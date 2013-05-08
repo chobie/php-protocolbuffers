@@ -39,10 +39,17 @@ class ProtocolBuffers
     const TYPE_SINT64     = 18;
     const MAX_FIELED_TYPE = 18;
 
+    protected static $packer = array();
+
     public static function decode($proto, $class, $buffers)
     {
-        $packer = new ProtocolBuffers_Packer_BinaryPacker();
-        //return pb_decode($proto, $class, $buffers);
+        if (!self::$packer) {
+            self::$packer = new ProtocolBuffers_Packer_BinaryPacker();
+        }
+//        $packer = self::$packer;
+
+        $r = pb_decode($proto, $class, $buffers);
+        return $r;
 
         $size = strlen($buffers);
         $result = array();

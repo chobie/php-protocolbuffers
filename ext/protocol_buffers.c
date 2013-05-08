@@ -89,30 +89,91 @@ const char* ReadVarint32FromArray(const char* buffer, uint* value) {
   return ptr;
 }
 
+static int pb_get_tag_name(HashTable *proto, ulong tag, zval **result TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), "name", sizeof("name"), (void **)&dd) == SUCCESS) {
+        *result = *dd;
+        return 1;
+    }
+    return 0;
+}
+
+static int pb_tag_is_string(HashTable *proto, ulong tag TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
+        if (Z_LVAL_PP(dd) == TYPE_STRING) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int pb_tag_is_message(HashTable *proto, ulong tag TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
+        if (Z_LVAL_PP(dd) == TYPE_MESSAGE) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 
 /* {{{ proto class pb_decode(array proto, string class, string data)
 */
 PHP_FUNCTION(pb_decode)
 {
-    HashTable *proto;
+    HashTable *proto, *hresult;
     char *class, *data;
     long class_len = 0, data_len = 0;
     int i = 0, offset = 0;
     char bit;
-    uint value = 0;
-    uint tag   = 0;
-    uint wiretype = 0;
-    int buffer_size = 0;
+    uint value = 0, tag = 0, wiretype = 0;
+    long buffer_size = 0;
     char buffer[512] = {0};
+    zval *z_class, *z_result, *z_proto;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"ass",&proto, &class, &class_len, &data, &data_len) == FAILURE) {
+		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
 		return;
 	}
 
+    MAKE_STD_ZVAL(z_result);
+    array_init(z_result);
+
+    hresult     = Z_ARRVAL_P(z_result);
+    proto       = Z_ARRVAL_P(z_proto);
     buffer_size = data + sizeof(data);
+
     // what is the better way to detect end of buffer?
-    while ((int)data < buffer_size) {
+    while ((long)data < buffer_size) {
         bit = *data;
 
         if (bit & 0x80) {
@@ -124,53 +185,135 @@ PHP_FUNCTION(pb_decode)
             tag      = (value >> 0x03);
             wiretype = (value & 0x07);
 
-            fprintf(stderr, "[tag: %d, wiretype: %d (%d)]\n", tag, wiretype, value);
+            //fprintf(stderr, "[tag: %d, wiretype: %d (%d)]\n", tag, wiretype, value);
 
             switch (wiretype) {
             case WIRETYPE_VARINT:
+            {
+                zval *t;
                 data = ReadVarint32FromArray(data, &value);
-                fprintf(stderr, "varint:value: %d\n", value);
+
+                if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
+                    zval *dz;
+
+                    MAKE_STD_ZVAL(dz);
+                    ZVAL_LONG(dz, value);
+
+                    if (Z_TYPE_P(t) != IS_STRING) {
+                            convert_to_string(t);
+                    }
+
+                    zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
+                    Z_ADDREF_P(dz);
+
+                    zval_ptr_dtor(&dz);
+                }
+            }
             break;
             case WIRETYPE_FIXED64:
+                // TODO: implement this
                 data += 8;
             break;
             case WIRETYPE_LENGTH_DELIMITED:
                 data = ReadVarint32FromArray(data, &value);
+                char key_buf[256] = {0};
+                zval *t;
 
-                // TODO: タイプごとに分ける
+                if (pb_tag_is_string(proto, tag TSRMLS_CC)) {
+                    if (value < 512) {
+                        memcpy(buffer, data, value);
+                        buffer[value+1] = '\0';
+                    } else {
+                        char *sub_buffer;
+                        sub_buffer = emalloc(value+1);
+                        memcpy(sub_buffer, data, value);
+                        sub_buffer[value+1] = '\0';
+                    }
 
-                if (value < 512) {
-                    memcpy(buffer, data, value);
-                    buffer[value+1] = '\0';
+                    if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
+                        zval *dz;
 
-                    fprintf(stderr, "length: %d\n", value);
-                    fprintf(stderr, "string: %s\n", data);
-                } else {
-                    char *sub_buffer;
-                    sub_buffer = emalloc(value+1);
-                    memcpy(sub_buffer, data, value);
-                    sub_buffer[value+1] = '\0';
+                        MAKE_STD_ZVAL(dz);
+                        ZVAL_STRING(dz, data, 1);
 
-                    fprintf(stderr, "length: %d\n", value);
-                    fprintf(stderr, "string: %s\n", data);
+                        if (Z_TYPE_P(t) != IS_STRING) {
+                                convert_to_string(t);
+                        }
+
+                        zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
+                        Z_ADDREF_P(dz);
+
+                        zval_ptr_dtor(&dz);
+                    }
+
+                } else if (pb_tag_is_message(proto, tag TSRMLS_CC)) {
+
+                    if (value < 512) {
+                        memcpy(buffer, data, value);
+                        buffer[value+1] = '\0';
+                    } else {
+                        char *sub_buffer;
+
+                        sub_buffer = emalloc(value+1);
+                        memcpy(sub_buffer, data, value);
+                        sub_buffer[value+1] = '\0';
+                    }
                 }
-                data += value;
 
+                data += value;
             break;
             case WIRETYPE_FIXED32: {
                 float a;
-                // TODO: タイプ毎にわける
-                //a = *(float *)data;
+                zval *t;
+
                 memcpy(&a, data, 4);
-                fprintf(stdout, "fixed32: %10f\n", a);
+
+                if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
+                    zval *dz;
+
+                    MAKE_STD_ZVAL(dz);
+                    ZVAL_DOUBLE(dz, a);
+
+                    if (Z_TYPE_P(t) != IS_STRING) {
+                            convert_to_string(t);
+                    }
+
+                    zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
+                    Z_ADDREF_P(dz);
+                    zval_ptr_dtor(&dz);
+                }
+
                 data += 4;
             }
             break;
             }
-            //data++;
         }
     }
 
+    {
+        zval *func, *ret, *obj, *params;
+        zend_class_entry **ce;
+        HashTable *h;
+        zval **pp[1];
+
+        MAKE_STD_ZVAL(func);
+        MAKE_STD_ZVAL(ret);
+        MAKE_STD_ZVAL(obj);
+
+        pp[0] = z_result;
+        zend_lookup_class(class, class_len, &ce TSRMLS_CC);
+
+        ZVAL_STRING(func, "__construct", 1);
+
+        object_init_ex(obj, *ce);
+        call_user_function(NULL, &obj, func, ret, 1, pp TSRMLS_CC);
+
+        zval_ptr_dtor(&func);
+        zval_ptr_dtor(&ret);
+        zval_ptr_dtor(&z_result);
+
+        RETURN_ZVAL(obj, 0, 1);
+    }
 }
 /* }}} */
 

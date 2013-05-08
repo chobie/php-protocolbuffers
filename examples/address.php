@@ -23,8 +23,15 @@ $data = ProtocolBuffers::encode($u2->getProto(), $u2);
 //echo $data;
 
 //$data = ProtocolBuffers::encode($addr->getProto(), $addr);
-ProtocolBuffers::decode($u2->getProto(), "User", $data);
-$end= microtime(true);
+$begin = microtime(true);
+$proto = $u2->getProto();
+$d = serialize($u2);
+for ($i = 0; $i < 10000; $i++) {
+    ProtocolBuffers::decode($proto, "User", $data);
+    //unserialize($d);
+}
+$end = microtime(true);
+var_dump($end - $begin);
 
 //var_dump(AddressBook::unserialize($data));
 //echo ProtocolBuffers::generateProto("User");
