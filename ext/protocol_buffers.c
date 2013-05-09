@@ -291,24 +291,26 @@ PHP_FUNCTION(pb_decode)
     }
 
     {
-        zval *func, *ret, *obj, *params;
+        zval func;
+
+        zval *ret, *obj, *params;
         zend_class_entry **ce;
         HashTable *h;
         zval **pp[1];
 
-        MAKE_STD_ZVAL(func);
-        MAKE_STD_ZVAL(ret);
+        //MAKE_STD_ZVAL(func);
+        //MAKE_STD_ZVAL(ret);
+        INIT_PZVAL(&func);
         MAKE_STD_ZVAL(obj);
 
-        pp[0] = z_result;
+        pp[0] = &z_result;
         zend_lookup_class(class, class_len, &ce TSRMLS_CC);
 
-        ZVAL_STRING(func, "__construct", 1);
-
+        ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
         object_init_ex(obj, *ce);
-        call_user_function(NULL, &obj, func, ret, 1, pp TSRMLS_CC);
-
-        zval_ptr_dtor(&func);
+        //call_user_function(NULL, &obj, func, ret, 1, pp TSRMLS_CC);
+        //call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
+        call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
         zval_ptr_dtor(&ret);
         zval_ptr_dtor(&z_result);
 
