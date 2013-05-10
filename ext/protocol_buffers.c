@@ -248,6 +248,7 @@ PHP_FUNCTION(pb_decode)
     long buffer_size = 0;
     char buffer[512] = {0};
     zval *z_class, *z_result, *z_proto;
+    zval *dz;
     zval *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -331,8 +332,6 @@ PHP_FUNCTION(pb_decode)
         switch (wiretype) {
         case WIRETYPE_VARINT:
         {
-            zval *dz;
-
             data = ReadVarint32FromArray(data, &value, data_end);
             MAKE_STD_ZVAL(dz);
             ZVAL_LONG(dz, value);
@@ -350,13 +349,12 @@ PHP_FUNCTION(pb_decode)
             data = ReadVarint32FromArray(data, &value, data_end);
 
             if (s->type == TYPE_STRING) {
-                zval *dz;
-
                 if (value < 512) {
                     memcpy(buffer, data, value);
                     buffer[value+1] = '\0';
                 } else {
                     char *sub_buffer;
+
                     sub_buffer = emalloc(value+1);
                     memcpy(sub_buffer, data, value);
                     sub_buffer[value+1] = '\0';
@@ -385,7 +383,6 @@ PHP_FUNCTION(pb_decode)
         case WIRETYPE_FIXED32: {
             if (s->type == TYPE_FLOAT) {
                 float a;
-                zval *dz;
 
                 memcpy(&a, data, 4);
 
@@ -411,7 +408,6 @@ PHP_FUNCTION(pb_decode)
         char *kkey;
         int *klen;
 
-        INIT_PZVAL(&func);
         MAKE_STD_ZVAL(obj);
         zend_lookup_class(class, class_len, &ce TSRMLS_CC);
         pp[0] = &z_result;
