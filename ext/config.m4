@@ -6,6 +6,6 @@ if test $PHP_PROTOCOLBUFFERS != "no"; then
 
     PHP_NEW_EXTENSION(protocolbuffers, protocol_buffers.c, $ext_shared)
 
-    CFLAGS=" -Wunused-variable -Wpointer-sign -Wimplicit-function-declaration -g"
+    CFLAGS=" -Wunused-variable -Wpointer-sign -Wimplicit-function-declaration"
     PHP_SUBST([CFLAGS])
 fi

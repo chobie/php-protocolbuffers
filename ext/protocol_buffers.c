@@ -23,6 +23,18 @@
  */
 #include "php_protocol_buffers.h"
 
+
+#ifndef GOOGLE_PREDICT_TRUE
+#ifdef __GNUC__
+// Provided at least since GCC 3.0.
+#define GOOGLE_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
+#else
+#define GOOGLE_PREDICT_TRUE
+#endif
+#endif
+
+
+
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 
@@ -82,12 +94,18 @@ void php_protocolbuffers_init(TSRMLS_D)
 }
 
 
-const char* ReadVarint32FromArray(const char* buffer, uint* value) {
+static inline char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
   // Fast path:  We have enough bytes left in the buffer to guarantee that
   // this read won't cross the end, so we can skip the checks.
   const char* ptr = buffer;
   int b;
   int result;
+
+  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && *buffer < 0x80) {
+    *value = *buffer;
+    ptr++;
+    return ptr;
+  }
 
   b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
   b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
@@ -203,7 +221,7 @@ static int pb_tag_wiretype(HashTable *proto, ulong tag TSRMLS_DC)
 }
 
 
-pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
+static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
 {
     int i = 0;
 
@@ -222,7 +240,7 @@ int scheme_size = 0;
 PHP_FUNCTION(pb_decode)
 {
     HashTable *proto, *hresult;
-    char *class, *data;
+    char *class, *data, *data_end;
     long class_len = 0, data_len = 0;
     int i = 0, offset = 0;
     char bit;
@@ -230,6 +248,7 @@ PHP_FUNCTION(pb_decode)
     long buffer_size = 0;
     char buffer[512] = {0};
     zval *z_class, *z_result, *z_proto;
+    zval *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
@@ -260,6 +279,7 @@ PHP_FUNCTION(pb_decode)
                 int  key_len = 0;
                 long index= 0;
                 long ttag = 0;
+                zend_class_entry *c;
 
                 zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
                 ttag = index;
@@ -280,89 +300,91 @@ PHP_FUNCTION(pb_decode)
                     scheme[n].name_len = tsize;
                     memcpy(scheme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
                     scheme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
+
+                    //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+
+                    if (scheme[n].type == TYPE_MESSAGE) {
+                        zend_lookup_class(class, class_len, &c TSRMLS_CC);
+                        scheme[n].ce = c;
+                    }
                 }
             }
         }
 	}
 
-
-    // what is the better way to detect end of buffer?
-    while ((long)data < buffer_size) {
+    data_end = data+data_len;
+    while (data < data_end) {
+        pb_scheme *s;
         bit = *data;
 
-        if (bit & 0x80) {
-            data++;
-            continue;
-        } else {
-            pb_scheme *s;
-            data = ReadVarint32FromArray(data, &value);
+        data = ReadVarint32FromArray(data, &value, data_end);
+        if (data == NULL) {
+            fprintf(stderr, "ERROR!");
+            return;
+        }
 
-            tag      = (value >> 0x03);
-            wiretype = (value & 0x07);
+        tag      = (value >> 0x03);
+        wiretype = (value & 0x07);
 
-            //fprintf(stderr, "[tag: %d, wiretype: %d (%d)]\n", tag, wiretype, value);
+        s = pb_search_scheme_by_tag(scheme, scheme_size, tag);
 
-            s = pb_search_scheme_by_tag(scheme, scheme_size, tag);
-            switch (wiretype) {
-            case WIRETYPE_VARINT:
-            {
-                zval *t;
+        switch (wiretype) {
+        case WIRETYPE_VARINT:
+        {
+            zval *dz;
+
+            data = ReadVarint32FromArray(data, &value, data_end);
+            MAKE_STD_ZVAL(dz);
+            ZVAL_LONG(dz, value);
+
+            zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
+            Z_ADDREF_P(dz);
+            zval_ptr_dtor(&dz);
+        }
+        break;
+        case WIRETYPE_FIXED64:
+            // TODO: implement this
+            data += 8;
+        break;
+        case WIRETYPE_LENGTH_DELIMITED:
+            data = ReadVarint32FromArray(data, &value, data_end);
+
+            if (s->type == TYPE_STRING) {
                 zval *dz;
 
-                data = ReadVarint32FromArray(data, &value);
+                if (value < 512) {
+                    memcpy(buffer, data, value);
+                    buffer[value+1] = '\0';
+                } else {
+                    char *sub_buffer;
+                    sub_buffer = emalloc(value+1);
+                    memcpy(sub_buffer, data, value);
+                    sub_buffer[value+1] = '\0';
+                }
+
                 MAKE_STD_ZVAL(dz);
-                ZVAL_LONG(dz, value);
+                ZVAL_STRING(dz, data, 1);
 
                 zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
                 Z_ADDREF_P(dz);
                 zval_ptr_dtor(&dz);
-            }
-            break;
-            case WIRETYPE_FIXED64:
-                // TODO: implement this
-                data += 8;
-            break;
-            case WIRETYPE_LENGTH_DELIMITED:
-                data = ReadVarint32FromArray(data, &value);
-                char key_buf[256] = {0};
-                zval *t;
-
-                if (s->type == TYPE_STRING) {
-                    if (value < 512) {
-                        memcpy(buffer, data, value);
-                        buffer[value+1] = '\0';
-                    } else {
-                        char *sub_buffer;
-                        sub_buffer = emalloc(value+1);
-                        memcpy(sub_buffer, data, value);
-                        sub_buffer[value+1] = '\0';
-                    }
-
-                    zval *dz;
-
-                    MAKE_STD_ZVAL(dz);
-                    ZVAL_STRING(dz, data, 1);
-
-                    zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
-                    Z_ADDREF_P(dz);
-                    zval_ptr_dtor(&dz);
-                } else if (s->type == TYPE_MESSAGE) {
-                    if (value < 512) {
-                        memcpy(buffer, data, value);
-                        buffer[value+1] = '\0';
-                    } else {
-                        char *sub_buffer;
-                        sub_buffer = emalloc(value+1);
-                        memcpy(sub_buffer, data, value);
-                        sub_buffer[value+1] = '\0';
-                    }
+            } else if (s->type == TYPE_MESSAGE) {
+                if (value < 512) {
+                    memcpy(buffer, data, value);
+                    buffer[value+1] = '\0';
+                } else {
+                    char *sub_buffer;
+                    sub_buffer = emalloc(value+1);
+                    memcpy(sub_buffer, data, value);
+                    sub_buffer[value+1] = '\0';
                 }
+            }
 
-                data += value;
-            break;
-            case WIRETYPE_FIXED32: {
+            data += value;
+        break;
+        case WIRETYPE_FIXED32: {
+            if (s->type == TYPE_FLOAT) {
                 float a;
-                zval *t;
                 zval *dz;
 
                 memcpy(&a, data, 4);
@@ -373,40 +395,47 @@ PHP_FUNCTION(pb_decode)
                 zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
                 Z_ADDREF_P(dz);
                 zval_ptr_dtor(&dz);
+            }
 
-                data += 4;
-            }
-            break;
-            }
+            data += 4;
+        }
+        break;
         }
     }
 
     {
         zval func;
 
-        zval *ret, *obj, *params;
-        zend_class_entry **ce;
-        HashTable *h;
         zval **pp[1];
+        zend_class_entry **ce;
+        char *kkey;
+        int *klen;
 
-        //MAKE_STD_ZVAL(func);
-        //MAKE_STD_ZVAL(ret);
         INIT_PZVAL(&func);
         MAKE_STD_ZVAL(obj);
-
-        pp[0] = &z_result;
         zend_lookup_class(class, class_len, &ce TSRMLS_CC);
+        pp[0] = &z_result;
 
         ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
+
         object_init_ex(obj, *ce);
-        //call_user_function(NULL, &obj, func, ret, 1, pp TSRMLS_CC);
-        //call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
-        call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
-        zval_ptr_dtor(&ret);
+
+        //call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
+        //Z_OBJPROP_P(obj)
+        //zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal)
+        //zend_mangle_property_name(&kkey, &klen, "*", 1, "_properties", sizeof("_properties")+1, 0);
+        //zend_hash_add(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
+
+        //zend_hash_find(Z_OBJPROP_P(obj), "_properties", sizeof("_properties")+1, (void **)&h);
+        zend_hash_update(Z_OBJPROP_P(obj), "_properties", sizeof("_properties"), (void **)&z_result, sizeof(zval*), NULL);
+
+        //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
+        Z_ADDREF_P(z_result);
         zval_ptr_dtor(&z_result);
 
-        RETURN_ZVAL(obj, 0, 1);
     }
+
+    RETURN_ZVAL(obj, 0, 1);
 }
 /* }}} */
 

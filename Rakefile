@@ -6,6 +6,9 @@ end
 
 task :install do
   Dir.chdir("ext") do
+    `phpize --clean`
+    `phpize`
+    `./configure`
     `make`
     `make install`
   end
