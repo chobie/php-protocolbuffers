@@ -373,9 +373,11 @@ PHP_FUNCTION(pb_decode)
     zval *obj;
     pb_scheme *ischeme;
     pb_scheme **is;
+    pb_scheme_container *container, **cn;
     int scheme_size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    //TODO: should be `ssa` as now, proto array is optional
 		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
 		return;
 	}
@@ -387,11 +389,16 @@ PHP_FUNCTION(pb_decode)
     proto       = Z_ARRVAL_P(z_proto);
     buffer_size = data + sizeof(data);
 
-    if (zend_hash_find(PBG(messages), class, class_len, (void **)&is) != SUCCESS) {
+    if (zend_hash_find(PBG(messages), class, class_len, (void **)&cn) != SUCCESS) {
         pb_convert_msg(proto, class, class_len, &ischeme, &scheme_size TSRMLS_CC);
-        zend_hash_add(PBG(messages), class, class_len, (void**)&ischeme, sizeof(ischeme), NULL);
+
+        container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
+        container->scheme = ischeme;
+        container->size = scheme_size;
+
+        zend_hash_add(PBG(messages), class, class_len, (void**)&container, sizeof(pb_scheme_container), NULL);
     } else {
-        ischeme = *is;
+        container = *cn;
     }
 
     data_end = data+data_len;
@@ -408,7 +415,7 @@ PHP_FUNCTION(pb_decode)
         tag      = (value >> 0x03);
         wiretype = (value & 0x07);
 
-        s = pb_search_scheme_by_tag(ischeme, scheme_size, tag);
+        s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
 
         switch (wiretype) {
         case WIRETYPE_VARINT:

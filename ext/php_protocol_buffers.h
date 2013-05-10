@@ -24,6 +24,25 @@ typedef struct {
     HashTable *messages;
 } pb_globals;
 
+typedef struct pb_scheme
+{
+	int tag;
+	char **name;
+	int name_len;
+	int wiretype;
+	int type;
+	int flags;
+	int scheme_type;
+	char *message;
+	char *enum_msg;
+	zend_class_entry *ce;
+} pb_scheme;
+
+typedef struct {
+    pb_scheme *scheme;
+    int size;
+} pb_scheme_container;
+
 #ifdef ZTS
 #define PBG(v) TSRMG(pb_globals_id, pb_globals *, v)
 PHPAPI extern int pb_globals_id;
@@ -71,20 +90,5 @@ typedef struct pb_vector {
         size_t length;
         int sorted;
 } pb_vector;
-
-typedef struct pb_scheme
-{
-	int tag;
-	char **name;
-	int name_len;
-	int wiretype;
-	int type;
-	int flags;
-	int scheme_type;
-	char *message;
-	char *enum_msg;
-	zend_class_entry *ce;
-} pb_scheme;
-
 
 #endif /* PHP_PROTOCOLBUFFERS_H */
