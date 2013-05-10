@@ -302,8 +302,59 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
     fprintf(stderr, "TAG:%d NOTFOUND!", tag);
 }
 
-pb_scheme *scheme;
-int scheme_size = 0;
+static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_scheme **scheme, int *size TSRMLS_DC)
+{
+    int n, sz;
+    zval *element;
+    HashPosition pos;
+    pb_scheme *ischeme;
+    zend_class_entry *c;
+
+    sz = zend_hash_num_elements(proto);
+    ischeme = (pb_scheme*)malloc(sizeof(pb_scheme) * sz);
+
+    for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
+                    zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
+                    zend_hash_move_forward_ex(proto, &pos), n++
+    ) {
+        char *key = {0};
+        int  key_len = 0;
+        long index= 0;
+        long ttag = 0;
+        zend_class_entry *c;
+
+        zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
+        ttag = index;
+
+        ischeme[n].tag = ttag;
+
+        {
+            zval *tmp;
+            char *tchar;
+            int tsize = 0;
+
+            ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
+            ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
+
+            pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+            tsize = Z_STRLEN_P(tmp)+1;
+            ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
+            ischeme[n].name_len = tsize;
+            memcpy(ischeme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+            ischeme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
+
+            //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+
+            if (ischeme[n].type == TYPE_MESSAGE) {
+                zend_lookup_class(class, class_len, &c TSRMLS_CC);
+                ischeme[n].ce = c;
+            }
+        }
+    }
+
+    *scheme = ischeme;
+    *size = &sz;
+}
 
 /* {{{ proto class pb_decode(array proto, string class, string data)
 */
@@ -322,6 +373,7 @@ PHP_FUNCTION(pb_decode)
     zval *obj;
     pb_scheme *ischeme;
     pb_scheme **is;
+    int scheme_size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
@@ -336,52 +388,7 @@ PHP_FUNCTION(pb_decode)
     buffer_size = data + sizeof(data);
 
     if (zend_hash_find(PBG(messages), class, class_len, (void **)&is) != SUCCESS) {
-	    int n;
-	    zval *element;
-	    HashPosition pos;
-
-        scheme_size = zend_hash_num_elements(proto);
-        ischeme = (pb_scheme*)malloc(sizeof(pb_scheme) * scheme_size);
-
-        for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
-                        zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
-                        zend_hash_move_forward_ex(proto, &pos), n++
-        ) {
-            char *key = {0};
-            int  key_len = 0;
-            long index= 0;
-            long ttag = 0;
-            zend_class_entry *c;
-
-            zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
-            ttag = index;
-
-            ischeme[n].tag = ttag;
-
-            {
-                zval *tmp;
-                char *tchar;
-                int tsize = 0;
-
-                ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
-                ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
-
-                pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
-                tsize = Z_STRLEN_P(tmp)+1;
-                ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
-                ischeme[n].name_len = tsize;
-                memcpy(ischeme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-                ischeme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
-
-                //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
-
-                if (ischeme[n].type == TYPE_MESSAGE) {
-                    zend_lookup_class(class, class_len, &c TSRMLS_CC);
-                    ischeme[n].ce = c;
-                }
-            }
-        }
-
+        pb_convert_msg(proto, class, class_len, &ischeme, &scheme_size TSRMLS_CC);
         zend_hash_add(PBG(messages), class, class_len, (void**)&ischeme, sizeof(ischeme), NULL);
     } else {
         ischeme = *is;
