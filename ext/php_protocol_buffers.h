@@ -20,6 +20,19 @@ extern zend_module_entry protocolbuffers_module_entry;
 
 //extern zend_class_entry *protocolbuffers_parser_class_entry;
 
+typedef struct {
+    HashTable *messages;
+} pb_globals;
+
+#ifdef ZTS
+#define PBG(v) TSRMG(pb_globals_id, pb_globals *, v)
+PHPAPI extern int pb_globals_id;
+#else
+#define PBG(v) (globals.v)
+PHPAPI extern pb_globals pb_globals;
+#endif
+
+
 enum WireType {
     WIRETYPE_VARINT           = 0,
     WIRETYPE_FIXED64          = 1,

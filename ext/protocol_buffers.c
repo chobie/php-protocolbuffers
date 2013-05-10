@@ -23,6 +23,12 @@
  */
 #include "php_protocol_buffers.h"
 
+#ifdef ZTS
+PHPAPI int pb_globals_id;
+#else
+PHPAPI pb_globals pb_globals;
+#endif
+
 
 #ifndef GOOGLE_PREDICT_TRUE
 #ifdef __GNUC__
@@ -46,6 +52,14 @@ static const unsigned int minimum_size = 8;
 
 void php_protocolbuffers_init(TSRMLS_D);
 
+
+static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
+{
+}
+
+static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC) /* {{{ */
+{
+}
 
 int pb_vector_init(pb_vector *v, size_t initial_size)
 {
@@ -79,10 +93,46 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
+
+#ifdef ZTS
+    ts_allocate_id(&pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
+#ifdef PHP_WIN32
+    ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor);
+#endif
+#else
+    pb_globals_ctor(&pb_globals TSRMLS_CC);
+#ifdef PHP_WIN32
+    php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
+#endif
+#endif
+
 	php_protocolbuffers_init(TSRMLS_C);
 	return SUCCESS;
 }
 
+PHP_RINIT_FUNCTION(protocolbuffers)
+{
+    PBG(messages) = NULL;
+    return SUCCESS;
+}
+
+
+PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
+{
+#ifdef ZTS
+        ts_free_id(pb_globals_id);
+#ifdef PHP_WIN32
+        ts_free_id(php_win32_core_globals_id);
+#endif
+#else
+        basic_globals_dtor(&pb_globals TSRMLS_CC);
+#ifdef PHP_WIN32
+        php_win32_core_globals_dtor(&the_php_win32_core_globals TSRMLS_CC);
+#endif
+#endif
+
+    return SUCCESS;
+}
 PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 {
 	return SUCCESS;
@@ -495,8 +545,8 @@ zend_module_entry protocolbuffers_module_entry = {
 	"protocolbuffers",
 	pb_functions,					/* Functions */
 	PHP_MINIT(protocolbuffers),	/* MINIT */
-	NULL,					/* MSHUTDOWN */
-	NULL,					/* RINIT */
+	PHP_MSHUTDOWN(protocolbuffers),	/* MSHUTDOWN */
+	PHP_RINIT(protocolbuffers),	/* RINIT */
 	PHP_RSHUTDOWN(protocolbuffers),		/* RSHUTDOWN */
 	PHP_MINFO(protocolbuffers),	/* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
