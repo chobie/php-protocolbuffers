@@ -26,9 +26,30 @@
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 
+// for vector
+static const double resize_factor = 1.75;
+static const unsigned int minimum_size = 8;
+
 //zend_class_entry *protocolbuffers_class_entry;
 
 void php_protocolbuffers_init(TSRMLS_D);
+
+
+int pb_vector_init(pb_vector *v, size_t initial_size)
+{
+    assert(v);
+    memset(v, 0x0, sizeof(pb_vector));
+
+    if (initial_size == 0)
+        initial_size = minimum_size;
+
+    v->_alloc_size = initial_size;
+    v->length = 0;
+    v->sorted = 1;
+    v->contents = malloc(v->_alloc_size * sizeof(void *));
+
+    return 0;
+}
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, proto)
@@ -145,6 +166,56 @@ static int pb_tag_is_message(HashTable *proto, ulong tag TSRMLS_DC)
     return 0;
 }
 
+static int pb_tag_type(HashTable *proto, ulong tag TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return -1;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return -1;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
+        return Z_LVAL_PP(dd);
+    }
+
+    return -1;
+}
+
+static int pb_tag_wiretype(HashTable *proto, ulong tag TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return -1;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return -1;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), "wire_type", sizeof("wire_type"), (void **)&dd) == SUCCESS) {
+        return Z_LVAL_PP(dd);
+    }
+
+    return -1;
+}
+
+
+pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
+{
+    int i = 0;
+
+    for (i = 0; i < scheme_size; i++) {
+        if (scheme[i].tag == tag) {
+            return &scheme[i];
+        }
+    }
+}
+
+pb_scheme *scheme;
+int scheme_size = 0;
 
 /* {{{ proto class pb_decode(array proto, string class, string data)
 */
@@ -172,6 +243,49 @@ PHP_FUNCTION(pb_decode)
     proto       = Z_ARRVAL_P(z_proto);
     buffer_size = data + sizeof(data);
 
+	{
+	    int n;
+	    zval *element;
+	    HashPosition pos;
+
+        if (scheme_size == 0){
+            scheme_size = zend_hash_num_elements(proto);
+            scheme = (pb_scheme*)malloc(sizeof(pb_scheme) * scheme_size);
+
+            for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
+                            zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
+                            zend_hash_move_forward_ex(proto, &pos), n++
+            ) {
+                char *key = {0};
+                int  key_len = 0;
+                long index= 0;
+                long ttag = 0;
+
+                zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
+                ttag = index;
+
+                scheme[n].tag = ttag;
+
+                {
+                    zval *tmp;
+                    char *tchar;
+                    int tsize = 0;
+
+                    scheme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
+                    scheme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
+
+                    pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+                    tsize = Z_STRLEN_P(tmp)+1;
+                    scheme[n].name = (char*)malloc(sizeof(char*) * tsize);
+                    scheme[n].name_len = tsize;
+                    memcpy(scheme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+                    scheme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
+                }
+            }
+        }
+	}
+
+
     // what is the better way to detect end of buffer?
     while ((long)data < buffer_size) {
         bit = *data;
@@ -180,6 +294,7 @@ PHP_FUNCTION(pb_decode)
             data++;
             continue;
         } else {
+            pb_scheme *s;
             data = ReadVarint32FromArray(data, &value);
 
             tag      = (value >> 0x03);
@@ -187,27 +302,20 @@ PHP_FUNCTION(pb_decode)
 
             //fprintf(stderr, "[tag: %d, wiretype: %d (%d)]\n", tag, wiretype, value);
 
+            s = pb_search_scheme_by_tag(scheme, scheme_size, tag);
             switch (wiretype) {
             case WIRETYPE_VARINT:
             {
                 zval *t;
+                zval *dz;
+
                 data = ReadVarint32FromArray(data, &value);
+                MAKE_STD_ZVAL(dz);
+                ZVAL_LONG(dz, value);
 
-                if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
-                    zval *dz;
-
-                    MAKE_STD_ZVAL(dz);
-                    ZVAL_LONG(dz, value);
-
-                    if (Z_TYPE_P(t) != IS_STRING) {
-                            convert_to_string(t);
-                    }
-
-                    zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
-                    Z_ADDREF_P(dz);
-
-                    zval_ptr_dtor(&dz);
-                }
+                zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
+                Z_ADDREF_P(dz);
+                zval_ptr_dtor(&dz);
             }
             break;
             case WIRETYPE_FIXED64:
@@ -219,7 +327,7 @@ PHP_FUNCTION(pb_decode)
                 char key_buf[256] = {0};
                 zval *t;
 
-                if (pb_tag_is_string(proto, tag TSRMLS_CC)) {
+                if (s->type == TYPE_STRING) {
                     if (value < 512) {
                         memcpy(buffer, data, value);
                         buffer[value+1] = '\0';
@@ -230,30 +338,20 @@ PHP_FUNCTION(pb_decode)
                         sub_buffer[value+1] = '\0';
                     }
 
-                    if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
-                        zval *dz;
+                    zval *dz;
 
-                        MAKE_STD_ZVAL(dz);
-                        ZVAL_STRING(dz, data, 1);
+                    MAKE_STD_ZVAL(dz);
+                    ZVAL_STRING(dz, data, 1);
 
-                        if (Z_TYPE_P(t) != IS_STRING) {
-                                convert_to_string(t);
-                        }
-
-                        zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
-                        Z_ADDREF_P(dz);
-
-                        zval_ptr_dtor(&dz);
-                    }
-
-                } else if (pb_tag_is_message(proto, tag TSRMLS_CC)) {
-
+                    zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
+                    Z_ADDREF_P(dz);
+                    zval_ptr_dtor(&dz);
+                } else if (s->type == TYPE_MESSAGE) {
                     if (value < 512) {
                         memcpy(buffer, data, value);
                         buffer[value+1] = '\0';
                     } else {
                         char *sub_buffer;
-
                         sub_buffer = emalloc(value+1);
                         memcpy(sub_buffer, data, value);
                         sub_buffer[value+1] = '\0';
@@ -265,23 +363,16 @@ PHP_FUNCTION(pb_decode)
             case WIRETYPE_FIXED32: {
                 float a;
                 zval *t;
+                zval *dz;
 
                 memcpy(&a, data, 4);
 
-                if (pb_get_tag_name(proto, tag, &t TSRMLS_CC)) {
-                    zval *dz;
+                MAKE_STD_ZVAL(dz);
+                ZVAL_DOUBLE(dz, a);
 
-                    MAKE_STD_ZVAL(dz);
-                    ZVAL_DOUBLE(dz, a);
-
-                    if (Z_TYPE_P(t) != IS_STRING) {
-                            convert_to_string(t);
-                    }
-
-                    zend_hash_add(hresult, Z_STRVAL_P(t), Z_STRLEN_P(t)+1, (void **)&dz, sizeof(dz), NULL);
-                    Z_ADDREF_P(dz);
-                    zval_ptr_dtor(&dz);
-                }
+                zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
+                Z_ADDREF_P(dz);
+                zval_ptr_dtor(&dz);
 
                 data += 4;
             }

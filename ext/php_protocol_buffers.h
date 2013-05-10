@@ -52,4 +52,26 @@ enum FieldType {
     MAX_FIELD_TYPE      = 18,
 };
 
+typedef struct pb_vector {
+        size_t _alloc_size;
+        void **contents;
+        size_t length;
+        int sorted;
+} pb_vector;
+
+typedef struct pb_scheme
+{
+	int tag;
+	char **name;
+	int name_len;
+	int wiretype;
+	int type;
+	int flags;
+	int scheme_type;
+	char *message;
+	char *enum_msg;
+	zend_class_entry *ce;
+} pb_scheme;
+
+
 #endif /* PHP_PROTOCOLBUFFERS_H */
