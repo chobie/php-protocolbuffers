@@ -53,6 +53,10 @@ static const unsigned int minimum_size = 8;
 void php_protocolbuffers_init(TSRMLS_D);
 
 
+void messages_dtor(pb_scheme *entry)
+{
+}
+
 static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
 {
 }
@@ -113,6 +117,11 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
     PBG(messages) = NULL;
+    if (!PBG(messages)) {
+            ALLOC_HASHTABLE(PBG(messages));
+            zend_hash_init(PBG(messages), 0, NULL, (void (*)(void *)) messages_dtor, 0);
+    }
+
     return SUCCESS;
 }
 
@@ -133,8 +142,18 @@ PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 
     return SUCCESS;
 }
+
 PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 {
+    if (PBG(messages)) {
+        zend_try {
+            zend_hash_destroy(PBG(messages));
+            FREE_HASHTABLE(PBG(messages));
+            PBG(messages) = NULL;
+        }
+        zend_end_try();
+    }
+
 	return SUCCESS;
 }
 
@@ -280,6 +299,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
             return &scheme[i];
         }
     }
+    fprintf(stderr, "TAG:%d NOTFOUND!", tag);
 }
 
 pb_scheme *scheme;
@@ -300,6 +320,8 @@ PHP_FUNCTION(pb_decode)
     zval *z_class, *z_result, *z_proto;
     zval *dz;
     zval *obj;
+    pb_scheme *ischeme;
+    pb_scheme **is;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
@@ -313,55 +335,57 @@ PHP_FUNCTION(pb_decode)
     proto       = Z_ARRVAL_P(z_proto);
     buffer_size = data + sizeof(data);
 
-	{
+    if (zend_hash_find(PBG(messages), class, class_len, (void **)&is) != SUCCESS) {
 	    int n;
 	    zval *element;
 	    HashPosition pos;
 
-        if (scheme_size == 0){
-            scheme_size = zend_hash_num_elements(proto);
-            scheme = (pb_scheme*)malloc(sizeof(pb_scheme) * scheme_size);
+        scheme_size = zend_hash_num_elements(proto);
+        ischeme = (pb_scheme*)malloc(sizeof(pb_scheme) * scheme_size);
 
-            for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
-                            zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
-                            zend_hash_move_forward_ex(proto, &pos), n++
-            ) {
-                char *key = {0};
-                int  key_len = 0;
-                long index= 0;
-                long ttag = 0;
-                zend_class_entry *c;
+        for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
+                        zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
+                        zend_hash_move_forward_ex(proto, &pos), n++
+        ) {
+            char *key = {0};
+            int  key_len = 0;
+            long index= 0;
+            long ttag = 0;
+            zend_class_entry *c;
 
-                zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
-                ttag = index;
+            zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
+            ttag = index;
 
-                scheme[n].tag = ttag;
+            ischeme[n].tag = ttag;
 
-                {
-                    zval *tmp;
-                    char *tchar;
-                    int tsize = 0;
+            {
+                zval *tmp;
+                char *tchar;
+                int tsize = 0;
 
-                    scheme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
-                    scheme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
+                ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
+                ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
 
-                    pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
-                    tsize = Z_STRLEN_P(tmp)+1;
-                    scheme[n].name = (char*)malloc(sizeof(char*) * tsize);
-                    scheme[n].name_len = tsize;
-                    memcpy(scheme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-                    scheme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
+                pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+                tsize = Z_STRLEN_P(tmp)+1;
+                ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
+                ischeme[n].name_len = tsize;
+                memcpy(ischeme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+                ischeme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
 
-                    //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+                //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
 
-                    if (scheme[n].type == TYPE_MESSAGE) {
-                        zend_lookup_class(class, class_len, &c TSRMLS_CC);
-                        scheme[n].ce = c;
-                    }
+                if (ischeme[n].type == TYPE_MESSAGE) {
+                    zend_lookup_class(class, class_len, &c TSRMLS_CC);
+                    ischeme[n].ce = c;
                 }
             }
         }
-	}
+
+        zend_hash_add(PBG(messages), class, class_len, (void**)&ischeme, sizeof(ischeme), NULL);
+    } else {
+        ischeme = *is;
+    }
 
     data_end = data+data_len;
     while (data < data_end) {
@@ -377,7 +401,7 @@ PHP_FUNCTION(pb_decode)
         tag      = (value >> 0x03);
         wiretype = (value & 0x07);
 
-        s = pb_search_scheme_by_tag(scheme, scheme_size, tag);
+        s = pb_search_scheme_by_tag(ischeme, scheme_size, tag);
 
         switch (wiretype) {
         case WIRETYPE_VARINT:
