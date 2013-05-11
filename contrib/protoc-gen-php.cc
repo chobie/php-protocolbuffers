@@ -110,6 +110,77 @@ string PHPCodeGenerator::DefaultValueAsString(const FieldDescriptor & field, boo
   return "";
 }
 
+string getTypeName(const FieldDescriptor & field){
+
+    if (field.is_repeated()) {
+        return "array";
+    }
+
+    switch (field.type()) {
+    case FieldDescriptorProto_Type_TYPE_DOUBLE:
+        return "double";
+        break;
+    case FieldDescriptorProto_Type_TYPE_FLOAT:
+        return "float";
+        break;
+    case FieldDescriptorProto_Type_TYPE_INT64:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_UINT64:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_INT32:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_FIXED64:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_FIXED32:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_BOOL:
+        return "bool";
+        break;
+    case FieldDescriptorProto_Type_TYPE_STRING:
+        return "string";
+        break;
+    case FieldDescriptorProto_Type_TYPE_GROUP:
+        return "";
+        break;
+    case FieldDescriptorProto_Type_TYPE_MESSAGE:
+    {
+        string name = (*field.message_type()).full_name();
+        replace(name.begin(), name.end(), '.', '_');
+
+        return name;
+
+    }
+    break;
+    case FieldDescriptorProto_Type_TYPE_BYTES:
+        return "string";
+        break;
+    case FieldDescriptorProto_Type_TYPE_UINT32:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_ENUM:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_SFIXED32:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_SFIXED64:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_SINT32:
+        return "int";
+        break;
+    case FieldDescriptorProto_Type_TYPE_SINT64:
+        return "int";
+        break;
+    }
+    return "";
+}
+
 void PHPCodeGenerator::PrintMessageRead(io::Printer &printer, const Descriptor & message, vector<const FieldDescriptor *> & required_fields, const FieldDescriptor * parentField) const {
 }
 
@@ -178,8 +249,10 @@ void PHPCodeGenerator::PrintMessageSize(io::Printer &printer, const Descriptor &
 
 void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & message) const {
 	// Parse the file options
+
 	const PHPFileOptions & options ( message.file()->options().GetExtension(php) );
 	bool skip_unknown = options.skip_unknown();
+	const string base_class = options.base_class();
 	const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
 
 	vector<const FieldDescriptor *> required_fields;
@@ -208,8 +281,9 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 				break;
 			}
 		}
-		if (parentField->type() == FieldDescriptor::TYPE_GROUP)
+		if (parentField->type() == FieldDescriptor::TYPE_GROUP) {
 			type = "group";
+		}
 	}
 
 	// Start printing the message
@@ -222,11 +296,25 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
         "type", type,
         "full_name", message.full_name()
 	);
+	printer.Print(" *\n");
+	printer.Print(" * -*- magic properties -*-\n");
+	printer.Print(" *\n");
+    for (int i = 0; i < message.field_count(); ++i) {
+		const FieldDescriptor &field ( *message.field(i) );
+        printer.Print(" * @property `type` $`variable`\n",
+            "type", getTypeName(field),
+            "variable", VariableName(field)
+        );
+    }
 	printer.Print(" */\n");
 
-	printer.Print("class `name`\n{\n",
+	printer.Print("class `name`",
 				  "name", ClassName(message)
 	);
+	if (!base_class.empty()) {
+        printer.Print(" extends `base`", "base", base_class);
+	}
+	printer.Print("\n{\n");
 	printer.Indent();
 
 	// Print fields map
@@ -243,6 +331,16 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 		printer.Print("'`key`' => array(\n",
 		    "key", VariableName(field));
     	printer.Indent();
+        printer.Print("'type' => '`type`',\n",
+            "type", getTypeName(field)
+        );
+        printer.Print("'opts' => array(\n");
+    	printer.Indent();
+        printer.Print("'tag' => `value`,\n",
+            "value", SimpleItoa(field.number())
+        );
+    	printer.Outdent();
+        printer.Print("),\n");
 
     	printer.Outdent();
 		printer.Print("),\n");
@@ -350,7 +448,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 //
 //    }
 
-    printer.Print("public static function getProto()\n");
+    printer.Print("public static function getDescriptor()\n");
     printer.Print("{\n");
     printer.Indent();
     printer.Print("return self::$scheme['scheme'];\n");
@@ -360,11 +458,11 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 
 
 	// Class Insertion Point
-	printer.Print(
-		"\n"
-		"// @@protoc_insertion_point(class_scope:`full_name`)\n",
-		"full_name", message.full_name()
-	);
+//	printer.Print(
+//		"\n"
+//		"// @@protoc_insertion_point(class_scope:`full_name`)\n",
+//		"full_name", message.full_name()
+//	);
 
 
 

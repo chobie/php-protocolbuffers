@@ -1,5 +1,8 @@
 *.o
 
+contrib/php_options.pb.cc
+contrib/php_options.pb.h
+
 # ignore phpized files
 Makefile.global
 acinclude.m4

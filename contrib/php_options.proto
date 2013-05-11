@@ -1,8 +1,10 @@
 import "google/protobuf/descriptor.proto";
 
+
 message PHPFileOptions {
 	optional string namespace    = 1;
 	optional bool   skip_unknown = 2;
+	optional string base_class   = 3;
 }
 
 extend google.protobuf.FileOptions {

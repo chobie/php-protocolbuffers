@@ -4,7 +4,7 @@ ProtocolBuffers decoder
 Requirements
 ------------
 
-Message class have to implement `array getProto()` static method and returns array have to be...
+Message class have to implement `array getDescriptor()` static method and returns array have to be...
 
 ````
 array(

@@ -39,7 +39,7 @@ class AddressBook
         )
     );
 
-    public static function getProto()
+    public static function getDescriptor()
     {
         return self::$scheme['scheme'];
     }

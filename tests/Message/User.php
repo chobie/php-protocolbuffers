@@ -70,7 +70,7 @@ class User extends Base
         )
     );
 
-    public static function getProto()
+    public static function getDescriptor()
     {
         return self::$scheme['scheme'];
     }

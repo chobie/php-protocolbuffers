@@ -234,12 +234,14 @@ class ProtocolBuffers
                     . $class->_properties[$column['name']];
                 break;
             case ProtocolBuffers::TYPE_MESSAGE:
-                if ($column['repeated']) {
-                    foreach ($class->_properties[$column['name']] as $v) {
-                        $data    = self::encode($v::getProto(), $v);
-                        $result .= $packer->writeVarint32($_tag)
-                            .$packer->writeVarint32(strlen($data))
-                            . $data;
+                if ($column['repeated'] == true) {
+                    if (is_array($class->_properties[$column['name']])) {
+                        foreach ($class->_properties[$column['name']] as $v) {
+                            $data    = self::encode($v::getProto(), $v);
+                            $result .= $packer->writeVarint32($_tag)
+                                .$packer->writeVarint32(strlen($data))
+                                . $data;
+                        }
                     }
                 } else {
                     $v = $class->_properties[$column['name']];

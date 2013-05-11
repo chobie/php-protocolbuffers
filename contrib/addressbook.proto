@@ -1,4 +1,8 @@
-package tutorial;
+package Tutorial;
+
+import "php_options.proto";
+
+option (php).base_class = "Base";
 
 message Person {
   required string name = 1;
