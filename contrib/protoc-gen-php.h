@@ -23,45 +23,55 @@
 
 #include "php_options.pb.h"
 
-using namespace google::protobuf;
-using namespace google::protobuf::compiler;
-using namespace google::protobuf::internal;
+//using namespace google::protobuf;
+//using namespace google::protobuf::compiler;
+//using namespace google::protobuf::internal;
+
+namespace google {
+namespace protobuf {
+namespace compiler {
+namespace php {
 
 class PHPCodeGenerator : public CodeGenerator {
-	private:
+    private:
 
-		void PrintMessage   (io::Printer &printer, const Descriptor & message) const;
-		void PrintMessages  (io::Printer &printer, const FileDescriptor & file) const;
+        void PrintMessage   (io::Printer &printer, const Descriptor & message) const;
+        void PrintMessages  (io::Printer &printer, const FileDescriptor & file) const;
 
-		void PrintEnum      (io::Printer &printer, const EnumDescriptor & e) const;
-		void PrintEnums     (io::Printer &printer, const FileDescriptor & file) const;
+        void PrintEnum      (io::Printer &printer, const EnumDescriptor & e) const;
+        void PrintEnums     (io::Printer &printer, const FileDescriptor & file) const;
 
-		void PrintService   (io::Printer &printer, const ServiceDescriptor & service) const;
-		void PrintServices  (io::Printer &printer, const FileDescriptor & file) const;
+        void PrintService   (io::Printer &printer, const ServiceDescriptor & service) const;
+        void PrintServices  (io::Printer &printer, const FileDescriptor & file) const;
 
-		string DefaultValueAsString(const FieldDescriptor & field, bool quote_string_type) const;
+        string DefaultValueAsString(const FieldDescriptor & field, bool quote_string_type) const;
 
-		// Print the read() method
-		void PrintMessageRead(io::Printer &printer, const Descriptor & message, vector<const FieldDescriptor *> & required_fields, const FieldDescriptor * parentField) const;
+        // Print the read() method
+        void PrintMessageRead(io::Printer &printer, const Descriptor & message, vector<const FieldDescriptor *> & required_fields, const FieldDescriptor * parentField) const;
 
-		// Print the write() method
-		void PrintMessageWrite(io::Printer &printer, const Descriptor & message, const FieldDescriptor * parentField) const;
+        // Print the write() method
+        void PrintMessageWrite(io::Printer &printer, const Descriptor & message, const FieldDescriptor * parentField) const;
 
-		// Print the size() method
-		void PrintMessageSize(io::Printer &printer, const Descriptor & message) const;
+        // Print the size() method
+        void PrintMessageSize(io::Printer &printer, const Descriptor & message) const;
 
-		// Maps names into PHP names
-		template <class DescriptorType>
-		string ClassName(const DescriptorType & descriptor) const;
+        // Maps names into PHP names
+        template <class DescriptorType>
+        string ClassName(const DescriptorType & descriptor) const;
 
-		string VariableName(const FieldDescriptor & field) const;
+        string VariableName(const FieldDescriptor & field) const;
 
-	public:
+    public:
 
-		PHPCodeGenerator();
-		~PHPCodeGenerator();
+        PHPCodeGenerator();
+        ~PHPCodeGenerator();
 
-		bool Generate(const FileDescriptor* file, const string& parameter, OutputDirectory* output_directory, string* error) const;
+        bool Generate(const FileDescriptor* file, const string& parameter, OutputDirectory* output_directory, string* error) const;
 
 };
+
+}  // namespace php
+}  // namespace compiler
+}  // namespace protobuf
+}  // namespace google
 #endif

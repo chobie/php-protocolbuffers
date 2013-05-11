@@ -1,7 +1,7 @@
 #include "protoc-gen-php.h"
 
 int main(int argc, char* argv[]) {
-	PHPCodeGenerator generator;
+	google::protobuf::compiler::php::PHPCodeGenerator generator;
 
 	return PluginMain(argc, argv, &generator);
 }

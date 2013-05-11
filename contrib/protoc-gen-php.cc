@@ -1,12 +1,14 @@
 #include "protoc-gen-php.h"
 
-PHPCodeGenerator::PHPCodeGenerator() {}
-PHPCodeGenerator::~PHPCodeGenerator() {}
+namespace google {
+namespace protobuf {
+namespace compiler {
+namespace php {
 
 string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
   string result;
   // Note:  I distrust ctype.h due to locales.
-  for (int i = 0; i < input.size(); i++) {
+  for (int i = 0; i < (int)input.size(); i++) {
     if ('a' <= input[i] && input[i] <= 'z') {
       if (cap_next_letter) {
         result += input[i] + ('A' - 'a');
@@ -34,25 +36,32 @@ string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
   return result;
 }
 
-string UnderscoresToCamelCase(const FieldDescriptor & field) {
+string UnderscoresToCamelCase(const FieldDescriptor& field) {
   return UnderscoresToCamelCaseImpl(field.name(), false);
 }
 
-string UnderscoresToCapitalizedCamelCase(const FieldDescriptor & field) {
+string UnderscoresToCapitalizedCamelCase(const FieldDescriptor& field) {
   return UnderscoresToCamelCaseImpl(field.name(), true);
 }
 
 string LowerString(const string & s) {
-  string newS (s);
-  LowerString(&newS);
+  string newS(s);
+
+  google::protobuf::LowerString(&newS);
   return newS;
 }
 
 string UpperString(const string & s) {
   string newS (s);
-  UpperString(&newS);
+
+  google::protobuf::UpperString(&newS);
   return newS;
 }
+
+
+PHPCodeGenerator::PHPCodeGenerator() {}
+PHPCodeGenerator::~PHPCodeGenerator() {}
+
 
 // Maps a Message full_name into a PHP name
 template <class DescriptorType>
@@ -65,7 +74,7 @@ string PHPCodeGenerator::ClassName(const DescriptorType & descriptor) const {
 }
 
 string PHPCodeGenerator::VariableName(const FieldDescriptor & field) const {
-	return UnderscoresToCamelCase(field);
+	return field.name();
 }
 
 string PHPCodeGenerator::DefaultValueAsString(const FieldDescriptor & field, bool quote_string_type) const {
@@ -242,17 +251,16 @@ void PHPCodeGenerator::PrintMessageWrite(io::Printer &printer, const Descriptor 
 }
 
 void PHPCodeGenerator::PrintMessageSize(io::Printer &printer, const Descriptor & message) const {
-	// Parse the file options
-	const PHPFileOptions & options ( message.file()->options().GetExtension(php) );
-	const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
+//	const PHPFileOptions& options(message.file()->options().GetExtension(php));
+//	const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
+
 }
 
-void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & message) const {
+void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &message) const {
 	// Parse the file options
 
-	const PHPFileOptions & options ( message.file()->options().GetExtension(php) );
-	bool skip_unknown = options.skip_unknown();
-	const string base_class = options.base_class();
+	const PHPFileOptions& options = message.file()->options().GetExtension(::php);
+	bool  skip_unknown        = options.skip_unknown();
 	const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
 
 	vector<const FieldDescriptor *> required_fields;
@@ -311,8 +319,8 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 	printer.Print("class `name`",
 				  "name", ClassName(message)
 	);
-	if (!base_class.empty()) {
-        printer.Print(" extends `base`", "base", base_class);
+	if (options.has_base_class()) {
+        printer.Print(" extends `base`", "base", options.base_class());
 	}
 	printer.Print("\n{\n");
 	printer.Indent();
@@ -448,6 +456,11 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor & mes
 //
 //    }
 
+    printer.Print("/**\n");
+    printer.Print(" * get descriptor for protocol buffers\n");
+    printer.Print(" * \n");
+    printer.Print(" * @return array\n");
+    printer.Print(" */\n");
     printer.Print("public static function getDescriptor()\n");
     printer.Print("{\n");
     printer.Indent();
@@ -527,7 +540,7 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
 	string php_filename ( file->name() + ".php" );
 
 	// Parse the options
-	const PHPFileOptions & options ( file->options().GetExtension(php) );
+	const PHPFileOptions & options(file->options().GetExtension(::php));
 	const string & namespace_ (options.namespace_());
 
 	// Generate main file.
@@ -538,22 +551,22 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
 	io::Printer printer(output.get(), '`');
 
 	try {
-		printer.Print(
-			"<?php\n"
-		);
+		printer.Print("<?php\n");
 
 		if (!namespace_.empty()) {
-			printer.Print("namespace `ns` {\n", "ns", namespace_.c_str());
+			printer.Print("namespace `ns`\n{\n", "ns", namespace_.c_str());
 			printer.Indent();
 		}
 
 		PrintMessages  (printer, *file);
+
 		PrintEnums     (printer, *file);
+
 		PrintServices  (printer, *file);
 
 		if (!namespace_.empty()) {
 			printer.Outdent();
-			printer.Print("}");
+			printer.Print("}\n");
 		}
 
 	} catch (const char *msg) {
@@ -563,3 +576,8 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
 
 	return true;
 }
+
+}  // namespace php
+}  // namespace compiler
+}  // namespace protobuf
+}  // namespace google
