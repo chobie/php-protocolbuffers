@@ -147,7 +147,7 @@ class ProtocolBuffers
      * @return string
      * @throws RuntimeException
      */
-    public function encode($proto, $class)
+    public static function encode($proto, $class)
     {
         $packer = new ProtocolBuffers_Packer_BinaryPacker();
 
@@ -162,7 +162,8 @@ class ProtocolBuffers
                 continue;
             }
 
-            $_tag = $packer->packTag($tag, $column['wire_type']);
+            $_tag = $packer->packTag($tag, self::typeToWireType($column['type']));
+
             switch ($column['type']) {
             case ProtocolBuffers::TYPE_DOUBLE:
                 // double, platform dependent
@@ -254,6 +255,32 @@ class ProtocolBuffers
         }
 
         return $result;
+    }
+
+    public static function typeToWireType($type)
+    {
+        $map = array(
+            self::TYPE_DOUBLE   => self::WIRETYPE_FIXED32,
+            self::TYPE_FLOAT    => self::WIRETYPE_FIXED32,
+            self::TYPE_INT64    => self::WIRETYPE_VARINT,
+            self::TYPE_UINT64   => self::WIRETYPE_VARINT,
+            self::TYPE_INT32    => self::WIRETYPE_VARINT,
+            self::TYPE_FIXED64  => self::WIRETYPE_FIXED64,
+            self::TYPE_FIXED32  => self::WIRETYPE_FIXED32,
+            self::TYPE_BOOL     => self::WIRETYPE_VARINT,
+            self::TYPE_STRING   => self::WIRETYPE_LENGTH_DELIMITED,
+            self::TYPE_GROUP    => null,
+            self::TYPE_MESSAGE  => self::WIRETYPE_LENGTH_DELIMITED,
+            self::TYPE_BYTES    => self::WIRETYPE_LENGTH_DELIMITED,
+            self::TYPE_UINT32   => self::WIRETYPE_VARINT,
+            self::TYPE_ENUM     => self::WIRETYPE_VARINT,
+            self::TYPE_SFIXED32 => self::WIRETYPE_FIXED32,
+            self::TYPE_SFIXED64 => self::WIRETYPE_FIXED64,
+            self::TYPE_SINT32   => self::WIRETYPE_VARINT,
+            self::TYPE_SINT64   => self::WIRETYPE_VARINT,
+        );
+
+        return $map[$type];
     }
 
     public static function generateProto($class)

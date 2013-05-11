@@ -299,6 +299,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
             return &scheme[i];
         }
     }
+
     fprintf(stderr, "TAG:%d NOTFOUND!", tag);
 }
 
@@ -334,7 +335,7 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
             int tsize = 0;
 
             ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
-            ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
+            //ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
 
             pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
             tsize = Z_STRLEN_P(tmp)+1;
@@ -374,7 +375,7 @@ PHP_FUNCTION(pb_decode)
     pb_scheme *ischeme;
     pb_scheme **is;
     pb_scheme_container *container, **cn;
-    int scheme_size;
+    int scheme_size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 	    //TODO: should be `ssa` as now, proto array is optional
@@ -391,6 +392,7 @@ PHP_FUNCTION(pb_decode)
 
     if (zend_hash_find(PBG(messages), class, class_len, (void **)&cn) != SUCCESS) {
         pb_convert_msg(proto, class, class_len, &ischeme, &scheme_size TSRMLS_CC);
+        scheme_size = zend_hash_num_elements(proto);
 
         container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
@@ -401,7 +403,7 @@ PHP_FUNCTION(pb_decode)
         container = *cn;
     }
 
-    data_end = data+data_len;
+    data_end = data + data_len;
     while (data < data_end) {
         pb_scheme *s;
         bit = *data;
