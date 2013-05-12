@@ -45,10 +45,6 @@ PHPAPI pb_globals pb_globals;
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 
-// for vector
-static const double resize_factor = 1.75;
-static const unsigned int minimum_size = 8;
-
 zend_class_entry *protocol_buffers_class_entry;
 
 void php_protocolbuffers_init(TSRMLS_D);
@@ -63,22 +59,6 @@ static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
 
 static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC) /* {{{ */
 {
-}
-
-int pb_vector_init(pb_vector *v, size_t initial_size)
-{
-    assert(v);
-    memset(v, 0x0, sizeof(pb_vector));
-
-    if (initial_size == 0)
-        initial_size = minimum_size;
-
-    v->_alloc_size = initial_size;
-    v->length = 0;
-    v->sorted = 1;
-    v->contents = (void**)malloc(v->_alloc_size * sizeof(void *));
-
-    return 0;
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)

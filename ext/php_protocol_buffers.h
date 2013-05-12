@@ -88,11 +88,4 @@ enum FieldType {
     MAX_FIELD_TYPE      = 18,
 };
 
-typedef struct pb_vector {
-        size_t _alloc_size;
-        void **contents;
-        size_t length;
-        int sorted;
-} pb_vector;
-
 #endif /* PHP_PROTOCOLBUFFERS_H */
