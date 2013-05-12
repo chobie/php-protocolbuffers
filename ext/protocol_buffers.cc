@@ -556,13 +556,72 @@ static int pb_serializer_write32(pb_serializer *serializer, unsigned int value)
         return 1;
     }
 
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 24 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 16 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
 
     return 0;
 }
+
+static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
+{
+    unsigned int target[4];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    memcpy(target, value, 4);
+#else
+    target[0] = (value);
+    target[1] = (value >>  8);
+    target[2] = (value >> 16);
+    target[3] = (value >> 24);
+#endif
+
+	serializer->buffer[serializer->buffer_size++] = target[0];
+	serializer->buffer[serializer->buffer_size++] = target[1];
+	serializer->buffer[serializer->buffer_size++] = target[2];
+	serializer->buffer[serializer->buffer_size++] = target[3];
+
+    return 0;
+}
+
+static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
+{
+    unsigned int target[8];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    memcpy(target, value, 8);
+#else
+    target[0] = (value);
+    target[1] = (value >>  8);
+    target[2] = (value >> 16);
+    target[3] = (value >> 24);
+    target[4] = (value >> 32);
+    target[5] = (value >> 40);
+    target[6] = (value >> 48);
+    target[7] = (value >> 52);
+#endif
+
+	serializer->buffer[serializer->buffer_size++] = target[0];
+	serializer->buffer[serializer->buffer_size++] = target[1];
+	serializer->buffer[serializer->buffer_size++] = target[2];
+	serializer->buffer[serializer->buffer_size++] = target[3];
+	serializer->buffer[serializer->buffer_size++] = target[4];
+	serializer->buffer[serializer->buffer_size++] = target[5];
+	serializer->buffer[serializer->buffer_size++] = target[6];
+	serializer->buffer[serializer->buffer_size++] = target[7];
+
+    return 0;
+}
+
 
 static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
 {
@@ -570,14 +629,14 @@ static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
         return 1;
     }
 
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 56 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 48 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 40 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 32 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 24 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 16 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 56 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 48 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 40 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 32 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
 
     return 0;
 }
@@ -703,15 +762,31 @@ PHP_METHOD(protocolbuffers, encode)
 
             switch (scheme->type) {
                 case TYPE_DOUBLE:
+                {
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        union {
+                            double d;
+                            uint64_t u;
+                        } u;
+                        u.d = Z_DVAL_PP(tmp);
+
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                        pb_serializer_write64_le(ser, u.u);
+                    }
+                }
                 break;
                 case TYPE_FLOAT:
                 {
                     if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-//                        char f_buffer[24];
-//
-//                        google::protobuf::FloatToBuffer(Z_DVAL_PP(tmp), f_buffer);
-//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-//                        pb_serializer_write_chararray(ser, (unsigned char*)&f_buffer, 24);
+                        union {
+                            float f;
+                            uint32_t u;
+                        } x;
+
+                        x.f = (float)Z_DVAL_PP(tmp);
+
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                        pb_serializer_write32_le(ser, x.u);
                     }
 
                 }

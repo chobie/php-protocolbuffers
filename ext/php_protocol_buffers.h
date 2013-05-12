@@ -16,6 +16,25 @@
 
 #include "strutil.h"
 
+#ifdef _MSC_VER
+  #if defined(_M_IX86) && \
+      !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST)
+    #define PROTOBUF_LITTLE_ENDIAN 1
+  #endif
+  #if _MSC_VER >= 1300
+    // If MSVC has "/RTCc" set, it will complain about truncating casts at
+    // runtime.  This file contains some intentional truncating casts.
+    #pragma runtime_checks("c", off)
+  #endif
+#else
+  #include <sys/param.h>   // __BYTE_ORDER
+  #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN && \
+      !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST)
+    #define PROTOBUF_LITTLE_ENDIAN 1
+  #endif
+#endif
+
+
 /* Define the entry point symbol
  * Zend will use when loading this module
  */
