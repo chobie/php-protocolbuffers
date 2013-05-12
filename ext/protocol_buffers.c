@@ -158,7 +158,7 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 }
 
 
-static inline char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
+static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
   // Fast path:  We have enough bytes left in the buffer to guarantee that
   // this read won't cross the end, so we can skip the checks.
   const char* ptr = buffer;
@@ -296,6 +296,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
     }
 
     fprintf(stderr, "TAG:%d NOTFOUND!", tag);
+    return NULL;
 }
 
 static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_scheme **scheme, int *size TSRMLS_DC)
@@ -304,7 +305,6 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
     zval *element;
     HashPosition pos;
     pb_scheme *ischeme;
-    zend_class_entry *c;
 
     sz = zend_hash_num_elements(proto);
     ischeme = (pb_scheme*)malloc(sizeof(pb_scheme) * sz);
@@ -314,10 +314,10 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
                     zend_hash_move_forward_ex(proto, &pos), n++
     ) {
         char *key = {0};
-        int  key_len = 0;
-        long index= 0;
+        uint  key_len = 0;
+        unsigned long index= 0;
         long ttag = 0;
-        zend_class_entry *c;
+        zend_class_entry **c;
 
         zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
         ttag = index;
@@ -326,7 +326,6 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
 
         {
             zval *tmp;
-            char *tchar;
             int tsize = 0;
 
             ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
@@ -343,13 +342,13 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
 
             if (ischeme[n].type == TYPE_MESSAGE) {
                 zend_lookup_class(class, class_len, &c TSRMLS_CC);
-                ischeme[n].ce = c;
+                ischeme[n].ce = *c;
             }
         }
     }
 
     *scheme = ischeme;
-    *size = &sz;
+    *size = sz;
 }
 
 /* {{{ proto class pb_decode(array proto, string class, string data)
@@ -360,62 +359,17 @@ PHP_FUNCTION(pb_decode)
 /* }}} */
 
 
-/* {{{ proto int pb_read_varint32(binary value)
-*/
-PHP_FUNCTION(pb_read_varint32)
-{
-	char *value = NULL;
-	long value_len = 0;
-	const uint* ptr;
-	uint b;
-	uint result;
-	int i = 0;
-	zval *z_result;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s",&value, &value_len) == FAILURE) {
-		return;
-	}
-
-	MAKE_STD_ZVAL(z_result);
-	ZVAL_NULL(z_result);
-	ptr = value;
-
-	b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |=  b         << 28; if (!(b & 0x80)) goto done;
-
-	// If the input is larger than 32 bits, we still need to read it all
-	// and discard the high-order bits.
-	for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
-	b = *(ptr++); if (!(b & 0x80)) goto done;
-	}
-
-	// We have overrun the maximum size of a varint (10 bytes).  Assume
-	// the data is corrupt.
-	RETURN_ZVAL(z_result, 0, 1);
-
-	done:
-	*value = result;
-
-	ZVAL_LONG(z_result, result);
-	RETURN_ZVAL(z_result, 0, 1);
-}
-/* }}} */
-
-
 PHP_METHOD(protocolbuffers, decode)
 {
     HashTable *proto, *hresult;
-    char *class, *data, *data_end;
+    char *class;
+    const char *data, *data_end;
     long class_len = 0, data_len = 0;
     char bit;
     uint value = 0, tag = 0, wiretype = 0;
     long buffer_size = 0;
     char buffer[512] = {0};
-    zval *z_class, *z_result, *z_proto;
+    zval *z_result, *z_proto;
     zval *dz;
     zval *obj;
     pb_scheme *ischeme;
@@ -433,7 +387,7 @@ PHP_METHOD(protocolbuffers, decode)
 
     hresult     = Z_ARRVAL_P(z_result);
     proto       = Z_ARRVAL_P(z_proto);
-    buffer_size = data + sizeof(data);
+    buffer_size = (long)data + sizeof(data);
 
     if (zend_hash_find(PBG(messages), class, class_len, (void **)&cn) != SUCCESS) {
         pb_convert_msg(proto, class, class_len, &ischeme, &scheme_size TSRMLS_CC);
@@ -678,6 +632,7 @@ static int pb_serializer_write_varint32(pb_serializer *serializer, uint8_t value
     for (i = 0; i < size; i++) {
         serializer->buffer[serializer->buffer_size++] = bytes[i];
     }
+    return 0;
 }
 
 static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
@@ -698,6 +653,7 @@ static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t valu
     for (i = 0; i < size; i++) {
         serializer->buffer[serializer->buffer_size++] = bytes[i];
     }
+    return 0;
 }
 
 
@@ -751,7 +707,7 @@ PHP_METHOD(protocolbuffers, encode)
         container->scheme = ischeme;
         container->size = scheme_size;
 
-        zend_hash_add(PBG(messages), class, strlen(class_name), (void**)&container, sizeof(pb_scheme_container), NULL);
+        zend_hash_add(PBG(messages), class_name, strlen(class_name), (void**)&container, sizeof(pb_scheme_container), NULL);
         zval_ptr_dtor(&ret);
     } else {
         container = *cn;
@@ -809,7 +765,7 @@ PHP_METHOD(protocolbuffers, encode)
                         if (Z_STRLEN_PP(tmp) > 0) {
                             pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
                             pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
-                            pb_serializer_write_chararray(ser, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+                            pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
                         }
                     }
                 break;
@@ -848,7 +804,7 @@ PHP_METHOD(protocolbuffers, encode)
         }
 
         if (ser->buffer_capacity > 0) {
-            RETVAL_STRINGL(ser->buffer, ser->buffer_size, 1);
+            RETVAL_STRINGL((const char*)ser->buffer, ser->buffer_size, 1);
 
             efree(ser->buffer);
             efree(ser);
@@ -864,7 +820,6 @@ PHP_METHOD(protocolbuffers, encode)
 
 static zend_function_entry pb_functions[] = {
 	PHP_MALIAS(protocolbuffers, pb_decode, decode,   arginfo_pb_decode, ZEND_ACC_PUBLIC)
-	PHP_FE(pb_read_varint32,              arginfo_pb_read_varint32)
 	{NULL, NULL, NULL}
 };
 

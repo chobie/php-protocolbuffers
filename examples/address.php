@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . "common.php";
+require join(DIRECTORY_SEPARATOR, array(dirname(dirname(__FILE__)), "src","ProtocolBuffers/Support.php"));
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/Base.php";
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/User.php";
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/Addressbook.php";
@@ -9,8 +9,8 @@ $person = new tutorial_Person();
 $person->_properties['id']  = 21;
 $person->_properties['name']  = "John Doe";
 
-$data = ProtocolBuffers::encode(tutorial_Person::getDescriptor(), $person);
-var_dump(ProtocolBuffers::decode(tutorial_Person::getDescriptor(), "tutorial_Person", $data));
+$data = ProtocolBuffers::encode($person);
+var_dump(ProtocolBuffers::decode(Tutorial_Person::getDescriptor(), "tutorial_Person", $data));
 //exit;
 
 
@@ -29,7 +29,7 @@ $addr = new AddressBook();
 $addr->addUser($u);
 $addr->addUser($u2);
 
-$data = ProtocolBuffers::encode($u2->getDescriptor(), $u2);
+$data = ProtocolBuffers::encode($u2);
 //echo $data;
 
 //$data = ProtocolBuffers::encode($addr->getDescriptor(), $addr);

@@ -11,6 +11,7 @@
 
 #include "php.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
 /* Define the entry point symbol
@@ -28,7 +29,7 @@ typedef struct {
 typedef struct pb_scheme
 {
 	int tag;
-	char **name;
+	char *name;
 	int name_len;
 	int wiretype;
 	int type;
