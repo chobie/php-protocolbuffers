@@ -24,6 +24,16 @@ extern zend_module_entry protocolbuffers_module_entry;
 
 extern zend_class_entry *protocol_buffers_class_entry;
 
+#ifndef GOOGLE_PREDICT_TRUE
+#ifdef __GNUC__
+// Provided at least since GCC 3.0.
+#define GOOGLE_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
+#else
+#define GOOGLE_PREDICT_TRUE
+#endif
+#endif
+
+
 typedef struct {
     HashTable *messages;
 } pb_globals;

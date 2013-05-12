@@ -30,18 +30,6 @@ PHPAPI int pb_globals_id;
 PHPAPI pb_globals pb_globals;
 #endif
 
-
-#ifndef GOOGLE_PREDICT_TRUE
-#ifdef __GNUC__
-// Provided at least since GCC 3.0.
-#define GOOGLE_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
-#else
-#define GOOGLE_PREDICT_TRUE
-#endif
-#endif
-
-
-
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 
@@ -717,6 +705,16 @@ PHP_METHOD(protocolbuffers, encode)
                 case TYPE_DOUBLE:
                 break;
                 case TYPE_FLOAT:
+                {
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+//                        char f_buffer[24];
+//
+//                        google::protobuf::FloatToBuffer(Z_DVAL_PP(tmp), f_buffer);
+//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+//                        pb_serializer_write_chararray(ser, (unsigned char*)&f_buffer, 24);
+                    }
+
+                }
                 break;
                 case TYPE_INT64:
                     if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
