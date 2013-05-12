@@ -76,7 +76,7 @@ int pb_vector_init(pb_vector *v, size_t initial_size)
     v->_alloc_size = initial_size;
     v->length = 0;
     v->sorted = 1;
-    v->contents = malloc(v->_alloc_size * sizeof(void *));
+    v->contents = (void**)malloc(v->_alloc_size * sizeof(void *));
 
     return 0;
 }
@@ -299,7 +299,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
     return NULL;
 }
 
-static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_scheme **scheme, int *size TSRMLS_DC)
+static void pb_convert_msg(HashTable *proto, char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
 {
     int n, sz;
     zval *element;
@@ -341,7 +341,7 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
             //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
 
             if (ischeme[n].type == TYPE_MESSAGE) {
-                zend_lookup_class(class, class_len, &c TSRMLS_CC);
+                zend_lookup_class(klass, klass_len, &c TSRMLS_CC);
                 ischeme[n].ce = *c;
             }
         }
@@ -362,9 +362,9 @@ PHP_FUNCTION(pb_decode)
 PHP_METHOD(protocolbuffers, decode)
 {
     HashTable *proto, *hresult;
-    char *class;
+    char *klass;
     const char *data, *data_end;
-    long class_len = 0, data_len = 0;
+    long klass_len = 0, data_len = 0;
     char bit;
     uint value = 0, tag = 0, wiretype = 0;
     long buffer_size = 0;
@@ -378,7 +378,7 @@ PHP_METHOD(protocolbuffers, decode)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 	    //TODO: should be `ssa` as now, proto array is optional
-		"ass", &z_proto, &class, &class_len, &data, &data_len) == FAILURE) {
+		"ass", &z_proto, &klass, &klass_len, &data, &data_len) == FAILURE) {
 		return;
 	}
 
@@ -389,15 +389,15 @@ PHP_METHOD(protocolbuffers, decode)
     proto       = Z_ARRVAL_P(z_proto);
     buffer_size = (long)data + sizeof(data);
 
-    if (zend_hash_find(PBG(messages), class, class_len, (void **)&cn) != SUCCESS) {
-        pb_convert_msg(proto, class, class_len, &ischeme, &scheme_size TSRMLS_CC);
+    if (zend_hash_find(PBG(messages), klass, klass_len, (void **)&cn) != SUCCESS) {
+        pb_convert_msg(proto, klass, klass_len, &ischeme, &scheme_size TSRMLS_CC);
         scheme_size = zend_hash_num_elements(proto);
 
         container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
 
-        zend_hash_add(PBG(messages), class, class_len, (void**)&container, sizeof(pb_scheme_container), NULL);
+        zend_hash_add(PBG(messages), klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
     } else {
         container = *cn;
     }
@@ -444,7 +444,7 @@ PHP_METHOD(protocolbuffers, decode)
                 } else {
                     char *sub_buffer;
 
-                    sub_buffer = emalloc(value+1);
+                    sub_buffer = (char *)emalloc(value+1);
                     memcpy(sub_buffer, data, value);
                     sub_buffer[value+1] = '\0';
                 }
@@ -461,7 +461,7 @@ PHP_METHOD(protocolbuffers, decode)
                     buffer[value+1] = '\0';
                 } else {
                     char *sub_buffer;
-                    sub_buffer = emalloc(value+1);
+                    sub_buffer = (char *)emalloc(value+1);
                     memcpy(sub_buffer, data, value);
                     sub_buffer[value+1] = '\0';
                 }
@@ -496,7 +496,7 @@ PHP_METHOD(protocolbuffers, decode)
         zend_class_entry **ce;
 
         MAKE_STD_ZVAL(obj);
-        zend_lookup_class(class, class_len, &ce TSRMLS_CC);
+        zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
         pp[0] = &z_result;
 
         ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
@@ -673,41 +673,41 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
 
 PHP_METHOD(protocolbuffers, encode)
 {
-    zval *class;
+    zval *klass;
     zend_class_entry *ce;
-    char *class_name;
+    char *klass_name;
     int scheme_size = 0;
     pb_scheme *ischeme;
     pb_scheme_container *container, **cn;
     HashTable *hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"o", &class) == FAILURE) {
+		"o", &klass) == FAILURE) {
 		return;
 	}
 
-	ce = Z_OBJCE_P(class);
-	class_name = ce->name;
+	ce = Z_OBJCE_P(klass);
+	klass_name = ce->name;
 
-    if (zend_hash_find(PBG(messages), class_name, strlen(class_name), (void **)&cn) != SUCCESS) {
+    if (zend_hash_find(PBG(messages), klass_name, strlen(klass_name), (void **)&cn) != SUCCESS) {
         zval method, *ret;
 
         if (zend_hash_exists(&ce->function_table, "getDescriptor", sizeof("getDescriptor")+1)) {
-            zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s does not have getDescriptor method", class_name);
+            zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s does not have getDescriptor method", klass_name);
             return;
         }
 
         ZVAL_STRINGL(&method, "getDescriptor", sizeof("getDescriptor")-1, 0);
-        call_user_function_ex(NULL, &class, &method, &ret, 0, 0, 0, NULL  TSRMLS_CC);
+        call_user_function_ex(NULL, &klass, &method, &ret, 0, 0, 0, NULL  TSRMLS_CC);
 
-        pb_convert_msg(Z_ARRVAL_P(ret), class_name, strlen(class_name), &ischeme, &scheme_size TSRMLS_CC);
+        pb_convert_msg(Z_ARRVAL_P(ret), klass_name, strlen(klass_name), &ischeme, &scheme_size TSRMLS_CC);
         scheme_size = zend_hash_num_elements(Z_ARRVAL_P(ret));
 
         container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
 
-        zend_hash_add(PBG(messages), class_name, strlen(class_name), (void**)&container, sizeof(pb_scheme_container), NULL);
+        zend_hash_add(PBG(messages), klass_name, strlen(klass_name), (void**)&container, sizeof(pb_scheme_container), NULL);
         zval_ptr_dtor(&ret);
     } else {
         container = *cn;
@@ -722,7 +722,7 @@ PHP_METHOD(protocolbuffers, encode)
         pb_serializer_init(&ser);
 
         // TODO: mangle property name
-        if (zend_hash_find(Z_OBJPROP_P(class), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
+        if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
             hash = Z_ARRVAL_PP(c);
         } else {
             fprintf(stderr, "_properties not found");
