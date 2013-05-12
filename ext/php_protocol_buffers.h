@@ -14,6 +14,8 @@
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
+#include "strutil.h"
+
 /* Define the entry point symbol
  * Zend will use when loading this module
  */
