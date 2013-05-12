@@ -125,6 +125,24 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 	return SUCCESS;
 }
 
+static inline uint32_t zigzag_encode32(int32_t n) {
+  // Note:  the right-shift must be arithmetic
+  return (n << 1) ^ (n >> 31);
+}
+
+static inline int32_t zigzag_decode32(uint32_t n) {
+  return (n >> 1) ^ - (int32_t)(n & 1);
+}
+
+static inline uint64_t zigzag_encode64(int64_t n) {
+  // Note:  the right-shift must be arithmetic
+  return (n << 1) ^ (n >> 63);
+}
+
+static inline int64_t zigzag_decode64(uint64_t n) {
+  return (n >> 1) ^ - (int64_t)(n & 1);
+}
+
 
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
   // Fast path:  We have enough bytes left in the buffer to guarantee that
@@ -804,8 +822,16 @@ PHP_METHOD(protocolbuffers, encode)
                     }
                 break;
                 case TYPE_FIXED64:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                        pb_serializer_write64_le(ser, Z_LVAL_PP(tmp));
+                    }
                 break;
                 case TYPE_FIXED32:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                        pb_serializer_write32_le(ser, Z_LVAL_PP(tmp));
+                    }
                 break;
                 case TYPE_BOOL:
                     if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
@@ -826,10 +852,24 @@ PHP_METHOD(protocolbuffers, encode)
                 break;
                 case TYPE_MESSAGE:
                 {
-                    //scheme->ce, getDescriptor
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+//                        char *res;
+//
+//                        php_pb_encode(tmp, &res);
+//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+//                        pb_serializer_write_varint32(ser, strlen(res));
+//                        pb_serializer_write_chararray(ser, res, strlen(res));
+                    }
                 }
                 break;
                 case TYPE_BYTES:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        if (Z_STRLEN_PP(tmp) > 0) {
+                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                            pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
+                            pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+                        }
+                    }
                 break;
                 case TYPE_UINT32:
                     if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
@@ -844,12 +884,28 @@ PHP_METHOD(protocolbuffers, encode)
                     }
                 break;
                 case TYPE_SFIXED32:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                        pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                    }
                 break;
                 case TYPE_SFIXED64:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                        pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                    }
                 break;
                 case TYPE_SINT32:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                        pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                    }
                 break;
                 case TYPE_SINT64:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                        pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(tmp)));
+                    }
                 break;
                 default:
                 break;

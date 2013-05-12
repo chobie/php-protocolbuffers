@@ -401,6 +401,12 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     	    printer.Print("'default'  => null,\n");
     	}
 
+    	if (field.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
+            const Descriptor &desc(*field.message_type());
+            printer.Print("'message'  => '`class`',\n",
+                "class", ClassName(desc));
+    	}
+
     	printer.Outdent();
     	printer.Print("),\n");
 	}
