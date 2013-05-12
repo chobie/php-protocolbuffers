@@ -14,8 +14,6 @@
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
-#include "strutil.h"
-
 #ifdef _MSC_VER
   #if defined(_M_IX86) && \
       !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST)
