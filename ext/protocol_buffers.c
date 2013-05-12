@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 #include "php_protocol_buffers.h"
+#include <stdint.h>
 
 #ifdef ZTS
 PHPAPI int pb_globals_id;
@@ -48,10 +49,9 @@ static const int kMaxVarint32Bytes = 5;
 static const double resize_factor = 1.75;
 static const unsigned int minimum_size = 8;
 
-//zend_class_entry *protocolbuffers_class_entry;
+zend_class_entry *protocol_buffers_class_entry;
 
 void php_protocolbuffers_init(TSRMLS_D);
-
 
 void messages_dtor(pb_scheme *entry)
 {
@@ -155,11 +155,6 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
     }
 
 	return SUCCESS;
-}
-
-
-void php_protocolbuffers_init(TSRMLS_D)
-{
 }
 
 
@@ -361,10 +356,61 @@ static void pb_convert_msg(HashTable *proto, char *class, int class_len, pb_sche
 */
 PHP_FUNCTION(pb_decode)
 {
+}
+/* }}} */
+
+
+/* {{{ proto int pb_read_varint32(binary value)
+*/
+PHP_FUNCTION(pb_read_varint32)
+{
+	char *value = NULL;
+	long value_len = 0;
+	const uint* ptr;
+	uint b;
+	uint result;
+	int i = 0;
+	zval *z_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s",&value, &value_len) == FAILURE) {
+		return;
+	}
+
+	MAKE_STD_ZVAL(z_result);
+	ZVAL_NULL(z_result);
+	ptr = value;
+
+	b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
+	b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
+	b = *(ptr++); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
+	b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
+	b = *(ptr++); result |=  b         << 28; if (!(b & 0x80)) goto done;
+
+	// If the input is larger than 32 bits, we still need to read it all
+	// and discard the high-order bits.
+	for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
+	b = *(ptr++); if (!(b & 0x80)) goto done;
+	}
+
+	// We have overrun the maximum size of a varint (10 bytes).  Assume
+	// the data is corrupt.
+	RETURN_ZVAL(z_result, 0, 1);
+
+	done:
+	*value = result;
+
+	ZVAL_LONG(z_result, result);
+	RETURN_ZVAL(z_result, 0, 1);
+}
+/* }}} */
+
+
+PHP_METHOD(protocolbuffers, decode)
+{
     HashTable *proto, *hresult;
     char *class, *data, *data_end;
     long class_len = 0, data_len = 0;
-    int i = 0, offset = 0;
     char bit;
     uint value = 0, tag = 0, wiretype = 0;
     long buffer_size = 0;
@@ -373,7 +419,6 @@ PHP_FUNCTION(pb_decode)
     zval *dz;
     zval *obj;
     pb_scheme *ischeme;
-    pb_scheme **is;
     pb_scheme_container *container, **cn;
     int scheme_size = 0;
 
@@ -495,8 +540,6 @@ PHP_FUNCTION(pb_decode)
 
         zval **pp[1];
         zend_class_entry **ce;
-        char *kkey;
-        int *klen;
 
         MAKE_STD_ZVAL(obj);
         zend_lookup_class(class, class_len, &ce TSRMLS_CC);
@@ -523,60 +566,349 @@ PHP_FUNCTION(pb_decode)
 
     RETURN_ZVAL(obj, 0, 1);
 }
-/* }}} */
 
-
-/* {{{ proto int pb_read_varint32(binary value)
-*/
-PHP_FUNCTION(pb_read_varint32)
+typedef struct pb_serializer
 {
-	char *value = NULL;
-	long value_len = 0;
-	const uint* ptr;
-	uint b;
-	uint result;
-	int i = 0;
-	zval *z_result;
+    uint8_t *buffer;
+    size_t buffer_size;
+    size_t buffer_capacity;
+    size_t buffer_offset;
+} pb_serializer;
+
+static void pb_serializer_init(pb_serializer **serializer)
+{
+    pb_serializer *ser;
+    ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
+
+    ser->buffer_size = 0;
+    ser->buffer_capacity = 32;
+    ser->buffer_offset = 0;
+    ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
+    memset(ser->buffer, '\0', ser->buffer_capacity);
+
+    *serializer = ser;
+}
+
+static int pb_serializer_resize(pb_serializer *serializer, size_t size)
+{
+	if (serializer->buffer_size + size < serializer->buffer_capacity) {
+		return 0;
+	}
+
+	while (serializer->buffer_size + size >= serializer->buffer_capacity) {
+		serializer->buffer_capacity *= 2;
+	}
+
+	serializer->buffer = (uint8_t*)erealloc(serializer->buffer, serializer->buffer_capacity);
+	if (serializer->buffer == NULL)
+		return 1;
+
+	return 0;
+}
+
+static int pb_serializer_write8(pb_serializer *serializer, unsigned int value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+    serializer->buffer[serializer->buffer_size++] = value;
+    return 0;
+}
+
+static int pb_serializer_write16(pb_serializer *serializer, unsigned int value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+
+    return 0;
+}
+
+static int pb_serializer_write32(pb_serializer *serializer, unsigned int value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 24 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 16 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+
+    return 0;
+}
+
+static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 56 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 48 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 40 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 32 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 24 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 16 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
+	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+
+    return 0;
+}
+
+static int pb_serializer_write_varint32(pb_serializer *serializer, uint8_t value)
+{
+    uint8_t bytes[kMaxVarint32Bytes];
+    int size = 0, i;
+
+    if (pb_serializer_resize(serializer, 4)) {
+        return 1;
+    }
+
+    while (value > 0x7F) {
+      bytes[size++] = (value & 0x7F) | 0x80;
+      value >>= 7;
+    }
+    bytes[size++] = value & 0x7F;
+
+    for (i = 0; i < size; i++) {
+        serializer->buffer[serializer->buffer_size++] = bytes[i];
+    }
+}
+
+static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
+{
+    uint8_t bytes[kMaxVarintBytes];
+    int size = 0, i;
+
+    if (pb_serializer_resize(serializer, 8)) {
+        return 1;
+    }
+
+    while (value > 0x7F) {
+      bytes[size++] = ((value) & 0x7F) | 0x80;
+      value >>= 7;
+    }
+    bytes[size++] = (value) & 0x7F;
+
+    for (i = 0; i < size; i++) {
+        serializer->buffer[serializer->buffer_size++] = bytes[i];
+    }
+}
+
+
+static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
+{
+    int i;
+
+    if (pb_serializer_resize(serializer, len)) {
+        return 1;
+    }
+
+    for (i = 0; i < len; i++) {
+        serializer->buffer[serializer->buffer_size++] = string[i];
+    }
+    return 0;
+}
+
+PHP_METHOD(protocolbuffers, encode)
+{
+    zval *class;
+    zend_class_entry *ce;
+    char *class_name;
+    int scheme_size = 0;
+    pb_scheme *ischeme;
+    pb_scheme_container *container, **cn;
+    HashTable *hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s",&value, &value_len) == FAILURE) {
+		"o", &class) == FAILURE) {
 		return;
 	}
 
-	MAKE_STD_ZVAL(z_result);
-	ZVAL_NULL(z_result);
-	ptr = value;
+	ce = Z_OBJCE_P(class);
+	class_name = ce->name;
 
-	b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
-	b = *(ptr++); result |=  b         << 28; if (!(b & 0x80)) goto done;
+    if (zend_hash_find(PBG(messages), class_name, strlen(class_name), (void **)&cn) != SUCCESS) {
+        zval method, *ret;
 
-	// If the input is larger than 32 bits, we still need to read it all
-	// and discard the high-order bits.
-	for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
-	b = *(ptr++); if (!(b & 0x80)) goto done;
-	}
+        if (zend_hash_exists(&ce->function_table, "getDescriptor", sizeof("getDescriptor")+1)) {
+            zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s does not have getDescriptor method", class_name);
+            return;
+        }
 
-	// We have overrun the maximum size of a varint (10 bytes).  Assume
-	// the data is corrupt.
-	RETURN_ZVAL(z_result, 0, 1);
+        ZVAL_STRINGL(&method, "getDescriptor", sizeof("getDescriptor")-1, 0);
+        call_user_function_ex(NULL, &class, &method, &ret, 0, 0, 0, NULL  TSRMLS_CC);
 
-	done:
-	*value = result;
+        pb_convert_msg(Z_ARRVAL_P(ret), class_name, strlen(class_name), &ischeme, &scheme_size TSRMLS_CC);
+        scheme_size = zend_hash_num_elements(Z_ARRVAL_P(ret));
 
-	ZVAL_LONG(z_result, result);
-	RETURN_ZVAL(z_result, 0, 1);
+        container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
+        container->scheme = ischeme;
+        container->size = scheme_size;
+
+        zend_hash_add(PBG(messages), class, strlen(class_name), (void**)&container, sizeof(pb_scheme_container), NULL);
+        zval_ptr_dtor(&ret);
+    } else {
+        container = *cn;
+    }
+
+    {
+        int i = 0;
+        pb_serializer *ser;
+        zval **c;
+        zval **tmp;
+
+        pb_serializer_init(&ser);
+
+        // TODO: mangle property name
+        if (zend_hash_find(Z_OBJPROP_P(class), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
+            hash = Z_ARRVAL_PP(c);
+        } else {
+            fprintf(stderr, "_properties not found");
+            return;
+        }
+
+        for (i = 0; i < container->size; i++) {
+            pb_scheme *scheme;
+            scheme = &(container->scheme[i]);
+
+            switch (scheme->type) {
+                case TYPE_DOUBLE:
+                break;
+                case TYPE_FLOAT:
+                break;
+                case TYPE_INT64:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                        pb_serializer_write_varint64(ser, Z_LVAL_PP(tmp));
+                    }
+                break;
+                case TYPE_INT32:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                    }
+                break;
+                case TYPE_FIXED64:
+                break;
+                case TYPE_FIXED32:
+                break;
+                case TYPE_BOOL:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                    }
+                break;
+                case TYPE_STRING:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        if (Z_STRLEN_PP(tmp) > 0) {
+                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                            pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
+                            pb_serializer_write_chararray(ser, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+                        }
+                    }
+                break;
+                case TYPE_GROUP:
+                break;
+                case TYPE_MESSAGE:
+                {
+                    //scheme->ce, getDescriptor
+                }
+                break;
+                case TYPE_BYTES:
+                break;
+                case TYPE_UINT32:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                    }
+                break;
+                case TYPE_ENUM:
+                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                    }
+                break;
+                case TYPE_SFIXED32:
+                break;
+                case TYPE_SFIXED64:
+                break;
+                case TYPE_SINT32:
+                break;
+                case TYPE_SINT64:
+                break;
+                default:
+                break;
+            }
+        }
+
+        if (ser->buffer_capacity > 0) {
+            RETVAL_STRINGL(ser->buffer, ser->buffer_size, 1);
+
+            efree(ser->buffer);
+            efree(ser);
+        } else {
+            fprintf(stderr, "NOTHING\n");
+            RETURN_EMPTY_STRING();
+        }
+    }
+
 }
-/* }}} */
+
 
 
 static zend_function_entry pb_functions[] = {
-	PHP_FE(pb_decode,                     arginfo_pb_decode)
+	PHP_MALIAS(protocolbuffers, pb_decode, decode,   arginfo_pb_decode, ZEND_ACC_PUBLIC)
 	PHP_FE(pb_read_varint32,              arginfo_pb_read_varint32)
 	{NULL, NULL, NULL}
 };
+
+static zend_function_entry php_protocolbuffers_methods[] = {
+    PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+    PHP_ME(protocolbuffers, encode, NULL, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
+
+void php_protocolbuffers_init(TSRMLS_D)
+{
+    zend_class_entry ce;
+    INIT_CLASS_ENTRY(ce, "ProtocolBuffers", php_protocolbuffers_methods);
+    protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_VARINT", sizeof("WIRETYPE_VARINT")-1, 0 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_FIXED64", sizeof("WIRETYPE_FIXED64")-1, 1 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_LENGTH_DELIMITED", sizeof("WIRETYPE_LENGTH_DELIMITED")-1, 2 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_START_GROUP", sizeof("WIRETYPE_START_GROUP")-1, 3 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_END_GROUP", sizeof("WIRETYPE_END_GROUP")-1, 4 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_FIXED32", sizeof("WIRETYPE_FIXED32")-1, 5 TSRMLS_CC);
+
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_DOUBLE", sizeof("TYPE_DOUBLE")-1, 1 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FLOAT", sizeof("TYPE_FLOAT")-1, 2 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_INT64", sizeof("TYPE_INT64")-1, 3 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_UINT64", sizeof("TYPE_UINT64")-1, 4 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_INT32", sizeof("TYPE_INT32")-1, 5 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FIXED64", sizeof("TYPE_FIXED64")-1, 6 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FIXED32", sizeof("TYPE_FIXED32")-1, 7 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_BOOL", sizeof("TYPE_BOOL")-1, 8 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_STRING", sizeof("TYPE_STRING")-1, 9 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_GROUP", sizeof("TYPE_GROUP")-1, 10 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_MESSAGE", sizeof("TYPE_MESSAGE")-1, 11 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_BYTES", sizeof("TYPE_BYTES")-1, 12 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_UINT32", sizeof("TYPE_UINT32")-1, 13 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_ENUM", sizeof("TYPE_ENUM")-1, 14 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SFIXED32", sizeof("TYPE_SFIXED32")-1, 15 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SFIXED64", sizeof("TYPE_SFIXED64")-1, 16 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SINT32", sizeof("TYPE_SINT32")-1, 17 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SINT64", sizeof("TYPE_SINT64")-1, 18 TSRMLS_CC);
+    zend_declare_class_constant_long(protocol_buffers_class_entry, "MAX_FIELD_TYPE", sizeof("MAX_FIELD_TYPE")-1, 19 TSRMLS_CC);
+}
+
 
 zend_module_entry protocolbuffers_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901

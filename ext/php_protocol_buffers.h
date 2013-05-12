@@ -11,6 +11,7 @@
 
 #include "php.h"
 #include "zend_interfaces.h"
+#include "ext/standard/php_smart_str.h"
 
 /* Define the entry point symbol
  * Zend will use when loading this module
@@ -18,7 +19,7 @@
 extern zend_module_entry protocolbuffers_module_entry;
 #define phpext_protocolbuffers_ptr &protocolbuffers_module_entry;
 
-//extern zend_class_entry *protocolbuffers_parser_class_entry;
+extern zend_class_entry *protocol_buffers_class_entry;
 
 typedef struct {
     HashTable *messages;
