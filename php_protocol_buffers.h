@@ -66,6 +66,7 @@ typedef struct pb_scheme
 	int type;
 	int flags;
 	int scheme_type;
+	int repeated;
 	char *message;
 	char *enum_msg;
 	zend_class_entry *ce;

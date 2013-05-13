@@ -186,6 +186,24 @@ static int pb_get_tag_name(HashTable *proto, ulong tag, zval **result TSRMLS_DC)
     return 0;
 }
 
+static int pb_get_repeated(HashTable *proto, ulong tag TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), "repeated", sizeof("repeated"), (void **)&dd) == SUCCESS) {
+        return Z_LVAL_PP(dd);
+    }
+    return 0;
+}
+
+
 static int pb_get_msg_name(HashTable *proto, ulong tag, zval **result TSRMLS_DC)
 {
     zval **d, **dd;
@@ -324,16 +342,15 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
             int tsize = 0;
 
             ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
-            //ischeme[n].wiretype = pb_tag_wiretype(proto, ttag TSRMLS_CC);
 
             pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
             tsize = Z_STRLEN_P(tmp)+1;
+            // TODO: fix memory leak
             ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
             ischeme[n].name_len = tsize;
             memcpy(ischeme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
             ischeme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
-
-            //pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
+            ischeme[n].repeated = pb_get_repeated(proto, ttag TSRMLS_CC);
 
             if (ischeme[n].type == TYPE_MESSAGE) {
                 pb_get_msg_name(proto, ttag, &tmp TSRMLS_CC);
@@ -461,16 +478,20 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
                 pb_scheme_container *c_container;
-
                 pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
-                pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
-                MAKE_STD_ZVAL(z_obj);
 
-                object_init_ex(z_obj, s->ce);
-                zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
-                zend_hash_add(hresult, s->name, s->name_len, (void **)&z_obj, sizeof(z_obj), NULL);
-                Z_ADDREF_P(z_obj);
-                zval_ptr_dtor(&z_obj);
+                if (s->repeated) {
+
+                } else {
+                    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
+                    MAKE_STD_ZVAL(z_obj);
+
+                    object_init_ex(z_obj, s->ce);
+                    zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+                    zend_hash_add(hresult, s->name, s->name_len, (void **)&z_obj, sizeof(z_obj), NULL);
+                    Z_ADDREF_P(z_obj);
+                    zval_ptr_dtor(&z_obj);
+                }
             }
 
             data += value;
@@ -601,16 +622,22 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                         pb_scheme_container *n_container;
                         pb_serializer *n_ser = NULL;
 
-                        ce = Z_OBJCE_PP(tmp);
 
-                        pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
-                        pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *tmp, n_container, &n_ser);
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                        pb_serializer_write_varint32(ser, n_ser->buffer_size);
-                        pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
+                        if (scheme->repeated) {
 
-                        efree(n_ser->buffer);
-                        efree(n_ser);
+                        } else {
+                            ce = Z_OBJCE_PP(tmp);
+
+                            pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+                            pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *tmp, n_container, &n_ser);
+                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                            pb_serializer_write_varint32(ser, n_ser->buffer_size);
+                            pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
+
+                            efree(n_ser->buffer);
+                            efree(n_ser);
+                        }
+
                 }
             }
             break;

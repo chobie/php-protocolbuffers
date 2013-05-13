@@ -29,6 +29,7 @@ $addr->addUser($u);
 $addr->addUser($u2);
 
 $data = ProtocolBuffers::encode($u2);
+exit;
 //echo $data;
 
 //$data = ProtocolBuffers::encode($addr->getDescriptor(), $addr);
