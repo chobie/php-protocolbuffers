@@ -498,6 +498,165 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
     return data;
 }
 
+static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
+{
+    int i = 0;
+    pb_serializer *ser;
+    zval **c;
+    zval **tmp;
+    HashTable *hash = NULL;
+
+    pb_serializer_init(&ser);
+
+    // TODO: mangle property name
+    if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
+        hash = Z_ARRVAL_PP(c);
+    } else {
+        fprintf(stderr, "_properties not found");
+        return -1;
+    }
+
+    for (i = 0; i < container->size; i++) {
+        pb_scheme *scheme;
+        scheme = &(container->scheme[i]);
+
+        switch (scheme->type) {
+            case TYPE_DOUBLE:
+            {
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    union {
+                        double d;
+                        uint64_t u;
+                    } u;
+                    u.d = Z_DVAL_PP(tmp);
+
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                    pb_serializer_write64_le(ser, u.u);
+                }
+            }
+            break;
+            case TYPE_FLOAT:
+            {
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    union {
+                        float f;
+                        uint32_t u;
+                    } x;
+
+                    x.f = (float)Z_DVAL_PP(tmp);
+
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                    pb_serializer_write32_le(ser, x.u);
+                }
+
+            }
+            break;
+            case TYPE_INT64:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                    pb_serializer_write_varint64(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_INT32:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_FIXED64:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                    pb_serializer_write64_le(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_FIXED32:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                    pb_serializer_write32_le(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_BOOL:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_STRING:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    if (Z_STRLEN_PP(tmp) > 0) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                        pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
+                        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+                    }
+                }
+            break;
+            case TYPE_GROUP:
+            break;
+            case TYPE_MESSAGE:
+            {
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+//                        char *res;
+//
+//                        php_pb_encode(tmp, &res);
+//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+//                        pb_serializer_write_varint32(ser, strlen(res));
+//                        pb_serializer_write_chararray(ser, res, strlen(res));
+                }
+            }
+            break;
+            case TYPE_BYTES:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    if (Z_STRLEN_PP(tmp) > 0) {
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                        pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
+                        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+                    }
+                }
+            break;
+            case TYPE_UINT32:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_ENUM:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
+                }
+            break;
+            case TYPE_SFIXED32:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                    pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                }
+            break;
+            case TYPE_SFIXED64:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                    pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                }
+            break;
+            case TYPE_SINT32:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+                    pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
+                }
+            break;
+            case TYPE_SINT64:
+                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+                    pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(tmp)));
+                }
+            break;
+            default:
+            break;
+        }
+    }
+
+    *serializer = ser;
+    return 0;
+}
 
 PHP_METHOD(protocolbuffers, decode)
 {
@@ -765,209 +924,35 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
 
 PHP_METHOD(protocolbuffers, encode)
 {
-    zval *klass;
+    zval *klass, *z_descriptor = NULL;
     zend_class_entry *ce;
-    char *klass_name;
     int scheme_size = 0;
     pb_scheme *ischeme;
     pb_scheme_container *container, **cn;
-    HashTable *hash;
+    HashTable *hash, *proto = NULL;
+    pb_serializer *ser;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"o", &klass) == FAILURE) {
+		"o|a", &klass, &z_descriptor) == FAILURE) {
 		return;
 	}
 
 	ce = Z_OBJCE_P(klass);
-	klass_name = ce->name;
-
-    if (zend_hash_find(PBG(messages), klass_name, strlen(klass_name), (void **)&cn) != SUCCESS) {
-        zval method, *ret;
-
-        if (zend_hash_exists(&ce->function_table, "getDescriptor", sizeof("getDescriptor")+1)) {
-            zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s does not have getDescriptor method", klass_name);
-            return;
-        }
-
-        ZVAL_STRINGL(&method, "getDescriptor", sizeof("getDescriptor")-1, 0);
-        call_user_function_ex(NULL, &klass, &method, &ret, 0, 0, 0, NULL  TSRMLS_CC);
-
-        pb_convert_msg(Z_ARRVAL_P(ret), klass_name, strlen(klass_name), &ischeme, &scheme_size TSRMLS_CC);
-        scheme_size = zend_hash_num_elements(Z_ARRVAL_P(ret));
-
-        container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
-        container->scheme = ischeme;
-        container->size = scheme_size;
-
-        zend_hash_add(PBG(messages), klass_name, strlen(klass_name), (void**)&container, sizeof(pb_scheme_container), NULL);
-        zval_ptr_dtor(&ret);
-    } else {
-        container = *cn;
+    if (z_descriptor) {
+        proto       = Z_ARRVAL_P(z_descriptor);
     }
 
-    {
-        int i = 0;
-        pb_serializer *ser;
-        zval **c;
-        zval **tmp;
+    pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+    pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser);
 
-        pb_serializer_init(&ser);
+    if (ser->buffer_capacity > 0) {
+        RETVAL_STRINGL((const char*)ser->buffer, ser->buffer_size, 1);
 
-        // TODO: mangle property name
-        if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
-            hash = Z_ARRVAL_PP(c);
-        } else {
-            fprintf(stderr, "_properties not found");
-            return;
-        }
-
-        for (i = 0; i < container->size; i++) {
-            pb_scheme *scheme;
-            scheme = &(container->scheme[i]);
-
-            switch (scheme->type) {
-                case TYPE_DOUBLE:
-                {
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        union {
-                            double d;
-                            uint64_t u;
-                        } u;
-                        u.d = Z_DVAL_PP(tmp);
-
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                        pb_serializer_write64_le(ser, u.u);
-                    }
-                }
-                break;
-                case TYPE_FLOAT:
-                {
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        union {
-                            float f;
-                            uint32_t u;
-                        } x;
-
-                        x.f = (float)Z_DVAL_PP(tmp);
-
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                        pb_serializer_write32_le(ser, x.u);
-                    }
-
-                }
-                break;
-                case TYPE_INT64:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                        pb_serializer_write_varint64(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_INT32:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_FIXED64:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                        pb_serializer_write64_le(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_FIXED32:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                        pb_serializer_write32_le(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_BOOL:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_STRING:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        if (Z_STRLEN_PP(tmp) > 0) {
-                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                            pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
-                            pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-                        }
-                    }
-                break;
-                case TYPE_GROUP:
-                break;
-                case TYPE_MESSAGE:
-                {
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-//                        char *res;
-//
-//                        php_pb_encode(tmp, &res);
-//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-//                        pb_serializer_write_varint32(ser, strlen(res));
-//                        pb_serializer_write_chararray(ser, res, strlen(res));
-                    }
-                }
-                break;
-                case TYPE_BYTES:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        if (Z_STRLEN_PP(tmp) > 0) {
-                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                            pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
-                            pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-                        }
-                    }
-                break;
-                case TYPE_UINT32:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_ENUM:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                        pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                    }
-                break;
-                case TYPE_SFIXED32:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                        pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                    }
-                break;
-                case TYPE_SFIXED64:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                        pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                    }
-                break;
-                case TYPE_SINT32:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                        pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                    }
-                break;
-                case TYPE_SINT64:
-                    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                        pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(tmp)));
-                    }
-                break;
-                default:
-                break;
-            }
-        }
-
-        if (ser->buffer_capacity > 0) {
-            RETVAL_STRINGL((const char*)ser->buffer, ser->buffer_size, 1);
-
-            efree(ser->buffer);
-            efree(ser);
-        } else {
-            fprintf(stderr, "NOTHING\n");
-            RETURN_EMPTY_STRING();
-        }
+        efree(ser->buffer);
+        efree(ser);
+    } else {
+        fprintf(stderr, "NOTHING\n");
+        RETURN_EMPTY_STRING();
     }
 
 }
