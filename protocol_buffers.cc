@@ -670,20 +670,14 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
 PHP_METHOD(protocolbuffers, decode)
 {
-    HashTable *proto = NULL, *hresult;
+    HashTable *proto = NULL;
     char *klass;
     const char *data, *data_end;
     long klass_len = 0, data_len = 0;
-    char bit;
-    uint value = 0, tag = 0, wiretype = 0;
     long buffer_size = 0;
-    char buffer[512] = {0};
     zval *z_result, *z_proto;
-    zval *dz;
     zval *obj;
-    pb_scheme *ischeme;
-    pb_scheme_container *container, **cn;
-    int scheme_size = 0;
+    pb_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
@@ -936,10 +930,8 @@ PHP_METHOD(protocolbuffers, encode)
 {
     zval *klass, *z_descriptor = NULL;
     zend_class_entry *ce;
-    int scheme_size = 0;
-    pb_scheme *ischeme;
-    pb_scheme_container *container, **cn;
-    HashTable *hash, *proto = NULL;
+    pb_scheme_container *container;
+    HashTable *proto = NULL;
     pb_serializer *ser;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
