@@ -14,6 +14,8 @@
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
+#include <stdint.h>
+
 #ifdef _MSC_VER
   #if defined(_M_IX86) && \
       !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST)
@@ -114,5 +116,14 @@ enum FieldType {
     TYPE_SINT64         = 18,
     MAX_FIELD_TYPE      = 18,
 };
+
+typedef struct pb_serializer
+{
+    uint8_t *buffer;
+    size_t buffer_size;
+    size_t buffer_capacity;
+    size_t buffer_offset;
+} pb_serializer;
+
 
 #endif /* PHP_PROTOCOLBUFFERS_H */

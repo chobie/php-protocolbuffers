@@ -22,7 +22,9 @@
  * THE SOFTWARE.
  */
 #include "php_protocol_buffers.h"
-#include <stdint.h>
+#include "helper.h"
+#include "protocol_buffers.h"
+
 
 #ifdef ZTS
 PHPAPI int pb_globals_id;
@@ -35,7 +37,6 @@ static const int kMaxVarint32Bytes = 5;
 
 zend_class_entry *protocol_buffers_class_entry;
 
-void php_protocolbuffers_init(TSRMLS_D);
 
 void messages_dtor(pb_scheme *entry)
 {
@@ -128,24 +129,6 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
     }
 
 	return SUCCESS;
-}
-
-static inline uint32_t zigzag_encode32(int32_t n) {
-  // Note:  the right-shift must be arithmetic
-  return (n << 1) ^ (n >> 31);
-}
-
-static inline int32_t zigzag_decode32(uint32_t n) {
-  return (n >> 1) ^ - (int32_t)(n & 1);
-}
-
-static inline uint64_t zigzag_encode64(int64_t n) {
-  // Note:  the right-shift must be arithmetic
-  return (n << 1) ^ (n >> 63);
-}
-
-static inline int64_t zigzag_decode64(uint64_t n) {
-  return (n >> 1) ^ - (int64_t)(n & 1);
 }
 
 
@@ -566,14 +549,6 @@ PHP_METHOD(protocolbuffers, decode)
 
     RETURN_ZVAL(obj, 0, 1);
 }
-
-typedef struct pb_serializer
-{
-    uint8_t *buffer;
-    size_t buffer_size;
-    size_t buffer_capacity;
-    size_t buffer_offset;
-} pb_serializer;
 
 static void pb_serializer_init(pb_serializer **serializer)
 {
