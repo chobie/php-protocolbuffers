@@ -2,8 +2,6 @@
 Check for protocol buffers sinple message encoding
 --FILE--
 <?php
-require dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, array("src", "ProtocolBuffers", "Support.php"));
-
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "Base.php";
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "User.php";
 
