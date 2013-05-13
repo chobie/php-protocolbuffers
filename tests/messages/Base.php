@@ -24,7 +24,7 @@ class Base
         }
 
         // first, create an empty box here.
-        $rule = $this->setup();
+        $rule = $this->getSchemeDescriptor();
         foreach ($rule[self::TYPE_PROPERTIES] as $key => $opts) {
             if (isset($opts[self::TYPE_OPTFLAGS][self::TYPE_DEFAULT])) {
                 $this->_properties[$key] = $opts[self::TYPE_OPTFLAGS][self::TYPE_DEFAULT];
@@ -81,7 +81,7 @@ class Base
      */
     public function get($target)
     {
-        $rule = $this->setup();
+        $rule = $this->getSchemeDescriptor();
         if (!isset($rule[self::TYPE_PROPERTIES][$target])) {
             throw new Exception("the property $target does not exist on " . get_class($this) . " class");
         }
@@ -118,7 +118,7 @@ class Base
 
         switch ($method) {
         case "get":
-            $rule = $this->setup();
+            $rule = $this->getSchemeDescriptor();
 
             if (!isset($rule[self::TYPE_PROPERTIES][$property])) {
                 throw new InvalidArgumentException("the property $property does not exist");
@@ -142,7 +142,7 @@ class Base
 
             break;
         case "set":
-            $rule = $this->setup();
+            $rule = $this->getSchemeDescriptor();
 
             if(count($args) != 1) {
                 throw new InvalidArgumentException("the {$property} args must be an {$rule[self::TYPE_PROPERTIES][$property][self::TYPE_TYPE]} instance. too many arguments");
@@ -172,7 +172,7 @@ class Base
      * @throws Exception
      */
     public function set($target, $value) {
-        $rule = $this->setup();
+        $rule = $this->getSchemeDescriptor();
 
         if (!isset($rule[self::TYPE_PROPERTIES][$target])) {
             throw new Exception(sprintf("%s does not have {$target} property", get_class($this)));
@@ -224,21 +224,23 @@ class Base
     }
 
     /**
-     * setup scheme
+     * get scheme descriptor
+     *
+     * this is not regard any pb descriptor.
      *
      * @return mixed
      */
-    public function setup()
+    public function getSchemeDescriptor()
     {
         $classname = get_class($this);
         if (!isset(self::$_scheme_cache[$classname])) {
-            self::$_scheme_cache[$classname] = $this->_setup($classname);
+            self::$_scheme_cache[$classname] = $this->_getSchemeDescriptorImpl($classname);
         }
 
         return self::$_scheme_cache[$classname];
     }
 
-    protected function _setup($classname, &$inherit = 0)
+    protected function _getSchemeDescriptorImpl($classname, &$inherit = 0)
     {
         $parent_opts = array();
 
@@ -252,7 +254,7 @@ class Base
                 break;
             }
 
-            $parent_opts = $this->_setup($parent, $inherit);
+            $parent_opts = $this->_getSchemeDescriptorImpl($parent, $inherit);
         } while (!$parent);
 
         if (!isset(self::$_scheme_cache[$classname])) {
@@ -299,7 +301,6 @@ class Base
                             }
                             break;
                         case self::TYPE_REQUIRED:
-
                             foreach ($property as $rule) {
                                 if (!in_array($rule, $real_opts[$key])) {
                                     $real_opts[$key][] = $rule;

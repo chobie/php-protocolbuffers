@@ -8,25 +8,18 @@ def cmd_run(command)
 end
 
 task :compile do
-  Dir.chdir("ext") do
-    cmd_run("make")
-  end
+  cmd_run("make")
 end
 
 task :install do
-  Dir.chdir("ext") do
-    cmd_run("phpize --clean")
-    cmd_run("phpize")
-    cmd_run("./configure")
-    cmd_run("make")
-    cmd_run("make install")
-  end
+  cmd_run("phpize --clean")
+  cmd_run("phpize")
+  cmd_run("./configure")
+  cmd_run("make")
+  cmd_run("make install")
 end
 
 task :test do
-  Dir.chdir("ext") do
-    cmd_run("make test NO_INTERACTION=1")
-  end
-
+  cmd_run("make test NO_INTERACTION=1")
 end
 

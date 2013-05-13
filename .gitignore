@@ -1,4 +1,6 @@
 *.o
+.idea
+*.iml
 
 contrib/php_options.pb.cc
 contrib/php_options.pb.h
