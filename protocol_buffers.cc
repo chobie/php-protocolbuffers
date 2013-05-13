@@ -480,7 +480,36 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 pb_scheme_container *c_container;
 
                 if (s->repeated) {
+                    pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
+                    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
+                    MAKE_STD_ZVAL(z_obj);
 
+                    object_init_ex(z_obj, s->ce);
+                    zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+
+                    if (!zend_hash_exists(hresult, s->name, s->name_len)) {
+                        zval *arr;
+
+                        MAKE_STD_ZVAL(arr);
+                        array_init(arr);
+
+                        zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&z_obj, sizeof(z_obj), NULL);
+                        Z_ADDREF_P(z_obj);
+
+                        zend_hash_add(hresult, s->name, s->name_len, (void **)&arr, sizeof(arr), NULL);
+                        Z_ADDREF_P(arr);
+                        zval_ptr_dtor(&arr);
+
+                    } else {
+                        zval **arr2;
+
+                        if (zend_hash_find(hresult, s->name, s->name_len, (void **)&arr2) == SUCCESS) {
+                            zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
+                            Z_ADDREF_P(z_obj);
+                        }
+                    }
+
+                    zval_ptr_dtor(&z_obj);
                 } else {
                     pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
                     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
@@ -488,6 +517,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                     object_init_ex(z_obj, s->ce);
                     zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+
                     zend_hash_add(hresult, s->name, s->name_len, (void **)&z_obj, sizeof(z_obj), NULL);
                     Z_ADDREF_P(z_obj);
                     zval_ptr_dtor(&z_obj);
@@ -622,8 +652,25 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                         pb_scheme_container *n_container;
                         pb_serializer *n_ser = NULL;
 
-
                         if (scheme->repeated) {
+                            HashPosition pos;
+                            zval **element;
+
+                            for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
+                                            zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
+                                            zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
+                            ) {
+                                ce = Z_OBJCE_PP(element);
+
+                                pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+                                pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
+                                pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                                pb_serializer_write_varint32(ser, n_ser->buffer_size);
+                                pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
+
+                                efree(n_ser->buffer);
+                                efree(n_ser);
+                            }
 
                         } else {
                             ce = Z_OBJCE_PP(tmp);

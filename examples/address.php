@@ -8,8 +8,8 @@ $person = new tutorial_Person();
 $person->_properties['id']  = 21;
 $person->_properties['name']  = "John Doe";
 
-$data = ProtocolBuffers::encode($person);
-var_dump(ProtocolBuffers::decode("Tutorial_Person", $data, Tutorial_Person::getDescriptor()));
+//$data = ProtocolBuffers::encode($person);
+//ProtocolBuffers::decode("Tutorial_Person", $data);
 //exit;
 
 
@@ -28,15 +28,13 @@ $addr = new AddressBook();
 $addr->addUser($u);
 $addr->addUser($u2);
 
-$data = ProtocolBuffers::encode($u2);
-//echo $data;
-
+$data = ProtocolBuffers::encode($addr);
 //$data = ProtocolBuffers::encode($addr->getDescriptor(), $addr);
 $begin = microtime(true);
-$proto = $u2->getDescriptor();
 $d = serialize($u2);
 for ($i = 0; $i < 10000; $i++) {
-    ProtocolBuffers::decode("User", $data);
+    var_dump(ProtocolBuffers::decode("AddressBook", $data));
+    exit;
     //unserialize($d);
 }
 $end = microtime(true);
