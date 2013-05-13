@@ -24,7 +24,9 @@
 #include "php_protocol_buffers.h"
 #include "helper.h"
 #include "protocol_buffers.h"
-
+extern "C" {
+#include "ext/standard/php_var.h"
+}
 
 #ifdef ZTS
 PHPAPI int pb_globals_id;
@@ -595,12 +597,20 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
             case TYPE_MESSAGE:
             {
                 if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-//                        char *res;
-//
-//                        php_pb_encode(tmp, &res);
-//                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-//                        pb_serializer_write_varint32(ser, strlen(res));
-//                        pb_serializer_write_chararray(ser, res, strlen(res));
+                        zend_class_entry *ce;
+                        pb_scheme_container *n_container;
+                        pb_serializer *n_ser = NULL;
+
+                        ce = Z_OBJCE_PP(tmp);
+
+                        pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+                        pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *tmp, n_container, &n_ser);
+                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                        pb_serializer_write_varint32(ser, n_ser->buffer_size);
+                        pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
+
+                        efree(n_ser->buffer);
+                        efree(n_ser);
                 }
             }
             break;
