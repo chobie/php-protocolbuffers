@@ -36,7 +36,7 @@ $begin = microtime(true);
 $proto = $u2->getDescriptor();
 $d = serialize($u2);
 for ($i = 0; $i < 10000; $i++) {
-    ProtocolBuffers::decode("User", $data, $proto);
+    ProtocolBuffers::decode("User", $data);
     //unserialize($d);
 }
 $end = microtime(true);

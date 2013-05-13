@@ -345,34 +345,44 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
     *size = sz;
 }
 
-static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC)
+static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result, HashTable *descriptor TSRMLS_DC)
 {
     pb_scheme_container *container, **cn;
     pb_scheme *ischeme;
     int scheme_size = 0;
 
     if (zend_hash_find(PBG(messages), klass, klass_len, (void **)&cn) != SUCCESS) {
-        zval *ret;
-        HashTable *proto;
-        zend_class_entry **ce;
+        zval *ret = NULL;
+        HashTable *proto = NULL;
 
-        zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
-        if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
-            proto = Z_ARRVAL_P(ret);
+
+        if (descriptor == NULL) {
+            zend_class_entry **ce;
+
+            zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
+            if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
+                proto = Z_ARRVAL_P(ret);
+            } else {
+                fprintf(stderr, "ERROR");
+                return 1;
+            }
         } else {
-            fprintf(stderr, "ERROR");
-            return 1;
+            proto = descriptor;
         }
 
         pb_convert_msg(proto, klass, klass_len, &ischeme, &scheme_size TSRMLS_CC);
         scheme_size = zend_hash_num_elements(proto);
 
+        /* TODO: fix leak */
         container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
 
         zend_hash_add(PBG(messages), klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
-        zval_ptr_dtor(&ret);
+
+        if (ret != NULL) {
+            zval_ptr_dtor(&ret);
+        }
     } else {
         container = *cn;
     }
@@ -450,7 +460,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 zval *z_arr, *z_obj;
                 pb_scheme_container *c_container;
 
-                pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container TSRMLS_CC);
+                pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
                 pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
                 MAKE_STD_ZVAL(z_obj);
 
@@ -491,7 +501,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
 PHP_METHOD(protocolbuffers, decode)
 {
-    HashTable *proto, *hresult;
+    HashTable *proto = NULL, *hresult;
     char *klass;
     const char *data, *data_end;
     long klass_len = 0, data_len = 0;
@@ -507,14 +517,16 @@ PHP_METHOD(protocolbuffers, decode)
     int scheme_size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"ssa", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
+		"ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
 		return;
 	}
 
-    proto       = Z_ARRVAL_P(z_proto);
-    buffer_size = (long)data + sizeof(data);
+    if (z_proto) {
+        proto       = Z_ARRVAL_P(z_proto);
+    }
 
-    pb_get_scheme_container(klass, klass_len, &container TSRMLS_CC);
+    buffer_size = (long)data + sizeof(data);
+    pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
     data_end = data + data_len;
     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
 
