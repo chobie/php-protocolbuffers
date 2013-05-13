@@ -9,7 +9,7 @@ $person->_properties['id']  = 21;
 $person->_properties['name']  = "John Doe";
 
 $data = ProtocolBuffers::encode($person);
-var_dump(ProtocolBuffers::decode(Tutorial_Person::getDescriptor(), "tutorial_Person", $data));
+var_dump(ProtocolBuffers::decode("Tutorial_Person", $data, Tutorial_Person::getDescriptor()));
 //exit;
 
 
@@ -36,7 +36,7 @@ $begin = microtime(true);
 $proto = $u2->getDescriptor();
 $d = serialize($u2);
 for ($i = 0; $i < 10000; $i++) {
-    ProtocolBuffers::decode($proto, "User", $data);
+    ProtocolBuffers::decode("User", $data, $proto);
     //unserialize($d);
 }
 $end = microtime(true);

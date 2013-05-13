@@ -14,7 +14,7 @@ $person->_properties['name']  = "John Doe";
 //}
 //$end = microtime(true);
 
-//var_dump(ProtocolBuffers::decode($person->getDescriptor(), "Tutorial_Person", $data));
+//var_dump(ProtocolBuffers::decode("Tutorial_Person", $data, $person->getDescriptor()));
 
 $u = new User();
 $u->setId(20);
@@ -23,4 +23,4 @@ $u->setName("chobie");
 
 $data = ProtocolBuffers::encode($u);
 echo $data;
-//var_dump(ProtocolBuffers::decode($u->getDescriptor(), "User", $data));
+//var_dump(ProtocolBuffers::decode("User", $data, $u->getDescriptor()));

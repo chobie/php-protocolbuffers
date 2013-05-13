@@ -50,9 +50,14 @@ static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC) /* {{{ */
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, proto)
-	ZEND_ARG_INFO(0, class)
-	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, bytes)
+	ZEND_ARG_INFO(0, descriptor)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_read_varint32, 0, 0, 1)
@@ -357,13 +362,6 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
     *size = sz;
 }
 
-/* {{{ proto class pb_decode(array proto, string class, string data)
-*/
-PHP_FUNCTION(pb_decode)
-{
-}
-/* }}} */
-
 static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC)
 {
     pb_scheme_container *container, **cn;
@@ -526,28 +524,14 @@ PHP_METHOD(protocolbuffers, decode)
     int scheme_size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    //TODO: should be `ssa` as now, proto array is optional
-		"ass", &z_proto, &klass, &klass_len, &data, &data_len) == FAILURE) {
+		"ssa", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
 		return;
 	}
 
     proto       = Z_ARRVAL_P(z_proto);
     buffer_size = (long)data + sizeof(data);
 
-//    if (zend_hash_find(PBG(messages), klass, klass_len, (void **)&cn) != SUCCESS) {
-//        pb_convert_msg(proto, klass, klass_len, &ischeme, &scheme_size TSRMLS_CC);
-//        scheme_size = zend_hash_num_elements(proto);
-//
-//        container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
-//        container->scheme = ischeme;
-//        container->size = scheme_size;
-//
-//        zend_hash_add(PBG(messages), klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
-//    } else {
-//        container = *cn;
-//    }
     pb_get_scheme_container(klass, klass_len, &container TSRMLS_CC);
-
     data_end = data + data_len;
     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
 
@@ -1001,13 +985,6 @@ PHP_METHOD(protocolbuffers, encode)
 
 }
 
-
-
-static zend_function_entry pb_functions[] = {
-	PHP_MALIAS(protocolbuffers, pb_decode, decode,   arginfo_pb_decode, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
-};
-
 static zend_function_entry php_protocolbuffers_methods[] = {
     PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers, encode, NULL, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
@@ -1055,7 +1032,7 @@ zend_module_entry protocolbuffers_module_entry = {
 	STANDARD_MODULE_HEADER,
 #endif
 	"protocolbuffers",
-	pb_functions,					/* Functions */
+	NULL,					/* Functions */
 	PHP_MINIT(protocolbuffers),	/* MINIT */
 	PHP_MSHUTDOWN(protocolbuffers),	/* MSHUTDOWN */
 	PHP_RINIT(protocolbuffers),	/* RINIT */
