@@ -478,11 +478,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
                 pb_scheme_container *c_container;
-                pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
 
                 if (s->repeated) {
 
                 } else {
+                    pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
                     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
                     MAKE_STD_ZVAL(z_obj);
 
@@ -702,7 +702,7 @@ PHP_METHOD(protocolbuffers, decode)
     const char *data, *data_end;
     long klass_len = 0, data_len = 0;
     long buffer_size = 0;
-    zval *z_result, *z_proto;
+    zval *z_result, *z_proto = NULL;
     zval *obj;
     pb_scheme_container *container;
 
