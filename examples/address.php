@@ -1,8 +1,8 @@
 <?php
 require join(DIRECTORY_SEPARATOR, array(dirname(dirname(__FILE__)), "src","ProtocolBuffers/Support.php"));
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/Base.php";
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/User.php";
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/Message/Addressbook.php";
+require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ext/tests/messages/Base.php";
+require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ext/tests/messages/User.php";
+require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ext/tests/messages/Addressbook.php";
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
 $person = new tutorial_Person();
