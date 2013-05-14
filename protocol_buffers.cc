@@ -1016,7 +1016,7 @@ static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
     return 0;
 }
 
-static int pb_serializer_write_varint32(pb_serializer *serializer, uint8_t value)
+static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 {
     uint8_t bytes[kMaxVarint32Bytes];
     int size = 0, i;
