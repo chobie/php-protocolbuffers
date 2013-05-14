@@ -52,24 +52,23 @@ extern zend_class_entry *protocol_buffers_class_entry;
 #endif
 #endif
 
-
-typedef struct {
+typedef struct pb_globals{
     HashTable *messages;
 } pb_globals;
 
 typedef struct pb_scheme
 {
-	int tag;
-	char *name;
-	int name_len;
-	int wiretype;
-	int type;
-	int flags;
-	int scheme_type;
-	int repeated;
-	char *message;
-	char *enum_msg;
-	zend_class_entry *ce;
+    int tag;
+    char *name;
+    int name_len;
+    int wiretype;
+    int type;
+    int flags;
+    int scheme_type;
+    int repeated;
+    char *message;
+    char *enum_msg;
+    zend_class_entry *ce;
 } pb_scheme;
 
 typedef struct {
@@ -81,8 +80,8 @@ typedef struct {
 #define PBG(v) TSRMG(pb_globals_id, pb_globals *, v)
 PHPAPI extern int pb_globals_id;
 #else
-#define PBG(v) (globals.v)
-PHPAPI extern pb_globals pb_globals;
+#define PBG(v) (php_pb_globals.v)
+PHPAPI extern pb_globals php_pb_globals;
 #endif
 
 
