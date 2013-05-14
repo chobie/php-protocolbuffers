@@ -358,8 +358,8 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
             // TODO: fix memory leak
             ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
             ischeme[n].name_len = tsize;
-            memcpy(ischeme[n].name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-            ischeme[n].name[Z_STRLEN_P(tmp)+1] = '\0';
+            memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
+            ischeme[n].name[tsize] = '\0';
             ischeme[n].repeated = pb_get_repeated(proto, ttag TSRMLS_CC);
 
             if (ischeme[n].type == TYPE_MESSAGE) {
