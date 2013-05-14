@@ -10,7 +10,7 @@
  * @property string $number
  * @property int $type
  */
-class Tutorial_Person_PhoneNumber extends Base
+class Tutorial_Person_PhoneNumber
 {
   protected static $scheme = array(
     'properties' => array(
@@ -49,6 +49,38 @@ class Tutorial_Person_PhoneNumber extends Base
     ),
   );
 
+  public function getNumber()
+  {
+    $result = null;
+
+    if (array_key_exists('number', $this->_properties)) {
+      $result = $this->_properties['number'];
+    }
+
+    return $result;
+  }
+
+  public function setNumber($number)
+  {
+    $this->_properties['number'] = $number;
+  }
+
+  public function getType()
+  {
+    $result = null;
+
+    if (array_key_exists('type', $this->_properties)) {
+      $result = $this->_properties['type'];
+    }
+
+    return $result;
+  }
+
+  public function setType($type)
+  {
+    $this->_properties['type'] = $type;
+  }
+
   /**
    * get descriptor for protocol buffers
    * 
@@ -85,7 +117,7 @@ class Tutorial_Person_PhoneType
  * @property string $email
  * @property array $phone
  */
-class Tutorial_Person extends Base
+class Tutorial_Person
 {
   protected static $scheme = array(
     'properties' => array(
@@ -155,6 +187,70 @@ class Tutorial_Person extends Base
     ),
   );
 
+  public function getName()
+  {
+    $result = null;
+
+    if (array_key_exists('name', $this->_properties)) {
+      $result = $this->_properties['name'];
+    }
+
+    return $result;
+  }
+
+  public function setName($name)
+  {
+    $this->_properties['name'] = $name;
+  }
+
+  public function getId()
+  {
+    $result = null;
+
+    if (array_key_exists('id', $this->_properties)) {
+      $result = $this->_properties['id'];
+    }
+
+    return $result;
+  }
+
+  public function setId($id)
+  {
+    $this->_properties['id'] = $id;
+  }
+
+  public function getEmail()
+  {
+    $result = null;
+
+    if (array_key_exists('email', $this->_properties)) {
+      $result = $this->_properties['email'];
+    }
+
+    return $result;
+  }
+
+  public function setEmail($email)
+  {
+    $this->_properties['email'] = $email;
+  }
+
+  public function getPhone()
+  {
+    $result = null;
+
+    if (array_key_exists('phone', $this->_properties)) {
+      $result = $this->_properties['phone'];
+    }
+
+    return $result;
+  }
+
+  public function addPhone($phone)
+  {
+    $this->_properties['phone'][] = $phone;
+  }
+
   /**
    * get descriptor for protocol buffers
    * 
@@ -176,7 +272,7 @@ class Tutorial_Person extends Base
  *
  * @property array $person
  */
-class Tutorial_AddressBook extends Base
+class Tutorial_AddressBook
 {
   protected static $scheme = array(
     'properties' => array(
@@ -200,6 +296,22 @@ class Tutorial_AddressBook extends Base
       ),
     ),
   );
+
+  public function getPerson()
+  {
+    $result = null;
+
+    if (array_key_exists('person', $this->_properties)) {
+      $result = $this->_properties['person'];
+    }
+
+    return $result;
+  }
+
+  public function addPerson($person)
+  {
+    $this->_properties['person'][] = $person;
+  }
 
   /**
    * get descriptor for protocol buffers
