@@ -28,6 +28,16 @@ extern "C" {
 #include "ext/standard/php_var.h"
 }
 
+
+#if PHP_VERSION_ID < 50300
+# ifndef Z_ADDREF_P
+#  define Z_ADDREF_P(pz)				(pz)->refcount++
+#  define Z_ADDREF_PP(ppz)				Z_ADDREF_P(*(ppz))
+#  define Z_ADDREF(z)					Z_ADDREF_P(&(z))
+# endif
+#endif
+
+
 #ifdef ZTS
 PHPAPI int pb_globals_id;
 #else
@@ -370,7 +380,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
     pb_scheme *ischeme;
     int scheme_size = 0;
 
-    if (zend_hash_find(PBG(messages), klass, klass_len, (void **)&cn) != SUCCESS) {
+    if (zend_hash_find(PBG(messages), (char*)klass, klass_len, (void **)&cn) != SUCCESS) {
         zval *ret = NULL;
         HashTable *proto = NULL;
 
@@ -378,7 +388,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         if (descriptor == NULL) {
             zend_class_entry **ce;
 
-            zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
+            zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC);
             if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
                 proto = Z_ARRVAL_P(ret);
             } else {
@@ -397,7 +407,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         container->scheme = ischeme;
         container->size = scheme_size;
 
-        zend_hash_add(PBG(messages), klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
+        zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
 
         if (ret != NULL) {
             zval_ptr_dtor(&ret);
@@ -469,7 +479,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 }
 
                 MAKE_STD_ZVAL(dz);
-                ZVAL_STRINGL(dz, data, value, 1);
+                ZVAL_STRINGL(dz, (char*)data, value, 1);
 
                 zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
                 Z_ADDREF_P(dz);
@@ -875,7 +885,7 @@ static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int valu
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, value, 4);
+    memcpy(target, (void*)value, 4);
 #else
     target[0] = (value);
     target[1] = (value >>  8);
@@ -900,7 +910,7 @@ static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, value, 8);
+    memcpy(target, (void*)value, 8);
 #else
     target[0] = (value);
     target[1] = (value >>  8);
@@ -1022,7 +1032,7 @@ PHP_METHOD(protocolbuffers, encode)
     pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser);
 
     if (ser->buffer_capacity > 0) {
-        RETVAL_STRINGL((const char*)ser->buffer, ser->buffer_size, 1);
+        RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
 
         efree(ser->buffer);
         efree(ser);

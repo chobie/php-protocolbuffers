@@ -3,7 +3,7 @@ PHP_ARG_ENABLE(protocolbuffers, Whether to enable the "protocolbuffers" extensio
 
 if test $PHP_PROTOCOLBUFFERS != "no"; then
     PHP_REQUIRE_CXX()
-    PHP_ADD_LIBRARY(stdc++,, XHP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(stdc++,, PROTOCOLBUFFERS_SHARED_LIBADD)
 
     PHP_SUBST(PROTOCOLBUFFERS_SHARED_LIBADD)
     PHP_NEW_EXTENSION(protocolbuffers, protocol_buffers.cc, $ext_shared)

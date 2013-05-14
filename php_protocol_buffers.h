@@ -10,6 +10,7 @@
 #endif
 
 #include "php.h"
+#include "zend.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
