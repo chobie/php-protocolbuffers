@@ -4,14 +4,13 @@ require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/messages/User.
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/messages/Addressbook.php";
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
-$person = new tutorial_Person();
-$person->_properties['id']  = 21;
-$person->_properties['name']  = "John Doe";
+$person = new Tutorial_Person();
+$person->setId(21);
+$person->setName("John Doe");
 
 //$data = ProtocolBuffers::encode($person);
 //ProtocolBuffers::decode("Tutorial_Person", $data);
 //exit;
-
 
 $u = new User();
 $u->setId(20);
@@ -33,8 +32,7 @@ $data = ProtocolBuffers::encode($addr);
 $begin = microtime(true);
 $d = serialize($u2);
 for ($i = 0; $i < 10000; $i++) {
-    var_dump(ProtocolBuffers::decode("AddressBook", $data));
-    exit;
+    ProtocolBuffers::decode("AddressBook", $data);
     //unserialize($d);
 }
 $end = microtime(true);
