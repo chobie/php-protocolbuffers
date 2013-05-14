@@ -421,6 +421,36 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
     return 0;
 }
 
+#define PHP_PB_DECOCDE_ADD_ELM \
+    if (s->repeated) {\
+        if (!zend_hash_exists(hresult, s->name, s->name_len)) {\
+            zval *arr;\
+    \
+            MAKE_STD_ZVAL(arr);\
+            array_init(arr);\
+    \
+            zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);\
+            Z_ADDREF_P(dz);\
+    \
+            zend_hash_add(hresult, s->name, s->name_len, (void **)&arr, sizeof(arr), NULL);\
+            Z_ADDREF_P(arr);\
+            zval_ptr_dtor(&arr);\
+        } else {\
+            zval **arr2;\
+    \
+            if (zend_hash_find(hresult, s->name, s->name_len, (void **)&arr2) == SUCCESS) {\
+                zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&dz, sizeof(dz), NULL);\
+                Z_ADDREF_P(dz);\
+            }\
+        }\
+    } else {\
+        zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);\
+        Z_ADDREF_P(dz);\
+    }\
+    \
+    zval_ptr_dtor(&dz);\
+\
+
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
     uint value = 0, tag = 0, wiretype = 0;
@@ -454,13 +484,18 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
             MAKE_STD_ZVAL(dz);
             ZVAL_LONG(dz, value);
 
-            zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
-            Z_ADDREF_P(dz);
-            zval_ptr_dtor(&dz);
+            PHP_PB_DECOCDE_ADD_ELM
         }
         break;
         case WIRETYPE_FIXED64:
-            // TODO: implement this
+            if (s->type == TYPE_DOUBLE) {
+                double d;
+                memcpy(&d, data, 8);
+
+                MAKE_STD_ZVAL(dz);
+                ZVAL_DOUBLE(dz, d);
+                PHP_PB_DECOCDE_ADD_ELM
+            }
             data += 8;
         break;
         case WIRETYPE_LENGTH_DELIMITED:
@@ -481,22 +516,21 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(dz);
                 ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-                zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
-                Z_ADDREF_P(dz);
-                zval_ptr_dtor(&dz);
+                PHP_PB_DECOCDE_ADD_ELM
+
             } else if (s->type == TYPE_MESSAGE) {
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
                 pb_scheme_container *c_container;
 
+                pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
+                pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
+
+                MAKE_STD_ZVAL(z_obj);
+                object_init_ex(z_obj, s->ce);
+                zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+
                 if (s->repeated) {
-                    pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
-                    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
-                    MAKE_STD_ZVAL(z_obj);
-
-                    object_init_ex(z_obj, s->ce);
-                    zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
-
                     if (!zend_hash_exists(hresult, s->name, s->name_len)) {
                         zval *arr;
 
@@ -509,7 +543,6 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         zend_hash_add(hresult, s->name, s->name_len, (void **)&arr, sizeof(arr), NULL);
                         Z_ADDREF_P(arr);
                         zval_ptr_dtor(&arr);
-
                     } else {
                         zval **arr2;
 
@@ -518,20 +551,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             Z_ADDREF_P(z_obj);
                         }
                     }
-
-                    zval_ptr_dtor(&z_obj);
                 } else {
-                    pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
-                    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
-                    MAKE_STD_ZVAL(z_obj);
-
-                    object_init_ex(z_obj, s->ce);
-                    zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
-
                     zend_hash_add(hresult, s->name, s->name_len, (void **)&z_obj, sizeof(z_obj), NULL);
                     Z_ADDREF_P(z_obj);
-                    zval_ptr_dtor(&z_obj);
                 }
+                zval_ptr_dtor(&z_obj);
             }
 
             data += value;
@@ -544,12 +568,9 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, a);
-
-                zend_hash_add(hresult, s->name, s->name_len, (void **)&dz, sizeof(dz), NULL);
-                Z_ADDREF_P(dz);
-                zval_ptr_dtor(&dz);
             }
 
+            PHP_PB_DECOCDE_ADD_ELM
             data += 4;
         }
         break;
