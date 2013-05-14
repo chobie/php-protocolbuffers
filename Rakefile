@@ -8,18 +8,19 @@ def cmd_run(command)
 end
 
 task :compile do
+  cmd_run("phpize")
+  cmd_run("./configure")
   cmd_run("make")
 end
 
 task :install do
-  cmd_run("phpize --clean")
-  cmd_run("phpize")
-  cmd_run("./configure")
-  cmd_run("make")
   cmd_run("make install")
 end
 
+desc "run php test cases"
 task :test do
-  cmd_run("make test NO_INTERACTION=1")
+  ENV["TESTS"] = "--show-diff -q"
+  sh "make test"
+  sh "cat tests/*.diff; if [ $? -eq 0 ];then exit 1; fi"
 end
 
