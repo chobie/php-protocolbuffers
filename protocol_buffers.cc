@@ -878,14 +878,14 @@ static int pb_serializer_write32(pb_serializer *serializer, unsigned int value)
 
 static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
 {
-    unsigned int target[4];
+    uint8_t target[4];
 
     if (pb_serializer_resize(serializer, 1)) {
         return 1;
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, (void*)value, 4);
+    memcpy(target, (void*)&value, sizeof(value));
 #else
     target[0] = (value);
     target[1] = (value >>  8);
@@ -910,7 +910,7 @@ static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, (void*)value, 8);
+    memcpy(target, (void*)&value, sizeof(value));
 #else
     target[0] = (value);
     target[1] = (value >>  8);
