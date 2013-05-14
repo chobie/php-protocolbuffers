@@ -762,9 +762,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
             case TYPE_GROUP:
             break;
             case TYPE_MESSAGE:
-            {
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_msg);
-            }
             break;
             case TYPE_BYTES:
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bytes);
