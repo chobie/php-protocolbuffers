@@ -561,6 +561,157 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
     return data;
 }
 
+static void pb_encode_element_float(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    union {
+        float f;
+        uint32_t u;
+    } x;
+
+    x.f = (float)Z_DVAL_PP(element);
+
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write32_le(ser, x.u);
+}
+
+static void pb_encode_element_double(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    union {
+        double d;
+        uint64_t u;
+    } u;
+    u.d = Z_DVAL_PP(element);
+
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write64_le(ser, u.u);
+
+}
+
+static void pb_encode_element_fixed32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write32_le(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    pb_serializer_write64_le(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_int64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint64(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_int32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_string(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_STRLEN_PP(element) > 0) {
+        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+        pb_serializer_write_varint32(ser, Z_STRLEN_PP(element));
+        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(element), Z_STRLEN_PP(element));
+    }
+}
+
+static void pb_encode_element_msg(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    zend_class_entry *ce;
+    pb_scheme_container *n_container;
+    pb_serializer *n_ser = NULL;
+
+    ce = Z_OBJCE_PP(element);
+
+    pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+    pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+    pb_serializer_write_varint32(ser, n_ser->buffer_size);
+    pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
+
+    efree(n_ser->buffer);
+    efree(n_ser);
+}
+
+static void pb_encode_element_bytes(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_STRLEN_PP(element) > 0) {
+        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+        pb_serializer_write_varint32(ser, Z_STRLEN_PP(element));
+        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(element), Z_STRLEN_PP(element));
+    }
+}
+
+static void pb_encode_element_uint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_enum(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_sfixed32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(element)));
+}
+
+static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(element)));
+}
+
+static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
+}
+
+static void pb_encode_element_sint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(element)));
+}
+
+static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f)
+{
+    zval **tmp;
+
+    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+        if (scheme->repeated) {
+            HashPosition pos;
+            zval **element;
+
+            for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
+                            zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
+                            zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
+            ) {
+                f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, ser);
+            }
+
+        } else {
+            f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser);
+        }
+
+    }
+}
+
 static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
     int i = 0;
@@ -585,163 +736,56 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
         switch (scheme->type) {
             case TYPE_DOUBLE:
-            {
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    union {
-                        double d;
-                        uint64_t u;
-                    } u;
-                    u.d = Z_DVAL_PP(tmp);
-
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                    pb_serializer_write64_le(ser, u.u);
-                }
-            }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double);
             break;
             case TYPE_FLOAT:
-            {
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    union {
-                        float f;
-                        uint32_t u;
-                    } x;
-
-                    x.f = (float)Z_DVAL_PP(tmp);
-
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                    pb_serializer_write32_le(ser, x.u);
-                }
-
-            }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float);
             break;
             case TYPE_INT64:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                    pb_serializer_write_varint64(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64);
             break;
             case TYPE_INT32:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int32);
             break;
             case TYPE_FIXED64:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                    pb_serializer_write64_le(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
             break;
             case TYPE_FIXED32:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                    pb_serializer_write32_le(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32);
             break;
             case TYPE_BOOL:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
             break;
             case TYPE_STRING:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    if (Z_STRLEN_PP(tmp) > 0) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                        pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
-                        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-                    }
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_string);
             break;
             case TYPE_GROUP:
             break;
             case TYPE_MESSAGE:
             {
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                        zend_class_entry *ce;
-                        pb_scheme_container *n_container;
-                        pb_serializer *n_ser = NULL;
-
-                        if (scheme->repeated) {
-                            HashPosition pos;
-                            zval **element;
-
-                            for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
-                                            zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
-                                            zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
-                            ) {
-                                ce = Z_OBJCE_PP(element);
-
-                                pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
-                                pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
-                                pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                                pb_serializer_write_varint32(ser, n_ser->buffer_size);
-                                pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
-
-                                efree(n_ser->buffer);
-                                efree(n_ser);
-                            }
-
-                        } else {
-                            ce = Z_OBJCE_PP(tmp);
-
-                            pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
-                            pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *tmp, n_container, &n_ser);
-                            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                            pb_serializer_write_varint32(ser, n_ser->buffer_size);
-                            pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
-
-                            efree(n_ser->buffer);
-                            efree(n_ser);
-                        }
-
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_msg);
             }
             break;
             case TYPE_BYTES:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    if (Z_STRLEN_PP(tmp) > 0) {
-                        pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-                        pb_serializer_write_varint32(ser, Z_STRLEN_PP(tmp));
-                        pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-                    }
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bytes);
             break;
             case TYPE_UINT32:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint32);
             break;
             case TYPE_ENUM:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-                    pb_serializer_write_varint32(ser, Z_LVAL_PP(tmp));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
             break;
             case TYPE_SFIXED32:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                    pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed32);
             break;
             case TYPE_SFIXED64:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                    pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64);
             break;
             case TYPE_SINT32:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-                    pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(tmp)));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32);
             break;
             case TYPE_SINT64:
-                if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-                    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-                    pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(tmp)));
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64);
             break;
             default:
             break;
