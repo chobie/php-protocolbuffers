@@ -719,7 +719,12 @@ static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **elemen
 static void pb_encode_element_sint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-    pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(element)));
+    if (Z_LVAL_PP(element) < 0) {
+        pb_serializer_write_varint64(ser, zigzag_encode64(Z_DVAL_PP(element)));
+    } else {
+        // MEMO: DO NOT CHANGE Z_LVAL_PP TO Z_DVAL_PP. this is correct.
+        pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(element)));
+    }
 }
 
 static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f)
