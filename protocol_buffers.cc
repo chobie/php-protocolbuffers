@@ -1027,6 +1027,11 @@ static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t valu
     uint8_t bytes[kMaxVarint32Bytes];
     int size = 0, i;
 
+    if (value > kint32max) {
+        fprintf(stderr, "out of bounds. write_varint32 expects %d", kint32max);
+        return 0;
+    }
+
     if (pb_serializer_resize(serializer, 4)) {
         return 1;
     }
