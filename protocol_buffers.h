@@ -20,6 +20,7 @@ static int pb_serializer_write16(pb_serializer *serializer, unsigned int value);
 static int pb_serializer_write32(pb_serializer *serializer, unsigned int value);
 static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value);
 static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value);
+static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value);
 static int pb_serializer_write64(pb_serializer *serializer, uint64_t value);
 static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value);
 static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value);

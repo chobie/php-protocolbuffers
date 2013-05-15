@@ -701,7 +701,13 @@ static void pb_encode_element_sfixed32(INTERNAL_FUNCTION_PARAMETERS, zval **elem
 static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-    pb_serializer_write64_le(ser, Z_LVAL_PP(element));
+
+    if (Z_DVAL_PP(element) < 0) {
+        pb_serializer_write64_le2(ser, (int64_t)Z_DVAL_PP(element));
+    } else {
+        // MEMO: DO NOT CHANGE Z_LVAL_PP TO Z_DVAL_PP. this is correct.
+        pb_serializer_write64_le(ser, Z_LVAL_PP(element));
+    }
 }
 
 static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
@@ -988,7 +994,40 @@ static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
     target[4] = (value >> 32);
     target[5] = (value >> 40);
     target[6] = (value >> 48);
-    target[7] = (value >> 52);
+    target[7] = (value >> 56);
+#endif
+
+	serializer->buffer[serializer->buffer_size++] = target[0];
+	serializer->buffer[serializer->buffer_size++] = target[1];
+	serializer->buffer[serializer->buffer_size++] = target[2];
+	serializer->buffer[serializer->buffer_size++] = target[3];
+	serializer->buffer[serializer->buffer_size++] = target[4];
+	serializer->buffer[serializer->buffer_size++] = target[5];
+	serializer->buffer[serializer->buffer_size++] = target[6];
+	serializer->buffer[serializer->buffer_size++] = target[7];
+
+    return 0;
+}
+
+static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
+{
+    unsigned int target[8];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    memcpy(target, (void*)&value, sizeof(value));
+#else
+    target[0] = (value);
+    target[1] = (value >>  8);
+    target[2] = (value >> 16);
+    target[3] = (value >> 24);
+    target[4] = (value >> 32);
+    target[5] = (value >> 40);
+    target[6] = (value >> 48);
+    target[7] = (value >> 56);
 #endif
 
 	serializer->buffer[serializer->buffer_size++] = target[0];
