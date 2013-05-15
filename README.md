@@ -1,7 +1,7 @@
 Protocol Buffers Extension for PHP
 ==================================
 
-[![Build Status](https://secure.travis-ci.org/chobie/php-sundown.png)](http://travis-ci.org/chobie/php-protocolbuffers)
+[![Build Status](https://secure.travis-ci.org/chobie/php-protocolbuffers.png)](http://travis-ci.org/chobie/php-protocolbuffers)
 
 Motivation
 ----------
