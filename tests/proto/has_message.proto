@@ -1,7 +1,9 @@
 package Tutorial;
 
-//import "php_options.proto";
+import "php_options.proto";
 //option (php).base_class = "Base";
+option (php).generate_getter = true;
+option (php).generate_setter = true;
 
 message Person {
     required string name = 1;

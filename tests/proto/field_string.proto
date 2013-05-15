@@ -1,0 +1,11 @@
+package Tutorial;
+
+import "php_options.proto";
+option (php).generate_getter = true;
+option (php).generate_setter = true;
+
+message String {
+    required string value = 1;
+}
+
+

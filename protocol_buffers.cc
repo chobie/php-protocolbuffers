@@ -645,9 +645,10 @@ static void pb_encode_element_int32(INTERNAL_FUNCTION_PARAMETERS, zval **element
 
 static void pb_encode_element_string(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
-    if (Z_STRLEN_PP(element) > 0) {
+    if (Z_TYPE_PP(element) != IS_NULL) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
         pb_serializer_write_varint32(ser, Z_STRLEN_PP(element));
+
         pb_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(element), Z_STRLEN_PP(element));
     }
 }
