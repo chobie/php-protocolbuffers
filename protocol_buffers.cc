@@ -712,13 +712,13 @@ static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **elem
 
 static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
-    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
 }
 
 static void pb_encode_element_sint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
-    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(element)));
 }
 
@@ -1067,8 +1067,8 @@ static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t valu
     int size = 0, i;
 
     if (value > kint32max) {
-        fprintf(stderr, "out of bounds. write_varint32 expects %d", kint32max);
-        return 0;
+//        fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
+//        return 0;
     }
 
     if (pb_serializer_resize(serializer, 4)) {
