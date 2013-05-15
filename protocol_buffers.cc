@@ -695,13 +695,13 @@ static void pb_encode_element_enum(INTERNAL_FUNCTION_PARAMETERS, zval **element,
 static void pb_encode_element_sfixed32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
-    pb_serializer_write32_le(ser, zigzag_encode32(Z_LVAL_PP(element)));
+    pb_serializer_write32_le(ser, Z_LVAL_PP(element));
 }
 
 static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-    pb_serializer_write64_le(ser, zigzag_encode32(Z_LVAL_PP(element)));
+    pb_serializer_write64_le(ser, Z_LVAL_PP(element));
 }
 
 static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
