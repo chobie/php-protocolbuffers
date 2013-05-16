@@ -44,11 +44,16 @@ class Tutorial_Person_PhoneNumber
         'optional' => true,
         'repeated' => false,
         'packable' => false,
-        'default'  => '',
+        'default'  => Tutorial_Person_PhoneType::HOME,
       ),
     ),
   );
 
+  /**
+   * getting value
+   *
+   * @return mixed $number
+   */
   public function getNumber()
   {
     $result = null;
@@ -60,11 +65,23 @@ class Tutorial_Person_PhoneNumber
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $number
+   *
+   * @return void
+   */
   public function setNumber($number)
   {
     $this->_properties['number'] = $number;
   }
 
+  /**
+   * getting value
+   *
+   * @return mixed $type
+   */
   public function getType()
   {
     $result = null;
@@ -76,6 +93,13 @@ class Tutorial_Person_PhoneNumber
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $type
+   *
+   * @return void
+   */
   public function setType($type)
   {
     $this->_properties['type'] = $type;
@@ -187,6 +211,11 @@ class Tutorial_Person
     ),
   );
 
+  /**
+   * getting value
+   *
+   * @return mixed $name
+   */
   public function getName()
   {
     $result = null;
@@ -198,11 +227,23 @@ class Tutorial_Person
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $name
+   *
+   * @return void
+   */
   public function setName($name)
   {
     $this->_properties['name'] = $name;
   }
 
+  /**
+   * getting value
+   *
+   * @return mixed $id
+   */
   public function getId()
   {
     $result = null;
@@ -214,11 +255,23 @@ class Tutorial_Person
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $id
+   *
+   * @return void
+   */
   public function setId($id)
   {
     $this->_properties['id'] = $id;
   }
 
+  /**
+   * getting value
+   *
+   * @return mixed $email
+   */
   public function getEmail()
   {
     $result = null;
@@ -230,11 +283,23 @@ class Tutorial_Person
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $email
+   *
+   * @return void
+   */
   public function setEmail($email)
   {
     $this->_properties['email'] = $email;
   }
 
+  /**
+   * getting value
+   *
+   * @return mixed $phone
+   */
   public function getPhone()
   {
     $result = null;
@@ -246,6 +311,13 @@ class Tutorial_Person
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $phone
+   *
+   * @return void
+   */
   public function addPhone($phone)
   {
     $this->_properties['phone'][] = $phone;
@@ -297,6 +369,11 @@ class Tutorial_AddressBook
     ),
   );
 
+  /**
+   * getting value
+   *
+   * @return mixed $person
+   */
   public function getPerson()
   {
     $result = null;
@@ -308,6 +385,13 @@ class Tutorial_AddressBook
     return $result;
   }
 
+  /**
+   * setting value
+   *
+   * @property mixed $person
+   *
+   * @return void
+   */
   public function addPerson($person)
   {
     $this->_properties['person'][] = $person;

@@ -423,7 +423,13 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         const FieldDescriptor &field(*message.field(i));
 
         if (options.generate_getter()) {
-            // TODO: add doc comment.
+            printer.Print("/**\n");
+            printer.Print(" * getting value\n");
+            printer.Print(" *\n");
+            printer.Print(" * @return mixed $`varname`\n",
+                "varname", field.name()
+            );
+            printer.Print(" */\n");
             printer.Print("public function get`name`()\n",
                 "name", UnderscoresToCapitalizedCamelCase(field)
             );
@@ -447,7 +453,15 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         }
 
         if (options.generate_setter()) {
-            // TODO: add doc comment.
+            printer.Print("/**\n");
+            printer.Print(" * setting value\n");
+            printer.Print(" *\n");
+            printer.Print(" * @property mixed $`varname`\n",
+                "varname", field.name()
+            );
+            printer.Print(" *\n");
+            printer.Print(" * @return void\n");
+            printer.Print(" */\n");
             if (field.is_repeated()) {
                 printer.Print("public function add`name`($`var`)\n",
                     "name", UnderscoresToCapitalizedCamelCase(field),
