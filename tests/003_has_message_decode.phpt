@@ -2,7 +2,6 @@
 Check for protocol buffers simple message encoding
 --FILE--
 <?php
-require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "Base.php";
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "003_has_message.proto.php";
 
 $expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "003_has_message.bin");

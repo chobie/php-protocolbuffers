@@ -589,6 +589,10 @@ static void pb_encode_element_float(INTERNAL_FUNCTION_PARAMETERS, zval **element
         uint32_t u;
     } x;
 
+    if (Z_TYPE_PP(element) != IS_DOUBLE) {
+        convert_to_double(*element);
+    }
+
     x.f = (float)Z_DVAL_PP(element);
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
@@ -601,6 +605,11 @@ static void pb_encode_element_double(INTERNAL_FUNCTION_PARAMETERS, zval **elemen
         double d;
         uint64_t u;
     } u;
+
+    if (Z_TYPE_PP(element) != IS_DOUBLE) {
+        convert_to_double(*element);
+    }
+
     u.d = Z_DVAL_PP(element);
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
@@ -627,6 +636,10 @@ static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
 
 static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
@@ -634,6 +647,7 @@ static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element,
 static void pb_encode_element_int64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+
     if (Z_LVAL_PP(element) < 0) {
         pb_serializer_write_varint64(ser, Z_DVAL_PP(element));
     } else {
@@ -695,12 +709,20 @@ static void pb_encode_element_bytes(INTERNAL_FUNCTION_PARAMETERS, zval **element
 
 static void pb_encode_element_uint32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
 static void pb_encode_element_enum(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
