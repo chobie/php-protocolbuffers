@@ -630,9 +630,19 @@ static void pb_encode_element_fixed32(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
 
 static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    long v;
+
     if (Z_TYPE_PP(element) != IS_LONG) {
         convert_to_long(*element);
     }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_fixed64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
     pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
@@ -650,13 +660,22 @@ static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element,
 
 static void pb_encode_element_int64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
-    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    long v;
 
-    if (Z_LVAL_PP(element) < 0) {
-        pb_serializer_write_varint64(ser, Z_DVAL_PP(element));
-    } else {
-        pb_serializer_write_varint64(ser, Z_LVAL_PP(element));
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
     }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
+
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint64(ser, v);
 }
 
 static void pb_encode_element_int32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
@@ -739,17 +758,25 @@ static void pb_encode_element_sfixed32(INTERNAL_FUNCTION_PARAMETERS, zval **elem
 
 static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
-    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    long v;
 
     if (Z_TYPE_PP(element) != IS_LONG) {
         convert_to_long(*element);
     }
+    v = Z_LVAL_PP(element);
 
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
 
-    if (Z_LVAL_PP(element) < 0) {
-        pb_serializer_write64_le2(ser, (int64_t)Z_LVAL_PP(element));
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
+    if (v < 0) {
+        pb_serializer_write64_le2(ser, (int64_t)v);
     } else {
-        pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
+        pb_serializer_write64_le(ser, (int64_t)v);
     }
 }
 
@@ -765,12 +792,25 @@ static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **elemen
 
 static void pb_encode_element_sint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    long v;
+
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_sint64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
-    if (Z_LVAL_PP(element) < 0) {
-        pb_serializer_write_varint64(ser, zigzag_encode64(Z_DVAL_PP(element)));
+    if (v < 0) {
+        pb_serializer_write_varint64(ser, zigzag_encode64(v));
     } else {
-        // MEMO: DO NOT CHANGE Z_LVAL_PP TO Z_DVAL_PP. this is correct.
-        pb_serializer_write_varint64(ser, zigzag_encode64(Z_LVAL_PP(element)));
+        pb_serializer_write_varint64(ser, zigzag_encode64(v));
     }
 }
 
