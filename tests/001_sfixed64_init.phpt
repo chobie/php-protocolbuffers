@@ -1,5 +1,7 @@
 --TEST--
-Check for protocol buffers sfixed32 implementations
+Check for protocol buffers sfixed64 implementations
+--SKIPIF--
+<?php if (8 !== PHP_INT_SIZE) { die('skip Only for 64-bit platform'); } ?>
 --FILE--
 <?php
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "field_sfixed64.proto.php";
@@ -14,7 +16,7 @@ $data = ProtocolBuffers::encode($u);
 if ($data == $expect) {
     echo "OK" . PHP_EOL;
 } else {
-    echo "FAILED" . PHP_EOL;
+    echo $data;
 }
 --EXPECT--
 OK
