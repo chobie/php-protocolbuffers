@@ -98,8 +98,7 @@ string PHPCodeGenerator::DefaultValueAsString(const FieldDescriptor & field, boo
             return SimpleDtoa(field.default_value_double());
 
         case FieldDescriptor::CPPTYPE_BOOL:
-            return field.default_value_bool() ? "true" : "false";
-
+            return (field.default_value_bool()) ? "true" : "false";
         case FieldDescriptor::CPPTYPE_STRING:
             if (quote_string_type)
                 return "\"" + CEscape(field.default_value_string()) + "\"";
@@ -394,8 +393,8 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         }
 
         if (field.has_default_value()) {
-            printer.Print("'default'  => '`value`',\n",
-                    "value", field.default_value_string()
+            printer.Print("'default'  => `value`,\n",
+                    "value", DefaultValueAsString(field, true)
                      );
         } else {
             printer.Print("'default'  => null,\n");
