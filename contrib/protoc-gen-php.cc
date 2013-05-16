@@ -422,6 +422,35 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     for (int i = 0; i < message.field_count(); ++i) {
         const FieldDescriptor &field(*message.field(i));
 
+
+        if (options.generate_has()) {
+            printer.Print("/**\n");
+            printer.Print(" * checkinng value\n");
+            printer.Print(" *\n");
+            printer.Print(" * @return bool\n",
+                "varname", field.name()
+            );
+            printer.Print(" */\n");
+            printer.Print("public function has`name`()\n",
+                "name", UnderscoresToCapitalizedCamelCase(field)
+            );
+            printer.Print("{\n");
+            printer.Indent();
+            printer.Print("if (isset($this->_properties['`key`'])) {\n",
+                "key", field.name()
+            );
+            printer.Indent();
+            printer.Print("return true;\n",
+                "key", field.name()
+            );
+            printer.Outdent();
+            printer.Print("}\n");
+            printer.Print("\n");
+            printer.Print("return false;\n");
+            printer.Outdent();
+            printer.Print("}\n\n");
+        }
+
         if (options.generate_getter()) {
             printer.Print("/**\n");
             printer.Print(" * getting value\n");
@@ -493,49 +522,6 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         }
     }
 
-    // Print the read/write methods
-    //PrintMessageRead(printer, message, required_fields, parentField);
-    //PrintMessageWrite(printer, message, parentField);
-    //PrintMessageSize(printer, message);
-
-    // Print fields variables and methods
-    //	for (int i = 0; i < message.field_count(); ++i) {
-    //		printer.Print("\n");
-    //
-    //		const FieldDescriptor &field ( *message.field(i) );
-    //
-    //		map<string, string> variables;
-    //		variables["name"]             = VariableName(field);
-    //		variables["capitalized_name"] = UnderscoresToCapitalizedCamelCase(field);
-    //		variables["default"]          = DefaultValueAsString(field, true);
-    //		variables["comment"]          = field.DebugString();
-    //
-    //		if (field.type() == FieldDescriptor::TYPE_GROUP) {
-    //			size_t p = variables["comment"].find ('{');
-    //			if (p != string::npos)
-    //				variables["comment"].resize (p - 1);
-    //		}
-    //
-    //		// TODO Check that comment is a single line
-    //
-    //		switch (field.type()) {
-    ////			If its a enum we should store it as a int
-    ////			case FieldDescriptor::TYPE_ENUM:
-    ////				variables["type"] = field.enum_type()->name() + " ";
-    ////				break;
-    //
-    //			case FieldDescriptor::TYPE_MESSAGE:
-    //			case FieldDescriptor::TYPE_GROUP:
-    //				variables["type"] = ClassName(*field.message_type()) + " ";
-    //				break;
-    //
-    //			default:
-    //				variables["type"] = "";
-    //		}
-    //
-    //
-    //    }
-
     printer.Print("/**\n");
     printer.Print(" * get descriptor for protocol buffers\n");
     printer.Print(" * \n");
@@ -556,8 +542,6 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     //		"// @@protoc_insertion_point(class_scope:`full_name`)\n",
     //		"full_name", message.full_name()
     //	);
-
-
 
     printer.Outdent();
     printer.Print("}\n\n");

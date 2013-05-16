@@ -7,6 +7,7 @@ message PHPFileOptions {
     optional bool   generate_scheme = 4;
     optional bool   generate_getter = 5;
     optional bool   generate_setter = 6;
+    optional bool   generate_has    = 7;
 }
 
 extend google.protobuf.FileOptions {
