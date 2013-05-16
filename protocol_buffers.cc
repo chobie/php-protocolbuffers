@@ -630,8 +630,12 @@ static void pb_encode_element_fixed32(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
 
 static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-    pb_serializer_write64_le(ser, Z_DVAL_PP(element));
+    pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
 }
 
 static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
@@ -737,11 +741,15 @@ static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **elem
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
 
-    if (Z_DVAL_PP(element) < 0) {
-        pb_serializer_write64_le2(ser, (int64_t)Z_DVAL_PP(element));
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
+
+    if (Z_LVAL_PP(element) < 0) {
+        pb_serializer_write64_le2(ser, (int64_t)Z_LVAL_PP(element));
     } else {
-        // MEMO: DO NOT CHANGE Z_LVAL_PP TO Z_DVAL_PP. this is correct.
-        pb_serializer_write64_le(ser, Z_LVAL_PP(element));
+        pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
     }
 }
 
