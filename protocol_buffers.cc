@@ -645,7 +645,11 @@ static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
 #endif
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-    pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
+    if (v < 0) {
+        pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
+    } else {
+        pb_serializer_write64_le(ser, (uint64_t)Z_LVAL_PP(element));
+    }
 }
 
 static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
@@ -752,6 +756,13 @@ static void pb_encode_element_enum(INTERNAL_FUNCTION_PARAMETERS, zval **element,
 
 static void pb_encode_element_sfixed32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
+    long v;
+
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+    v = Z_LVAL_PP(element);
+
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     pb_serializer_write32_le(ser, Z_LVAL_PP(element));
 }
@@ -1077,7 +1088,14 @@ static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, (void*)&value, sizeof(value));
+    target[0] = (uint8_t) (value >> 56 & 0xff);
+    target[1] = (uint8_t) (value >> 48 & 0xff);
+    target[2] = (uint8_t) (value >> 40 & 0xff);
+    target[3] = (uint8_t) (value >> 32 & 0xff);
+    target[4] = (uint8_t) (value >> 24 & 0xff);
+    target[5] = (uint8_t) (value >> 16 & 0xff);
+    target[6] = (uint8_t) (value >> 8 & 0xff);
+    target[7] = (uint8_t) (value & 0xff);
 #else
     target[0] = (value);
     target[1] = (value >>  8);
@@ -1110,7 +1128,14 @@ static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
     }
 
 #ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, (void*)&value, sizeof(value));
+    target[0] = (uint8_t) (value >> 56 & 0xff);
+    target[1] = (uint8_t) (value >> 48 & 0xff);
+    target[2] = (uint8_t) (value >> 40 & 0xff);
+    target[3] = (uint8_t) (value >> 32 & 0xff);
+    target[4] = (uint8_t) (value >> 24 & 0xff);
+    target[5] = (uint8_t) (value >> 16 & 0xff);
+    target[6] = (uint8_t) (value >> 8 & 0xff);
+    target[7] = (uint8_t) (value & 0xff);
 #else
     target[0] = (value);
     target[1] = (value >>  8);
