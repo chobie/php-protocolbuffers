@@ -151,11 +151,11 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
   int b;
   int result;
 
-  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && *buffer < 0x80) {
-    *value = *buffer;
-    ptr++;
-    return ptr;
-  }
+//  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && *buffer < 0x80) {
+//    *value = *buffer;
+//    ptr++;
+//    return ptr;
+//  }
 
   b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
   b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
@@ -1317,7 +1317,7 @@ PHP_METHOD(protocolbuffers, encode)
 static zend_function_entry php_protocolbuffers_methods[] = {
     PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers, encode, NULL, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+    {NULL, NULL, NULL}
 };
 
 
