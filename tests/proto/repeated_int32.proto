@@ -1,0 +1,12 @@
+package Tutorial;
+
+import "php_options.proto";
+//option (php).base_class = "Base";
+option (php).generate_getter = true;
+option (php).generate_setter = true;
+
+message RepeatedInt32{
+    repeated int32 value = 1;
+}
+
+
