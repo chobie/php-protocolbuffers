@@ -63,18 +63,18 @@ static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC) /* {{{ */
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, bytes)
-	ZEND_ARG_INFO(0, descriptor)
+    ZEND_ARG_INFO(0, class_name)
+    ZEND_ARG_INFO(0, bytes)
+    ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_encode, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, descriptor)
+    ZEND_ARG_INFO(0, object)
+    ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_read_varint32, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
+    ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 PHP_MINFO_FUNCTION(protocolbuffers)
@@ -140,7 +140,7 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
         zend_end_try();
     }
 
-	return SUCCESS;
+    return SUCCESS;
 }
 
 
@@ -941,10 +941,10 @@ PHP_METHOD(protocolbuffers, decode)
     zval *obj;
     pb_scheme_container *container;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
+        return;
+    }
 
     if (z_proto) {
         proto       = Z_ARRVAL_P(z_proto);
@@ -1003,19 +1003,20 @@ static void pb_serializer_init(pb_serializer **serializer)
 
 static int pb_serializer_resize(pb_serializer *serializer, size_t size)
 {
-	if (serializer->buffer_size + size < serializer->buffer_capacity) {
-		return 0;
-	}
+    if (serializer->buffer_size + size < serializer->buffer_capacity) {
+        return 0;
+    }
 
-	while (serializer->buffer_size + size >= serializer->buffer_capacity) {
-		serializer->buffer_capacity *= 2;
-	}
+    while (serializer->buffer_size + size >= serializer->buffer_capacity) {
+        serializer->buffer_capacity *= 2;
+    }
 
-	serializer->buffer = (uint8_t*)erealloc(serializer->buffer, serializer->buffer_capacity);
-	if (serializer->buffer == NULL)
-		return 1;
+    serializer->buffer = (uint8_t*)erealloc(serializer->buffer, serializer->buffer_capacity);
+    if (serializer->buffer == NULL) {
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 static int pb_serializer_write8(pb_serializer *serializer, unsigned int value)
@@ -1034,8 +1035,8 @@ static int pb_serializer_write16(pb_serializer *serializer, unsigned int value)
         return 1;
     }
 
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
 
     return 0;
 }
@@ -1046,10 +1047,10 @@ static int pb_serializer_write32(pb_serializer *serializer, unsigned int value)
         return 1;
     }
 
-	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
-	serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
 
     return 0;
 }
@@ -1071,10 +1072,10 @@ static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int valu
     target[3] = (value >> 24);
 #endif
 
-	serializer->buffer[serializer->buffer_size++] = target[0];
-	serializer->buffer[serializer->buffer_size++] = target[1];
-	serializer->buffer[serializer->buffer_size++] = target[2];
-	serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
 
     return 0;
 }
@@ -1097,24 +1098,29 @@ static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
     target[6] = (uint8_t) (value >> 8 & 0xff);
     target[7] = (uint8_t) (value & 0xff);
 #else
-    target[0] = (value);
-    target[1] = (value >>  8);
-    target[2] = (value >> 16);
-    target[3] = (value >> 24);
-    target[4] = (value >> 32);
-    target[5] = (value >> 40);
-    target[6] = (value >> 48);
-    target[7] = (value >> 56);
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
 #endif
 
-	serializer->buffer[serializer->buffer_size++] = target[0];
-	serializer->buffer[serializer->buffer_size++] = target[1];
-	serializer->buffer[serializer->buffer_size++] = target[2];
-	serializer->buffer[serializer->buffer_size++] = target[3];
-	serializer->buffer[serializer->buffer_size++] = target[4];
-	serializer->buffer[serializer->buffer_size++] = target[5];
-	serializer->buffer[serializer->buffer_size++] = target[6];
-	serializer->buffer[serializer->buffer_size++] = target[7];
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
 
     return 0;
 }
@@ -1137,24 +1143,29 @@ static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
     target[6] = (uint8_t) (value >> 8 & 0xff);
     target[7] = (uint8_t) (value & 0xff);
 #else
-    target[0] = (value);
-    target[1] = (value >>  8);
-    target[2] = (value >> 16);
-    target[3] = (value >> 24);
-    target[4] = (value >> 32);
-    target[5] = (value >> 40);
-    target[6] = (value >> 48);
-    target[7] = (value >> 56);
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
 #endif
 
-	serializer->buffer[serializer->buffer_size++] = target[0];
-	serializer->buffer[serializer->buffer_size++] = target[1];
-	serializer->buffer[serializer->buffer_size++] = target[2];
-	serializer->buffer[serializer->buffer_size++] = target[3];
-	serializer->buffer[serializer->buffer_size++] = target[4];
-	serializer->buffer[serializer->buffer_size++] = target[5];
-	serializer->buffer[serializer->buffer_size++] = target[6];
-	serializer->buffer[serializer->buffer_size++] = target[7];
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
 
     return 0;
 }
@@ -1248,12 +1259,12 @@ PHP_METHOD(protocolbuffers, encode)
     HashTable *proto = NULL;
     pb_serializer *ser;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"o|a", &klass, &z_descriptor) == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "o|a", &klass, &z_descriptor) == FAILURE) {
+        return;
+    }
 
-	ce = Z_OBJCE_P(klass);
+    ce = Z_OBJCE_P(klass);
     if (z_descriptor) {
         proto       = Z_ARRVAL_P(z_descriptor);
     }
@@ -1317,19 +1328,19 @@ void php_protocolbuffers_init(TSRMLS_D)
 
 zend_module_entry protocolbuffers_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
+    STANDARD_MODULE_HEADER,
 #endif
-	"protocolbuffers",
-	NULL,					/* Functions */
-	PHP_MINIT(protocolbuffers),	/* MINIT */
-	PHP_MSHUTDOWN(protocolbuffers),	/* MSHUTDOWN */
-	PHP_RINIT(protocolbuffers),	/* RINIT */
-	PHP_RSHUTDOWN(protocolbuffers),		/* RSHUTDOWN */
-	PHP_MINFO(protocolbuffers),	/* MINFO */
+    "protocolbuffers",
+    NULL,					/* Functions */
+    PHP_MINIT(protocolbuffers),	/* MINIT */
+    PHP_MSHUTDOWN(protocolbuffers),	/* MSHUTDOWN */
+    PHP_RINIT(protocolbuffers),	/* RINIT */
+    PHP_RSHUTDOWN(protocolbuffers),		/* RSHUTDOWN */
+    PHP_MINFO(protocolbuffers),	/* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
-	PHP_PROTOCOLBUFFERS_EXTVER,
+    PHP_PROTOCOLBUFFERS_EXTVER,
 #endif
-	STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_PROPERTIES
 };
 
 
