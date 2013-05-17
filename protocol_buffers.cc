@@ -476,6 +476,10 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         wiretype = (value & 0x07);
 
         s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
+        if (s == NULL) {
+            fprintf(stderr, "tag %d NOTFOUND. this is bug\n", tag);
+            return "";
+        }
 
         switch (wiretype) {
         case WIRETYPE_VARINT:
@@ -517,7 +521,22 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_STRINGL(dz, (char*)data, value, 1);
 
                 PHP_PB_DECOCDE_ADD_ELM
+            } else if (s->type == TYPE_BYTES) {
+                if (value < 512) {
+                    memcpy(buffer, data, value);
+                    buffer[value] = '\0';
+                } else {
+                    char *sub_buffer;
 
+                    sub_buffer = (char *)emalloc(value+1);
+                    memcpy(sub_buffer, data, value);
+                    sub_buffer[value+1] = '\0';
+                }
+
+                MAKE_STD_ZVAL(dz);
+                ZVAL_STRINGL(dz, (char*)data, value, 1);
+
+                PHP_PB_DECOCDE_ADD_ELM
             } else if (s->type == TYPE_MESSAGE) {
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
@@ -555,6 +574,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     zend_hash_add(hresult, s->name, s->name_len, (void **)&z_obj, sizeof(z_obj), NULL);
                     Z_ADDREF_P(z_obj);
                 }
+
                 zval_ptr_dtor(&z_obj);
             }
 
