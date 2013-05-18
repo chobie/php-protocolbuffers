@@ -4,7 +4,7 @@ Check for protocol buffers big tag implementations
 <?php
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "big_tag.proto.php";
 
-$expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "001_big_Tag.bin");
+$expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "001_big_tag.bin");
 
 $u = new Tutorial_BigTag();
 $u->setValue(1);
