@@ -1,14 +1,14 @@
 <?php
 /**
- * Tutorial_RepeatedInt32
+ * Tutorial_Integer32
  *
- * @message Tutorial.RepeatedInt32
+ * @message Tutorial.Integer32
  *
  * -*- magic properties -*-
  *
  * @property array $value
  */
-class Tutorial_RepeatedInt32
+class Tutorial_Integer32
 {
   protected static $scheme = array(
     'properties' => array(
@@ -26,7 +26,7 @@ class Tutorial_RepeatedInt32
         'required' => false,
         'optional' => false,
         'repeated' => true,
-        'packable' => false,
+        'packable' => true,
         'default'  => null,
       ),
     ),
