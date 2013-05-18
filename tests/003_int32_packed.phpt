@@ -4,12 +4,10 @@ Check for protocol buffers int32 packed implementations
 <?php
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "field_int32_packed.proto.php";
 
-$expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "001_int32_packed_many.bin");
+$expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "003_int32_packed_one.bin");
 
 $u = new Tutorial_Integer32();
 $u->addValue(1);
-$u->addValue(2);
-$u->addValue(1024);
 
 $data = ProtocolBuffers::encode($u);
 
