@@ -59,6 +59,7 @@ static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 #endif
 }
 
+// comes from PECL mongo's bson.c
 static inline int is_utf8(const char *s, int len)
 {
     int i;
