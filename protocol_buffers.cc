@@ -887,6 +887,15 @@ static void pb_encode_element_sint32(INTERNAL_FUNCTION_PARAMETERS, zval **elemen
     pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
 }
 
+static void pb_encode_element_sint32_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
+    pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
+}
+
 static void pb_encode_element_sint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     long v;
@@ -1042,7 +1051,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64);
             break;
             case TYPE_SINT32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32);
+                }
             break;
             case TYPE_SINT64:
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64);
