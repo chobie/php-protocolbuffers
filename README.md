@@ -39,6 +39,13 @@ Install for developers
     # please add following line to your php.ini
     # extension=protocolbuffers.so
 
+Building protoc-gen-php
+-----------------------
+
+currently, protoc-php-gen does not do install. you have to put it on to PATH manually
+
+    cd php-protocolbuffers/contrib
+    make
 
 Overview
 --------
