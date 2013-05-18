@@ -694,6 +694,16 @@ static void pb_encode_element_fixed32(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
     pb_serializer_write32_le(ser, Z_LVAL_PP(element));
 }
 
+static void pb_encode_element_fixed32_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
+    pb_serializer_write32_le(ser, Z_LVAL_PP(element));
+}
+
+
 static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     long v;
@@ -1022,7 +1032,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
             break;
             case TYPE_FIXED32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32);
+                }
             break;
             case TYPE_BOOL:
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
