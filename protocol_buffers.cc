@@ -812,6 +812,47 @@ static void pb_encode_element_int64_packed(INTERNAL_FUNCTION_PARAMETERS, zval **
 }
 
 
+static void pb_encode_element_uint64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    long v;
+
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
+
+    pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint64(ser, v);
+}
+
+static void pb_encode_element_uint64_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    long v;
+
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
+
+    pb_serializer_write_varint64(ser, v);
+}
+
+
+
 static void pb_encode_element_int32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
@@ -1114,6 +1155,13 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                     pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64_packed);
                 } else {
                     pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64);
+                }
+            break;
+            case TYPE_UINT64:
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64);
                 }
             break;
             case TYPE_INT32:
