@@ -48,7 +48,35 @@ static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 
 zend_class_entry *protocol_buffers_class_entry;
+zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 
+static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
+{
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
+        return zend_exception_get_default();
+#else
+        return zend_exception_get_default(TSRMLS_C);
+#endif
+}
+
+static inline int is_utf8(const char *s, int len)
+{
+    int i;
+
+    for (i = 0; i < len; i++) {
+        if (i + 3 < len && (s[i] & 248) == 240 && (s[i + 1] & 192) == 128 && (s[i + 2] & 192) == 128 && (s[i + 3] & 192) == 128) {
+            i += 3;
+        } else if (i + 2 < len && (s[i] & 240) == 224 && (s[i + 1] & 192) == 128 && (s[i + 2] & 192) == 128) {
+            i += 2;
+        } else if (i + 1 < len && (s[i] & 224) == 192 && (s[i + 1] & 192) == 128) {
+            i += 1;
+        } else if ((s[i] & 128) != 0) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
 
 void messages_dtor(pb_scheme *entry)
 {
@@ -752,6 +780,12 @@ static void pb_encode_element_int32_packed(INTERNAL_FUNCTION_PARAMETERS, zval **
 static void pb_encode_element_string(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     if (Z_TYPE_PP(element) != IS_NULL) {
+
+        if (is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
+            zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+            return;
+        }
+
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
         pb_serializer_write_varint32(ser, Z_STRLEN_PP(element));
 
@@ -1015,6 +1049,12 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
             break;
             default:
             break;
+        }
+
+        if (EG(exception)) {
+            efree(ser->buffer);
+            efree(ser);
+            return 1;
         }
     }
 
@@ -1359,7 +1399,7 @@ PHP_METHOD(protocolbuffers, encode)
     zend_class_entry *ce;
     pb_scheme_container *container;
     HashTable *proto = NULL;
-    pb_serializer *ser;
+    pb_serializer *ser = NULL;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "o|a", &klass, &z_descriptor) == FAILURE) {
@@ -1372,9 +1412,11 @@ PHP_METHOD(protocolbuffers, encode)
     }
 
     pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
-    pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser);
+    if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
+        return;
+    }
 
-    if (ser->buffer_capacity > 0) {
+    if (ser->buffer_size > 0) {
         RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
 
         efree(ser->buffer);
@@ -1395,9 +1437,13 @@ static zend_function_entry php_protocolbuffers_methods[] = {
 
 void php_protocolbuffers_init(TSRMLS_D)
 {
-    zend_class_entry ce;
+    zend_class_entry ce, ce2;
+
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers", php_protocolbuffers_methods);
     protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+    INIT_CLASS_ENTRY(ce2, "ProtocolBuffers_InvalidByteSequenceException", 0);
+    protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce2, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
     zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_VARINT", sizeof("WIRETYPE_VARINT")-1, 0 TSRMLS_CC);
     zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_FIXED64", sizeof("WIRETYPE_FIXED64")-1, 1 TSRMLS_CC);

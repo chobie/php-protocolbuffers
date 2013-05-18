@@ -67,6 +67,7 @@ extern zend_module_entry protocolbuffers_module_entry;
 #define phpext_protocolbuffers_ptr &protocolbuffers_module_entry;
 
 extern zend_class_entry *protocol_buffers_class_entry;
+extern zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 
 #ifndef GOOGLE_PREDICT_TRUE
 #ifdef __GNUC__
