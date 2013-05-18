@@ -665,6 +665,22 @@ static void pb_encode_element_float(INTERNAL_FUNCTION_PARAMETERS, zval **element
     pb_serializer_write32_le(ser, x.u);
 }
 
+static void pb_encode_element_float_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    union {
+        float f;
+        uint32_t u;
+    } x;
+
+    if (Z_TYPE_PP(element) != IS_DOUBLE) {
+        convert_to_double(*element);
+    }
+
+    x.f = (float)Z_DVAL_PP(element);
+    pb_serializer_write32_le(ser, x.u);
+}
+
+
 static void pb_encode_element_double(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     union {
@@ -682,6 +698,23 @@ static void pb_encode_element_double(INTERNAL_FUNCTION_PARAMETERS, zval **elemen
     pb_serializer_write64_le(ser, u.u);
 
 }
+
+static void pb_encode_element_double_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    union {
+        double d;
+        uint64_t u;
+    } u;
+
+    if (Z_TYPE_PP(element) != IS_DOUBLE) {
+        convert_to_double(*element);
+    }
+
+    u.d = Z_DVAL_PP(element);
+
+    pb_serializer_write64_le(ser, u.u);
+}
+
 
 static void pb_encode_element_fixed32(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
@@ -1013,10 +1046,18 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
         switch (scheme->type) {
             case TYPE_DOUBLE:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double);
+                }
             break;
             case TYPE_FLOAT:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float);
+                }
             break;
             case TYPE_INT64:
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64);

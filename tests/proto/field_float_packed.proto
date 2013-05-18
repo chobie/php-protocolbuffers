@@ -5,8 +5,8 @@ package Tutorial;
 //option (php).generate_getter = true;
 //option (php).generate_setter = true;
 
-message Double {
-    required float value = 1;
+message Float {
+    repeated float value = 1 [packed = true];
 }
 
 
