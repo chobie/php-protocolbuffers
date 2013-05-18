@@ -762,6 +762,30 @@ static void pb_encode_element_fixed64(INTERNAL_FUNCTION_PARAMETERS, zval **eleme
     }
 }
 
+static void pb_encode_element_fixed64_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    long v;
+
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+    v = Z_LVAL_PP(element);
+
+#if SIZEOF_LONG == 4
+    if (v > 0x80000000 || v == 0x80000000) {
+        zend_error(E_WARNING, "pb_encode_element_fixed64: 64bit long on 32bit platform. ignore this key");
+        return;
+    }
+#endif
+
+    if (v < 0) {
+        pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
+    } else {
+        pb_serializer_write64_le(ser, (uint64_t)Z_LVAL_PP(element));
+    }
+}
+
+
 static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     if (Z_TYPE_PP(element) != IS_LONG) {
@@ -1172,7 +1196,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                 }
             break;
             case TYPE_FIXED64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
+                }
             break;
             case TYPE_FIXED32:
                 if (scheme->packed == 1) {
