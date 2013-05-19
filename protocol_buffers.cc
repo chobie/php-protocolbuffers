@@ -519,6 +519,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_BOOL(dz, value);
             } else if (s->type == TYPE_INT32) {
                 ZVAL_LONG(dz, (int32_t)value);
+            } else if (s->type == TYPE_SINT32) {
+                ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
             } else {
                 ZVAL_LONG(dz, value);
             }
