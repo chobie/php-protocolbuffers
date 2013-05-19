@@ -1183,7 +1183,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
         hash = Z_ARRVAL_PP(c);
     } else {
-        fprintf(stderr, "_properties not found");
+        zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "the class does not defined _properties.");
         return -1;
     }
 
