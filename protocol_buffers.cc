@@ -566,18 +566,26 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 if (value < 512) {
                     memcpy(buffer, data, value);
                     buffer[value] = '\0';
+                    MAKE_STD_ZVAL(dz);
+                    ZVAL_STRINGL(dz, (char*)data, value, 1);
+
+                    PHP_PB_DECOCDE_ADD_ELM
                 } else {
                     char *sub_buffer;
 
-                    sub_buffer = (char *)emalloc(value+1);
+                    sub_buffer = (char *)emalloc(value);
+
                     memcpy(sub_buffer, data, value);
-                    sub_buffer[value+1] = '\0';
+
+                    MAKE_STD_ZVAL(dz);
+                    ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
+
+                    PHP_PB_DECOCDE_ADD_ELM
+
+                    efree(sub_buffer);
                 }
 
-                MAKE_STD_ZVAL(dz);
-                ZVAL_STRINGL(dz, (char*)data, value, 1);
-
-                PHP_PB_DECOCDE_ADD_ELM
+                data = data + value;
             } else if (s->type == TYPE_MESSAGE) {
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
