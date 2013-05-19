@@ -1,5 +1,7 @@
 --TEST--
 Check for protocol buffers int64 packed implementations
+--SKIPIF--
+<?php if (8 !== PHP_INT_SIZE) { die('skip Only for 64-bit platform'); } ?>
 --FILE--
 <?php
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "field_int64_packed.proto.php";
