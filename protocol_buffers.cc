@@ -647,6 +647,13 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, a);
+            } else if (s->type == TYPE_SFIXED32) {
+                long l = 0;
+
+                memcpy(&l, data, 4);
+                MAKE_STD_ZVAL(dz);
+
+                ZVAL_LONG(dz, (int32_t)l);
             } else {
                 long l = 0;
 
