@@ -539,6 +539,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
             data += 8;
         break;
         case WIRETYPE_LENGTH_DELIMITED:
+            // TODO: support packed values
             data = ReadVarint32FromArray(data, &value, data_end);
 
             if (s->type == TYPE_STRING) {
