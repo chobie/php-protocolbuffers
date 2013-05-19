@@ -514,8 +514,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         {
             data = ReadVarint32FromArray(data, &value, data_end);
             MAKE_STD_ZVAL(dz);
+
             if (s->type == TYPE_BOOL) {
                 ZVAL_BOOL(dz, value);
+            } else if (s->type == TYPE_INT32) {
+                ZVAL_LONG(dz, (int32_t)value);
             } else {
                 ZVAL_LONG(dz, value);
             }
@@ -638,22 +641,23 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         break;
         case WIRETYPE_FIXED32: {
             if (s->type == TYPE_FLOAT) {
-                float a;
+                float a = 0;
 
                 memcpy(&a, data, 4);
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, a);
             } else {
-                long l;
+                long l = 0;
 
                 memcpy(&l, data, 4);
 
                 MAKE_STD_ZVAL(dz);
-                ZVAL_LONG(dz, value);
+                ZVAL_LONG(dz, l);
             }
 
             PHP_PB_DECOCDE_ADD_ELM
+
             data += 4;
         }
         break;
