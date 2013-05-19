@@ -27,6 +27,7 @@
 extern "C" {
 #include "ext/standard/php_var.h"
 }
+#include "is_utf8.h"
 
 
 #if PHP_VERSION_ID < 50300
@@ -57,26 +58,6 @@ static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 #else
         return zend_exception_get_default(TSRMLS_C);
 #endif
-}
-
-// comes from PECL mongo's bson.c
-static inline int is_utf8(const char *s, int len)
-{
-    int i;
-
-    for (i = 0; i < len; i++) {
-        if (i + 3 < len && (s[i] & 248) == 240 && (s[i + 1] & 192) == 128 && (s[i + 2] & 192) == 128 && (s[i + 3] & 192) == 128) {
-            i += 3;
-        } else if (i + 2 < len && (s[i] & 240) == 224 && (s[i + 1] & 192) == 128 && (s[i + 2] & 192) == 128) {
-            i += 2;
-        } else if (i + 1 < len && (s[i] & 224) == 192 && (s[i + 1] & 192) == 128) {
-            i += 1;
-        } else if ((s[i] & 128) != 0) {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 void messages_dtor(pb_scheme *entry)
