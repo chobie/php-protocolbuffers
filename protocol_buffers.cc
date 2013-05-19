@@ -527,7 +527,15 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, d);
                 PHP_PB_DECOCDE_ADD_ELM
+            } else {
+                long l;
+                memcpy(&l, data, 8);
+
+                MAKE_STD_ZVAL(dz);
+                ZVAL_DOUBLE(dz, l);
+                PHP_PB_DECOCDE_ADD_ELM
             }
+
             data += 8;
         break;
         case WIRETYPE_LENGTH_DELIMITED:
@@ -616,6 +624,13 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, a);
+            } else {
+                long l;
+
+                memcpy(&l, data, 4);
+
+                MAKE_STD_ZVAL(dz);
+                ZVAL_LONG(dz, value);
             }
 
             PHP_PB_DECOCDE_ADD_ELM
