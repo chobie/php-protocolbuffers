@@ -87,7 +87,6 @@ typedef struct pb_scheme
     int tag;
     char *name;
     int name_len;
-    int wiretype;
     int type;
     int flags;
     int scheme_type;

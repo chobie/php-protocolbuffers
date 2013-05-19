@@ -335,25 +335,6 @@ static int pb_tag_type(HashTable *proto, ulong tag TSRMLS_DC)
     return -1;
 }
 
-static int pb_tag_wiretype(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return -1;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return -1;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), "wire_type", sizeof("wire_type"), (void **)&dd) == SUCCESS) {
-        return Z_LVAL_PP(dd);
-    }
-
-    return -1;
-}
-
-
 static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
 {
     int i = 0;
