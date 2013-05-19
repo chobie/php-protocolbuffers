@@ -47,6 +47,8 @@ currently, protoc-php-gen does not do install. you have to put it on to PATH man
     cd php-protocolbuffers/contrib
     make
 
+* you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
+
 Overview
 --------
 
