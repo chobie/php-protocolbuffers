@@ -20,7 +20,7 @@ Under Development
 License
 -------
 
-MIT License
+BSD License
 
 Requirements
 ------------
