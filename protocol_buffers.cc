@@ -796,6 +796,15 @@ static void pb_encode_element_bool(INTERNAL_FUNCTION_PARAMETERS, zval **element,
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
+static void pb_encode_element_bool_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
 static void pb_encode_element_int64(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     long v;
@@ -975,6 +984,15 @@ static void pb_encode_element_enum(INTERNAL_FUNCTION_PARAMETERS, zval **element,
     }
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
+    pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+}
+
+static void pb_encode_element_enum_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
+{
+    if (Z_TYPE_PP(element) != IS_LONG) {
+        convert_to_long(*element);
+    }
+
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
@@ -1243,7 +1261,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                 }
             break;
             case TYPE_BOOL:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool_packed);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
+                }
             break;
             case TYPE_STRING:
                 pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_string);
@@ -1264,7 +1286,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
                 }
             break;
             case TYPE_ENUM:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
+                if (scheme->packed == 1) {
+                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
+                } else {
+                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
+                }
             break;
             case TYPE_SFIXED32:
                 if (scheme->packed == 1) {
