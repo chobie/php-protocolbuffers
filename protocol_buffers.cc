@@ -514,7 +514,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         {
             data = ReadVarint32FromArray(data, &value, data_end);
             MAKE_STD_ZVAL(dz);
-            ZVAL_LONG(dz, value);
+            if (s->type == TYPE_BOOL) {
+                ZVAL_BOOL(dz, value);
+            } else {
+                ZVAL_LONG(dz, value);
+            }
 
             PHP_PB_DECOCDE_ADD_ELM
         }
