@@ -217,132 +217,43 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
   return ptr;
 }
 
-static int pb_get_tag_name(HashTable *proto, ulong tag, zval **result TSRMLS_DC)
+static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, char *name, size_t name_len TSRMLS_DC)
 {
     zval **d, **dd;
 
     if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
         return 0;
     }
+
     if (Z_TYPE_PP(d) != IS_ARRAY) {
         return 0;
     }
 
-    if (zend_hash_find(Z_ARRVAL_PP(d), "name", sizeof("name"), (void **)&dd) == SUCCESS) {
+    if (zend_hash_find(Z_ARRVAL_PP(d), name, name_len, (void **)&dd) == SUCCESS) {
+        return Z_LVAL_PP(dd);
+    }
+
+    return 0;
+}
+
+static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, char *name, size_t name_len, zval **result TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), name, name_len, (void **)&dd) == SUCCESS) {
         *result = *dd;
         return 1;
     }
-    return 0;
-}
-
-static int pb_get_repeated(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), "repeated", sizeof("repeated"), (void **)&dd) == SUCCESS) {
-        return Z_LVAL_PP(dd);
-    }
-    return 0;
-}
-
-static int pb_get_packed(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), "packable", sizeof("packable"), (void **)&dd) == SUCCESS) {
-        return Z_LVAL_PP(dd);
-    }
-    return 0;
-}
-
-
-static int pb_get_msg_name(HashTable *proto, ulong tag, zval **result TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), "message", sizeof("message"), (void **)&dd) == SUCCESS) {
-        *result = *dd;
-        return 1;
-    }
-    return 0;
-}
-
-
-static int pb_tag_is_string(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
-        if (Z_LVAL_PP(dd) == TYPE_STRING) {
-            return 1;
-        }
-    }
 
     return 0;
-}
-
-static int pb_tag_is_message(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
-        if (Z_LVAL_PP(dd) == TYPE_MESSAGE) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-static int pb_tag_type(HashTable *proto, ulong tag TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return -1;
-    }
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return -1;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), "type", sizeof("type"), (void **)&dd) == SUCCESS) {
-        return Z_LVAL_PP(dd);
-    }
-
-    return -1;
 }
 
 static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
@@ -387,21 +298,26 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
         {
             zval *tmp;
             int tsize = 0;
+            char *t;
 
-            ischeme[n].type = pb_tag_type(proto, ttag TSRMLS_CC);
+            ischeme[n].type = pb_get_lval_from_hash_by_tag(proto, ttag, "type", sizeof("type") TSRMLS_CC);
 
-            pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
-            tsize = Z_STRLEN_P(tmp)+1;
-            // TODO: fix memory leak
-            ischeme[n].name = (char*)emalloc(sizeof(char*) * tsize);
-            ischeme[n].name_len = tsize;
+            pb_get_zval_from_hash_by_tag(proto, ttag, "name", sizeof("name"), &tmp TSRMLS_CC);
+
+            tsize                  = Z_STRLEN_P(tmp)+1;
+            ischeme[n].name        = (char*)emalloc(sizeof(char*) * tsize);
+            ischeme[n].name_len    = tsize;
+
             memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
             ischeme[n].name[tsize] = '\0';
-            ischeme[n].repeated = pb_get_repeated(proto, ttag TSRMLS_CC);
-            ischeme[n].packed   = pb_get_packed(proto, ttag TSRMLS_CC);
+
+            ischeme[n].repeated = pb_get_lval_from_hash_by_tag(proto, ttag, "repeated", sizeof("repeated") TSRMLS_CC);
+            ischeme[n].packed   = pb_get_lval_from_hash_by_tag(proto, ttag, "packable", sizeof("packable") TSRMLS_CC);
 
             if (ischeme[n].type == TYPE_MESSAGE) {
-                pb_get_msg_name(proto, ttag, &tmp TSRMLS_CC);
+
+                pb_get_zval_from_hash_by_tag(proto, ttag, "message", sizeof("message"), &tmp TSRMLS_CC);
+
                 zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC);
                 ischeme[n].ce = *c;
             }
@@ -440,7 +356,6 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         pb_convert_msg(proto, klass, klass_len, &ischeme, &scheme_size TSRMLS_CC);
         scheme_size = zend_hash_num_elements(proto);
 
-        /* TODO: fix leak */
         container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
