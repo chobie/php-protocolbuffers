@@ -169,11 +169,11 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
   int b;
   int result;
 
-//  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && *buffer < 0x80) {
-//    *value = *buffer;
-//    ptr++;
-//    return ptr;
-//  }
+  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && (uint)*ptr < 0x80) {
+    *value = (uint)*buffer;
+    ptr++;
+    return ptr;
+  }
 
   b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
   b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
