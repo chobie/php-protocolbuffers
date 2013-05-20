@@ -1212,6 +1212,8 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     return 0;
 }
 
+/* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
+*/
 PHP_METHOD(protocolbuffers, decode)
 {
     HashTable *proto = NULL;
@@ -1247,7 +1249,7 @@ PHP_METHOD(protocolbuffers, decode)
         zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
         pp[0] = &z_result;
 
-        ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
+        //ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
 
         object_init_ex(obj, *ce);
 
@@ -1268,6 +1270,7 @@ PHP_METHOD(protocolbuffers, decode)
 
     RETURN_ZVAL(obj, 0, 1);
 }
+/* }}} */
 
 static void pb_serializer_init(pb_serializer **serializer)
 {
@@ -1576,6 +1579,8 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
     return 0;
 }
 
+/* {{{ proto string ProtocolBuffers::encode($class[, array $descriptor])
+*/
 PHP_METHOD(protocolbuffers, encode)
 {
     zval *klass, *z_descriptor = NULL;
@@ -1609,6 +1614,7 @@ PHP_METHOD(protocolbuffers, encode)
     }
 
 }
+/* }}} */
 
 static zend_function_entry php_protocolbuffers_methods[] = {
     PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
