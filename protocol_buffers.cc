@@ -645,6 +645,21 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(dz);
 
                 ZVAL_LONG(dz, (int32_t)l);
+            } else if (s->type == TYPE_FIXED32) {
+                unsigned long l = 0;
+                memcpy(&l, data, 4);
+
+                MAKE_STD_ZVAL(dz);
+#if SIZEOF_LONG == 4
+                if (l > 0x7fffffff) {
+                    // PHP_INT_MAX is 0x7fffffff on this platform. cast to double.
+                    ZVAL_DOUBLE(dz, l);
+                } else {
+                    ZVAL_LONG(dz, (unsigned long)l);
+                }
+#else
+                ZVAL_LONG(dz, (unsigned long)l);
+#endif
             } else {
                 long l = 0;
 
