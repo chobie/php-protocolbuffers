@@ -68,8 +68,10 @@ static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 #endif
 }
 
-void messages_dtor(pb_scheme *entry)
+void messages_dtor(void *entry)
 {
+//    pb_scheme_container **container =  (pb_scheme_container**)entry;
+//    fprintf(stderr, "SZ:%d\n", (*container)->size);
 }
 
 static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
@@ -151,6 +153,25 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 {
     if (PBG(messages)) {
         zend_try {
+            int i = 0;
+            HashPosition pos;
+            pb_scheme_container **element;
+
+            for(zend_hash_internal_pointer_reset_ex(PBG(messages), &pos);
+                            zend_hash_get_current_data_ex(PBG(messages), (void **)&element, &pos) == SUCCESS;
+                            zend_hash_move_forward_ex(PBG(messages), &pos)
+            ) {
+
+                for (i = 0; i < (*element)->size; i++) {
+                    if ((*element)->scheme[i].name != NULL) {
+                        efree((*element)->scheme[i].name);
+                    }
+                }
+
+                efree((*element)->scheme);
+                efree(*element);
+            }
+
             zend_hash_destroy(PBG(messages));
             FREE_HASHTABLE(PBG(messages));
             PBG(messages) = NULL;
@@ -346,7 +367,7 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
     pb_scheme *ischeme;
 
     sz = zend_hash_num_elements(proto);
-    ischeme = (pb_scheme*)malloc(sizeof(pb_scheme) * sz);
+    ischeme = (pb_scheme*)emalloc(sizeof(pb_scheme) * sz);
 
     for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
                     zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
@@ -372,7 +393,7 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
             pb_get_tag_name(proto, ttag, &tmp TSRMLS_CC);
             tsize = Z_STRLEN_P(tmp)+1;
             // TODO: fix memory leak
-            ischeme[n].name = (char*)malloc(sizeof(char*) * tsize);
+            ischeme[n].name = (char*)emalloc(sizeof(char*) * tsize);
             ischeme[n].name_len = tsize;
             memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
             ischeme[n].name[tsize] = '\0';
@@ -420,11 +441,11 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         scheme_size = zend_hash_num_elements(proto);
 
         /* TODO: fix leak */
-        container = (pb_scheme_container*)malloc(sizeof(pb_scheme_container));
+        container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
 
-        zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container), NULL);
+        zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container*), NULL);
 
         if (ret != NULL) {
             zval_ptr_dtor(&ret);
