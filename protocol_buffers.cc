@@ -1728,7 +1728,6 @@ PHP_METHOD(protocolbuffers, encode)
         efree(ser->buffer);
         efree(ser);
     } else {
-        fprintf(stderr, "NOTHING\n");
         RETURN_EMPTY_STRING();
     }
 
