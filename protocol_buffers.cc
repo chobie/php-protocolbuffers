@@ -91,92 +91,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_read_varint32, 0, 0, 1)
     ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-PHP_MINFO_FUNCTION(protocolbuffers)
-{
-}
-
-PHP_MINIT_FUNCTION(protocolbuffers)
-{
-
-#ifdef ZTS
-    ts_allocate_id(&pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
-#ifdef PHP_WIN32
-    ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor);
-#endif
-#else
-    pb_globals_ctor(&php_pb_globals TSRMLS_CC);
-#ifdef PHP_WIN32
-    php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
-#endif
-#endif
-
-    php_protocolbuffers_init(TSRMLS_C);
-    return SUCCESS;
-}
-
-PHP_RINIT_FUNCTION(protocolbuffers)
-{
-    PBG(messages) = NULL;
-    if (!PBG(messages)) {
-        ALLOC_HASHTABLE(PBG(messages));
-        zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
-    }
-
-    return SUCCESS;
-}
-
-
-PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
-{
-#ifdef ZTS
-        ts_free_id(pb_globals_id);
-#ifdef PHP_WIN32
-        ts_free_id(php_win32_core_globals_id);
-#endif
-#else
-        pb_globals_dtor(&php_pb_globals TSRMLS_CC);
-#ifdef PHP_WIN32
-        php_win32_core_globals_dtor(&the_php_win32_core_globals TSRMLS_CC);
-#endif
-#endif
-
-    return SUCCESS;
-}
-
-PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
-{
-    if (PBG(messages)) {
-        zend_try {
-            int i = 0;
-            HashPosition pos;
-            pb_scheme_container **element;
-
-            for(zend_hash_internal_pointer_reset_ex(PBG(messages), &pos);
-                            zend_hash_get_current_data_ex(PBG(messages), (void **)&element, &pos) == SUCCESS;
-                            zend_hash_move_forward_ex(PBG(messages), &pos)
-            ) {
-
-                for (i = 0; i < (*element)->size; i++) {
-                    if ((*element)->scheme[i].name != NULL) {
-                        efree((*element)->scheme[i].name);
-                    }
-                }
-
-                efree((*element)->scheme);
-                efree(*element);
-            }
-
-            zend_hash_destroy(PBG(messages));
-            FREE_HASHTABLE(PBG(messages));
-            PBG(messages) = NULL;
-        }
-        zend_end_try();
-    }
-
-    return SUCCESS;
-}
-
-
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
   // Fast path:  We have enough bytes left in the buffer to guarantee that
   // this read won't cross the end, so we can skip the checks.
@@ -1745,6 +1659,91 @@ void php_protocolbuffers_init(TSRMLS_D)
 
 #undef PB_DECLARE_CONST_LONG
 
+}
+
+PHP_MINFO_FUNCTION(protocolbuffers)
+{
+}
+
+PHP_MINIT_FUNCTION(protocolbuffers)
+{
+
+#ifdef ZTS
+    ts_allocate_id(&pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
+#ifdef PHP_WIN32
+    ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor);
+#endif
+#else
+    pb_globals_ctor(&php_pb_globals TSRMLS_CC);
+#ifdef PHP_WIN32
+    php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
+#endif
+#endif
+
+    php_protocolbuffers_init(TSRMLS_C);
+    return SUCCESS;
+}
+
+PHP_RINIT_FUNCTION(protocolbuffers)
+{
+    PBG(messages) = NULL;
+    if (!PBG(messages)) {
+        ALLOC_HASHTABLE(PBG(messages));
+        zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
+    }
+
+    return SUCCESS;
+}
+
+
+PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
+{
+#ifdef ZTS
+        ts_free_id(pb_globals_id);
+#ifdef PHP_WIN32
+        ts_free_id(php_win32_core_globals_id);
+#endif
+#else
+        pb_globals_dtor(&php_pb_globals TSRMLS_CC);
+#ifdef PHP_WIN32
+        php_win32_core_globals_dtor(&the_php_win32_core_globals TSRMLS_CC);
+#endif
+#endif
+
+    return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
+{
+    if (PBG(messages)) {
+        zend_try {
+            int i = 0;
+            HashPosition pos;
+            pb_scheme_container **element;
+
+            for(zend_hash_internal_pointer_reset_ex(PBG(messages), &pos);
+                            zend_hash_get_current_data_ex(PBG(messages), (void **)&element, &pos) == SUCCESS;
+                            zend_hash_move_forward_ex(PBG(messages), &pos)
+            ) {
+
+                for (i = 0; i < (*element)->size; i++) {
+                    if ((*element)->scheme[i].name != NULL) {
+                        efree((*element)->scheme[i].name);
+                    }
+                }
+
+                efree((*element)->scheme);
+                efree(*element);
+            }
+
+            zend_hash_destroy(PBG(messages));
+            FREE_HASHTABLE(PBG(messages));
+            PBG(messages) = NULL;
+        }
+        zend_end_try();
+    }
+
+    return SUCCESS;
 }
 
 
