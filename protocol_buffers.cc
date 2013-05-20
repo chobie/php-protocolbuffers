@@ -1680,32 +1680,38 @@ void php_protocolbuffers_init(TSRMLS_D)
     INIT_CLASS_ENTRY(ce2, "ProtocolBuffers_InvalidByteSequenceException", 0);
     protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce2, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_VARINT", sizeof("WIRETYPE_VARINT")-1, 0 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_FIXED64", sizeof("WIRETYPE_FIXED64")-1, 1 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_LENGTH_DELIMITED", sizeof("WIRETYPE_LENGTH_DELIMITED")-1, 2 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_START_GROUP", sizeof("WIRETYPE_START_GROUP")-1, 3 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_END_GROUP", sizeof("WIRETYPE_END_GROUP")-1, 4 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "WIRETYPE_FIXED32", sizeof("WIRETYPE_FIXED32")-1, 5 TSRMLS_CC);
+#define PB_DECLARE_CONST_LONG(name, size, value) \
+    zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
 
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_DOUBLE", sizeof("TYPE_DOUBLE")-1, 1 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FLOAT", sizeof("TYPE_FLOAT")-1, 2 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_INT64", sizeof("TYPE_INT64")-1, 3 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_UINT64", sizeof("TYPE_UINT64")-1, 4 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_INT32", sizeof("TYPE_INT32")-1, 5 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FIXED64", sizeof("TYPE_FIXED64")-1, 6 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_FIXED32", sizeof("TYPE_FIXED32")-1, 7 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_BOOL", sizeof("TYPE_BOOL")-1, 8 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_STRING", sizeof("TYPE_STRING")-1, 9 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_GROUP", sizeof("TYPE_GROUP")-1, 10 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_MESSAGE", sizeof("TYPE_MESSAGE")-1, 11 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_BYTES", sizeof("TYPE_BYTES")-1, 12 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_UINT32", sizeof("TYPE_UINT32")-1, 13 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_ENUM", sizeof("TYPE_ENUM")-1, 14 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SFIXED32", sizeof("TYPE_SFIXED32")-1, 15 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SFIXED64", sizeof("TYPE_SFIXED64")-1, 16 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SINT32", sizeof("TYPE_SINT32")-1, 17 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "TYPE_SINT64", sizeof("TYPE_SINT64")-1, 18 TSRMLS_CC);
-    zend_declare_class_constant_long(protocol_buffers_class_entry, "MAX_FIELD_TYPE", sizeof("MAX_FIELD_TYPE")-1, 19 TSRMLS_CC);
+    PB_DECLARE_CONST_LONG("WIRETYPE_VARINT",           sizeof("WIRETYPE_VARINT")-1,           0);
+    PB_DECLARE_CONST_LONG("WIRETYPE_FIXED64",          sizeof("WIRETYPE_FIXED64")-1,          1);
+    PB_DECLARE_CONST_LONG("WIRETYPE_LENGTH_DELIMITED", sizeof("WIRETYPE_LENGTH_DELIMITED")-1, 2);
+    PB_DECLARE_CONST_LONG("WIRETYPE_START_GROUP",      sizeof("WIRETYPE_START_GROUP")-1,      3);
+    PB_DECLARE_CONST_LONG("WIRETYPE_END_GROUP",        sizeof("WIRETYPE_END_GROUP")-1,        4);
+    PB_DECLARE_CONST_LONG("WIRETYPE_FIXED32",          sizeof("WIRETYPE_FIXED32")-1,          5);
+
+    PB_DECLARE_CONST_LONG("TYPE_DOUBLE",               sizeof("TYPE_DOUBLE")-1,               1);
+    PB_DECLARE_CONST_LONG("TYPE_FLOAT",                sizeof("TYPE_FLOAT")-1,                2);
+    PB_DECLARE_CONST_LONG("TYPE_INT64",                sizeof("TYPE_INT64")-1,                3);
+    PB_DECLARE_CONST_LONG("TYPE_UINT64",               sizeof("TYPE_UINT64")-1,               4);
+    PB_DECLARE_CONST_LONG("TYPE_INT32",                sizeof("TYPE_INT32")-1,                5);
+    PB_DECLARE_CONST_LONG("TYPE_FIXED64",              sizeof("TYPE_FIXED64")-1,              6);
+    PB_DECLARE_CONST_LONG("TYPE_FIXED32",              sizeof("TYPE_FIXED32")-1,              7);
+    PB_DECLARE_CONST_LONG("TYPE_BOOL",                 sizeof("TYPE_BOOL")-1,                 8);
+    PB_DECLARE_CONST_LONG("TYPE_STRING",               sizeof("TYPE_STRING")-1,               9);
+    PB_DECLARE_CONST_LONG("TYPE_GROUP",                sizeof("TYPE_GROUP")-1,               10);
+    PB_DECLARE_CONST_LONG("TYPE_MESSAGE",              sizeof("TYPE_MESSAGE")-1,             11);
+    PB_DECLARE_CONST_LONG("TYPE_BYTES",                sizeof("TYPE_BYTES")-1,               12);
+    PB_DECLARE_CONST_LONG("TYPE_UINT32",               sizeof("TYPE_UINT32")-1,              13);
+    PB_DECLARE_CONST_LONG("TYPE_ENUM",                 sizeof("TYPE_ENUM")-1,                14);
+    PB_DECLARE_CONST_LONG("TYPE_SFIXED32",             sizeof("TYPE_SFIXED32")-1,            15);
+    PB_DECLARE_CONST_LONG("TYPE_SFIXED64",             sizeof("TYPE_SFIXED64")-1,            16);
+    PB_DECLARE_CONST_LONG("TYPE_SINT32",               sizeof("TYPE_SINT32")-1,              17);
+    PB_DECLARE_CONST_LONG("TYPE_SINT64",               sizeof("TYPE_SINT64")-1,              18);
+    PB_DECLARE_CONST_LONG("MAX_FIELD_TYPE",            sizeof("MAX_FIELD_TYPE")-1,           19);
+
+#undef PB_DECLARE_CONST_LONG
+
 }
 
 
