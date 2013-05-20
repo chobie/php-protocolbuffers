@@ -68,12 +68,6 @@ static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 #endif
 }
 
-void messages_dtor(void *entry)
-{
-//    pb_scheme_container **container =  (pb_scheme_container**)entry;
-//    fprintf(stderr, "SZ:%d\n", (*container)->size);
-}
-
 static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
 {
 }
@@ -124,8 +118,8 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 {
     PBG(messages) = NULL;
     if (!PBG(messages)) {
-            ALLOC_HASHTABLE(PBG(messages));
-            zend_hash_init(PBG(messages), 0, NULL, (void (*)(void *)) messages_dtor, 0);
+        ALLOC_HASHTABLE(PBG(messages));
+        zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
     }
 
     return SUCCESS;
