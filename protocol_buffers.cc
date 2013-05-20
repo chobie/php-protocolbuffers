@@ -1551,18 +1551,51 @@ static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
 
 static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
 {
+    unsigned int target[8];
+
     if (pb_serializer_resize(serializer, 1)) {
         return 1;
     }
 
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 56 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 48 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 40 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 32 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#else
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#endif
+
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
 
     return 0;
 }
