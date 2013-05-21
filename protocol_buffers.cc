@@ -441,6 +441,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(z_obj);
                 object_init_ex(z_obj, s->ce);
                 zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+                pb_execute_wakeup(z_obj TSRMLS_CC);
 
                 if (s->repeated) {
                     if (!zend_hash_exists(hresult, s->name, s->name_len)) {
@@ -1508,6 +1509,24 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
     return 0;
 }
 
+static void pb_execute_wakeup(zval *obj TSRMLS_DC)
+{
+    zval fname, *retval_ptr = NULL;
+
+    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
+        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
+
+            INIT_PZVAL(&fname);
+            ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
+
+            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+    }
+
+    if (retval_ptr) {
+        zval_ptr_dtor(&retval_ptr);
+    }
+}
+
 /* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
 */
 PHP_METHOD(protocolbuffers, decode)
@@ -1562,24 +1581,7 @@ PHP_METHOD(protocolbuffers, decode)
         Z_ADDREF_P(z_result);
         zval_ptr_dtor(&z_result);
 
-        // wakeup
-        {
-            zval fname, *retval_ptr = NULL;
-
-            if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
-                zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
-
-                    INIT_PZVAL(&fname);
-                    ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
-
-                    call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-                }
-
-                if (retval_ptr) {
-                    zval_ptr_dtor(&retval_ptr);
-                }
-        }
-
+        pb_execute_wakeup(obj TSRMLS_CC);
     }
 
     RETURN_ZVAL(obj, 0, 1);

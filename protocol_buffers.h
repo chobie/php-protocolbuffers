@@ -13,6 +13,8 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
 static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result, HashTable *descriptor TSRMLS_DC);
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result);
 
+static void pb_execute_wakeup(zval *obj TSRMLS_DC);
+
 static void pb_serializer_init(pb_serializer **serializer);
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);
 static int pb_serializer_write8(pb_serializer *serializer, unsigned int value);
