@@ -603,6 +603,17 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_ENUM:
                         break;
                         case TYPE_SFIXED32:
+                        {
+                            long l = 0;
+
+                            memcpy(&l, data, 4);
+                            MAKE_STD_ZVAL(dz);
+
+                            ZVAL_LONG(dz, (int32_t)l);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+                            data += 4;
+                        }
                         break;
                         case TYPE_SFIXED64:
                         break;
