@@ -471,6 +471,51 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 }
 
                 zval_ptr_dtor(&z_obj);
+            } else if (s->packed) {
+                const char *packed_data_end;
+
+                packed_data_end = data + value;
+                do {
+                    switch (s->type) {
+                        case TYPE_DOUBLE:
+                        break;
+                        case TYPE_FLOAT:
+                        break;
+                        case TYPE_INT64:
+                        break;
+                        case TYPE_UINT64:
+                        break;
+                        case TYPE_INT32:
+                        {
+                                data = ReadVarint32FromArray(data, &value, data_end);
+
+                                MAKE_STD_ZVAL(dz);
+                                ZVAL_LONG(dz, (int32_t)value);
+
+                                PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+                        }
+                        break;
+                        case TYPE_FIXED64:
+                        break;
+                        case TYPE_FIXED32:
+                        break;
+                        case TYPE_BOOL:
+                        break;
+                        case TYPE_UINT32:
+                        break;
+                        case TYPE_ENUM:
+                        break;
+                        case TYPE_SFIXED32:
+                        break;
+                        case TYPE_SFIXED64:
+                        break;
+                        case TYPE_SINT32:
+                        break;
+                        case TYPE_SINT64:
+                        break;
+                    }
+                } while(data < packed_data_end);
+
             }
 
             data += value;
