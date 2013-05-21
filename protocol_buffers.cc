@@ -1209,66 +1209,6 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     return 0;
 }
 
-/* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
-*/
-PHP_METHOD(protocolbuffers, decode)
-{
-    HashTable *proto = NULL;
-    char *klass;
-    const char *data, *data_end;
-    long klass_len = 0, data_len = 0;
-    long buffer_size = 0;
-    zval *z_result, *z_proto = NULL;
-    zval *obj;
-    pb_scheme_container *container;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
-        return;
-    }
-
-    if (z_proto) {
-        proto       = Z_ARRVAL_P(z_proto);
-    }
-
-    buffer_size = (long)data + sizeof(data);
-    pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
-    data_end = data + data_len;
-    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
-
-    {
-        //zval func;
-
-        zval **pp[1];
-        zend_class_entry **ce;
-
-        MAKE_STD_ZVAL(obj);
-        zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
-        pp[0] = &z_result;
-
-        //ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
-
-        object_init_ex(obj, *ce);
-
-        //call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
-        //Z_OBJPROP_P(obj)
-        //zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal)
-        //zend_mangle_property_name(&kkey, &klen, "*", 1, "_properties", sizeof("_properties")+1, 0);
-        //zend_hash_add(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
-
-        //zend_hash_find(Z_OBJPROP_P(obj), "_properties", sizeof("_properties")+1, (void **)&h);
-        zend_hash_update(Z_OBJPROP_P(obj), "_properties", sizeof("_properties"), (void **)&z_result, sizeof(zval*), NULL);
-
-        //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
-        Z_ADDREF_P(z_result);
-        zval_ptr_dtor(&z_result);
-
-    }
-
-    RETURN_ZVAL(obj, 0, 1);
-}
-/* }}} */
-
 static void pb_serializer_init(pb_serializer **serializer)
 {
     pb_serializer *ser;
@@ -1575,6 +1515,66 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
     }
     return 0;
 }
+
+/* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
+*/
+PHP_METHOD(protocolbuffers, decode)
+{
+    HashTable *proto = NULL;
+    char *klass;
+    const char *data, *data_end;
+    long klass_len = 0, data_len = 0;
+    long buffer_size = 0;
+    zval *z_result, *z_proto = NULL;
+    zval *obj;
+    pb_scheme_container *container;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
+        return;
+    }
+
+    if (z_proto) {
+        proto       = Z_ARRVAL_P(z_proto);
+    }
+
+    buffer_size = (long)data + sizeof(data);
+    pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
+    data_end = data + data_len;
+    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
+
+    {
+        //zval func;
+
+        zval **pp[1];
+        zend_class_entry **ce;
+
+        MAKE_STD_ZVAL(obj);
+        zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
+        pp[0] = &z_result;
+
+        //ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
+
+        object_init_ex(obj, *ce);
+
+        //call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
+        //Z_OBJPROP_P(obj)
+        //zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal)
+        //zend_mangle_property_name(&kkey, &klen, "*", 1, "_properties", sizeof("_properties")+1, 0);
+        //zend_hash_add(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
+
+        //zend_hash_find(Z_OBJPROP_P(obj), "_properties", sizeof("_properties")+1, (void **)&h);
+        zend_hash_update(Z_OBJPROP_P(obj), "_properties", sizeof("_properties"), (void **)&z_result, sizeof(zval*), NULL);
+
+        //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
+        Z_ADDREF_P(z_result);
+        zval_ptr_dtor(&z_result);
+
+    }
+
+    RETURN_ZVAL(obj, 0, 1);
+}
+/* }}} */
 
 /* {{{ proto string ProtocolBuffers::encode($class[, array $descriptor])
 */
