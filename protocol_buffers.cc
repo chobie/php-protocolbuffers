@@ -914,11 +914,7 @@ static void pb_encode_element_sfixed64(INTERNAL_FUNCTION_PARAMETERS, zval **elem
 #endif
 
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
-    if (v < 0) {
-        pb_serializer_write64_le2(ser, (int64_t)v);
-    } else {
-        pb_serializer_write64_le(ser, (int64_t)v);
-    }
+    pb_serializer_write64_le2(ser, (int64_t)v);
 }
 
 static void pb_encode_element_sfixed64_packed(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
@@ -937,11 +933,7 @@ static void pb_encode_element_sfixed64_packed(INTERNAL_FUNCTION_PARAMETERS, zval
     }
 #endif
 
-    if (v < 0) {
-        pb_serializer_write64_le2(ser, (int64_t)v);
-    } else {
-        pb_serializer_write64_le(ser, (int64_t)v);
-    }
+    pb_serializer_write64_le2(ser, (int64_t)v);
 }
 
 
