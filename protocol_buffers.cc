@@ -1216,7 +1216,7 @@ static void pb_serializer_init(pb_serializer **serializer)
     ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
 
     ser->buffer_size = 0;
-    ser->buffer_capacity = 32;
+    ser->buffer_capacity = 256;
     ser->buffer_offset = 0;
     ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
     memset(ser->buffer, '\0', ser->buffer_capacity);
