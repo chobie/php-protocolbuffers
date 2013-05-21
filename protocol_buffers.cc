@@ -126,6 +126,38 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
   return ptr;
 }
 
+static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* value, const char* buffer_end)
+{
+    const char* ptr = buffer;
+    uint32_t b;
+
+    // Splitting into 32-bit pieces gives better performance on 32-bit
+    // processors.
+    uint32_t part0 = 0, part1 = 0, part2 = 0;
+
+    b = *(ptr++); part0  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part0 |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part0 |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part0 |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part1  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part1 |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part1 |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part1 |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part2  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
+    b = *(ptr++); part2 |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
+
+    // We have overrun the maximum size of a varint (10 bytes).  The data
+    // must be corrupt.
+    return "";
+
+   done:
+    *value = (uint64_t)(part0)         |
+             ((uint64_t)(part1) << 28) |
+             ((uint64_t)(part2) << 56);
+
+    return ptr;
+}
+
 static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
 {
     zval **d, **dd;
@@ -497,14 +529,12 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_UINT64:
                         break;
                         case TYPE_INT32:
-                        {
-                                data = ReadVarint32FromArray(data, &value, data_end);
+                            data = ReadVarint32FromArray(data, &value, data_end);
 
-                                MAKE_STD_ZVAL(dz);
-                                ZVAL_LONG(dz, (int32_t)value);
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, (int32_t)value);
 
-                                PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
-                        }
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         break;
                         case TYPE_FIXED64:
                         break;
@@ -529,6 +559,15 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_SINT32:
                         break;
                         case TYPE_SINT64:
+                        {
+                            uint64_t v2;
+                            data = ReadVarint64FromArray(data, &v2, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, (int64_t)zigzag_decode64(v2));
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+                        }
                         break;
                     }
 
