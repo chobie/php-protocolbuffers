@@ -174,7 +174,6 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
         }
     }
 
-    fprintf(stderr, "TAG:%d NOTFOUND!", tag);
     return NULL;
 }
 
@@ -337,7 +336,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
         s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
         if (s == NULL) {
-            fprintf(stderr, "tag %d NOTFOUND. this is bug\n", tag);
+            fprintf(stderr, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
             return "";
         }
 
