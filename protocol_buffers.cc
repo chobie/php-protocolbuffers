@@ -523,6 +523,17 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         }
                         break;
                         case TYPE_FLOAT:
+                        {
+                            float a = 0;
+
+                            memcpy(&a, data, 4);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_DOUBLE(dz, a);
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+
+                            data += 4;
+                        }
                         break;
                         case TYPE_INT64:
                         break;
