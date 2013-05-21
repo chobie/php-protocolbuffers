@@ -34,6 +34,7 @@
 #include "protocol_buffers.h"
 extern "C" {
 #include "ext/standard/php_var.h"
+#include "ext/standard/php_incomplete_class.h"
 }
 #include "is_utf8.h"
 
@@ -1560,6 +1561,24 @@ PHP_METHOD(protocolbuffers, decode)
         //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
         Z_ADDREF_P(z_result);
         zval_ptr_dtor(&z_result);
+
+        // wakeup
+        {
+            zval fname, *retval_ptr = NULL;
+
+            if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
+                zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
+
+                    INIT_PZVAL(&fname);
+                    ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
+
+                    call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+                }
+
+                if (retval_ptr) {
+                    zval_ptr_dtor(&retval_ptr);
+                }
+        }
 
     }
 
