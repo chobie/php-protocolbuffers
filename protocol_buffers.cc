@@ -441,7 +441,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(z_obj);
                 object_init_ex(z_obj, s->ce);
                 zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
-                pb_execute_wakeup(z_obj TSRMLS_CC);
+                // TODO
+                //pb_execute_wakeup(z_obj TSRMLS_CC);
 
                 if (s->repeated) {
                     if (!zend_hash_exists(hresult, s->name, s->name_len)) {
@@ -1066,10 +1067,10 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     pb_serializer_init(&ser);
 
     // TODO: consider interface.
-    pb_execute_sleep(klass, &targets TSRMLS_CC);
-    if (targets != NULL) {
-        // TODO: make hash?
-    }
+//    pb_execute_sleep(klass, &targets TSRMLS_CC);
+//    if (targets != NULL) {
+//        // TODO: make hash?
+//    }
 
     // TODO: mangle property name
     if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
@@ -1607,7 +1608,8 @@ PHP_METHOD(protocolbuffers, decode)
         Z_ADDREF_P(z_result);
         zval_ptr_dtor(&z_result);
 
-        pb_execute_wakeup(obj TSRMLS_CC);
+        // TODO:
+        //pb_execute_wakeup(obj TSRMLS_CC);
     }
 
     RETURN_ZVAL(obj, 0, 1);
