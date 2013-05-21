@@ -281,7 +281,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
     return 0;
 }
 
-#define PHP_PB_DECOCDE_ADD_ELM \
+#define PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED \
     if (s->repeated) {\
         if (!zend_hash_exists(hresult, s->name, s->name_len)) {\
             zval *arr;\
@@ -357,7 +357,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_LONG(dz, value);
             }
 
-            PHP_PB_DECOCDE_ADD_ELM
+            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
         }
         break;
         case WIRETYPE_FIXED64:
@@ -367,14 +367,14 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, d);
-                PHP_PB_DECOCDE_ADD_ELM
+                PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
             } else {
                 long l;
                 memcpy(&l, data, 8);
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, l);
-                PHP_PB_DECOCDE_ADD_ELM
+                PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
             }
 
             data += 8;
@@ -391,7 +391,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-                    PHP_PB_DECOCDE_ADD_ELM
+                    PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                 } else {
                     char *sub_buffer;
 
@@ -401,7 +401,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
 
-                    PHP_PB_DECOCDE_ADD_ELM
+                    PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
 
                     efree(sub_buffer);
                 }
@@ -413,7 +413,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-                    PHP_PB_DECOCDE_ADD_ELM
+                    PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                 } else {
                     char *sub_buffer;
 
@@ -424,7 +424,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
 
-                    PHP_PB_DECOCDE_ADD_ELM
+                    PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
 
                     efree(sub_buffer);
                 }
@@ -514,7 +514,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_LONG(dz, l);
             }
 
-            PHP_PB_DECOCDE_ADD_ELM
+            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
 
             data += 4;
         }
