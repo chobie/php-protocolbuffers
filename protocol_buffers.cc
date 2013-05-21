@@ -478,6 +478,16 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 do {
                     switch (s->type) {
                         case TYPE_DOUBLE:
+                        {
+                            double d;
+                            memcpy(&d, data, 8);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_DOUBLE(dz, d);
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+
+                            data += 8;
+                        }
                         break;
                         case TYPE_FLOAT:
                         break;
