@@ -536,6 +536,15 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         }
                         break;
                         case TYPE_INT64:
+                        {
+                            uint64_t v2;
+                            data = ReadVarint64FromArray(data, &v2, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, v2);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+                        }
                         break;
                         case TYPE_UINT64:
                         break;
