@@ -125,7 +125,7 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
   return ptr;
 }
 
-static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, char *name, size_t name_len TSRMLS_DC)
+static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
 {
     zval **d, **dd;
 
@@ -144,7 +144,7 @@ static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, char
     return 0;
 }
 
-static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, char *name, size_t name_len, zval **result TSRMLS_DC)
+static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len, zval **result TSRMLS_DC)
 {
     zval **d, **dd;
 
@@ -206,7 +206,6 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
         {
             zval *tmp;
             int tsize = 0;
-            char *t;
 
             ischeme[n].type = pb_get_lval_from_hash_by_tag(proto, ttag, "type", sizeof("type") TSRMLS_CC);
 
@@ -1034,7 +1033,6 @@ static void pb_encode_element_packed(INTERNAL_FUNCTION_PARAMETERS, HashTable *ha
     zval **tmp;
 
     if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-        zend_class_entry *ce;
         pb_serializer *n_ser = NULL;
 
         if (scheme->repeated) {
@@ -1070,7 +1068,6 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     int i = 0;
     pb_serializer *ser;
     zval **c;
-    zval **tmp;
     HashTable *hash = NULL;
 
     pb_serializer_init(&ser);
@@ -1240,7 +1237,7 @@ PHP_METHOD(protocolbuffers, decode)
     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
 
     {
-        zval func;
+        //zval func;
 
         zval **pp[1];
         zend_class_entry **ce;
