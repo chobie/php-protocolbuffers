@@ -539,6 +539,26 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_FIXED64:
                         break;
                         case TYPE_FIXED32:
+                        {
+                            unsigned long l = 0;
+                            memcpy(&l, data, 4);
+
+                            MAKE_STD_ZVAL(dz);
+#if SIZEOF_LONG == 4
+                            if (l > 0x7fffffff) {
+                                // PHP_INT_MAX is 0x7fffffff on this platform. cast to double.
+                                ZVAL_DOUBLE(dz, l);
+                            } else {
+                                ZVAL_LONG(dz, (unsigned long)l);
+                            }
+#else
+                            ZVAL_LONG(dz, (unsigned long)l);
+#endif
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+
+                            data += 4;
+                        }
                         break;
                         case TYPE_BOOL:
                             data = ReadVarint32FromArray(data, &value, data_end);
