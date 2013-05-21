@@ -14,6 +14,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result);
 
 static void pb_execute_wakeup(zval *obj TSRMLS_DC);
+static void pb_execute_sleep(zval *obj, zval **retval TSRMLS_DC);
 
 static void pb_serializer_init(pb_serializer **serializer);
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);

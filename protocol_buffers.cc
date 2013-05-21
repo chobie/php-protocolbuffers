@@ -1060,10 +1060,16 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 {
     int i = 0;
     pb_serializer *ser;
-    zval **c;
+    zval **c, *targets = NULL;
     HashTable *hash = NULL;
 
     pb_serializer_init(&ser);
+
+    // TODO: consider interface.
+    pb_execute_sleep(klass, &targets TSRMLS_CC);
+    if (targets != NULL) {
+        // TODO: make hash?
+    }
 
     // TODO: mangle property name
     if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
@@ -1072,6 +1078,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
         zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "the class does not defined _properties.");
         return -1;
     }
+
 
     for (i = 0; i < container->size; i++) {
         pb_scheme *scheme;
@@ -1526,6 +1533,25 @@ static void pb_execute_wakeup(zval *obj TSRMLS_DC)
         zval_ptr_dtor(&retval_ptr);
     }
 }
+
+static void pb_execute_sleep(zval *obj, zval **retval TSRMLS_DC)
+{
+    zval fname, *retval_ptr = NULL;
+
+    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
+        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__sleep", sizeof("__sleep"))) {
+
+            INIT_PZVAL(&fname);
+            ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
+
+            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+    }
+
+    if (retval_ptr) {
+        *retval = retval_ptr;
+    }
+}
+
 
 /* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
 */
