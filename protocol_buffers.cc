@@ -500,6 +500,12 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_FIXED32:
                         break;
                         case TYPE_BOOL:
+                            data = ReadVarint32FromArray(data, &value, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_BOOL(dz, value);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         break;
                         case TYPE_UINT32:
                         break;
