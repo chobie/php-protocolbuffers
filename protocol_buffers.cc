@@ -472,8 +472,9 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 zval_ptr_dtor(&z_obj);
             } else if (s->packed) {
-                const char *packed_data_end;
+                const char *packed_data_end, *last_data_offset;
 
+                last_data_offset = data;
                 packed_data_end = data + value;
                 do {
                     switch (s->type) {
@@ -530,6 +531,12 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         case TYPE_SINT64:
                         break;
                     }
+
+                    if (last_data_offset == data) {
+                        fprintf(stderr, "detect infinite loop!");
+                        break;
+                    }
+                    last_data_offset = data;
                 } while(data < packed_data_end);
 
             }
