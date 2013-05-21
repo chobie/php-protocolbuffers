@@ -616,6 +616,16 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         }
                         break;
                         case TYPE_SFIXED64:
+                        {
+                            int64_t l;
+                            memcpy(&l, data, 8);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_DOUBLE(dz, l);
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+
+                            data += 8;
+                        }
                         break;
                         case TYPE_SINT32:
                         break;
