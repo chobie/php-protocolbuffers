@@ -541,12 +541,22 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             data = ReadVarint64FromArray(data, &v2, data_end);
 
                             MAKE_STD_ZVAL(dz);
-                            ZVAL_LONG(dz, v2);
+                            ZVAL_LONG(dz, (int64_t)v2);
 
                             PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         }
                         break;
                         case TYPE_UINT64:
+                        {
+                            uint64_t v2;
+                            data = ReadVarint64FromArray(data, &v2, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, v2);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
+                        }
+                        break;
                         break;
                         case TYPE_INT32:
                             data = ReadVarint32FromArray(data, &value, data_end);
@@ -599,8 +609,20 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         break;
                         case TYPE_UINT32:
+                            data = ReadVarint32FromArray(data, &value, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, (int32_t)value);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         break;
                         case TYPE_ENUM:
+                            data = ReadVarint32FromArray(data, &value, data_end);
+
+                            MAKE_STD_ZVAL(dz);
+                            ZVAL_LONG(dz, (int32_t)value);
+
+                            PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
                         break;
                         case TYPE_SFIXED32:
                         {
