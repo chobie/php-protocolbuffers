@@ -73,7 +73,7 @@ static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
 {
 }
 
-static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC) /* {{{ */
+static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC)
 {
 }
 
