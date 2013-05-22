@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 #include <cstdio> // for sprintf
 

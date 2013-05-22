@@ -7,7 +7,7 @@ option (php).generate_getter = true;
 option (php).generate_setter = true;
 
 message Person {
-  //option (php_option).trait = "Hoge";
+  //option (php_option).trait = "Hoge Fuga";
 
   required string name = 1;
   required int32 id = 2;

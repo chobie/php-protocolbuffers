@@ -355,7 +355,16 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Indent();
 
     if (message.options().HasExtension(php_option)) {
-        printer.Print("use `trait`;\n", "trait", message.options().GetExtension(php_option).trait());
+        vector<string> traits;
+        vector<string>::iterator it;
+
+        SplitStringUsing(message.options().GetExtension(php_option).trait(), " ", &traits);
+
+        it = traits.begin();
+        while (it != traits.end()) {
+            printer.Print("use `trait`;\n", "trait", *it);
+            ++it;
+        }
 
         printer.Print("\n");
     }
