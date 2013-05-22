@@ -346,11 +346,19 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("class `name`",
             "name", ClassName(message)
              );
+
     if (options.has_base_class()) {
         printer.Print(" extends `base`", "base", options.base_class());
     }
+
     printer.Print("\n{\n");
     printer.Indent();
+
+    if (message.options().HasExtension(php_option)) {
+        printer.Print("use `trait`;\n", "trait", message.options().GetExtension(php_option).trait());
+
+        printer.Print("\n");
+    }
 
     // Print fields map
     printer.Print(

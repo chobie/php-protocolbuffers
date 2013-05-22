@@ -10,6 +10,15 @@ message PHPFileOptions {
     optional bool   generate_has    = 7;
 }
 
+message PHPMessageOptions {
+    optional string trait = 1;
+}
+
 extend google.protobuf.FileOptions {
     optional PHPFileOptions php = 1004;
 }
+
+extend google.protobuf.MessageOptions {
+    optional PHPMessageOptions php_option = 1004;
+}
+
