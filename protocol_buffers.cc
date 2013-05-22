@@ -170,7 +170,7 @@ static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, cons
         return 0;
     }
 
-    if (zend_hash_find(Z_ARRVAL_PP(d), name, name_len, (void **)&dd) == SUCCESS) {
+    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
         return Z_LVAL_PP(dd);
     }
 
@@ -189,7 +189,7 @@ static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, cons
         return 0;
     }
 
-    if (zend_hash_find(Z_ARRVAL_PP(d), name, name_len, (void **)&dd) == SUCCESS) {
+    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
         *result = *dd;
         return 1;
     }
