@@ -98,6 +98,12 @@ typedef struct pb_scheme
 } pb_scheme;
 
 typedef struct {
+    char *name;
+    int name_len;
+    char *filename;
+    int filename_len;
+    int is_extendable;
+    //int extension_range_min;
     pb_scheme *scheme;
     int size;
 } pb_scheme_container;
