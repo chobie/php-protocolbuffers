@@ -289,7 +289,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
             if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
                 proto = Z_ARRVAL_P(ret);
             } else {
-                fprintf(stderr, "ERROR");
+                php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
                 return 1;
             }
         } else {
@@ -364,7 +364,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         data = ReadVarint32FromArray(data, &value, data_end);
 
         if (data == NULL) {
-            fprintf(stderr, "ERROR!");
+            php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message failed. ReadVarint32FromArray returns NULL.");
             return "";
         }
 
@@ -373,7 +373,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
         s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
         if (s == NULL) {
-            fprintf(stderr, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
             return "";
         }
 
@@ -676,7 +676,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     }
 
                     if (last_data_offset == data) {
-                        fprintf(stderr, "detect infinite loop!");
+                        php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message: detect infinite loop when processing repeated packed field.");
                         break;
                     }
                     last_data_offset = data;
@@ -1261,7 +1261,7 @@ static void pb_encode_element_packed(INTERNAL_FUNCTION_PARAMETERS, HashTable *ha
             efree(n_ser);
 
         } else {
-            fprintf(stderr, "pb_encode_element_packed called non repeated scheme. this is bug");
+            php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
         }
 
     }
