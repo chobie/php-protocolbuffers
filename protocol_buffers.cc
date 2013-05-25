@@ -32,10 +32,12 @@
 #include "php_protocol_buffers.h"
 #include "helper.h"
 #include "protocol_buffers.h"
+
 extern "C" {
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/info.h"
+#include "limits.h"
 }
 #include "is_utf8.h"
 
@@ -57,6 +59,7 @@ PHPAPI pb_globals php_pb_globals;
 
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
+static const int64_t kLongMax = LONG_MAX;
 
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
