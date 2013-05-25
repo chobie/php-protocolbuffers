@@ -41,9 +41,9 @@ extern "C" {
 
 #if PHP_VERSION_ID < 50300
 # ifndef Z_ADDREF_P
-#  define Z_ADDREF_P(pz)				(pz)->refcount++
-#  define Z_ADDREF_PP(ppz)				Z_ADDREF_P(*(ppz))
-#  define Z_ADDREF(z)					Z_ADDREF_P(&(z))
+#  define Z_ADDREF_P(pz)   (pz)->refcount++
+#  define Z_ADDREF_PP(ppz) Z_ADDREF_P(*(ppz))
+#  define Z_ADDREF(z)      Z_ADDREF_P(&(z))
 # endif
 #endif
 
@@ -93,37 +93,37 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_read_varint32, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
-  // Fast path:  We have enough bytes left in the buffer to guarantee that
-  // this read won't cross the end, so we can skip the checks.
-  const char* ptr = buffer;
-  int b;
-  int result;
+    // Fast path:  We have enough bytes left in the buffer to guarantee that
+    // this read won't cross the end, so we can skip the checks.
+    const char* ptr = buffer;
+    int b;
+    int result;
 
-  if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && (uint)*ptr < 0x80) {
-    *value = (uint)*buffer;
-    ptr++;
-    return ptr;
-  }
+    if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && (uint)*ptr < 0x80) {
+        *value = (uint)*buffer;
+        ptr++;
+        return ptr;
+    }
 
-  b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
-  b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
-  b = *(ptr++); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
-  b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
-  b = *(ptr++); result |=  b         << 28; if (!(b & 0x80)) goto done;
+    b = *(ptr++); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
+    b = *(ptr++); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
+    b = *(ptr++); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
+    b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
+    b = *(ptr++); result |=  b         << 28; if (!(b & 0x80)) goto done;
 
-  // If the input is larger than 32 bits, we still need to read it all
-  // and discard the high-order bits.
-  for (int i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
-    b = *(ptr++); if (!(b & 0x80)) goto done;
-  }
+    // If the input is larger than 32 bits, we still need to read it all
+    // and discard the high-order bits.
+    for (int i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
+        b = *(ptr++); if (!(b & 0x80)) goto done;
+    }
 
-  // We have overrun the maximum size of a varint (10 bytes).  Assume
-  // the data is corrupt.
-  return NULL;
+    // We have overrun the maximum size of a varint (10 bytes).  Assume
+    // the data is corrupt.
+    return NULL;
 
- done:
-  *value = result;
-  return ptr;
+    done:
+        *value = result;
+        return ptr;
 }
 
 static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* value, const char* buffer_end)
@@ -473,6 +473,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 MAKE_STD_ZVAL(z_obj);
                 object_init_ex(z_obj, s->ce);
                 zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+
                 // TODO
                 //pb_execute_wakeup(z_obj TSRMLS_CC);
 
@@ -1676,14 +1677,15 @@ static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t valu
     }
 
     while (value > 0x7F) {
-      bytes[size++] = (value & 0x7F) | 0x80;
-      value >>= 7;
+        bytes[size++] = (value & 0x7F) | 0x80;
+        value >>= 7;
     }
     bytes[size++] = value & 0x7F;
 
     for (i = 0; i < size; i++) {
         serializer->buffer[serializer->buffer_size++] = bytes[i];
     }
+
     return 0;
 }
 
@@ -1697,8 +1699,8 @@ static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t valu
     }
 
     while (value > 0x7F) {
-      bytes[size++] = ((value) & 0x7F) | 0x80;
-      value >>= 7;
+        bytes[size++] = ((value) & 0x7F) | 0x80;
+        value >>= 7;
     }
     bytes[size++] = (value) & 0x7F;
 
@@ -1769,8 +1771,7 @@ PHP_METHOD(protocolbuffers, decode)
     const char *data, *data_end;
     long klass_len = 0, data_len = 0;
     long buffer_size = 0;
-    zval *z_result, *z_proto = NULL;
-    zval *obj;
+    zval *obj, *z_result, *z_proto = NULL;
     pb_scheme_container *container;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1866,15 +1867,24 @@ static zend_function_entry php_protocolbuffers_methods[] = {
 };
 
 
+static void php_invalid_byte_sequence_exception(TSRMLS_D)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "ProtocolBuffers_InvalidByteSequenceException", 0);
+    protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+}
+
 void php_protocolbuffers_init(TSRMLS_D)
 {
-    zend_class_entry ce, ce2;
+    zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers", php_protocolbuffers_methods);
     protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-    INIT_CLASS_ENTRY(ce2, "ProtocolBuffers_InvalidByteSequenceException", 0);
-    protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce2, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+    php_invalid_byte_sequence_exception(TSRMLS_C);
+
+
 
 #define PB_DECLARE_CONST_LONG(name, size, value) \
     zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
@@ -1936,6 +1946,7 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
     PBG(messages) = NULL;
+
     if (!PBG(messages)) {
         ALLOC_HASHTABLE(PBG(messages));
         zend_hash_init(PBG(messages), 0, NULL, NULL, 0);

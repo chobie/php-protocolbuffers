@@ -16,6 +16,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 static void pb_execute_wakeup(zval *obj TSRMLS_DC);
 static void pb_execute_sleep(zval *obj, zval **retval TSRMLS_DC);
 
+static void php_invalid_byte_sequence_exception(TSRMLS_D);
+
 static void pb_serializer_init(pb_serializer **serializer);
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);
 static int pb_serializer_write8(pb_serializer *serializer, unsigned int value);
