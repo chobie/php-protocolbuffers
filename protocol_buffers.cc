@@ -35,6 +35,7 @@
 extern "C" {
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_incomplete_class.h"
+#include "ext/standard/info.h"
 }
 #include "is_utf8.h"
 
@@ -1922,6 +1923,13 @@ void php_protocolbuffers_init(TSRMLS_D)
 
 PHP_MINFO_FUNCTION(protocolbuffers)
 {
+
+    php_printf("PHP Protocol Buffers Extension\n");
+
+    php_info_print_table_start();
+    php_info_print_table_header(2,"Protocol Buffers Support",  "enabled");
+    php_info_print_table_row(2,"Version", PHP_PROTOCOLBUFFERS_EXTVER);
+    php_info_print_table_end();
 }
 
 PHP_MINIT_FUNCTION(protocolbuffers)
