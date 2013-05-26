@@ -1,35 +1,24 @@
 <?php
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/messages/Base.php";
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/messages/User.php";
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "tests/messages/Addressbook.php";
 require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
+$person = new Tutorial_Person();
+$person->setId(21);
+$person->setName("John Doe");
 
-$u = new User();
-$u->setId(20);
-$u->setOffense(105);
-$u->setName("chobie");
+$data = serialize($person);
 
-$u2 = new User();
-$u2->setId(21);
-$u2->setOffense(108);
+printf("# decoding benchmark (serialize / unserialize).\n");
+printf("# target message size: %d bytes.\n", strlen($data));
+printf("# start\n");
 
-$u2->setName("charmy");
-
-$addr = new AddressBook();
-$addr->addUser($u);
-$addr->addUser($u2);
-
-$data  = serialize($addr);
 $begin = microtime(true);
-
-for ($i = 0; $i < 10000; $i++) {
+$attempts = 100000;
+for ($i = 0; $i < $attempts; $i++) {
     unserialize($data);
 }
 $end = microtime(true);
 
-var_dump($end - $begin);
-
-//var_dump(AddressBook::unserialize($data));
-//echo ProtocolBuffers::generateProto("User");
-//echo ProtocolBuffers::generateProto("AddressBook");
+printf("# Result:\n");
+printf("# decoding %d messages\n", $attempts);
+printf("# processing time: %6f (%f/message)\n", $end - $begin, ($end - $begin) / $attempts);
+printf("# total bytes: %d bytes\n", strlen($data) * $attempts);
