@@ -92,10 +92,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_encode, 0, 0, 1)
     ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_read_varint32, 0, 0, 1)
-    ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
     // Fast path:  We have enough bytes left in the buffer to guarantee that
     // this read won't cross the end, so we can skip the checks.
