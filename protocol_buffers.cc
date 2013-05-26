@@ -734,6 +734,317 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
     return data;
 }
 
+
+
+static void pb_serializer_destroy(pb_serializer *serializer)
+{
+    if (serializer != NULL) {
+        if (serializer->buffer_size != NULL ) {
+            efree(serializer->buffer);
+        }
+
+        serializer->buffer = NULL;
+        serializer->buffer_offset = 0;
+        serializer->buffer_size = 0;
+        efree(serializer);
+        serializer = NULL;
+    }
+}
+
+
+static void pb_serializer_init(pb_serializer **serializer)
+{
+    pb_serializer *ser;
+    ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
+
+    ser->buffer_size = 0;
+    ser->buffer_capacity = 256;
+    ser->buffer_offset = 0;
+    ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
+    memset(ser->buffer, '\0', ser->buffer_capacity);
+
+    *serializer = ser;
+}
+
+static int pb_serializer_resize(pb_serializer *serializer, size_t size)
+{
+    if (serializer->buffer_size + size < serializer->buffer_capacity) {
+        return 0;
+    }
+
+    while (serializer->buffer_size + size >= serializer->buffer_capacity) {
+        serializer->buffer_capacity *= 2;
+    }
+
+    serializer->buffer = (uint8_t*)erealloc(serializer->buffer, serializer->buffer_capacity);
+    if (serializer->buffer == NULL) {
+        return 1;
+    }
+
+    return 0;
+}
+
+static int pb_serializer_write8(pb_serializer *serializer, unsigned int value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+    serializer->buffer[serializer->buffer_size++] = value;
+    return 0;
+}
+
+static int pb_serializer_write16(pb_serializer *serializer, unsigned int value)
+{
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
+    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
+
+    return 0;
+}
+
+static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
+{
+    uint8_t target[4] = {0};
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    memcpy(target, (void*)&value, sizeof(value));
+#else
+    target[0] = (value);
+    target[1] = (value >>  8);
+    target[2] = (value >> 16);
+    target[3] = (value >> 24);
+#endif
+
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+
+    return 0;
+}
+
+static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
+{
+    unsigned int target[8];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#else
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#endif
+
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
+
+    return 0;
+}
+
+static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
+{
+    int i;
+
+    if (pb_serializer_resize(serializer, len)) {
+        return 1;
+    }
+
+    for (i = 0; i < len; i++) {
+        serializer->buffer[serializer->buffer_size++] = string[i];
+    }
+    return 0;
+}
+
+static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
+{
+    uint8_t bytes[kMaxVarint32Bytes];
+    int size = 0, i;
+
+    if (value > kint32max) {
+//        fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
+//        return 0;
+    }
+
+    if (pb_serializer_resize(serializer, 4)) {
+        return 1;
+    }
+
+    while (value > 0x7F) {
+        bytes[size++] = (value & 0x7F) | 0x80;
+        value >>= 7;
+    }
+    bytes[size++] = value & 0x7F;
+
+    for (i = 0; i < size; i++) {
+        serializer->buffer[serializer->buffer_size++] = bytes[i];
+    }
+
+    return 0;
+}
+
+static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
+{
+    unsigned int target[8];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#else
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#endif
+
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
+
+    return 0;
+}
+
+static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
+{
+    unsigned int target[8];
+
+    if (pb_serializer_resize(serializer, 1)) {
+        return 1;
+    }
+
+#ifdef PROTOBUF_LITTLE_ENDIAN
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#else
+    {
+        uint32_t part0 = (uint32_t)(value);
+        uint32_t part1 = (uint32_t)(value >> 32);
+
+        target[0] = (uint8_t)(part0);
+        target[1] = (uint8_t)(part0 >> 8);
+        target[2] = (uint8_t)(part0 >> 16);
+        target[3] = (uint8_t)(part0 >> 24);
+        target[4] = (uint8_t)(part1);
+        target[5] = (uint8_t)(part1 >> 8);
+        target[6] = (uint8_t)(part1 >> 16);
+        target[7] = (uint8_t)(part1 >> 24);
+    }
+#endif
+
+    serializer->buffer[serializer->buffer_size++] = target[0];
+    serializer->buffer[serializer->buffer_size++] = target[1];
+    serializer->buffer[serializer->buffer_size++] = target[2];
+    serializer->buffer[serializer->buffer_size++] = target[3];
+    serializer->buffer[serializer->buffer_size++] = target[4];
+    serializer->buffer[serializer->buffer_size++] = target[5];
+    serializer->buffer[serializer->buffer_size++] = target[6];
+    serializer->buffer[serializer->buffer_size++] = target[7];
+
+    return 0;
+}
+
+
+static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
+{
+    uint8_t bytes[kMaxVarintBytes];
+    int size = 0, i;
+
+    if (pb_serializer_resize(serializer, 8)) {
+        return 1;
+    }
+
+    while (value > 0x7F) {
+        bytes[size++] = ((value) & 0x7F) | 0x80;
+        value >>= 7;
+    }
+    bytes[size++] = (value) & 0x7F;
+
+    for (i = 0; i < size; i++) {
+        serializer->buffer[serializer->buffer_size++] = bytes[i];
+    }
+    return 0;
+}
+
 static void pb_encode_element_float(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser)
 {
     union {
@@ -1419,315 +1730,6 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     return 0;
 }
 
-static void pb_serializer_destroy(pb_serializer *serializer)
-{
-    if (serializer != NULL) {
-        if (serializer->buffer_size != NULL ) {
-            efree(serializer->buffer);
-        }
-
-        serializer->buffer = NULL;
-        serializer->buffer_offset = 0;
-        serializer->buffer_size = 0;
-        efree(serializer);
-        serializer = NULL;
-    }
-}
-
-
-static void pb_serializer_init(pb_serializer **serializer)
-{
-    pb_serializer *ser;
-    ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
-
-    ser->buffer_size = 0;
-    ser->buffer_capacity = 256;
-    ser->buffer_offset = 0;
-    ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
-    memset(ser->buffer, '\0', ser->buffer_capacity);
-
-    *serializer = ser;
-}
-
-static int pb_serializer_resize(pb_serializer *serializer, size_t size)
-{
-    if (serializer->buffer_size + size < serializer->buffer_capacity) {
-        return 0;
-    }
-
-    while (serializer->buffer_size + size >= serializer->buffer_capacity) {
-        serializer->buffer_capacity *= 2;
-    }
-
-    serializer->buffer = (uint8_t*)erealloc(serializer->buffer, serializer->buffer_capacity);
-    if (serializer->buffer == NULL) {
-        return 1;
-    }
-
-    return 0;
-}
-
-static int pb_serializer_write8(pb_serializer *serializer, unsigned int value)
-{
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-    serializer->buffer[serializer->buffer_size++] = value;
-    return 0;
-}
-
-static int pb_serializer_write16(pb_serializer *serializer, unsigned int value)
-{
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value >> 8 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (unsigned char) (value & 0xff);
-
-    return 0;
-}
-
-static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
-{
-    uint8_t target[4] = {0};
-
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-#ifdef PROTOBUF_LITTLE_ENDIAN
-    memcpy(target, (void*)&value, sizeof(value));
-#else
-    target[0] = (value);
-    target[1] = (value >>  8);
-    target[2] = (value >> 16);
-    target[3] = (value >> 24);
-#endif
-
-    serializer->buffer[serializer->buffer_size++] = target[0];
-    serializer->buffer[serializer->buffer_size++] = target[1];
-    serializer->buffer[serializer->buffer_size++] = target[2];
-    serializer->buffer[serializer->buffer_size++] = target[3];
-
-    return 0;
-}
-
-static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
-{
-    unsigned int target[8];
-
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-#ifdef PROTOBUF_LITTLE_ENDIAN
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#else
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#endif
-
-    serializer->buffer[serializer->buffer_size++] = target[0];
-    serializer->buffer[serializer->buffer_size++] = target[1];
-    serializer->buffer[serializer->buffer_size++] = target[2];
-    serializer->buffer[serializer->buffer_size++] = target[3];
-    serializer->buffer[serializer->buffer_size++] = target[4];
-    serializer->buffer[serializer->buffer_size++] = target[5];
-    serializer->buffer[serializer->buffer_size++] = target[6];
-    serializer->buffer[serializer->buffer_size++] = target[7];
-
-    return 0;
-}
-
-static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value)
-{
-    unsigned int target[8];
-
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-#ifdef PROTOBUF_LITTLE_ENDIAN
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#else
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#endif
-
-    serializer->buffer[serializer->buffer_size++] = target[0];
-    serializer->buffer[serializer->buffer_size++] = target[1];
-    serializer->buffer[serializer->buffer_size++] = target[2];
-    serializer->buffer[serializer->buffer_size++] = target[3];
-    serializer->buffer[serializer->buffer_size++] = target[4];
-    serializer->buffer[serializer->buffer_size++] = target[5];
-    serializer->buffer[serializer->buffer_size++] = target[6];
-    serializer->buffer[serializer->buffer_size++] = target[7];
-
-    return 0;
-}
-
-
-static int pb_serializer_write64(pb_serializer *serializer, uint64_t value)
-{
-    unsigned int target[8];
-
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-
-#ifdef PROTOBUF_LITTLE_ENDIAN
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#else
-    {
-        uint32_t part0 = (uint32_t)(value);
-        uint32_t part1 = (uint32_t)(value >> 32);
-
-        target[0] = (uint8_t)(part0);
-        target[1] = (uint8_t)(part0 >> 8);
-        target[2] = (uint8_t)(part0 >> 16);
-        target[3] = (uint8_t)(part0 >> 24);
-        target[4] = (uint8_t)(part1);
-        target[5] = (uint8_t)(part1 >> 8);
-        target[6] = (uint8_t)(part1 >> 16);
-        target[7] = (uint8_t)(part1 >> 24);
-    }
-#endif
-
-    serializer->buffer[serializer->buffer_size++] = target[0];
-    serializer->buffer[serializer->buffer_size++] = target[1];
-    serializer->buffer[serializer->buffer_size++] = target[2];
-    serializer->buffer[serializer->buffer_size++] = target[3];
-    serializer->buffer[serializer->buffer_size++] = target[4];
-    serializer->buffer[serializer->buffer_size++] = target[5];
-    serializer->buffer[serializer->buffer_size++] = target[6];
-    serializer->buffer[serializer->buffer_size++] = target[7];
-
-    return 0;
-}
-
-static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
-{
-    uint8_t bytes[kMaxVarint32Bytes];
-    int size = 0, i;
-
-    if (value > kint32max) {
-//        fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
-//        return 0;
-    }
-
-    if (pb_serializer_resize(serializer, 4)) {
-        return 1;
-    }
-
-    while (value > 0x7F) {
-        bytes[size++] = (value & 0x7F) | 0x80;
-        value >>= 7;
-    }
-    bytes[size++] = value & 0x7F;
-
-    for (i = 0; i < size; i++) {
-        serializer->buffer[serializer->buffer_size++] = bytes[i];
-    }
-
-    return 0;
-}
-
-static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
-{
-    uint8_t bytes[kMaxVarintBytes];
-    int size = 0, i;
-
-    if (pb_serializer_resize(serializer, 8)) {
-        return 1;
-    }
-
-    while (value > 0x7F) {
-        bytes[size++] = ((value) & 0x7F) | 0x80;
-        value >>= 7;
-    }
-    bytes[size++] = (value) & 0x7F;
-
-    for (i = 0; i < size; i++) {
-        serializer->buffer[serializer->buffer_size++] = bytes[i];
-    }
-    return 0;
-}
-
-
-static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
-{
-    int i;
-
-    if (pb_serializer_resize(serializer, len)) {
-        return 1;
-    }
-
-    for (i = 0; i < len; i++) {
-        serializer->buffer[serializer->buffer_size++] = string[i];
-    }
-    return 0;
-}
 
 /* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
 */
