@@ -24,4 +24,5 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
 
 static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer);
 
-typedef void (*pb_encode_callback)(INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser);
+#define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser, int write_header
+typedef void (*pb_encode_callback)(PB_ENCODE_CALLBACK_PARAMETERS);
