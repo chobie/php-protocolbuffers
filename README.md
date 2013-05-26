@@ -92,6 +92,27 @@ encode object with specified descriptor.
 ##### *Example*
 
 
+Compatibility
+-------------
+
+<table>
+  <tr>
+    <td>repeated fields</td><td>supported</td>
+  </tr>
+  <tr>
+    <td>packed attributes</td><td>supported</td>
+  </tr>
+  <tr>
+    <td>extensions</td><td>not supported (will be add in July, 2013)</td>
+  </tr>
+  <tr>
+    <td>unknown fields</td><td>not supported (will be add in July, 2013)</td>
+  </tr>
+</table>
+
+Basically, php-protocolbuffers test cases were made by python generator.
+at least it proves correct behavior in those test cases.
+
 Thanks
 -------
 
