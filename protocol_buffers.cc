@@ -30,7 +30,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "php_protocol_buffers.h"
-#include "helper.h"
 #include "protocol_buffers.h"
 
 extern "C" {
@@ -39,7 +38,9 @@ extern "C" {
 #include "ext/standard/info.h"
 #include "limits.h"
 }
+
 #include "is_utf8.h"
+#include "helper.h"
 
 
 #if PHP_VERSION_ID < 50300
@@ -1723,43 +1724,6 @@ static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned cha
     }
     return 0;
 }
-
-static void pb_execute_wakeup(zval *obj TSRMLS_DC)
-{
-    zval fname, *retval_ptr = NULL;
-
-    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
-        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
-
-            INIT_PZVAL(&fname);
-            ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
-
-            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-    }
-
-    if (retval_ptr) {
-        zval_ptr_dtor(&retval_ptr);
-    }
-}
-
-static void pb_execute_sleep(zval *obj, zval **retval TSRMLS_DC)
-{
-    zval fname, *retval_ptr = NULL;
-
-    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
-        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__sleep", sizeof("__sleep"))) {
-
-            INIT_PZVAL(&fname);
-            ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
-
-            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-    }
-
-    if (retval_ptr) {
-        *retval = retval_ptr;
-    }
-}
-
 
 /* {{{ proto mixed ProtocolBuffers::decode($class_name, $bytes)
 */
