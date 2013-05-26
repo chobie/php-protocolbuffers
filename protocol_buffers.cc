@@ -739,7 +739,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 static void pb_serializer_destroy(pb_serializer *serializer)
 {
     if (serializer != NULL) {
-        if (serializer->buffer_size != NULL ) {
+        if (serializer->buffer != NULL) {
             efree(serializer->buffer);
         }
 
@@ -1332,10 +1332,16 @@ static void pb_encode_element_msg(INTERNAL_FUNCTION_PARAMETERS, zval **element, 
     zend_class_entry *ce;
     pb_scheme_container *n_container;
     pb_serializer *n_ser = NULL;
+    int err = 0;
 
     ce = Z_OBJCE_PP(element);
 
     pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+    if (err) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+    }
+    // TODO: add error handling
+
     pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
     pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
     pb_serializer_write_varint32(ser, n_ser->buffer_size);
@@ -1720,8 +1726,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
         }
 
         if (EG(exception)) {
-            efree(ser->buffer);
-            efree(ser);
+            pb_serializer_destroy(ser);
             return 1;
         }
     }
@@ -1742,6 +1747,7 @@ PHP_METHOD(protocolbuffers, decode)
     long buffer_size = 0;
     zval *obj, *z_result, *z_proto = NULL;
     pb_scheme_container *container;
+    int err = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
@@ -1753,7 +1759,12 @@ PHP_METHOD(protocolbuffers, decode)
     }
 
     buffer_size = (long)data + sizeof(data);
-    pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
+    err = pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
+    if (err) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
+        return;
+    }
+
     data_end = data + data_len;
     pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
 
