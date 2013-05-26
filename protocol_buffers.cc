@@ -1489,23 +1489,9 @@ static int pb_serializer_write16(pb_serializer *serializer, unsigned int value)
     return 0;
 }
 
-static int pb_serializer_write32(pb_serializer *serializer, unsigned int value)
-{
-    if (pb_serializer_resize(serializer, 1)) {
-        return 1;
-    }
-
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 24 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 16 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value >> 8 & 0xff);
-    serializer->buffer[serializer->buffer_size++] = (uint8_t) (value & 0xff);
-
-    return 0;
-}
-
 static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
 {
-    uint8_t target[4];
+    uint8_t target[4] = {0};
 
     if (pb_serializer_resize(serializer, 1)) {
         return 1;
