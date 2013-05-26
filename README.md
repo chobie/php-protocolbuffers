@@ -108,6 +108,9 @@ Compatibility
   <tr>
     <td>unknown fields</td><td>not supported (will be add in July, 2013)</td>
   </tr>
+  <tr>
+    <td>string field type check</td><td>strict (string must be utf-8 encoded or ascii text)</td>
+  </tr>
 </table>
 
 Basically, php-protocolbuffers test cases were made by python generator.
