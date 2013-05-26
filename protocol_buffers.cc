@@ -1813,6 +1813,7 @@ PHP_METHOD(protocolbuffers, encode)
     pb_scheme_container *container;
     HashTable *proto = NULL;
     pb_serializer *ser = NULL;
+    int err = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "o|a", &klass, &z_descriptor) == FAILURE) {
@@ -1825,7 +1826,11 @@ PHP_METHOD(protocolbuffers, encode)
         proto       = Z_ARRVAL_P(z_descriptor);
     }
 
-    pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+    err = pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+    if (err) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+    }
+
 
     if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
         return;
