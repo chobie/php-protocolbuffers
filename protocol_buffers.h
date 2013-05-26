@@ -17,6 +17,7 @@ static void pb_execute_wakeup(zval *obj TSRMLS_DC);
 static void pb_execute_sleep(zval *obj, zval **retval TSRMLS_DC);
 
 static void php_invalid_byte_sequence_exception(TSRMLS_D);
+static void pb_serializer_destroy(pb_serializer *serilizer);
 
 static void pb_serializer_init(pb_serializer **serializer);
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);

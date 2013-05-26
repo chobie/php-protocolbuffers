@@ -1252,9 +1252,7 @@ static void pb_encode_element_packed(INTERNAL_FUNCTION_PARAMETERS, HashTable *ha
             pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
             pb_serializer_write_varint32(ser, n_ser->buffer_size);
             pb_serializer_write_chararray(ser, (unsigned char*)n_ser->buffer, n_ser->buffer_size);
-
-            efree(n_ser->buffer);
-            efree(n_ser);
+            pb_serializer_destroy(n_ser);
 
         } else {
             php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
@@ -1270,6 +1268,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     pb_serializer *ser;
     zval **c, *targets = NULL;
     HashTable *hash = NULL;
+    pb_scheme *scheme;
 
     pb_serializer_init(&ser);
 
@@ -1283,13 +1282,16 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
         hash = Z_ARRVAL_PP(c);
     } else {
-        zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "the class does not defined _properties.");
+        pb_serializer_destroy(ser);
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` property.");
         return -1;
     }
 
+    if (container->size < 1) {
+        return -1;
+    }
 
     for (i = 0; i < container->size; i++) {
-        pb_scheme *scheme;
         scheme = &(container->scheme[i]);
 
         switch (scheme->type) {
@@ -1416,6 +1418,22 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     *serializer = ser;
     return 0;
 }
+
+static void pb_serializer_destroy(pb_serializer *serializer)
+{
+    if (serializer != NULL) {
+        if (serializer->buffer_size != NULL ) {
+            efree(serializer->buffer);
+        }
+
+        serializer->buffer = NULL;
+        serializer->buffer_offset = 0;
+        serializer->buffer_size = 0;
+        efree(serializer);
+        serializer = NULL;
+    }
+}
+
 
 static void pb_serializer_init(pb_serializer **serializer)
 {
@@ -1802,24 +1820,29 @@ PHP_METHOD(protocolbuffers, encode)
     }
 
     ce = Z_OBJCE_P(klass);
+
     if (z_descriptor) {
         proto       = Z_ARRVAL_P(z_descriptor);
     }
 
     pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+
     if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
         return;
+    }
+
+    if (ser == NULL) {
+        RETURN_EMPTY_STRING();
     }
 
     if (ser->buffer_size > 0) {
         RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
 
-        efree(ser->buffer);
-        efree(ser);
+        pb_serializer_destroy(ser);
     } else {
+        pb_serializer_destroy(ser);
         RETURN_EMPTY_STRING();
     }
-
 }
 /* }}} */
 
