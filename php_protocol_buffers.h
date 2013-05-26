@@ -18,6 +18,11 @@
 
 #include <stdint.h>
 
+#ifndef PHP_PROTOCOLBUFFERS_DEBUG
+#define PHP_PROTOCOLBUFFERS_DEBUG 0
+#endif
+
+
 #ifdef _MSC_VER
   #if defined(_M_IX86) && \
       !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST)
