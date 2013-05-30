@@ -986,7 +986,7 @@ static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 
     x.f = (float)Z_DVAL_PP(element);
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     }
     pb_serializer_write32_le(ser, x.u);
@@ -1005,7 +1005,7 @@ static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 
     u.d = Z_DVAL_PP(element);
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     }
     pb_serializer_write64_le(ser, u.u);
@@ -1014,7 +1014,7 @@ static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 
 static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     }
 
@@ -1041,7 +1041,7 @@ static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
     }
 #endif
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
     }
 
@@ -1058,7 +1058,7 @@ static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
         convert_to_long(*element);
     }
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
@@ -1080,7 +1080,7 @@ static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
     }
 #endif
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
     pb_serializer_write_varint64(ser, v);
@@ -1102,7 +1102,7 @@ static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
     }
 #endif
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
     pb_serializer_write_varint64(ser, v);
@@ -1110,7 +1110,7 @@ static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
 
@@ -1181,7 +1181,7 @@ static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
         convert_to_long(*element);
     }
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
 
@@ -1194,7 +1194,7 @@ static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
         convert_to_long(*element);
     }
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
     pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
@@ -1209,7 +1209,7 @@ static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
     }
     v = Z_LVAL_PP(element);
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     }
     pb_serializer_write32_le(ser, Z_LVAL_PP(element));
@@ -1231,7 +1231,7 @@ static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
     }
 #endif
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
     }
     pb_serializer_write64_le2(ser, (int64_t)v);
@@ -1243,7 +1243,7 @@ static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
         convert_to_long(*element);
     }
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
     pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
@@ -1265,37 +1265,14 @@ static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
     }
 #endif
 
-    if (write_header > 0) {
+    if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
     }
 
     pb_serializer_write_varint64(ser, zigzag_encode64(v));
 }
 
-static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f)
-{
-    zval **tmp;
-
-    if (zend_hash_find(hash, scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-        if (scheme->repeated) {
-            HashPosition pos;
-            zval **element;
-
-            for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
-                            zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
-                            zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
-            ) {
-                f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, ser, 1);
-            }
-
-        } else {
-            f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, 1);
-        }
-
-    }
-}
-
-static void pb_encode_element_packed(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f)
+static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
 {
     zval **tmp;
 
@@ -1306,27 +1283,37 @@ static void pb_encode_element_packed(INTERNAL_FUNCTION_PARAMETERS, HashTable *ha
             HashPosition pos;
             zval **element;
 
-            pb_serializer_init(&n_ser);
+            if (is_packed == 1) {
+                pb_serializer_init(&n_ser);
+            } else {
+                n_ser = ser;
+            }
 
             for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
                             zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
                             zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
             ) {
-                f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, n_ser, 0);
+                f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, n_ser, is_packed);
             }
 
-            pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-            pb_serializer_write_varint32(ser, n_ser->buffer_size);
-            pb_serializer_write_chararray(ser, (unsigned char*)n_ser->buffer, n_ser->buffer_size);
-            pb_serializer_destroy(n_ser);
+            if (is_packed == 1) {
+                pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
+                pb_serializer_write_varint32(ser, n_ser->buffer_size);
+                pb_serializer_write_chararray(ser, (unsigned char*)n_ser->buffer, n_ser->buffer_size);
+
+                pb_serializer_destroy(n_ser);
+            }
 
         } else {
-            php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
+            if (is_packed == 1) {
+                php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
+            } else {
+                f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
+            }
         }
 
     }
 }
-
 
 static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
@@ -1362,113 +1349,57 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
         switch (scheme->type) {
             case TYPE_DOUBLE:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
             break;
             case TYPE_FLOAT:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
             break;
             case TYPE_INT64:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
             break;
             case TYPE_UINT64:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
             break;
             case TYPE_INT32:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int32);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int32);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
             break;
             case TYPE_FIXED64:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
             break;
             case TYPE_FIXED32:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
             break;
             case TYPE_BOOL:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
             break;
             case TYPE_STRING:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_string);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_string, 0);
             break;
             case TYPE_GROUP:
             break;
             case TYPE_MESSAGE:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_msg);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_msg, 0);
             break;
             case TYPE_BYTES:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bytes);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bytes, 0);
             break;
             case TYPE_UINT32:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint32);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint32);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
             break;
             case TYPE_ENUM:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
             break;
             case TYPE_SFIXED32:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed32);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed32);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
             break;
             case TYPE_SFIXED64:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
             break;
             case TYPE_SINT32:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
             break;
             case TYPE_SINT64:
-                if (scheme->packed == 1) {
-                    pb_encode_element_packed(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64);
-                } else {
-                    pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64);
-                }
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
             break;
             default:
             break;
