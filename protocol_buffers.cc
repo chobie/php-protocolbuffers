@@ -1632,8 +1632,6 @@ void php_protocolbuffers_init(TSRMLS_D)
 
     php_invalid_byte_sequence_exception(TSRMLS_C);
 
-
-
 #define PB_DECLARE_CONST_LONG(name, size, value) \
     zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
 
@@ -1674,8 +1672,8 @@ PHP_MINFO_FUNCTION(protocolbuffers)
     php_printf("PHP Protocol Buffers Extension\n");
 
     php_info_print_table_start();
-    php_info_print_table_header(2,"Protocol Buffers Support",  "enabled");
-    php_info_print_table_row(2,"Version", PHP_PROTOCOLBUFFERS_EXTVER);
+    php_info_print_table_header(2, "Protocol Buffers Support", "enabled");
+    php_info_print_table_row(2, "Version", PHP_PROTOCOLBUFFERS_EXTVER);
     php_info_print_table_end();
 }
 
