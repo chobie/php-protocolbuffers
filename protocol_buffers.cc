@@ -63,6 +63,7 @@ static const int kMaxVarint32Bytes = 5;
 static const int64_t kLongMax = LONG_MAX;
 
 zend_class_entry *protocol_buffers_class_entry;
+zend_class_entry *protocol_buffers_descriptor_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
@@ -1611,6 +1612,15 @@ static void php_invalid_byte_sequence_exception(TSRMLS_D)
 
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers_InvalidByteSequenceException", 0);
     protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+}
+
+
+static void php_descriptor_class(TSRMLS_D)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "ProtocolBuffers_Descriptor", 0);
+    protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 }
 
 void php_protocolbuffers_init(TSRMLS_D)
