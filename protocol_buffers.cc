@@ -64,6 +64,7 @@ static const int64_t kLongMax = LONG_MAX;
 
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_descriptor_class_entry;
+zend_class_entry *protocol_buffers_field_descriptor_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
@@ -1546,12 +1547,20 @@ static void php_invalid_byte_sequence_exception(TSRMLS_D)
 }
 
 
-static void php_descriptor_class(TSRMLS_D)
+static void php_pb_descriptor_class(TSRMLS_D)
 {
     zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers_Descriptor", 0);
     protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+}
+
+static void php_pb_filed_descriptor_class(TSRMLS_D)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "ProtocolBuffers_FieldDescriptor", 0);
+    protocol_buffers_field_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 }
 
 void php_protocolbuffers_init(TSRMLS_D)
@@ -1562,6 +1571,8 @@ void php_protocolbuffers_init(TSRMLS_D)
     protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
     php_invalid_byte_sequence_exception(TSRMLS_C);
+    php_pb_descriptor_class(TSRMLS_C);
+    php_pb_filed_descriptor_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_LONG(name, size, value) \
     zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
