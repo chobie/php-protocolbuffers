@@ -41,6 +41,8 @@ extern "C" {
 
 #include "is_utf8.h"
 #include "helper.h"
+#include "descriptor.h"
+#include "field_descriptor.h"
 
 
 #if PHP_VERSION_ID < 50300
@@ -1546,22 +1548,6 @@ static void php_invalid_byte_sequence_exception(TSRMLS_D)
     protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 }
 
-
-static void php_pb_descriptor_class(TSRMLS_D)
-{
-    zend_class_entry ce;
-
-    INIT_CLASS_ENTRY(ce, "ProtocolBuffers_Descriptor", 0);
-    protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-}
-
-static void php_pb_filed_descriptor_class(TSRMLS_D)
-{
-    zend_class_entry ce;
-
-    INIT_CLASS_ENTRY(ce, "ProtocolBuffers_FieldDescriptor", 0);
-    protocol_buffers_field_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-}
 
 void php_protocolbuffers_init(TSRMLS_D)
 {
