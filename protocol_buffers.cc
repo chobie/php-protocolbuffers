@@ -43,7 +43,9 @@ extern "C" {
 #include "helper.h"
 #include "descriptor.h"
 #include "field_descriptor.h"
+#include "field_options.h"
 #include "message.h"
+#include "message_options.h"
 
 
 #if PHP_VERSION_ID < 50300
@@ -68,7 +70,9 @@ static const int64_t kLongMax = LONG_MAX;
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_descriptor_class_entry;
 zend_class_entry *protocol_buffers_field_descriptor_class_entry;
+zend_class_entry *protocol_buffers_field_options_class_entry;
 zend_class_entry *protocol_buffers_message_class_entry;
+zend_class_entry *protocol_buffers_message_options_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
@@ -1492,7 +1496,9 @@ void php_protocolbuffers_init(TSRMLS_D)
     php_invalid_byte_sequence_exception(TSRMLS_C);
     php_pb_descriptor_class(TSRMLS_C);
     php_pb_filed_descriptor_class(TSRMLS_C);
+    php_pb_filed_options_class(TSRMLS_C);
     php_pb_message_class(TSRMLS_C);
+    php_pb_message_options_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_LONG(name, size, value) \
     zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
