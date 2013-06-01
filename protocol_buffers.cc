@@ -401,14 +401,17 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         break;
         case WIRETYPE_FIXED64:
             if (s->type == TYPE_DOUBLE) {
+                uint64_t _v;
                 double d;
-                memcpy(&d, data, 8);
+
+                memcpy(&_v, data, 8);
+                d = decode_double(_v);
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, d);
                 PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
             } else {
-                long l;
+                uint64_t l;
                 memcpy(&l, data, 8);
 
                 MAKE_STD_ZVAL(dz);
@@ -519,9 +522,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     switch (s->type) {
                         case TYPE_DOUBLE:
                         {
+                            uint64_t _v;
                             double d;
-                            memcpy(&d, data, 8);
+                            memcpy(&_v, data, 8);
 
+                            d = decode_double(_v);
                             MAKE_STD_ZVAL(dz);
                             ZVAL_DOUBLE(dz, d);
                             PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED
@@ -531,9 +536,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         break;
                         case TYPE_FLOAT:
                         {
+                            uint32_t _v;
                             float a = 0;
 
-                            memcpy(&a, data, 4);
+                            memcpy(&_v, data, 4);
+                            a = decode_float(_v);
 
                             MAKE_STD_ZVAL(dz);
                             ZVAL_DOUBLE(dz, a);
@@ -690,9 +697,11 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
         break;
         case WIRETYPE_FIXED32: {
             if (s->type == TYPE_FLOAT) {
+                uint32_t _v;
                 float a = 0;
 
-                memcpy(&a, data, 4);
+                memcpy(&_v, data, 4);
+                a = decode_float(_v);
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, a);
@@ -917,41 +926,26 @@ static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t valu
 
 static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-    union {
-        float f;
-        uint32_t u;
-    } x;
-
     if (Z_TYPE_PP(element) != IS_DOUBLE) {
         convert_to_double(*element);
     }
-
-    x.f = (float)Z_DVAL_PP(element);
 
     if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
     }
-    pb_serializer_write32_le(ser, x.u);
+    pb_serializer_write32_le(ser, encode_float(Z_DVAL_PP(element)));
 }
 
 static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-    union {
-        double d;
-        uint64_t u;
-    } u;
-
     if (Z_TYPE_PP(element) != IS_DOUBLE) {
         convert_to_double(*element);
     }
 
-    u.d = Z_DVAL_PP(element);
-
     if (is_packed == 0) {
         pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
     }
-    pb_serializer_write64_le(ser, u.u);
-
+    pb_serializer_write64_le(ser, encode_double(Z_DVAL_PP(element)));
 }
 
 static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)

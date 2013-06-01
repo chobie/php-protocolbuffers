@@ -16,6 +16,46 @@ static inline int64_t zigzag_decode64(uint64_t n) {
   return (n >> 1) ^ - (int64_t)(n & 1);
 }
 
+static inline uint64_t encode_double(double value) {
+    union {
+        double d;
+        uint64_t v;
+    } u;
+    u.d = value;
+
+    return u.v;
+}
+
+static inline double decode_double(uint64_t value) {
+    union {
+        double d;
+        uint64_t v;
+    } u;
+    u.v = value;
+
+    return u.d;
+}
+
+static inline uint32_t encode_float(float value) {
+    union {
+        float f;
+        uint32_t v;
+    } u;
+    u.f = value;
+
+    return u.v;
+}
+
+static inline float decode_float(int32_t value) {
+    union {
+        float f;
+        uint32_t v;
+    } u;
+    u.v = value;
+
+    return u.f;
+}
+
 //static void pb_execute_wakeup(zval *obj TSRMLS_DC)
 //{
 //    zval fname, *retval_ptr = NULL;
