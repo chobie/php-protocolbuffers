@@ -69,7 +69,7 @@ static const uint64_t kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
  * Zend will use when loading this module
  */
 extern zend_module_entry protocolbuffers_module_entry;
-#define phpext_protocolbuffers_ptr &protocolbuffers_module_entry;
+#define phpext_protocolbuffers_ptr &protocolbuffers_module_entry
 
 extern zend_class_entry *protocol_buffers_class_entry;
 extern zend_class_entry *protocol_buffers_descriptor_class_entry;
