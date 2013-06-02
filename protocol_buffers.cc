@@ -74,6 +74,7 @@ zend_class_entry *protocol_buffers_field_options_class_entry;
 zend_class_entry *protocol_buffers_message_class_entry;
 zend_class_entry *protocol_buffers_message_options_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
+zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 {
@@ -372,7 +373,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
         if (data == NULL) {
             php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message failed. ReadVarint32FromArray returns NULL.");
-            return "";
+            zval_ptr_dtor(&tmp);
+            return NULL;
         }
 
         tag      = (value >> 0x03);
@@ -380,8 +382,9 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
         s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
         if (s == NULL) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
-            return "";
+            //php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
+            zval_ptr_dtor(&tmp);
+            return NULL;
         }
 
         switch (wiretype) {
@@ -1362,7 +1365,7 @@ PHP_METHOD(protocolbuffers, decode)
 {
     HashTable *proto = NULL;
     char *klass;
-    const char *data, *data_end;
+    const char *data, *data_end, *res;
     long klass_len = 0, data_len = 0;
     long buffer_size = 0;
     zval *obj, *z_result, *z_proto = NULL;
@@ -1386,7 +1389,11 @@ PHP_METHOD(protocolbuffers, decode)
     }
 
     data_end = data + data_len;
-    pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
+    res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &z_result);
+    if (res == NULL) {
+        zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
+        return;
+    }
 
     {
         //zval func;
@@ -1485,6 +1492,14 @@ static void php_invalid_byte_sequence_exception(TSRMLS_D)
     protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 }
 
+static void php_protocol_buffers_invalid_exception(TSRMLS_D)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "InvalidProtocolBufferException", 0);
+    protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+
+}
 
 void php_protocolbuffers_init(TSRMLS_D)
 {
@@ -1494,6 +1509,7 @@ void php_protocolbuffers_init(TSRMLS_D)
     protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
     php_invalid_byte_sequence_exception(TSRMLS_C);
+    php_protocol_buffers_invalid_exception(TSRMLS_C);
     php_pb_descriptor_class(TSRMLS_C);
     php_pb_filed_descriptor_class(TSRMLS_C);
     php_pb_filed_options_class(TSRMLS_C);
