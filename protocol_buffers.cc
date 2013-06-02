@@ -1377,7 +1377,7 @@ PHP_METHOD(protocolbuffers, decode)
         return;
     }
 
-    if (data_len == 0) {
+    if (data_len < 1) {
         zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable seems null");
         return;
     }
