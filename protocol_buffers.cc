@@ -1377,6 +1377,12 @@ PHP_METHOD(protocolbuffers, decode)
         return;
     }
 
+    if (data_len == 0) {
+        zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable seems null");
+        return;
+    }
+
+
     if (z_proto) {
         proto       = Z_ARRVAL_P(z_proto);
     }
