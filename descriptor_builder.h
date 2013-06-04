@@ -1,0 +1,6 @@
+#ifndef PHP_PROTOCOLBUFFERS_DESCRIPTOR_BUILDER_H
+#define PHP_PROTOCOLBUFFERS_DESCRIPTOR_BUILDER_H
+
+void php_pb_descriptor_builder_class(TSRMLS_D);
+
+#endif

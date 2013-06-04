@@ -16,7 +16,7 @@ if test $PHP_PROTOCOLBUFFERS != "no"; then
         CXXFLAGS="-Wno-write-strings"
     fi
 
-    PHP_PROTOBUF_SRCS="protocol_buffers.cc descriptor.cc field_descriptor.cc field_options.cc message.cc message_options.cc"
+    PHP_PROTOBUF_SRCS="protocol_buffers.cc descriptor.cc descriptor_builder.cc field_descriptor.cc field_options.cc message.cc message_options.cc"
 
     PHP_SUBST(PROTOCOLBUFFERS_SHARED_LIBADD)
     PHP_NEW_EXTENSION(protocolbuffers, $PHP_PROTOBUF_SRCS, $ext_shared)
