@@ -32,13 +32,6 @@
 #include "php_protocol_buffers.h"
 #include "protocol_buffers.h"
 
-extern "C" {
-#include "ext/standard/php_var.h"
-#include "ext/standard/php_incomplete_class.h"
-#include "ext/standard/info.h"
-#include "limits.h"
-}
-
 #include "is_utf8.h"
 #include "helper.h"
 #include "descriptor.h"

@@ -16,6 +16,13 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/spl/spl_exceptions.h"
 
+extern "C" {
+#include "ext/standard/php_var.h"
+#include "ext/standard/php_incomplete_class.h"
+#include "ext/standard/info.h"
+#include "limits.h"
+}
+
 #include <stdint.h>
 
 #ifndef PHP_PROTOCOLBUFFERS_DEBUG
