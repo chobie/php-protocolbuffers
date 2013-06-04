@@ -24,6 +24,18 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, setName)
 {
+    zval *instance = getThis();
+    char *name;
+    long name_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &name, &name_len) == FAILURE) {
+        return;
+    }
+
+    if (name_len > 0) {
+        add_property_string_ex(instance, "name", sizeof("name"), name, 1 TSRMLS_CC);
+    }
 }
 /* }}} */
 
@@ -32,11 +44,21 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setName)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, build)
 {
-    zval *result;
-
+    zval *result, *name;
+    php_protocolbuffers_descriptor *descriptor;
 
     MAKE_STD_ZVAL(result);
     object_init_ex(result, protocol_buffers_descriptor_class_entry);
+
+    descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, result);
+
+    name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "name", sizeof("name")-1, 0 TSRMLS_CC);
+    if (name) {
+        descriptor->name_len = Z_STRLEN_P(name);
+        descriptor->name = (char*)emalloc(descriptor->name_len+1);
+        memset(descriptor->name, '\0', descriptor->name_len+1);
+        memcpy(descriptor->name, Z_STRVAL_P(name), descriptor->name_len);
+    }
 
     RETURN_ZVAL(result, 0, 1);
 }
@@ -56,4 +78,6 @@ void php_pb_descriptor_builder_class(TSRMLS_D)
 
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers_DescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
     protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+    zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
