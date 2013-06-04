@@ -16,10 +16,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_build, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension, 0, 0, 2)
+    ZEND_ARG_INFO(0, index)
+    ZEND_ARG_INFO(0, field)
+ZEND_END_ARG_INFO()
+
 /* {{{ proto void ProtocolBuffers_DescriptorBuilder::addField(int $index, ProtocolBuffers_DescriptorField $field)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 {
+    zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffers_DescriptorBuilder::addField does not implement yet");
 }
 /* }}} */
 
@@ -80,11 +86,21 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 /* }}} */
 
 
+/* {{{ proto void ProtocolBuffers_DescriptorBuilder::setExtension()
+*/
+PHP_METHOD(protocolbuffers_descriptor_builder, setExtension)
+{
+    zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffers_DescriptorBuilder::setExtension does not implement yet");
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
     PHP_ME(protocolbuffers_descriptor_builder, addField,  arginfo_pb_descriptor_builder_add_field, ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers_descriptor_builder, getName,   arginfo_pb_descriptor_builder_get_name, ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_pb_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
+    PHP_ME(protocolbuffers_descriptor_builder, setExtension, arginfo_pb_descriptor_builder_set_extension, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
