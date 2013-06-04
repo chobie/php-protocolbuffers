@@ -1,0 +1,4 @@
+[option memo]
+ProtocolBuffers::OPT_STORE_TYPE      = ProtocolBuffers::STORE_SINGLE_PROPERTY |
+                                       ProtocolBuffers::STORE_EACH_PROPERTY;
+ProtocolBuffers::OPT_STORE_FIELDNAME = "_values";
