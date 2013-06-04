@@ -76,11 +76,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor___construct, 0, 0, 1)
     ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_type, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_type, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_type, 0, 0, 1)
     ZEND_ARG_INFO(0, wiretype)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_default, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_default, 0, 0, 1)
+    ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 
@@ -147,10 +154,54 @@ PHP_METHOD(protocolbuffers_field_descriptor, setType)
 }
 /* }}} */
 
+/* {{{ proto mixed ProtocolBuffers_FieldDescriptor::getDefault()
+*/
+PHP_METHOD(protocolbuffers_field_descriptor, getDefault)
+{
+    zval *instance = getThis();
+    zval **result = NULL;
+    char *name = NULL;
+    int name_len = 0;
+
+    zend_mangle_property_name(&name, &name_len, "*", 1, "default", sizeof("default"), 0);
+    if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+        RETVAL_ZVAL(*result, 1, 0);
+    } else {
+        RETVAL_NULL();
+    }
+    efree(name);
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffers_FieldDescriptor::setDefault(mixed $value)
+*/
+PHP_METHOD(protocolbuffers_field_descriptor, setDefault)
+{
+    zval *instance = getThis();
+    zval *zv = NULL, *value = NULL;
+    char *name;
+    int name_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &value) == FAILURE) {
+        return;
+    }
+
+    zend_mangle_property_name(&name, &name_len, "*", 1, "default", sizeof("default"), 0);
+
+    MAKE_STD_ZVAL(zv);
+    ZVAL_ZVAL(zv, value, 1, 0);
+    zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&zv, sizeof(zval*), NULL);
+    efree(name);
+}
+/* }}} */
+
 static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
     PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_pb_field_descriptor_get_type, ZEND_ACC_PUBLIC)
     PHP_ME(protocolbuffers_field_descriptor, setType,  arginfo_pb_field_descriptor_set_type, ZEND_ACC_PUBLIC)
+    PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_pb_field_descriptor_get_default, ZEND_ACC_PUBLIC)
+    PHP_ME(protocolbuffers_field_descriptor, setDefault, arginfo_pb_field_descriptor_set_default, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
