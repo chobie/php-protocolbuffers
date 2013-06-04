@@ -5,6 +5,7 @@
 #define PHP_PROTOCOLBUFFERS_EXTNAME "protocolbuffers"
 #define PHP_PROTOCOLBUFFERS_EXTVER "0.1"
 
+extern "C" {
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -15,15 +16,17 @@
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 #include "ext/spl/spl_exceptions.h"
-
-extern "C" {
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "limits.h"
 }
 
+#if defined(__osf__)
+#include <inttypes.h>
+#elif !defined(_MSC_VER)
 #include <stdint.h>
+#endif
 
 #ifndef PHP_PROTOCOLBUFFERS_DEBUG
 #define PHP_PROTOCOLBUFFERS_DEBUG 0
@@ -136,7 +139,6 @@ PHPAPI extern int pb_globals_id;
 #define PBG(v) (php_pb_globals.v)
 PHPAPI extern pb_globals php_pb_globals;
 #endif
-
 
 enum WireType {
     WIRETYPE_VARINT           = 0,

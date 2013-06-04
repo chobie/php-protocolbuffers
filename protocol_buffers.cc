@@ -50,11 +50,10 @@
 # endif
 #endif
 
-
 #ifdef ZTS
-PHPAPI int pb_globals_id;
+int pb_globals_id;
 #else
-PHPAPI pb_globals php_pb_globals;
+pb_globals php_pb_globals;
 #endif
 
 static const int kMaxVarintBytes = 10;
@@ -1580,14 +1579,8 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 
 #ifdef ZTS
     ts_allocate_id(&pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
-#ifdef PHP_WIN32
-    ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor);
-#endif
 #else
     pb_globals_ctor(&php_pb_globals TSRMLS_CC);
-#ifdef PHP_WIN32
-    php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
-#endif
 #endif
 
     php_protocolbuffers_init(TSRMLS_C);
@@ -1611,14 +1604,8 @@ PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 {
 #ifdef ZTS
         ts_free_id(pb_globals_id);
-#ifdef PHP_WIN32
-        ts_free_id(php_win32_core_globals_id);
-#endif
 #else
         pb_globals_dtor(&php_pb_globals TSRMLS_CC);
-#ifdef PHP_WIN32
-        php_win32_core_globals_dtor(&the_php_win32_core_globals TSRMLS_CC);
-#endif
 #endif
 
     return SUCCESS;
