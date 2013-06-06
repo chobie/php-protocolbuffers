@@ -17,7 +17,7 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
     zend_object_std_init(object, ce TSRMLS_CC);
 
 #if ZEND_MODULE_API_NO >= 20100525
-    object_properties_init(&object, ce);
+    object_properties_init(object, ce);
 #else
     {
         zval *tmp;
