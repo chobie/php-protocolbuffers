@@ -11,7 +11,6 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
 {
     zend_object_value retval;
     zend_object *object;
-    zval *fields;
 
     object = (zend_object*)ecalloc(1, sizeof(*object));
     zend_object_std_init(object, ce TSRMLS_CC);
@@ -21,7 +20,7 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
 #else
     {
         zval *tmp;
-        zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+        zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
     }
 #endif
     retval.handle = zend_objects_store_put(object,
@@ -29,11 +28,6 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
         (zend_objects_free_object_storage_t) php_protocolbuffers_descriptor_builder_free_storage,
     NULL TSRMLS_CC);
     retval.handlers = zend_get_std_object_handlers();
-
-
-    MAKE_STD_ZVAL(fields);
-    array_init(fields);
-    zend_hash_update(object->properties, "fields", sizeof("fields"), (void **)&fields, sizeof(zval*), NULL);
 
     return retval;
 }
@@ -80,8 +74,13 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 
     if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
         zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
-    }
+    } else {
+        MAKE_STD_ZVAL(*fields);
+        array_init(*fields);
 
+        zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
+        zend_hash_update(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields, sizeof(zval*), NULL);
+    }
 }
 /* }}} */
 
