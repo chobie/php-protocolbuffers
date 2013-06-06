@@ -56,6 +56,45 @@ static inline float decode_float(int32_t value) {
     return u.f;
 }
 
+static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
+        return Z_LVAL_PP(dd);
+    }
+
+    return 0;
+}
+
+static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len, zval **result TSRMLS_DC)
+{
+    zval **d, **dd;
+
+    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
+        return 0;
+    }
+
+    if (Z_TYPE_PP(d) != IS_ARRAY) {
+        return 0;
+    }
+
+    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
+        *result = *dd;
+        return 1;
+    }
+
+    return 0;
+}
+
 //static void pb_execute_wakeup(zval *obj TSRMLS_DC)
 //{
 //    zval fname, *retval_ptr = NULL;

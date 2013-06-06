@@ -3,8 +3,23 @@
 
 static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_descriptor *object TSRMLS_DC)
 {
-    if (object->name_len) {
+    if (object->name_len > 0) {
         efree(object->name);
+    }
+
+    if (object->container != NULL) {
+        int i;
+
+        for (i = 0; i < (object->container)->size; i++) {
+            if ((object->container)->scheme[i].name != NULL) {
+                efree((object->container)->scheme[i].name);
+            }
+        }
+
+        if (object->container->scheme != NULL) {
+            efree(object->container->scheme);
+        }
+        efree(object->container);
     }
 
     zend_object_std_dtor(&object->zo TSRMLS_CC);
@@ -18,7 +33,7 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 
     object->name = NULL;
     object->name_len = 0;
-    object->container = NULL;
+    object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
 
     return retval;
 }

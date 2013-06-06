@@ -125,24 +125,105 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getName)
 /* }}} */
 
 
+static int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
+{
+    char *key;
+    int key_len;
+    zval **resval;
+
+    zend_mangle_property_name(&key, &key_len, "*", 1, name, name_len, 0);
+    if (zend_hash_find(hash, key, key_len, (void **)&resval) == SUCCESS) {
+        *result = *resval;
+    }
+
+    efree(key);
+    return 0;
+}
+
 /* {{{ proto ProtocolBuffers_Descriptor ProtocolBuffers_DescriptorBuilder::build()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, build)
 {
-    zval *result, *name;
+    zval *result, *name, *fields = NULL;
     php_protocolbuffers_descriptor *descriptor;
 
     MAKE_STD_ZVAL(result);
     object_init_ex(result, protocol_buffers_descriptor_class_entry);
-
     descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, result);
 
     name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "name", sizeof("name")-1, 0 TSRMLS_CC);
     if (name) {
         descriptor->name_len = Z_STRLEN_P(name);
-        descriptor->name = (char*)emalloc(descriptor->name_len+1);
-        memset(descriptor->name, '\0', descriptor->name_len+1);
-        memcpy(descriptor->name, Z_STRVAL_P(name), descriptor->name_len);
+        if (descriptor->name_len > 0) {
+            descriptor->name = (char*)emalloc(descriptor->name_len+1);
+            memset(descriptor->name, '\0', descriptor->name_len+1);
+            memcpy(descriptor->name, Z_STRVAL_P(name), descriptor->name_len);
+        }
+    }
+
+    fields = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "fields", sizeof("fields")-1, 0 TSRMLS_CC);
+    if (fields != NULL && Z_TYPE_P(fields) == IS_ARRAY) {
+        HashTable *proto;
+        HashPosition pos;
+        zval **element;
+        int n;
+        size_t sz;
+        pb_scheme *ischeme;
+
+        proto = Z_ARRVAL_P(fields);
+        sz = zend_hash_num_elements(proto);
+
+        ischeme = (pb_scheme*)emalloc(sizeof(pb_scheme) * sz);
+        descriptor->container->size = sz;
+        descriptor->container->scheme = ischeme;
+
+        for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
+                        zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
+                        zend_hash_move_forward_ex(proto, &pos), n++
+        ) {
+            zval *tmp = NULL;
+            int tsize = 0;
+
+            ischeme[n].tag = (int)pos->h;
+            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "type", sizeof("type"), &tmp TSRMLS_CC);
+            if (Z_TYPE_P(tmp) == IS_LONG) {
+                ischeme[n].type = Z_LVAL_P(tmp);
+            }
+
+            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "name", sizeof("name"), &tmp TSRMLS_CC);
+            if (Z_TYPE_P(tmp) == IS_STRING) {
+                ischeme[n].type = Z_LVAL_P(tmp);
+
+                tsize                  = Z_STRLEN_P(tmp)+1;
+                ischeme[n].name        = (char*)emalloc(sizeof(char*) * tsize);
+                ischeme[n].name_len    = tsize;
+
+                memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
+                ischeme[n].name[tsize] = '\0';
+            }
+
+            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "repeated", sizeof("repeated"), &tmp TSRMLS_CC);
+            if (Z_TYPE_P(tmp) == IS_BOOL) {
+                convert_to_long(tmp);
+                ischeme[n].repeated = Z_LVAL_P(tmp);
+            }
+
+            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "packed", sizeof("packed"), &tmp TSRMLS_CC);
+            if (Z_TYPE_P(tmp) == IS_BOOL) {
+                convert_to_long(tmp);
+                ischeme[n].packed = Z_LVAL_P(tmp);
+            }
+
+            if (ischeme[n].type == TYPE_MESSAGE) {
+                zend_class_entry **c;
+
+                php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "message", sizeof("message"), &tmp TSRMLS_CC);
+                if (Z_TYPE_P(tmp) == IS_STRING) {
+                    zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC);
+                    ischeme[n].ce = *c;
+                }
+            }
+        }
     }
 
     RETURN_ZVAL(result, 0, 1);

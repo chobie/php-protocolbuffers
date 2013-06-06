@@ -22,6 +22,9 @@ extern "C" {
 #include "limits.h"
 }
 
+#include "helper.h"
+
+
 #if defined(__osf__)
 #include <inttypes.h>
 #elif !defined(_MSC_VER)

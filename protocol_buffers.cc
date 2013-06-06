@@ -33,7 +33,6 @@
 #include "protocol_buffers.h"
 
 #include "is_utf8.h"
-#include "helper.h"
 #include "descriptor.h"
 #include "field_descriptor.h"
 #include "field_options.h"
@@ -164,45 +163,6 @@ static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* va
              ((uint64_t)(part2) << 56);
 
     return ptr;
-}
-
-static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
-        return Z_LVAL_PP(dd);
-    }
-
-    return 0;
-}
-
-static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len, zval **result TSRMLS_DC)
-{
-    zval **d, **dd;
-
-    if (zend_hash_index_find(proto, tag, (void **)&d) != SUCCESS) {
-        return 0;
-    }
-
-    if (Z_TYPE_PP(d) != IS_ARRAY) {
-        return 0;
-    }
-
-    if (zend_hash_find(Z_ARRVAL_PP(d), (char*)name, name_len, (void **)&dd) == SUCCESS) {
-        *result = *dd;
-        return 1;
-    }
-
-    return 0;
 }
 
 static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
