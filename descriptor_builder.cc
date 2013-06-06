@@ -1,6 +1,44 @@
 #include "php_protocol_buffers.h"
 #include "descriptor_builder.h"
 
+static void php_protocolbuffers_descriptor_builder_free_storage(zend_object *object TSRMLS_DC)
+{
+    zend_object_std_dtor(object TSRMLS_CC);
+    efree(object);
+}
+
+zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *ce TSRMLS_DC)
+{
+    zend_object_value retval;
+    zend_object *object;
+    zval *fields;
+
+    object = (zend_object*)ecalloc(1, sizeof(*object));
+    zend_object_std_init(object, ce TSRMLS_CC);
+
+#if ZEND_MODULE_API_NO >= 20100525
+    object_properties_init(&object, ce);
+#else
+    {
+        zval *tmp;
+        zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+    }
+#endif
+    retval.handle = zend_objects_store_put(object,
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t) php_protocolbuffers_descriptor_builder_free_storage,
+    NULL TSRMLS_CC);
+    retval.handlers = zend_get_std_object_handlers();
+
+
+    MAKE_STD_ZVAL(fields);
+    array_init(fields);
+    zend_hash_update(object->properties, "fields", sizeof("fields"), (void **)&fields, sizeof(zval*), NULL);
+
+    return retval;
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_add_field, 0, 0, 2)
     ZEND_ARG_INFO(0, index)
     ZEND_ARG_INFO(0, field)
@@ -25,7 +63,25 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 {
-    zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffers_DescriptorBuilder::addField does not implement yet");
+    zval *instance = getThis();
+    zval *field = NULL;
+    zval **fields = NULL;
+    long index;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "lO", &index, &field, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
+        return;
+    }
+
+    if (index < 1 || index > ktagmax) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "index shoud be in %d - %d", 1, ktagmax);
+        return;
+    }
+
+    if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
+        zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
+    }
+
 }
 /* }}} */
 
@@ -107,9 +163,15 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 void php_pb_descriptor_builder_class(TSRMLS_D)
 {
     zend_class_entry ce;
+    zval *fields;
 
     INIT_CLASS_ENTRY(ce, "ProtocolBuffers_DescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
     protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+    protocol_buffers_descriptor_builder_class_entry->create_object = php_protocolbuffers_descriptor_builder_new;
+
+    MAKE_STD_ZVAL(fields);
+    array_init(fields);
 
     zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }

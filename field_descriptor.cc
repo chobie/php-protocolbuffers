@@ -8,7 +8,7 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
     } else {
         const char *key = hash_key->arKey;
         size_t key_length = hash_key->nKeyLength;
-        zval *value, **instance;
+        zval *value = NULL, **instance = NULL;
         char *name;
         int name_length;
 
