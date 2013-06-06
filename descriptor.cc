@@ -97,11 +97,13 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 {
     zval *instance = getThis();
     php_protocolbuffers_descriptor *descriptor;
+    int n = 0;
+    pb_scheme *ischeme;
+
 
     descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, instance);
 
     php_printf("{\n");
-
     if (descriptor->name_len > 0) {
         php_printf("  \"name\": \"%s\",\n", descriptor->name);
     } else {
@@ -109,6 +111,25 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
     }
 
     php_printf("  \"fields\": {\n");
+    if (descriptor->container->size > 0) {
+        for (n = 0; n < descriptor->container->size; n++) {
+            ischeme = &(descriptor->container->scheme[n]);
+            php_printf("    \"%d\": {\n", ischeme->tag);
+            php_printf("      type: %d,\n", ischeme->type);
+            php_printf("      name: \"%s\",\n", ischeme->name);
+            php_printf("      repeated: %s,\n", (ischeme->repeated == true) ? "true" : "false");
+            php_printf("      packed: %s\n", (ischeme->packed== true) ? "true" : "false");
+            php_printf("    }");
+
+            if (n+1 < descriptor->container->size) {
+                php_printf(",\n");
+            } else {
+                php_printf("\n");
+            }
+
+        }
+
+    }
     php_printf("  }\n");
 
     php_printf("}\n");

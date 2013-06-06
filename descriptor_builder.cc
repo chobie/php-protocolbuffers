@@ -194,8 +194,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
             php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "name", sizeof("name"), &tmp TSRMLS_CC);
             if (Z_TYPE_P(tmp) == IS_STRING) {
-                ischeme[n].type = Z_LVAL_P(tmp);
-
                 tsize                  = Z_STRLEN_P(tmp)+1;
                 ischeme[n].name        = (char*)emalloc(sizeof(char*) * tsize);
                 ischeme[n].name_len    = tsize;
