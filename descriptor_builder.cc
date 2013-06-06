@@ -73,6 +73,15 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
     }
 
     if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
+        if (Z_TYPE_PP(fields) != IS_ARRAY) {
+            zval *tmp;
+
+            MAKE_STD_ZVAL(tmp);
+            array_init(tmp);
+            zend_hash_update(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&tmp, sizeof(zval*), NULL);
+            fields = &tmp;
+        }
+
         zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
     } else {
         MAKE_STD_ZVAL(*fields);
