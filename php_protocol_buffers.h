@@ -68,6 +68,7 @@ extern "C" {
 #define GOOGLE_LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
 #endif
 
+static const int32_t ktagmax   = 0x1FFFFFFF;
 static const int32_t kint32max = 0x7FFFFFFF;
 static const int32_t kint32min = -kint32max - 1;
 static const int64_t kint64max = GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF);
