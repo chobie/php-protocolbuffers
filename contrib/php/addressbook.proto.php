@@ -98,6 +98,8 @@ class Tutorial_Person_PhoneNumber
       )));
       self::$descriptor = $desc->build();
     }
+
+    return self::$descriptor;
   }
 
 }
@@ -289,6 +291,8 @@ class Tutorial_Person
       )));
       self::$descriptor = $desc->build();
     }
+
+    return self::$descriptor;
   }
 
 }
@@ -354,6 +358,8 @@ class Tutorial_AddressBook
       )));
       self::$descriptor = $desc->build();
     }
+
+    return self::$descriptor;
   }
 
 }

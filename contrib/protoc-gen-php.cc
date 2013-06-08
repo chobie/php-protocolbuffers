@@ -572,6 +572,9 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("self::$descriptor = $desc->build();\n");
     printer.Outdent();
     printer.Print("}\n");
+
+    printer.Print("\n");
+    printer.Print("return self::$descriptor;\n");
     printer.Outdent();
     printer.Print("}\n");
     printer.Print("\n");
