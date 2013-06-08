@@ -115,7 +115,7 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
         for (n = 0; n < descriptor->container->size; n++) {
             ischeme = &(descriptor->container->scheme[n]);
             php_printf("    \"%d\": {\n", ischeme->tag);
-            php_printf("      type: %s,\n", field_type_to_str(ischeme->type));
+            php_printf("      type: \"%s\",\n", field_type_to_str(ischeme->type));
             php_printf("      name: \"%s\",\n", ischeme->name);
             if (ischeme->type == TYPE_MESSAGE && ischeme->ce != NULL) {
                 php_printf("      message: \"%s\",\n", ischeme->ce->name);
