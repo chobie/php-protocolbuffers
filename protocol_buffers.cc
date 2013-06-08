@@ -261,7 +261,8 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
                     entry = Z_OBJCE_P(ret);
                     if (entry == protocol_buffers_descriptor_class_entry) {
                         desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
-                        //zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
+                        desc->free_container = 1;
+                        zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
                     }
 
                     if (ret != NULL) {

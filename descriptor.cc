@@ -7,7 +7,7 @@ static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_desc
         efree(object->name);
     }
 
-    if (object->container != NULL) {
+    if (object->container != NULL && object->free_container < 1) {
         int i;
 
         for (i = 0; i < (object->container)->size; i++) {
@@ -33,6 +33,7 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 
     object->name = NULL;
     object->name_len = 0;
+    object->free_container = 0;
     object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
 
     return retval;

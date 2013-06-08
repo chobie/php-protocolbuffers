@@ -220,6 +220,7 @@ typedef struct{
     zend_object zo;
     char *name;
     size_t name_len;
+    int free_container;
     pb_scheme_container *container;
 } php_protocolbuffers_descriptor;
 
