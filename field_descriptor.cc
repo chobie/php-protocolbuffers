@@ -57,6 +57,13 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
             PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
         } else if (strcmp(key, "packable") == 0) {
             PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
+        } else if (strcmp(key, "message") == 0) {
+            zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)key, key_length, 0);
+
+            MAKE_STD_ZVAL(value);
+            ZVAL_STRING(value, Z_STRVAL_PP(zv), 1);
+            zend_hash_update(Z_OBJPROP_PP(instance), name, name_length, (void **)&value, sizeof(zval*), NULL);
+            efree(name);
         } else if (strcmp(key, "name") == 0) {
             zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)key, key_length, 0);
 
@@ -89,6 +96,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_type, 0, 0, 1)
     ZEND_ARG_INFO(0, wiretype)
+    ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_default, 0, 0, 0)
@@ -137,28 +145,50 @@ PHP_METHOD(protocolbuffers_field_descriptor, getType)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_FieldDescriptor::setType(long $wiretype)
+/* {{{ proto void ProtocolBuffers_FieldDescriptor::setType(long $wiretype[, mixed $value])
 */
 PHP_METHOD(protocolbuffers_field_descriptor, setType)
 {
 
     zval *instance = getThis();
+    zval *target = NULL;
     zval *value = NULL;
     long wiretype;
     char *name;
     int name_len;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "l", &wiretype) == FAILURE) {
+        "l|z", &wiretype, &value) == FAILURE) {
+        return;
+    }
+
+    if (wiretype == TYPE_MESSAGE && value == NULL) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "message wiretype requres class name");
         return;
     }
 
     zend_mangle_property_name(&name, &name_len, "*", 1, "type", sizeof("type"), 0);
 
-    MAKE_STD_ZVAL(value);
-    ZVAL_LONG(value, wiretype);
-    zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&value, sizeof(zval*), NULL);
+    MAKE_STD_ZVAL(target);
+    ZVAL_LONG(target, wiretype);
+    zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&target, sizeof(zval*), NULL);
     efree(name);
+
+    if (wiretype == TYPE_MESSAGE) {
+        zval *ref;
+
+        zend_mangle_property_name(&name, &name_len, "*", 1, "message", sizeof("message"), 0);
+        MAKE_STD_ZVAL(ref);
+        ZVAL_ZVAL(ref, value, 1, 0);
+
+        if (Z_TYPE_P(ref) != IS_STRING) {
+            convert_to_string(ref);
+        }
+
+        zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&ref, sizeof(zval*), NULL);
+        efree(name);
+
+    }
 }
 /* }}} */
 

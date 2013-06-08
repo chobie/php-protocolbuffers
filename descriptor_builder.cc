@@ -176,6 +176,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
         sz = zend_hash_num_elements(proto);
 
         ischeme = (pb_scheme*)emalloc(sizeof(pb_scheme) * sz);
+        memset(ischeme, '\0', sizeof(pb_scheme) * sz);
         descriptor->container->size = sz;
         descriptor->container->scheme = ischeme;
 
