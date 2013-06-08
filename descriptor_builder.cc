@@ -209,7 +209,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
                 ischeme[n].repeated = Z_LVAL_P(tmp);
             }
 
-            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "packed", sizeof("packed"), &tmp TSRMLS_CC);
+            php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "packable", sizeof("packable"), &tmp TSRMLS_CC);
             if (Z_TYPE_P(tmp) == IS_BOOL) {
                 convert_to_long(tmp);
                 ischeme[n].packed = Z_LVAL_P(tmp);

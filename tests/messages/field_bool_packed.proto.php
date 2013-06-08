@@ -10,27 +10,7 @@
  */
 class Tutorial_Boolean
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'value' => array(
-        'type' => 'array',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'value',
-        'type'     => 8,
-        'required' => false,
-        'optional' => false,
-        'repeated' => true,
-        'packable' => true,
-        'default'  => null,
-      ),
-    ),
-  );
+  protected static $descriptor;
 
   public function getValue()
   {
@@ -55,7 +35,21 @@ class Tutorial_Boolean
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+      if (!isset(self::$descriptor)) {
+          $desc = new ProtocolBuffers_DescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_BOOL,
+              "name"     => "value",
+              "packable" => true,
+              "repeated" => true,
+              "default"  => null,
+          )));
+
+          self::$descriptor = $desc->build();
+      }
+
+      return self::$descriptor;
+
   }
 
 }

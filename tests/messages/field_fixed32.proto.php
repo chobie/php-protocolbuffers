@@ -10,27 +10,7 @@
  */
 class Tutorial_Fixed32
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'value' => array(
-        'type' => 'int',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'value',
-        'type'     => 7,
-        'required' => true,
-        'optional' => false,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => null,
-      ),
-    ),
-  );
+  protected static $descriptor;
 
   public function getValue()
   {
@@ -55,7 +35,21 @@ class Tutorial_Fixed32
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+      if (!isset(self::$descriptor)) {
+          $desc = new ProtocolBuffers_DescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_FIXED32,
+              "name"     => "value",
+              "packable" => false,
+              "repeated" => false,
+              "default"  => null,
+          )));
+
+          self::$descriptor = $desc->build();
+      }
+
+      return self::$descriptor;
+
   }
 
 }

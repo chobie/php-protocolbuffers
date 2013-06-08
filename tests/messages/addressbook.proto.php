@@ -135,28 +135,7 @@ class Tutorial_User
  */
 class Tutorial_AddressBook
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'user' => array(
-        'type' => 'array',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'user',
-        'type'     => 11,
-        'required' => false,
-        'optional' => false,
-        'repeated' => true,
-        'packable' => false,
-        'default'  => null,
-        'message'  => 'Tutorial_User',
-      ),
-    ),
-  );
+  protected static $descriptor;
 
   public function getUser()
   {
@@ -181,7 +160,38 @@ class Tutorial_AddressBook
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+      if (!isset(self::$descriptor)) {
+          $desc = new ProtocolBuffers_DescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_INT32,
+              "name"     => "id",
+              "required" => true,
+              "packable" => false,
+              "repeated" => false,
+              "default"  => null,
+          )));
+          $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_FLOAT,
+              "name"     => "offense",
+              "required" => false,
+              "packable" => false,
+              "repeated" => false,
+              "default"  => null,
+          )));
+          $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_STRING,
+              "name"     => "name",
+              "required" => false,
+              "packable" => false,
+              "repeated" => false,
+              "default"  => null,
+          )));
+
+          self::$descriptor = $desc->build();
+      }
+
+      return self::$descriptor;
+
   }
 
 }

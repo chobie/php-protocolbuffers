@@ -10,27 +10,7 @@
  */
 class Tutorial_RepeatedString
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'values' => array(
-        'type' => 'array',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'values',
-        'type'     => 9,
-        'required' => false,
-        'optional' => false,
-        'repeated' => true,
-        'packable' => false,
-        'default'  => null,
-      ),
-    ),
-  );
+  protected static $descriptor;
 
   public function getValues()
   {
@@ -55,7 +35,20 @@ class Tutorial_RepeatedString
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+      if (!isset(self::$descriptor)) {
+          $desc = new ProtocolBuffers_DescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+              "type"     => ProtocolBuffers::TYPE_STRING,
+              "name"     => "values",
+              "packable" => false,
+              "repeated" => true,
+              "default"  => null,
+          )));
+
+          self::$descriptor = $desc->build();
+      }
+
+      return self::$descriptor;
   }
 
 }

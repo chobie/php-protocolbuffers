@@ -1350,7 +1350,7 @@ PHP_METHOD(protocolbuffers, decode)
     int err = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "ss|a", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
+        "ss|z", &klass, &klass_len, &data, &data_len, &z_proto) == FAILURE) {
         return;
     }
 
@@ -1359,8 +1359,7 @@ PHP_METHOD(protocolbuffers, decode)
         return;
     }
 
-
-    if (z_proto) {
+    if (z_proto && Z_TYPE_P(z_proto) == IS_ARRAY) {
         proto       = Z_ARRVAL_P(z_proto);
     }
 

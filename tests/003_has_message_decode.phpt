@@ -7,7 +7,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARAT
 $expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "003_has_message.bin");
 
 
-$person = ProtocolBuffers::decode("Tutorial_Person", $expect, Tutorial_Person::getDescriptor());
+$person = ProtocolBuffers::decode("Tutorial_Person", $expect);
 
 echo $person->getId() . PHP_EOL;
 echo $person->getName() . PHP_EOL;
