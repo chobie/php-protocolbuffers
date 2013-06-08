@@ -251,7 +251,27 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
 
             zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC);
             if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
-                proto = Z_ARRVAL_P(ret);
+                if (Z_TYPE_P(ret) == IS_ARRAY) {
+                    proto = Z_ARRVAL_P(ret);
+                } else if (Z_TYPE_P(ret) == IS_OBJECT) {
+                    //TODO: needs refactoring.
+                    zend_class_entry *entry;
+                    php_protocolbuffers_descriptor *desc;
+
+                    entry = Z_OBJCE_P(ret);
+                    if (entry == protocol_buffers_descriptor_class_entry) {
+                        desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
+                        //zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
+                    }
+
+                    if (ret != NULL) {
+                        zval_ptr_dtor(&ret);
+                    }
+
+                    *result = desc->container;
+
+                    return 0;
+                }
             } else {
                 php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
                 return 1;
