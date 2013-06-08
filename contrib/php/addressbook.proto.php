@@ -12,43 +12,7 @@
  */
 class Tutorial_Person_PhoneNumber
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'number' => array(
-        'type' => 'string',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-      'type' => array(
-        'type' => 'int',
-        'opts' => array(
-          'tag' => 2,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'number',
-        'type'     => 9,
-        'required' => true,
-        'optional' => false,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => null,
-      ),
-      2 => array(
-        'name'     => 'type',
-        'type'     => 14,
-        'required' => false,
-        'optional' => true,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => Tutorial_Person_PhoneType::HOME,
-      ),
-    ),
-  );
-
+  protected static $descriptor;
   /**
    * getting value
    *
@@ -112,7 +76,26 @@ class Tutorial_Person_PhoneNumber
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+    if (!isset(self::$descriptor)) {
+      $desc = new ProtocolBuffers_DescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 9,
+        "name"     => "number",
+        "optional" => false,
+        "repeated" => false,
+        "packable" => false,
+        "default"  => "",
+      )));
+      $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 14,
+        "name"     => "type",
+        "optional" => true,
+        "repeated" => false,
+        "packable" => false,
+        "default"  => Tutorial_Person_PhoneType::HOME,
+      )));
+      self::$descriptor = $desc->build();
+    }
   }
 
 }
@@ -143,74 +126,7 @@ class Tutorial_Person_PhoneType
  */
 class Tutorial_Person
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'name' => array(
-        'type' => 'string',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-      'id' => array(
-        'type' => 'int',
-        'opts' => array(
-          'tag' => 2,
-        ),
-      ),
-      'email' => array(
-        'type' => 'string',
-        'opts' => array(
-          'tag' => 3,
-        ),
-      ),
-      'phone' => array(
-        'type' => 'array',
-        'opts' => array(
-          'tag' => 4,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'name',
-        'type'     => 9,
-        'required' => true,
-        'optional' => false,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => null,
-      ),
-      2 => array(
-        'name'     => 'id',
-        'type'     => 5,
-        'required' => true,
-        'optional' => false,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => null,
-      ),
-      3 => array(
-        'name'     => 'email',
-        'type'     => 9,
-        'required' => false,
-        'optional' => true,
-        'repeated' => false,
-        'packable' => false,
-        'default'  => null,
-      ),
-      4 => array(
-        'name'     => 'phone',
-        'type'     => 11,
-        'required' => false,
-        'optional' => false,
-        'repeated' => true,
-        'packable' => false,
-        'default'  => null,
-        'message'  => 'Tutorial_Person_PhoneNumber',
-      ),
-    ),
-  );
-
+  protected static $descriptor;
   /**
    * getting value
    *
@@ -330,7 +246,43 @@ class Tutorial_Person
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+    if (!isset(self::$descriptor)) {
+      $desc = new ProtocolBuffers_DescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 9,
+        "name"     => "name",
+        "optional" => false,
+        "repeated" => false,
+        "packable" => false,
+        "default"  => "",
+      )));
+      $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 5,
+        "name"     => "id",
+        "optional" => false,
+        "repeated" => false,
+        "packable" => false,
+        "default"  => 0,
+      )));
+      $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 9,
+        "name"     => "email",
+        "optional" => true,
+        "repeated" => false,
+        "packable" => false,
+        "default"  => "",
+      )));
+      $desc->addField(4, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 11,
+        "name"     => "phone",
+        "optional" => false,
+        "repeated" => true,
+        "packable" => false,
+        "default"  => null,
+        "message"  => "Tutorial_Person_PhoneNumber",
+      )));
+      self::$descriptor = $desc->build();
+    }
   }
 
 }
@@ -346,29 +298,7 @@ class Tutorial_Person
  */
 class Tutorial_AddressBook
 {
-  protected static $scheme = array(
-    'properties' => array(
-      'person' => array(
-        'type' => 'array',
-        'opts' => array(
-          'tag' => 1,
-        ),
-      ),
-    ),
-    'scheme' => array(
-      1 => array(
-        'name'     => 'person',
-        'type'     => 11,
-        'required' => false,
-        'optional' => false,
-        'repeated' => true,
-        'packable' => false,
-        'default'  => null,
-        'message'  => 'Tutorial_Person',
-      ),
-    ),
-  );
-
+  protected static $descriptor;
   /**
    * getting value
    *
@@ -404,7 +334,19 @@ class Tutorial_AddressBook
    */
   public static function getDescriptor()
   {
-    return self::$scheme['scheme'];
+    if (!isset(self::$descriptor)) {
+      $desc = new ProtocolBuffers_DescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+        "type"     => 11,
+        "name"     => "person",
+        "optional" => false,
+        "repeated" => true,
+        "packable" => false,
+        "default"  => null,
+        "message"  => "Tutorial_Person",
+      )));
+      self::$descriptor = $desc->build();
+    }
   }
 
 }

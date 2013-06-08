@@ -370,94 +370,8 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     }
 
     // Print fields map
-    printer.Print(
-            "protected static $scheme = array(\n"
-             );
-    printer.Indent();
 
-    printer.Print("'properties' => array(\n");
-    printer.Indent();
-    for (int i = 0; i < message.field_count(); ++i) {
-        const FieldDescriptor &field ( *message.field(i) );
-
-        printer.Print("'`key`' => array(\n",
-                "key", VariableName(field));
-        printer.Indent();
-        printer.Print("'type' => '`type`',\n",
-                "type", getTypeName(field)
-                 );
-        printer.Print("'opts' => array(\n");
-        printer.Indent();
-        printer.Print("'tag' => `value`,\n",
-                "value", SimpleItoa(field.number())
-                 );
-        printer.Outdent();
-        printer.Print("),\n");
-
-        printer.Outdent();
-        printer.Print("),\n");
-    }
-
-    printer.Outdent();
-    printer.Print("),\n");
-
-    printer.Print("'scheme' => array(\n");
-    printer.Indent();
-    for (int i = 0; i < message.field_count(); ++i) {
-        const FieldDescriptor &field ( *message.field(i) );
-
-        printer.Print("`index` => array(\n", "index", SimpleItoa(field.number()));
-        printer.Indent();
-        printer.Print("'name'     => '`value`',\n",
-                "value", VariableName(field));
-        printer.Print("'type'     => `value`,\n",
-                "value", SimpleItoa(field.type()));
-
-        if (field.is_required()) {
-            printer.Print("'required' => true,\n");
-        } else {
-            printer.Print("'required' => false,\n");
-        }
-
-        if (field.is_optional()) {
-            printer.Print("'optional' => true,\n");
-        } else {
-            printer.Print("'optional' => false,\n");
-        }
-
-        if (field.is_repeated()) {
-            printer.Print("'repeated' => true,\n");
-        } else {
-            printer.Print("'repeated' => false,\n");
-        }
-
-        if (field.is_packable()) {
-            printer.Print("'packable' => true,\n");
-        } else {
-            printer.Print("'packable' => false,\n");
-        }
-
-        if (field.has_default_value()) {
-            printer.Print("'default'  => `value`,\n",
-                    "value", DefaultValueAsString(field, true)
-                     );
-        } else {
-            printer.Print("'default'  => null,\n");
-        }
-
-        if (field.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
-            const Descriptor &desc(*field.message_type());
-            printer.Print("'message'  => '`class`',\n",
-                    "class", ClassName(desc));
-        }
-
-        printer.Outdent();
-        printer.Print("),\n");
-    }
-    printer.Outdent();
-    printer.Print("),\n");
-    printer.Outdent();
-    printer.Print(");\n\n");
+    printer.Print("protected static $descriptor;\n");
 
     if (!skip_unknown) {
         // printer.Print("private $_unknown;\n");
@@ -575,7 +489,54 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("public static function getDescriptor()\n");
     printer.Print("{\n");
     printer.Indent();
-    printer.Print("return self::$scheme['scheme'];\n");
+    printer.Print("if (!isset(self::$descriptor)) {\n");
+    printer.Indent();
+    printer.Print("$desc = new ProtocolBuffers_DescriptorBuilder();\n");
+    for (int i = 0; i < message.field_count(); ++i) {
+        const FieldDescriptor &field (*message.field(i));
+
+        printer.Print("$desc->addField(`tag`, new ProtocolBuffers_FieldDescriptor(array(\n",
+            "tag",
+            SimpleItoa(field.number())
+        );
+        printer.Indent();
+        printer.Print("\"type\"     => `type`,\n",
+            "type",
+            SimpleItoa(field.type())
+        );
+        printer.Print("\"name\"     => \"`name`\",\n",
+            "name",
+            VariableName(field)
+        );
+        printer.Print("\"optional\" => `optional`,\n",
+            "optional",
+            (field.is_optional()) ? "true" : "false"
+        );
+        printer.Print("\"repeated\" => `repeated`,\n",
+            "repeated",
+            (field.is_repeated()) ? "true" : "false"
+        );
+        printer.Print("\"packable\" => `packable`,\n",
+            "packable",
+            (field.is_packable()) ? "true" : "false"
+        );
+        printer.Print("\"default\"  => `value`,\n",
+            "value",
+            DefaultValueAsString(field, true)
+        );
+        if (field.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
+            const Descriptor &desc(*field.message_type());
+            printer.Print("\"message\"  => \"`message`\",\n",
+                "message",
+                ClassName(desc)
+            );
+        }
+        printer.Outdent();
+        printer.Print(")));\n");
+    }
+    printer.Print("self::$descriptor = $desc->build();\n");
+    printer.Outdent();
+    printer.Print("}\n");
     printer.Outdent();
     printer.Print("}\n");
     printer.Print("\n");
