@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package version="2.1" xmlns="http://pear.php.net/dtd/package-2.1" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0     http://pear.php.net/dtd/tasks-1.0.xsd     http://pear.php.net/dtd/package-2.1     http://pear.php.net/dtd/package-2.1.xsd">
+ <name>protocolbuffers</name>
+ <channel>pecl.php.net</channel>
+ <summary>Protocol Buffers are a way of encoding structured data in an efficient yet extensible format. Google uses Protocol Buffers for almost all of its internal RPC protocols and file formats.
+</summary>
+ <description>protocol buffers</description>
+ <lead>
+  <name>Shuhei Tanuma</name>
+  <user>chobieeee</user>
+  <email>chobieeeee@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2013-06-08</date>
+ <time>20:45:43</time>
+ <version>
+  <release>0.1.0a</release>
+  <api>0.1.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+ <notes>Initial Release</notes>
+ <contents>
+  <dir name="/">
+   <dir name="contrib">
+    <file role="src" name="main.cc"/>
+    <file role="src" name="protoc-gen-php.cc"/>
+    <file role="src" name="protoc-gen-php.h"/>
+    <file role="src" name="strutil.cc"/>
+    <file role="src" name="strutil.h"/>
+   </dir>
+   <dir name="examples">
+    <file role="doc" name="address.php"/>
+    <file role="doc" name="address2.php"/>
+   </dir>
+   <dir name="tests">
+    <dir name="fixtures">
+     <file role="test" name="001_big_tag.bin"/>
+     <file role="test" name="001_bool.bin"/>
+     <file role="test" name="001_bytes.bin"/>
+     <file role="test" name="001_double_sample.bin"/>
+     <file role="test" name="001_fixed32_init.bin"/>
+     <file role="test" name="001_fixed32_max.bin"/>
+     <file role="test" name="001_fixed64_init.bin"/>
+     <file role="test" name="001_fixed64_max.bin"/>
+     <file role="test" name="001_float_sample.bin"/>
+     <file role="test" name="001_float_signed.bin"/>
+     <file role="test" name="001_int32_init.bin"/>
+     <file role="test" name="001_int32_max.bin"/>
+     <file role="test" name="001_int32_min.bin"/>
+     <file role="test" name="001_int64_init.bin"/>
+     <file role="test" name="001_int64_max.bin"/>
+     <file role="test" name="001_int64_min.bin"/>
+     <file role="test" name="001_sfixed32_signed.bin"/>
+     <file role="test" name="001_sfixed32_unsigned.bin"/>
+     <file role="test" name="001_sfixed64_max.bin"/>
+     <file role="test" name="001_sfixed64_min.bin"/>
+     <file role="test" name="001_sfixed64_zero.bin"/>
+     <file role="test" name="001_sint32_init.bin"/>
+     <file role="test" name="001_sint32_max.bin"/>
+     <file role="test" name="001_sint32_min.bin"/>
+     <file role="test" name="001_sint64_init.bin"/>
+     <file role="test" name="001_sint64_max.bin"/>
+     <file role="test" name="001_sint64_min.bin"/>
+     <file role="test" name="001_string_0bytes.bin"/>
+     <file role="test" name="001_string_1024bytes.bin"/>
+     <file role="test" name="001_string_small.bin"/>
+     <file role="test" name="001_string_utf8.bin"/>
+     <file role="test" name="002_repeated_int32.bin"/>
+     <file role="test" name="002_repeated_string.bin"/>
+     <file role="test" name="002_simple_encode.bin"/>
+     <file role="test" name="003_bool_packed.bin"/>
+     <file role="test" name="003_double_packed.bin"/>
+     <file role="test" name="003_fixed32_packed.bin"/>
+     <file role="test" name="003_fixed64_packed.bin"/>
+     <file role="test" name="003_float_packed.bin"/>
+     <file role="test" name="003_has_message.bin"/>
+     <file role="test" name="003_int32_packed_many.bin"/>
+     <file role="test" name="003_int32_packed_one.bin"/>
+     <file role="test" name="003_int64_packed.bin"/>
+     <file role="test" name="003_sfixed32_packed.bin"/>
+     <file role="test" name="003_sfixed64_packed.bin"/>
+     <file role="test" name="003_sint32_packed.bin"/>
+     <file role="test" name="003_sint64_packed.bin"/>
+     <file role="test" name="003_uint32_packed.bin"/>
+     <file role="test" name="android_logo.gif"/>
+     <file role="test" name="fixture001.bin"/>
+    </dir>
+    <dir name="messages">
+     <file role="test" name="003_has_message.proto.php"/>
+     <file role="test" name="addressbook.proto.php"/>
+     <file role="test" name="big_tag.proto.php"/>
+     <file role="test" name="field_bool.proto.php"/>
+     <file role="test" name="field_bool_packed.proto.php"/>
+     <file role="test" name="field_bytes.proto.php"/>
+     <file role="test" name="field_double.proto.php"/>
+     <file role="test" name="field_double_packed.proto.php"/>
+     <file role="test" name="field_fixed32.proto.php"/>
+     <file role="test" name="field_fixed32_packed.proto.php"/>
+     <file role="test" name="field_fixed64.proto.php"/>
+     <file role="test" name="field_fixed64_packed.proto.php"/>
+     <file role="test" name="field_float.proto.php"/>
+     <file role="test" name="field_float_packed.proto.php"/>
+     <file role="test" name="field_int32.proto.php"/>
+     <file role="test" name="field_int32_packed.proto.php"/>
+     <file role="test" name="field_int64.proto.php"/>
+     <file role="test" name="field_int64_packed.proto.php"/>
+     <file role="test" name="field_sfixed32.proto.php"/>
+     <file role="test" name="field_sfixed32_packed.proto.php"/>
+     <file role="test" name="field_sfixed64.proto.php"/>
+     <file role="test" name="field_sfixed64_packed.proto.php"/>
+     <file role="test" name="field_sint32.proto.php"/>
+     <file role="test" name="field_sint32_packed.proto.php"/>
+     <file role="test" name="field_sint64.proto.php"/>
+     <file role="test" name="field_sint64_packed.proto.php"/>
+     <file role="test" name="field_string.proto.php"/>
+     <file role="test" name="field_uint32_packed.proto.php"/>
+     <file role="test" name="repeated_int32.proto.php"/>
+     <file role="test" name="repeated_string.proto.php"/>
+    </dir>
+    <dir name="proto">
+     <file role="test" name="addressbook.proto"/>
+     <file role="test" name="big_tag.proto"/>
+     <file role="test" name="field_bool.proto"/>
+     <file role="test" name="field_bool_packed.proto"/>
+     <file role="test" name="field_bytes.proto"/>
+     <file role="test" name="field_double.proto"/>
+     <file role="test" name="field_double_packed.proto"/>
+     <file role="test" name="field_fixed32.proto"/>
+     <file role="test" name="field_fixed32_packed.proto"/>
+     <file role="test" name="field_fixed64.proto"/>
+     <file role="test" name="field_fixed64_packed.proto"/>
+     <file role="test" name="field_float.proto"/>
+     <file role="test" name="field_float_packed.proto"/>
+     <file role="test" name="field_int32.proto"/>
+     <file role="test" name="field_int32_packed.proto"/>
+     <file role="test" name="field_int64.proto"/>
+     <file role="test" name="field_int64_packed.proto"/>
+     <file role="test" name="field_sfixed32.proto"/>
+     <file role="test" name="field_sfixed32_packed.proto"/>
+     <file role="test" name="field_sfixed64.proto"/>
+     <file role="test" name="field_sfixed64_packed.proto"/>
+     <file role="test" name="field_sint32.proto"/>
+     <file role="test" name="field_sint32_packed.proto"/>
+     <file role="test" name="field_sint64.proto"/>
+     <file role="test" name="field_sint64_packed.proto"/>
+     <file role="test" name="field_string.proto"/>
+     <file role="test" name="field_uint32_packed.proto"/>
+     <file role="test" name="has_message.proto"/>
+     <file role="test" name="repeated_int32.proto"/>
+     <file role="test" name="repeated_string.proto"/>
+    </dir>
+    <file role="test" name="001_big_tag.phpt"/>
+    <file role="test" name="001_bool.phpt"/>
+    <file role="test" name="001_bytes.phpt"/>
+    <file role="test" name="001_constants.phpt"/>
+    <file role="test" name="001_double_sample.phpt"/>
+    <file role="test" name="001_fixed32_init.phpt"/>
+    <file role="test" name="001_fixed32_max.phpt"/>
+    <file role="test" name="001_fixed64_init.phpt"/>
+    <file role="test" name="001_fixed64_max.phpt"/>
+    <file role="test" name="001_float_sample.phpt"/>
+    <file role="test" name="001_float_signed.phpt"/>
+    <file role="test" name="001_int32_init.phpt"/>
+    <file role="test" name="001_int32_max.phpt"/>
+    <file role="test" name="001_int32_min.phpt"/>
+    <file role="test" name="001_int64_init.phpt"/>
+    <file role="test" name="001_int64_max.phpt"/>
+    <file role="test" name="001_int64_min.phpt"/>
+    <file role="test" name="001_sfixed32_signed.phpt"/>
+    <file role="test" name="001_sfixed32_unsigned.phpt"/>
+    <file role="test" name="001_sfixed64_init.phpt"/>
+    <file role="test" name="001_sfixed64_max.phpt"/>
+    <file role="test" name="001_sfixed64_min.phpt"/>
+    <file role="test" name="001_sint32_init.phpt"/>
+    <file role="test" name="001_sint32_max.phpt"/>
+    <file role="test" name="001_sint32_min.phpt"/>
+    <file role="test" name="001_sint64.init.phpt"/>
+    <file role="test" name="001_sint64_max.phpt"/>
+    <file role="test" name="001_sint64_min.phpt"/>
+    <file role="test" name="001_string_0bytes.phpt"/>
+    <file role="test" name="001_string_1024bytes.phpt"/>
+    <file role="test" name="001_string_invaild_encoding.phpt"/>
+    <file role="test" name="001_string_small.phpt"/>
+    <file role="test" name="001_string_utf8.phpt"/>
+    <file role="test" name="002_repeated_int32.phpt"/>
+    <file role="test" name="002_repeated_string.phpt"/>
+    <file role="test" name="002_simple_encode.phpt"/>
+    <file role="test" name="003_bool_packed.phpt"/>
+    <file role="test" name="003_double_packed.phpt"/>
+    <file role="test" name="003_fixed32_packed.phpt"/>
+    <file role="test" name="003_fixed64_packed.phpt"/>
+    <file role="test" name="003_float_packed.phpt"/>
+    <file role="test" name="003_has_message_decode.phpt"/>
+    <file role="test" name="003_has_message_encode.phpt"/>
+    <file role="test" name="003_int32_packed.phpt"/>
+    <file role="test" name="003_int32_packed_many.phpt"/>
+    <file role="test" name="003_int64_packed.phpt"/>
+    <file role="test" name="003_sfixed32_packed.phpt"/>
+    <file role="test" name="003_sfixed64_packed.phpt"/>
+    <file role="test" name="003_sint32_packed.phpt"/>
+    <file role="test" name="003_sint64_packed.phpt"/>
+    <file role="test" name="003_uint32_packed.phpt"/>
+    <file role="test" name="004_decode_bool.phpt"/>
+    <file role="test" name="004_decode_bytes.phpt"/>
+    <file role="test" name="004_decode_double_sample.phpt"/>
+    <file role="test" name="004_decode_fixed32_init.phpt"/>
+    <file role="test" name="004_decode_fixed32_max.phpt"/>
+    <file role="test" name="004_decode_float_sample.phpt"/>
+    <file role="test" name="004_decode_float_signed.phpt"/>
+    <file role="test" name="004_decode_int32_init.phpt"/>
+    <file role="test" name="004_decode_int32_max.phpt"/>
+    <file role="test" name="004_decode_int32_min.phpt"/>
+    <file role="test" name="004_decode_sfixed32_signed.phpt"/>
+    <file role="test" name="004_decode_sfixed32_unsigned.phpt"/>
+    <file role="test" name="004_decode_sint32_init.phpt"/>
+    <file role="test" name="004_decode_sint32_max.phpt"/>
+    <file role="test" name="004_decode_sint32_min.phpt"/>
+    <file role="test" name="004_decode_string_0bytes.phpt"/>
+    <file role="test" name="004_decode_string_1024bytes.phpt"/>
+    <file role="test" name="005_decode_bool_packed.phpt"/>
+    <file role="test" name="005_decode_double_packed.phpt"/>
+    <file role="test" name="005_decode_fixed32_packed.phpt"/>
+    <file role="test" name="005_decode_fixed64_packed.phpt"/>
+    <file role="test" name="005_decode_float_packed.phpt"/>
+    <file role="test" name="005_decode_int32_packed.phpt"/>
+    <file role="test" name="005_decode_int32_packed_many.phpt"/>
+    <file role="test" name="005_decode_int64_packed.phpt"/>
+    <file role="test" name="005_decode_sfixed32_packed.phpt"/>
+    <file role="test" name="005_decode_sfixed64_packed.phpt"/>
+    <file role="test" name="005_decode_sint32_packed.phpt"/>
+    <file role="test" name="005_decode_sint64_packed.phpt"/>
+    <file role="test" name="800_field_descriptor.phpt"/>
+    <file role="test" name="801_descirptor_builder.phpt"/>
+    <file role="test" name="999_dummy_string.phpt"/>
+    <file role="test" name="999_empty_string.phpt"/>
+    <file role="test" name="999_illegal_bytes.phpt"/>
+    <file role="test" name="999_null.phpt"/>
+   </dir>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
+   <file role="src" name="descriptor.cc"/>
+   <file role="src" name="descriptor.h"/>
+   <file role="src" name="descriptor_builder.cc"/>
+   <file role="src" name="descriptor_builder.h"/>
+   <file role="src" name="field_descriptor.cc"/>
+   <file role="src" name="field_descriptor.h"/>
+   <file role="src" name="field_options.cc"/>
+   <file role="src" name="field_options.h"/>
+   <file role="src" name="helper.h"/>
+   <file role="src" name="is_utf8.h"/>
+   <file role="src" name="message.cc"/>
+   <file role="src" name="message.h"/>
+   <file role="src" name="message_options.cc"/>
+   <file role="src" name="message_options.h"/>
+   <file role="src" name="php_protocol_buffers.h"/>
+   <file role="src" name="protocol_buffers.cc"/>
+   <file role="src" name="protocol_buffers.h"/>
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.8</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>protocolbuffers</providesextension>
+ <extsrcrelease/>
+</package>
