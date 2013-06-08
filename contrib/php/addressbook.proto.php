@@ -81,6 +81,7 @@ class Tutorial_Person_PhoneNumber
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "number",
+        "required" => true,
         "optional" => false,
         "repeated" => false,
         "packable" => false,
@@ -89,6 +90,7 @@ class Tutorial_Person_PhoneNumber
       $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_ENUM,
         "name"     => "type",
+        "required" => false,
         "optional" => true,
         "repeated" => false,
         "packable" => false,
@@ -251,6 +253,7 @@ class Tutorial_Person
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "name",
+        "required" => true,
         "optional" => false,
         "repeated" => false,
         "packable" => false,
@@ -259,6 +262,7 @@ class Tutorial_Person
       $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_INT32,
         "name"     => "id",
+        "required" => true,
         "optional" => false,
         "repeated" => false,
         "packable" => false,
@@ -267,6 +271,7 @@ class Tutorial_Person
       $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "email",
+        "required" => false,
         "optional" => true,
         "repeated" => false,
         "packable" => false,
@@ -275,6 +280,7 @@ class Tutorial_Person
       $desc->addField(4, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "phone",
+        "required" => false,
         "optional" => false,
         "repeated" => true,
         "packable" => false,
@@ -339,6 +345,7 @@ class Tutorial_AddressBook
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "person",
+        "required" => false,
         "optional" => false,
         "repeated" => true,
         "packable" => false,

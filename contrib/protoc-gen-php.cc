@@ -539,6 +539,10 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "name",
             VariableName(field)
         );
+        printer.Print("\"required\" => `required`,\n",
+            "required",
+            (field.is_required()) ? "true" : "false"
+        );
         printer.Print("\"optional\" => `optional`,\n",
             "optional",
             (field.is_optional()) ? "true" : "false"
