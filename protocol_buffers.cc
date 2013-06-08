@@ -263,6 +263,12 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
                         desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
                         desc->free_container = 1;
                         zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
+                    } else {
+                        zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
+                        if (ret != NULL) {
+                            zval_ptr_dtor(&ret);
+                        }
+                        return 1;
                     }
 
                     if (ret != NULL) {
@@ -272,6 +278,12 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
                     *result = desc->container;
 
                     return 0;
+                } else {
+                    if (ret != NULL) {
+                        zval_ptr_dtor(&ret);
+                    }
+                    zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+                    return 1;
                 }
             } else {
                 php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
@@ -1436,9 +1448,13 @@ PHP_METHOD(protocolbuffers, encode)
 
     err = pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
     if (err) {
-        php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+        if (EG(exception)) {
+            return;
+        } else {
+            php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+            return;
+        }
     }
-
 
     if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
         return;
