@@ -79,7 +79,7 @@ class Tutorial_Person_PhoneNumber
     if (!isset(self::$descriptor)) {
       $desc = new ProtocolBuffers_DescriptorBuilder();
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 9,
+        "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "number",
         "optional" => false,
         "repeated" => false,
@@ -87,7 +87,7 @@ class Tutorial_Person_PhoneNumber
         "default"  => "",
       )));
       $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 14,
+        "type"     => ProtocolBuffers::TYPE_ENUM,
         "name"     => "type",
         "optional" => true,
         "repeated" => false,
@@ -249,7 +249,7 @@ class Tutorial_Person
     if (!isset(self::$descriptor)) {
       $desc = new ProtocolBuffers_DescriptorBuilder();
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 9,
+        "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "name",
         "optional" => false,
         "repeated" => false,
@@ -257,7 +257,7 @@ class Tutorial_Person
         "default"  => "",
       )));
       $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 5,
+        "type"     => ProtocolBuffers::TYPE_INT32,
         "name"     => "id",
         "optional" => false,
         "repeated" => false,
@@ -265,7 +265,7 @@ class Tutorial_Person
         "default"  => 0,
       )));
       $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 9,
+        "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "email",
         "optional" => true,
         "repeated" => false,
@@ -273,7 +273,7 @@ class Tutorial_Person
         "default"  => "",
       )));
       $desc->addField(4, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 11,
+        "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "phone",
         "optional" => false,
         "repeated" => true,
@@ -337,7 +337,7 @@ class Tutorial_AddressBook
     if (!isset(self::$descriptor)) {
       $desc = new ProtocolBuffers_DescriptorBuilder();
       $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
-        "type"     => 11,
+        "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "person",
         "optional" => false,
         "repeated" => true,

@@ -217,6 +217,37 @@ string getTypeName(const FieldDescriptor & field){
     return "";
 }
 
+static const char *fields_map[] = {
+    "DUMMY",
+    "ProtocolBuffers::TYPE_DOUBLE",
+    "ProtocolBuffers::TYPE_FLOAT",
+    "ProtocolBuffers::TYPE_INT64",
+    "ProtocolBuffers::TYPE_UINT64",
+    "ProtocolBuffers::TYPE_INT32",
+    "ProtocolBuffers::TYPE_FIXED64",
+    "ProtocolBuffers::TYPE_FIXED32",
+    "ProtocolBuffers::TYPE_BOOL",
+    "ProtocolBuffers::TYPE_STRING",
+    "ProtocolBuffers::TYPE_GROUP",
+    "ProtocolBuffers::TYPE_MESSAGE",
+    "ProtocolBuffers::TYPE_BYTES",
+    "ProtocolBuffers::TYPE_UINT32",
+    "ProtocolBuffers::TYPE_ENUM",
+    "ProtocolBuffers::TYPE_SFIXED32",
+    "ProtocolBuffers::TYPE_SFIXED64",
+    "ProtocolBuffers::TYPE_SINT32",
+    "ProtocolBuffers::TYPE_SINT64",
+};
+
+static const char* field_type_to_str(int field_type)
+{
+    if (field_type > 0 && field_type <= 18) {
+        return fields_map[field_type];
+    } else {
+        return NULL;
+    }
+}
+
 void PHPCodeGenerator::PrintMessageRead(io::Printer &printer, const Descriptor & message, vector<const FieldDescriptor *> & required_fields, const FieldDescriptor * parentField) const {
 }
 
@@ -502,7 +533,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         printer.Indent();
         printer.Print("\"type\"     => `type`,\n",
             "type",
-            SimpleItoa(field.type())
+            field_type_to_str(field.type())
         );
         printer.Print("\"name\"     => \"`name`\",\n",
             "name",
