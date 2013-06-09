@@ -107,13 +107,10 @@ Compatibility
     <td>packed attributes</td><td>supported</td>
   </tr>
   <tr>
-    <td>extensions</td><td>not supported (will be add in July, 2013)</td>
+    <td>extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
   </tr>
   <tr>
     <td>unknown fields</td><td>not supported (will be add in July, 2013)</td>
-  </tr>
-  <tr>
-    <td>string field type check</td><td>strict (string must be utf-8 encoded or ascii text)</td>
   </tr>
 </table>
 

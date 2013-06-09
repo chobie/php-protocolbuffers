@@ -38,6 +38,7 @@
 #include "field_options.h"
 #include "message.h"
 #include "message_options.h"
+#include "php_message_options.h"
 #include "descriptor_builder.h"
 
 #ifdef ZTS
@@ -57,6 +58,8 @@ zend_class_entry *protocol_buffers_field_options_class_entry;
 zend_class_entry *protocol_buffers_message_class_entry;
 zend_class_entry *protocol_buffers_message_options_class_entry;
 zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
+
+zend_class_entry *protocol_buffers_php_message_options_class_entry;
 
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
@@ -1313,10 +1316,11 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     if (container->use_single_property < 1) {
         hash = Z_OBJPROP_P(klass);
     } else {
-        if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len, (void**)&c) == SUCCESS) {
+        if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
             hash = Z_ARRVAL_PP(c);
         } else {
             pb_serializer_destroy(ser);
+
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
             return -1;
         }
@@ -1583,6 +1587,7 @@ void php_protocolbuffers_init(TSRMLS_D)
     php_pb_filed_options_class(TSRMLS_C);
     php_pb_message_class(TSRMLS_C);
     php_pb_message_options_class(TSRMLS_C);
+    php_pb_php_message_options_class(TSRMLS_C);
     php_pb_descriptor_builder_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_LONG(name, size, value) \

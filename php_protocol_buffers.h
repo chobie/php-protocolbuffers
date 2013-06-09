@@ -93,9 +93,12 @@ extern zend_class_entry *protocol_buffers_message_class_entry;
 extern zend_class_entry *protocol_buffers_message_options_class_entry;
 extern zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
 
+extern zend_class_entry *protocol_buffers_php_message_options_class_entry;
+
 extern zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 extern zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
+
 
 #ifndef GOOGLE_PREDICT_TRUE
 #ifdef __GNUC__

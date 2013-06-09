@@ -132,6 +132,8 @@ class Tutorial_Person
 
   protected $phone;
 
+  //protected $_properties = array();
+
   /**
    * getting value
    *
@@ -266,6 +268,10 @@ class Tutorial_Person
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
+      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions->setUseSingleProperty(false);
+      $phpoptions->setSinglePropertyName("_properties");
+
       self::$descriptor = $desc->build();
     }
 
