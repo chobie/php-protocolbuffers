@@ -14,20 +14,16 @@ class Tutorial_SignedInteger32
 
   protected $_properties = array();
 
+  protected $value;
+
   public function getValue()
   {
-    $result = null;
-
-    if (array_key_exists('value', $this->_properties)) {
-      $result = $this->_properties['value'];
-    }
-
-    return $result;
+    return $this->value;
   }
 
   public function addValue($value)
   {
-    $this->_properties['value'][] = $value;
+    $this->value[] = $value;
   }
 
   /**

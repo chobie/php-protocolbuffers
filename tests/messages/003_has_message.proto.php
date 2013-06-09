@@ -14,38 +14,28 @@ class Tutorial_Person_PhoneNumber
 {
   protected static $descriptor;
 
-  protected $_properties = array();
+  protected $type;
+
+  protected $number;
 
   public function getType()
   {
-    $result = null;
-
-    if (array_key_exists('type', $this->_properties)) {
-      $result = $this->_properties['type'];
-    }
-
-    return $result;
+    return $this->type;
   }
 
   public function setType($type)
   {
-    $this->_properties['type'] = $type;
+    $this->type = $type;
   }
 
   public function getNumber()
   {
-    $result = null;
-
-    if (array_key_exists('number', $this->_properties)) {
-      $result = $this->_properties['number'];
-    }
-
-    return $result;
+    return $this->number;
   }
 
   public function setNumber($number)
   {
-    $this->_properties['number'] = $number;
+    $this->number = $number;
   }
 
   /**
@@ -110,68 +100,52 @@ class Tutorial_Person
 
   protected $_properties = array();
 
+  protected $name;
+
+  protected $id;
+
+  protected $phone;
+
+  protected $email;
+
   public function getName()
   {
-    $result = null;
-
-    if (array_key_exists('name', $this->_properties)) {
-      $result = $this->_properties['name'];
-    }
-
-    return $result;
+    return $this->name;
   }
 
   public function setName($name)
   {
-    $this->_properties['name'] = $name;
+    $this->name = $name;
   }
 
   public function getId()
   {
-    $result = null;
-
-    if (array_key_exists('id', $this->_properties)) {
-      $result = $this->_properties['id'];
-    }
-
-    return $result;
+    return $this->id;
   }
 
   public function setId($id)
   {
-    $this->_properties['id'] = $id;
+    $this->id = $id;
   }
 
   public function getEmail()
   {
-    $result = null;
-
-    if (array_key_exists('email', $this->_properties)) {
-      $result = $this->_properties['email'];
-    }
-
-    return $result;
+    return $this->email;
   }
 
   public function setEmail($email)
   {
-    $this->_properties['email'] = $email;
+    $this->email = $email;
   }
 
   public function getPhone()
   {
-    $result = null;
-
-    if (array_key_exists('phone', $this->_properties)) {
-      $result = $this->_properties['phone'];
-    }
-
-    return $result;
+    return $this->phone;
   }
 
   public function setPhone($phone)
   {
-    $this->_properties['phone'] = $phone;
+    $this->phone = $phone;
   }
 
   /**

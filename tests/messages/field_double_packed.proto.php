@@ -12,22 +12,16 @@ class Tutorial_Double
 {
   protected static $descriptor;
 
-  protected $_properties = array();
+  protected $value = array();
 
   public function getValue()
   {
-    $result = null;
-
-    if (array_key_exists('value', $this->_properties)) {
-      $result = $this->_properties['value'];
-    }
-
-    return $result;
+    return $this->value;
   }
 
   public function addValue($value)
   {
-    $this->_properties['value'][] = $value;
+    $this->value[] = $value;
   }
 
   /**

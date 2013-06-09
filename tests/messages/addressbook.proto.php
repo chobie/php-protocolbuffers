@@ -16,52 +16,40 @@ class Tutorial_User
 
   protected $_properties = array();
 
+  protected $id;
+
+  protected $offense;
+
+  protected $name;
+
   public function getId()
   {
-    $result = null;
-
-    if (array_key_exists('id', $this->_properties)) {
-      $result = $this->_properties['id'];
-    }
-
-    return $result;
+    return $this->id;
   }
 
   public function setId($id)
   {
-    $this->_properties['id'] = $id;
+    $this->id = $id;
   }
 
   public function getOffense()
   {
-    $result = null;
-
-    if (array_key_exists('offense', $this->_properties)) {
-      $result = $this->_properties['offense'];
-    }
-
-    return $result;
+    return $this->offense;
   }
 
   public function setOffense($offense)
   {
-    $this->_properties['offense'] = $offense;
+    $this->offense = $offense;
   }
 
   public function getName()
   {
-    $result = null;
-
-    if (array_key_exists('name', $this->_properties)) {
-      $result = $this->_properties['name'];
-    }
-
-    return $result;
+    return $this->name;
   }
 
   public function setName($name)
   {
-    $this->_properties['name'] = $name;
+    $this->name = $name;
   }
 
   /**
@@ -121,20 +109,16 @@ class Tutorial_AddressBook
 
   protected $_properties = array();
 
+  protected $user = array();
+
   public function getUser()
   {
-    $result = null;
-
-    if (array_key_exists('user', $this->_properties)) {
-      $result = $this->_properties['user'];
-    }
-
-    return $result;
+    return $this->user;
   }
 
   public function addUser($user)
   {
-    $this->_properties['user'][] = $user;
+    $this->user[] = $user;
   }
 
   /**

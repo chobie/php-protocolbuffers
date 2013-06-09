@@ -14,20 +14,16 @@ class Tutorial_RepeatedString
 
   protected $_properties = array();
 
+  protected $values = array();
+
   public function getValues()
   {
-    $result = null;
-
-    if (array_key_exists('values', $this->_properties)) {
-      $result = $this->_properties['values'];
-    }
-
-    return $result;
+    return $this->values;
   }
 
   public function addValues($values)
   {
-    $this->_properties['values'][] = $values;
+    $this->values[] = $values;
   }
 
   /**
