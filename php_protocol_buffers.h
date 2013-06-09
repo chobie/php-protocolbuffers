@@ -135,6 +135,9 @@ typedef struct {
     int is_extendable;
     //int extension_range_min;
     pb_scheme *scheme;
+    int use_single_property;
+    char *single_property_name;
+    int single_property_name_len;
     int size;
 } pb_scheme_container;
 

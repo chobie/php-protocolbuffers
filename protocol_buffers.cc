@@ -305,6 +305,15 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
         container->scheme = ischeme;
         container->size = scheme_size;
+        container->use_single_property = 0;
+        {
+            char *prop;
+            int prop_len;
+
+            zend_mangle_property_name(&prop, &prop_len, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
+            container->single_property_name = prop;
+            container->single_property_name_len = prop_len;
+        }
 
         zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container*), NULL);
 
@@ -320,10 +329,23 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
     return 0;
 }
 
-static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, HashTable *hresult, zval *dz)
+static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz)
 {
+    char *name;
+    int name_len;
+
+    if (container->use_single_property < 1) {
+        name = s->mangled_name;
+        name_len = s->mangled_name_len;
+    } else {
+        name = s->name;
+        name_len = s->name_len;
+    }
+
     if (s->repeated) {
-        if (!zend_hash_exists(hresult, s->mangled_name, s->mangled_name_len)) {
+
+
+        if (!zend_hash_exists(hresult, name, name_len)) {
             zval *arr;
     
             MAKE_STD_ZVAL(arr);
@@ -332,13 +354,13 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, H
             zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);
             Z_ADDREF_P(dz);
     
-            zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr, sizeof(arr), NULL);
+            zend_hash_update(hresult, name, name_len, (void **)&arr, sizeof(arr), NULL);
             Z_ADDREF_P(arr);
             zval_ptr_dtor(&arr);
         } else {
             zval **arr2;
 
-            if (zend_hash_find(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr2) == SUCCESS) {
+            if (zend_hash_find(hresult, name, name_len, (void **)&arr2) == SUCCESS) {
                 if (Z_TYPE_PP(arr2) == IS_NULL) {
                     array_init(*arr2);
                 }
@@ -348,7 +370,7 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, H
             }
         }
     } else {
-        zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&dz, sizeof(dz), NULL);
+        zend_hash_update(hresult, name, name_len, (void **)&dz, sizeof(dz), NULL);
         Z_ADDREF_P(dz);
     }
     
@@ -401,7 +423,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_LONG(dz, value);
             }
 
-            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
         }
         break;
         case WIRETYPE_FIXED64:
@@ -414,14 +436,14 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, d);
-                php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
             } else {
                 uint64_t l;
                 memcpy(&l, data, 8);
 
                 MAKE_STD_ZVAL(dz);
                 ZVAL_DOUBLE(dz, l);
-                php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
             }
 
             data += 8;
@@ -437,7 +459,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-                    php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                    php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                 } else {
                     char *sub_buffer;
 
@@ -447,7 +469,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
 
-                    php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                    php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                     efree(sub_buffer);
                 }
 
@@ -458,7 +480,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-                    php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                    php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                 } else {
                     char *sub_buffer;
 
@@ -469,7 +491,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                     MAKE_STD_ZVAL(dz);
                     ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
 
-                    php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                    php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
                     efree(sub_buffer);
                 }
@@ -544,7 +566,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             d = decode_double(_v);
                             MAKE_STD_ZVAL(dz);
                             ZVAL_DOUBLE(dz, d);
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
                             data += 8;
                         }
@@ -559,7 +581,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                             MAKE_STD_ZVAL(dz);
                             ZVAL_DOUBLE(dz, a);
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
                             data += 4;
                         }
@@ -572,7 +594,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int64_t)v2);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         }
                         break;
                         case TYPE_UINT64:
@@ -583,7 +605,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, v2);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         }
                         break;
                         break;
@@ -593,7 +615,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int32_t)value);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         break;
                         case TYPE_FIXED64:
                         {
@@ -603,7 +625,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, l);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                             data += 8;
                         }
                         break;
@@ -624,7 +646,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             ZVAL_LONG(dz, (unsigned long)l);
 #endif
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
                             data += 4;
                         }
@@ -635,7 +657,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_BOOL(dz, value);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         break;
                         case TYPE_UINT32:
                             data = ReadVarint32FromArray(data, &value, data_end);
@@ -643,7 +665,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int32_t)value);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         break;
                         case TYPE_ENUM:
                             data = ReadVarint32FromArray(data, &value, data_end);
@@ -651,7 +673,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int32_t)value);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         break;
                         case TYPE_SFIXED32:
                         {
@@ -662,7 +684,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                             ZVAL_LONG(dz, (int32_t)l);
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                             data += 4;
                         }
                         break;
@@ -673,7 +695,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                             MAKE_STD_ZVAL(dz);
                             ZVAL_DOUBLE(dz, l);
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
                             data += 8;
                         }
@@ -684,7 +706,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         break;
                         case TYPE_SINT64:
                         {
@@ -694,7 +716,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                             MAKE_STD_ZVAL(dz);
                             ZVAL_LONG(dz, (int64_t)zigzag_decode64(v2));
 
-                            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+                            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
                         }
                         break;
                     }
@@ -751,7 +773,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 ZVAL_LONG(dz, l);
             }
 
-            php_pb_decode_add_value_and_consider_repeated(s, hresult, dz);
+            php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
             data += 4;
         }
@@ -1223,11 +1245,21 @@ static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
     pb_serializer_write_varint64(ser, zigzag_encode64(v));
 }
 
-static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
+static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
 {
     zval **tmp;
+    char *name;
+    int name_len;
 
-    if (zend_hash_find(hash, scheme->mangled_name, scheme->mangled_name_len, (void **)&tmp) == SUCCESS) {
+    if (container->use_single_property < 1) {
+        name = scheme->mangled_name;
+        name_len = scheme->mangled_name_len;
+    } else {
+        name = scheme->name;
+        name_len = scheme->name_len;
+    }
+
+    if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
         pb_serializer *n_ser = NULL;
 
         if (scheme->repeated) {
@@ -1283,16 +1315,12 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 //        // TODO: make hash?
 //    }
 
-    // TODO: able to choose single property or each properties.
-    if (1) {
+    if (container->use_single_property < 1) {
         hash = Z_OBJPROP_P(klass);
     } else {
-        zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
-        if (zend_hash_find(Z_OBJPROP_P(klass), name, name_length, (void**)&c) == SUCCESS) {
-            efree(name);
+        if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len, (void**)&c) == SUCCESS) {
             hash = Z_ARRVAL_PP(c);
         } else {
-            efree(name);
             pb_serializer_destroy(ser);
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
             return -1;
@@ -1308,57 +1336,57 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
         switch (scheme->type) {
             case TYPE_DOUBLE:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
             break;
             case TYPE_FLOAT:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
             break;
             case TYPE_INT64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
             break;
             case TYPE_UINT64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
             break;
             case TYPE_INT32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
             break;
             case TYPE_FIXED64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
             break;
             case TYPE_FIXED32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
             break;
             case TYPE_BOOL:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
             break;
             case TYPE_STRING:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_string, 0);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_string, 0);
             break;
             case TYPE_GROUP:
             break;
             case TYPE_MESSAGE:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_msg, 0);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_msg, 0);
             break;
             case TYPE_BYTES:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_bytes, 0);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bytes, 0);
             break;
             case TYPE_UINT32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
             break;
             case TYPE_ENUM:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
             break;
             case TYPE_SFIXED32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
             break;
             case TYPE_SFIXED64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
             break;
             case TYPE_SINT32:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
             break;
             case TYPE_SINT64:
-                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
+                pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
             break;
             default:
             break;
@@ -1664,6 +1692,10 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
                     if ((*element)->scheme[i].mangled_name != NULL) {
                         efree((*element)->scheme[i].mangled_name);
                     }
+                }
+
+                if ((*element)->single_property_name != NULL) {
+                    efree((*element)->single_property_name);
                 }
 
                 efree((*element)->scheme);

@@ -19,6 +19,10 @@ static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_desc
             }
         }
 
+        if (object->container->single_property_name != NULL) {
+            efree(object->container->single_property_name);
+        }
+
         if (object->container->scheme != NULL) {
             efree(object->container->scheme);
         }
