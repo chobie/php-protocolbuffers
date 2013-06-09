@@ -260,4 +260,12 @@ typedef struct{
 
 #define PHP_PROTOCOLBUFFERS_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *)zend_object_store_get_object(OBJECT TSRMLS_CC);
 
+#if PHP_VERSION_ID < 50300
+# ifndef Z_ADDREF_P
+#  define Z_ADDREF_P(pz)   (pz)->refcount++
+#  define Z_ADDREF_PP(ppz) Z_ADDREF_P(*(ppz))
+#  define Z_ADDREF(z)      Z_ADDREF_P(&(z))
+# endif
+#endif
+
 #endif /* PHP_PROTOCOLBUFFERS_H */

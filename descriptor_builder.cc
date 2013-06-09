@@ -133,7 +133,7 @@ static int php_pb_field_descriptor_get_property(HashTable *hash, const char *nam
     int key_len;
     zval **resval;
 
-    zend_mangle_property_name(&key, &key_len, "*", 1, name, name_len, 0);
+    zend_mangle_property_name(&key, &key_len, "*", 1, (char*)name, name_len, 0);
     if (zend_hash_find(hash, key, key_len, (void **)&resval) == SUCCESS) {
         *result = *resval;
     }

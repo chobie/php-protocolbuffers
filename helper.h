@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 static inline uint32_t zigzag_encode32(int32_t n) {
   // Note:  the right-shift must be arithmetic
   return (n << 1) ^ (n >> 31);

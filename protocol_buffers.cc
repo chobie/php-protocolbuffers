@@ -40,15 +40,6 @@
 #include "message_options.h"
 #include "descriptor_builder.h"
 
-
-#if PHP_VERSION_ID < 50300
-# ifndef Z_ADDREF_P
-#  define Z_ADDREF_P(pz)   (pz)->refcount++
-#  define Z_ADDREF_PP(ppz) Z_ADDREF_P(*(ppz))
-#  define Z_ADDREF(z)      Z_ADDREF_P(&(z))
-# endif
-#endif
-
 #ifdef ZTS
 int pb_globals_id;
 #else
