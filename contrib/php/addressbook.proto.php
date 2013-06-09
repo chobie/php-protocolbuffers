@@ -14,7 +14,8 @@ class Tutorial_Person_PhoneNumber
 {
   protected static $descriptor;
 
-  protected $_properties = array();
+  protected $number;
+  protected $type;
 
   /**
    * getting value
@@ -23,13 +24,7 @@ class Tutorial_Person_PhoneNumber
    */
   public function getNumber()
   {
-    $result = null;
-
-    if (array_key_exists('number', $this->_properties)) {
-      $result = $this->_properties['number'];
-    }
-
-    return $result;
+    return $this->number;
   }
 
   /**
@@ -41,7 +36,7 @@ class Tutorial_Person_PhoneNumber
    */
   public function setNumber($number)
   {
-    $this->_properties['number'] = $number;
+    $this->number = $number;
   }
 
   /**
@@ -51,13 +46,7 @@ class Tutorial_Person_PhoneNumber
    */
   public function getType()
   {
-    $result = null;
-
-    if (array_key_exists('type', $this->_properties)) {
-      $result = $this->_properties['type'];
-    }
-
-    return $result;
+    return $this->type;
   }
 
   /**
@@ -69,7 +58,7 @@ class Tutorial_Person_PhoneNumber
    */
   public function setType($type)
   {
-    $this->_properties['type'] = $type;
+    $this->type = $type;
   }
 
   /**
@@ -135,7 +124,13 @@ class Tutorial_Person
 {
   protected static $descriptor;
 
-  protected $_properties = array();
+  protected $name;
+
+  protected $id;
+
+  protected $email;
+
+  protected $phone;
 
   /**
    * getting value
@@ -144,13 +139,7 @@ class Tutorial_Person
    */
   public function getName()
   {
-    $result = null;
-
-    if (array_key_exists('name', $this->_properties)) {
-      $result = $this->_properties['name'];
-    }
-
-    return $result;
+    return $this->name;
   }
 
   /**
@@ -162,7 +151,7 @@ class Tutorial_Person
    */
   public function setName($name)
   {
-    $this->_properties['name'] = $name;
+    $this->name = $name;
   }
 
   /**
@@ -172,13 +161,7 @@ class Tutorial_Person
    */
   public function getId()
   {
-    $result = null;
-
-    if (array_key_exists('id', $this->_properties)) {
-      $result = $this->_properties['id'];
-    }
-
-    return $result;
+    return $this->id;
   }
 
   /**
@@ -190,7 +173,7 @@ class Tutorial_Person
    */
   public function setId($id)
   {
-    $this->_properties['id'] = $id;
+    $this->id = $id;
   }
 
   /**
@@ -200,13 +183,7 @@ class Tutorial_Person
    */
   public function getEmail()
   {
-    $result = null;
-
-    if (array_key_exists('email', $this->_properties)) {
-      $result = $this->_properties['email'];
-    }
-
-    return $result;
+    return $this->email;
   }
 
   /**
@@ -218,7 +195,7 @@ class Tutorial_Person
    */
   public function setEmail($email)
   {
-    $this->_properties['email'] = $email;
+    $this->email = $email;
   }
 
   /**
@@ -228,13 +205,7 @@ class Tutorial_Person
    */
   public function getPhone()
   {
-    $result = null;
-
-    if (array_key_exists('phone', $this->_properties)) {
-      $result = $this->_properties['phone'];
-    }
-
-    return $result;
+    return $this->phone;
   }
 
   /**
@@ -246,7 +217,7 @@ class Tutorial_Person
    */
   public function addPhone($phone)
   {
-    $this->_properties['phone'][] = $phone;
+    $this->phone[] = $phone;
   }
 
   /**
@@ -316,7 +287,7 @@ class Tutorial_AddressBook
 {
   protected static $descriptor;
 
-  protected $_properties = array();
+  protected $person = array();
 
   /**
    * getting value
@@ -325,13 +296,7 @@ class Tutorial_AddressBook
    */
   public function getPerson()
   {
-    $result = null;
-
-    if (array_key_exists('person', $this->_properties)) {
-      $result = $this->_properties['person'];
-    }
-
-    return $result;
+    return $this->person;
   }
 
   /**
@@ -343,7 +308,7 @@ class Tutorial_AddressBook
    */
   public function addPerson($person)
   {
-    $this->_properties['person'][] = $person;
+    $this->person[] = $person;
   }
 
   /**

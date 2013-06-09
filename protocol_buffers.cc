@@ -1272,6 +1272,10 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
                 n_ser = ser;
             }
 
+            if (Z_TYPE_PP(tmp) != IS_ARRAY) {
+                array_init(*tmp);
+            }
+
             for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
                             zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
                             zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
