@@ -195,12 +195,19 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
             php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "name", sizeof("name"), &tmp TSRMLS_CC);
             if (Z_TYPE_P(tmp) == IS_STRING) {
+                char *mangle;
+                int mangle_len;
+
                 tsize                  = Z_STRLEN_P(tmp)+1;
                 ischeme[n].name        = (char*)emalloc(sizeof(char*) * tsize);
                 ischeme[n].name_len    = tsize;
 
                 memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
                 ischeme[n].name[tsize] = '\0';
+
+                zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].name, ischeme[n].name_len, 0);
+                ischeme[n].mangled_name     = mangle;
+                ischeme[n].mangled_name_len = mangle_len;
             }
 
             php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "repeated", sizeof("repeated"), &tmp TSRMLS_CC);

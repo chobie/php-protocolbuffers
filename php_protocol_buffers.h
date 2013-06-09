@@ -115,6 +115,8 @@ typedef struct pb_scheme
     int tag;
     char *name;
     int name_len;
+    char *mangled_name;
+    int mangled_name_len;
     int type;
     int flags;
     int scheme_type;

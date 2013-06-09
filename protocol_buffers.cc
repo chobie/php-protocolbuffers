@@ -206,6 +206,8 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
         {
             zval *tmp;
             int tsize = 0;
+            char *mangle;
+            int mangle_len;
 
             ischeme[n].type = pb_get_lval_from_hash_by_tag(proto, ttag, "type", sizeof("type") TSRMLS_CC);
 
@@ -217,6 +219,10 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
 
             memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
             ischeme[n].name[tsize] = '\0';
+
+            zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].name, ischeme[n].name_len, 0);
+            ischeme[n].mangled_name     = mangle;
+            ischeme[n].mangled_name_len = mangle_len;
 
             ischeme[n].repeated = pb_get_lval_from_hash_by_tag(proto, ttag, "repeated", sizeof("repeated") TSRMLS_CC);
             ischeme[n].packed   = pb_get_lval_from_hash_by_tag(proto, ttag, "packable", sizeof("packable") TSRMLS_CC);
@@ -314,52 +320,10 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
     return 0;
 }
 
-#define PHP_PB_DECOCDE_ADD_VALUE_AND_CONSIDER_REPEATED \
-    if (s->repeated) {\
-        if (!zend_hash_exists(hresult, s->name, s->name_len)) {\
-            zval *arr;\
-    \
-            MAKE_STD_ZVAL(arr);\
-            array_init(arr);\
-    \
-            zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);\
-            Z_ADDREF_P(dz);\
-    \
-            zend_hash_update(hresult, s->name, s->name_len, (void **)&arr, sizeof(arr), NULL);\
-            Z_ADDREF_P(arr);\
-            zval_ptr_dtor(&arr);\
-        } else {\
-            zval **arr2;\
-            char *name;\
-            int name_len;\
-    \
-            zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)s->name, s->name_len, 0);\
-            if (zend_hash_find(hresult, name, name_len, (void **)&arr2) == SUCCESS) {\
-                zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&dz, sizeof(dz), NULL);\
-                Z_ADDREF_P(dz);\
-            }\
-            efree(name);\
-        }\
-    } else {\
-        char *name;\
-        int name_len;\
-        \
-        zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)s->name, s->name_len, 0);\
-        zend_hash_update(hresult, name, name_len, (void **)&dz, sizeof(dz), NULL);\
-        Z_ADDREF_P(dz);\
-        efree(name);\
-    }\
-    \
-    zval_ptr_dtor(&dz);\
-
 static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, HashTable *hresult, zval *dz)
 {
-    char *name;
-    int name_len;
-
-    zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)s->name, s->name_len, 0);
     if (s->repeated) {
-        if (!zend_hash_exists(hresult, name, name_len)) {
+        if (!zend_hash_exists(hresult, s->mangled_name, s->mangled_name_len)) {
             zval *arr;
     
             MAKE_STD_ZVAL(arr);
@@ -368,13 +332,13 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, H
             zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);
             Z_ADDREF_P(dz);
     
-            zend_hash_update(hresult, name, name_len, (void **)&arr, sizeof(arr), NULL);
+            zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr, sizeof(arr), NULL);
             Z_ADDREF_P(arr);
             zval_ptr_dtor(&arr);
         } else {
             zval **arr2;
 
-            if (zend_hash_find(hresult, name, name_len, (void **)&arr2) == SUCCESS) {
+            if (zend_hash_find(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr2) == SUCCESS) {
                 if (Z_TYPE_PP(arr2) == IS_NULL) {
                     array_init(*arr2);
                 }
@@ -384,11 +348,10 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme *s, H
             }
         }
     } else {
-        zend_hash_update(hresult, name, name_len, (void **)&dz, sizeof(dz), NULL);
+        zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&dz, sizeof(dz), NULL);
         Z_ADDREF_P(dz);
     }
     
-    efree(name);
     zval_ptr_dtor(&dz);
 }
 
@@ -539,14 +502,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 //pb_execute_wakeup(z_obj TSRMLS_CC);
 
                 if (s->repeated) {
-                    char *name;
-                    int name_length;
-
-                    zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)s->name, s->name_len, 0);
-                    if (!zend_hash_exists(hresult, name, name_length)) {
+                    if (!zend_hash_exists(hresult, s->mangled_name, s->mangled_name_len)) {
                         zval *arr;
-                        char *name;
-                        int name_length;
 
                         MAKE_STD_ZVAL(arr);
                         array_init(arr);
@@ -554,26 +511,20 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&z_obj, sizeof(z_obj), NULL);
                         Z_ADDREF_P(z_obj);
 
-                        zend_hash_update(hresult, name, name_length, (void **)&arr, sizeof(arr), NULL);
+                        zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr, sizeof(arr), NULL);
                         Z_ADDREF_P(arr);
                         zval_ptr_dtor(&arr);
                     } else {
                         zval **arr2;
 
-                        if (zend_hash_find(hresult, name, name_length, (void **)&arr2) == SUCCESS) {
+                        if (zend_hash_find(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr2) == SUCCESS) {
                             zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
                             Z_ADDREF_P(z_obj);
                         }
                     }
-                    efree(name);
                 } else {
-                    char *name;
-                    int name_length;
-
-                    zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)s->name, s->name_len, 0);
-                    zend_hash_update(hresult, name, name_length, (void **)&z_obj, sizeof(z_obj), NULL);
+                    zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&z_obj, sizeof(z_obj), NULL);
                     Z_ADDREF_P(z_obj);
-                    efree(name);
                 }
 
                 zval_ptr_dtor(&z_obj);
@@ -1275,11 +1226,8 @@ static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
 {
     zval **tmp;
-    char *name = NULL;
-    int name_length;
 
-    zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)scheme->name, scheme->name_len, 0);
-    if (zend_hash_find(hash, name, name_length, (void **)&tmp) == SUCCESS) {
+    if (zend_hash_find(hash, scheme->mangled_name, scheme->mangled_name_len, (void **)&tmp) == SUCCESS) {
         pb_serializer *n_ser = NULL;
 
         if (scheme->repeated) {
@@ -1314,10 +1262,6 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, HashTable *hash, pb_
                 f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
             }
         }
-    }
-
-    if (name != NULL) {
-        efree(name);
     }
 }
 
@@ -1716,6 +1660,9 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
                 for (i = 0; i < (*element)->size; i++) {
                     if ((*element)->scheme[i].name != NULL) {
                         efree((*element)->scheme[i].name);
+                    }
+                    if ((*element)->scheme[i].mangled_name != NULL) {
+                        efree((*element)->scheme[i].mangled_name);
                     }
                 }
 
