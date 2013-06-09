@@ -12,6 +12,8 @@ class Tutorial_RepeatedString
 {
   protected static $descriptor;
 
+  protected $_properties = array();
+
   public function getValues()
   {
     $result = null;

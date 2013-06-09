@@ -12,7 +12,9 @@ class Tutorial_Fixed64
 {
   protected static $descriptor;
 
-  public function getValue()
+  protected $_properties = array();
+
+    public function getValue()
   {
     $result = null;
 

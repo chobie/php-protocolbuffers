@@ -12,6 +12,8 @@ class Tutorial_SignedInteger32
 {
   protected static $descriptor;
 
+  protected $_properties = array();
+
   public function getValue()
   {
     $result = null;

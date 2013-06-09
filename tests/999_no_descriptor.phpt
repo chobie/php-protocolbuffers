@@ -1,3 +1,6 @@
+--TEST--
+Check for protocol buffers decode implementations
+--FILE--
 <?php
 /**
  * Tutorial_Bytes
@@ -11,8 +14,6 @@
 class Tutorial_Bytes
 {
   protected static $descriptor;
-
-  protected $_properties = array();
 
   public function getValue()
   {
@@ -32,27 +33,25 @@ class Tutorial_Bytes
 
   /**
    * get descriptor for protocol buffers
-   * 
+   *
    * @return array
    */
   public static function getDescriptor()
   {
-      if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
-              "type"     => ProtocolBuffers::TYPE_BYTES,
-              "name"     => "value",
-              "packable" => false,
-              "repeated" => false,
-              "default"  => null,
-          )));
-
-          self::$descriptor = $desc->build();
-      }
-
-      return self::$descriptor;
-
+    // return nothing.
   }
-
 }
 
+
+$b = new Tutorial_Bytes();
+$droid  = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "android_logo.gif");
+$b->setValue($droid);
+
+try {
+	ProtocolBuffers::encode($b);
+} catch (ProtocolBuffers_InvalidProtocolBufferException $e) {
+	echo "OK";
+}
+
+--EXPECT--
+OK

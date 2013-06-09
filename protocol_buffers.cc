@@ -471,13 +471,19 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 const char *n_buffer_end = data + value;
                 zval *z_arr, *z_obj;
                 pb_scheme_container *c_container;
+                char *name;
+                int name_length;
 
                 pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
                 pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_arr);
 
                 MAKE_STD_ZVAL(z_obj);
                 object_init_ex(z_obj, s->ce);
-                zend_hash_update(Z_OBJPROP_P(z_obj), "_properties", sizeof("_properties"), (void **)&z_arr, sizeof(zval*), NULL);
+
+                //TODO: able to choose single property or else.
+                zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
+                zend_hash_update(Z_OBJPROP_P(z_obj), name, name_length, (void **)&z_arr, sizeof(zval*), NULL);
+                efree(name);
 
                 // TODO
                 //pb_execute_wakeup(z_obj TSRMLS_CC);
@@ -1254,6 +1260,8 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
     zval **c, *targets = NULL;
     HashTable *hash = NULL;
     pb_scheme *scheme;
+    char *name;
+    int name_length;
 
     pb_serializer_init(&ser);
 
@@ -1263,12 +1271,15 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 //        // TODO: make hash?
 //    }
 
-    // TODO: mangle property name
-    if (zend_hash_find(Z_OBJPROP_P(klass), "_properties", sizeof("_properties"), (void**)&c) == SUCCESS) {
+    // TODO: able to choose single property or each properties.
+    zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
+    if (zend_hash_find(Z_OBJPROP_P(klass), name, name_length, (void**)&c) == SUCCESS) {
+        efree(name);
         hash = Z_ARRVAL_PP(c);
     } else {
+        efree(name);
         pb_serializer_destroy(ser);
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` property.");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
         return -1;
     }
 
@@ -1391,9 +1402,10 @@ PHP_METHOD(protocolbuffers, decode)
 
     {
         //zval func;
-
         zval **pp[1];
         zend_class_entry **ce;
+        char *name;
+        int name_length;
 
         MAKE_STD_ZVAL(obj);
         zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
@@ -1410,7 +1422,9 @@ PHP_METHOD(protocolbuffers, decode)
         //zend_hash_add(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
 
         //zend_hash_find(Z_OBJPROP_P(obj), "_properties", sizeof("_properties")+1, (void **)&h);
-        zend_hash_update(Z_OBJPROP_P(obj), "_properties", sizeof("_properties"), (void **)&z_result, sizeof(zval*), NULL);
+        zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
+        zend_hash_update(Z_OBJPROP_P(obj), name, name_length, (void **)&z_result, sizeof(zval*), NULL);
+        efree(name);
 
         //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
         Z_ADDREF_P(z_result);
@@ -1451,6 +1465,7 @@ PHP_METHOD(protocolbuffers, encode)
         if (EG(exception)) {
             return;
         } else {
+            // TODO: improve displaying error message
             php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
             return;
         }

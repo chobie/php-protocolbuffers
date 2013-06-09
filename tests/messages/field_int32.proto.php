@@ -12,7 +12,9 @@ class Tutorial_Integer32
 {
   protected static $descriptor;
 
-  public function getValue()
+  protected $_properties = array();
+
+    public function getValue()
   {
     $result = null;
 

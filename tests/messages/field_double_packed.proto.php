@@ -12,6 +12,8 @@ class Tutorial_Double
 {
   protected static $descriptor;
 
+  protected $_properties = array();
+
   public function getValue()
   {
     $result = null;

@@ -12,6 +12,8 @@ class Tutorial_RepeatedInt32
 {
   protected static $descriptor;
 
+  protected $_properties = array();
+
   public function getValue()
   {
     $result = null;

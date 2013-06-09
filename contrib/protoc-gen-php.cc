@@ -403,6 +403,9 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     // Print fields map
 
     printer.Print("protected static $descriptor;\n");
+    printer.Print("\n");
+    printer.Print("protected $_properties = array();\n");
+    printer.Print("\n");
 
     if (!skip_unknown) {
         // printer.Print("private $_unknown;\n");

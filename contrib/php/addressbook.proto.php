@@ -13,6 +13,9 @@
 class Tutorial_Person_PhoneNumber
 {
   protected static $descriptor;
+
+  protected $_properties = array();
+
   /**
    * getting value
    *
@@ -131,6 +134,9 @@ class Tutorial_Person_PhoneType
 class Tutorial_Person
 {
   protected static $descriptor;
+
+  protected $_properties = array();
+
   /**
    * getting value
    *
@@ -309,6 +315,9 @@ class Tutorial_Person
 class Tutorial_AddressBook
 {
   protected static $descriptor;
+
+  protected $_properties = array();
+
   /**
    * getting value
    *
