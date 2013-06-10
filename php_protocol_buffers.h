@@ -5,7 +5,6 @@
 #define PHP_PROTOCOLBUFFERS_EXTNAME "protocolbuffers"
 #define PHP_PROTOCOLBUFFERS_EXTVER "0.1"
 
-extern "C" {
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -20,7 +19,6 @@ extern "C" {
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "limits.h"
-}
 
 #include "helper.h"
 

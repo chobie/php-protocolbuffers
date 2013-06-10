@@ -5,21 +5,18 @@ PHP_ARG_ENABLE(protocolbuffers-debug, for protocolbuffers debug support,
     [ --enable-protocolbuffers-debug       Enable enable protocolbuffers debug support], no, no)
 
 if test $PHP_PROTOCOLBUFFERS != "no"; then
-    PHP_REQUIRE_CXX()
-    PHP_ADD_LIBRARY(stdc++,, PROTOCOLBUFFERS_SHARED_LIBADD)
-
     if test "$PHP_PROTOCOLBUFFERS_DEBUG" != "no"; then
-        CXXFLAGS="$CXXFLAGS -Wall -g -ggdb -O0 -DPHP_PROTOCOLBUFFERS_DEBUG=1"
+        CFLAGS="$CFLAGS -Wall -g -ggdb -O0 -DPHP_PROTOCOLBUFFERS_DEBUG=1"
         AC_DEFINE(PHP_PROTOCOLBUFFERS_DEBUG, 1, [Enable protocolbuffers debug support])
     else
         # ignore strings warnings
         CXXFLAGS="-Wno-write-strings"
     fi
 
-    PHP_PROTOBUF_SRCS="protocol_buffers.cc descriptor.cc descriptor_builder.cc field_descriptor.cc field_options.cc message.cc message_options.cc php_message_options.cc"
+    PHP_PROTOBUF_SRCS="protocol_buffers.c descriptor.c descriptor_builder.c field_descriptor.c field_options.c message.c message_options.c php_message_options.c"
 
     PHP_SUBST(PROTOCOLBUFFERS_SHARED_LIBADD)
     PHP_NEW_EXTENSION(protocolbuffers, $PHP_PROTOBUF_SRCS, $ext_shared)
 
-    PHP_SUBST([CXXFLAGS])
+    PHP_SUBST([CFLAGS])
 fi
