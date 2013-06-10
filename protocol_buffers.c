@@ -102,6 +102,7 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
 	const char* ptr = buffer;
 	int b;
 	int result;
+	int i;
 
 	if (GOOGLE_PREDICT_TRUE(buffer < buffer_end) && (uint)*ptr < 0x80) {
 		*value = (uint)*buffer;
@@ -119,7 +120,7 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
 	 * If the input is larger than 32 bits, we still need to read it all
 	 * and discard the high-order bits.
 	 */
-	for (int i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
+	for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
 		b = *(ptr++); if (!(b & 0x80)) goto done;
 	}
 

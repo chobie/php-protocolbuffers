@@ -71,9 +71,9 @@
 
 static const int32_t ktagmax   = 0x1FFFFFFF;
 static const int32_t kint32max = 0x7FFFFFFF;
-static const int32_t kint32min = -kint32max - 1;
+static const int32_t kint32min = -0x7FFFFFFF - 1;
 static const int64_t kint64max = GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF);
-static const int64_t kint64min = -kint64max - 1;
+static const int64_t kint64min = -GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF) - 1;
 static const uint32_t kuint32max = 0xFFFFFFFFu;
 static const uint64_t kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 
