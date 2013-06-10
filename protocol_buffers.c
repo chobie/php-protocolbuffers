@@ -1304,8 +1304,17 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 			if (is_packed == 1) {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
 			} else {
+				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
+					zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+					return;
+				}
 				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
 			}
+		}
+	} else {
+		if (scheme->required > 0) {
+			zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			return;
 		}
 	}
 }
