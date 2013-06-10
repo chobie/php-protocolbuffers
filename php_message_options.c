@@ -10,7 +10,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_single_property_name, 
 ZEND_END_ARG_INFO()
 
 
-/* {{{ proto void ProtocolBuffers_PHPMessageOptions::setUseSingleProperty(boolean $use)
+/* {{{ proto void ProtocolBuffersPHPMessageOptions::setUseSingleProperty(boolean $use)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 {
@@ -31,7 +31,7 @@ PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_PHPMessageOptions::setSinglePropertyName(string $name)
+/* {{{ proto void ProtocolBuffersPHPMessageOptions::setSinglePropertyName(string $name)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 {
@@ -68,7 +68,7 @@ void php_pb_php_message_options_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_PHPMessageOptions", php_protocolbuffers_php_message_options_methods);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersPHPMessageOptions", php_protocolbuffers_php_message_options_methods);
 	protocol_buffers_php_message_options_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, "use_single_property", sizeof("use_single_property")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);

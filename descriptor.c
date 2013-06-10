@@ -95,7 +95,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_dump, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 
-/* {{{ proto ProtocolBuffers_Descriptor ProtocolBuffers_Descriptor::__construct()
+/* {{{ proto ProtocolBuffersDescriptor ProtocolBuffersDescriptor::__construct()
 */
 PHP_METHOD(protocolbuffers_descriptor, __construct)
 {
@@ -103,7 +103,7 @@ PHP_METHOD(protocolbuffers_descriptor, __construct)
 }
 /* }}} */
 
-/* {{{ proto string ProtocolBuffers_Descriptor::getName()
+/* {{{ proto string ProtocolBuffersDescriptor::getName()
 */
 PHP_METHOD(protocolbuffers_descriptor, getName)
 {
@@ -116,21 +116,21 @@ PHP_METHOD(protocolbuffers_descriptor, getName)
 }
 /* }}} */
 
-/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffers_Descriptor::getField(int $tag)
+/* {{{ proto ProtocolBuffersFieldDescriptor ProtocolBuffersDescriptor::getField(int $tag)
 */
 PHP_METHOD(protocolbuffers_descriptor, getField)
 {
 }
 /* }}} */
 
-/* {{{ proto mixed ProtocolBuffers_Descriptor::getOption(int $option)
+/* {{{ proto mixed ProtocolBuffersDescriptor::getOption(int $option)
 */
 PHP_METHOD(protocolbuffers_descriptor, getOption)
 {
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_Descriptor::dump()
+/* {{{ proto void ProtocolBuffersDescriptor::dump()
 */
 PHP_METHOD(protocolbuffers_descriptor, dump)
 {
@@ -153,15 +153,15 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 	if (descriptor->container->size > 0) {
 		for (n = 0; n < descriptor->container->size; n++) {
 			ischeme = &(descriptor->container->scheme[n]);
-			php_printf("	\"%d\": {\n", ischeme->tag);
-			php_printf("	  type: \"%s\",\n", field_type_to_str(ischeme->type));
-			php_printf("	  name: \"%s\",\n", ischeme->name);
+			php_printf("    \"%d\": {\n", ischeme->tag);
+			php_printf("      type: \"%s\",\n", field_type_to_str(ischeme->type));
+			php_printf("      name: \"%s\",\n", ischeme->name);
 			if (ischeme->type == TYPE_MESSAGE && ischeme->ce != NULL) {
-				php_printf("	  message: \"%s\",\n", ischeme->ce->name);
+				php_printf("      message: \"%s\",\n", ischeme->ce->name);
 			}
-			php_printf("	  repeated: %s,\n", (ischeme->repeated == true) ? "true" : "false");
-			php_printf("	  packed: %s\n", (ischeme->packed== true) ? "true" : "false");
-			php_printf("	}");
+			php_printf("      repeated: %s,\n", (ischeme->repeated == true) ? "true" : "false");
+			php_printf("      packed: %s\n", (ischeme->packed== true) ? "true" : "false");
+			php_printf("    }");
 
 			if (n+1 < descriptor->container->size) {
 				php_printf(",\n");
@@ -191,7 +191,7 @@ void php_pb_descriptor_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_Descriptor", php_protocolbuffers_descriptor_methods);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptor", php_protocolbuffers_descriptor_methods);
 	protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_descriptor_class_entry->create_object = php_protocolbuffers_descriptor_new;
 }

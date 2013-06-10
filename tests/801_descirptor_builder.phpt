@@ -3,7 +3,7 @@ Check for protocol buffers descriptor builder implementations
 --FILE--
 <?php
 
-$builder = new ProtocolBuffers_DescriptorBuilder();
+$builder = new ProtocolBuffersDescriptorBuilder();
 $builder->setName("Person");
 
 echo $builder->getName("Person") . PHP_EOL;
@@ -12,13 +12,13 @@ echo strlen($builder->getName("Person")) . PHP_EOL;
 
 $descriptor = $builder->build();
 
-if ($descriptor instanceof ProtocolBuffers_Descriptor) {
+if ($descriptor instanceof ProtocolBuffersDescriptor) {
     echo $descriptor->getName("Person") . PHP_EOL;
     echo $descriptor->getName("Person") . PHP_EOL;
     echo strlen($descriptor->getName("Person")) . PHP_EOL;
 
 } else {
-    echo "FAULT: INSTANCE IS NOT ProtocolBuffers_Descriptor" . PHP_EOL;
+    echo "FAULT: INSTANCE IS NOT ProtocolBuffersDescriptor" . PHP_EOL;
 }
 
 --EXPECT--

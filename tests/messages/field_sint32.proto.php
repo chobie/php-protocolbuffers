@@ -34,8 +34,8 @@ class Tutorial_SInt32
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_SINT32,
               "name"     => "value",
               "required" => true,

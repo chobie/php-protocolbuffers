@@ -107,7 +107,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_default, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 
-/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffers_FieldDescriptor::__construct(array $params)
+/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersFieldDescriptor::__construct(array $params)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, __construct)
 {
@@ -126,7 +126,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, __construct)
 /* }}} */
 
 
-/* {{{ proto long ProtocolBuffers_FieldDescriptor::getType()
+/* {{{ proto long ProtocolBuffersFieldDescriptor::getType()
 */
 PHP_METHOD(protocolbuffers_field_descriptor, getType)
 {
@@ -145,7 +145,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, getType)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_FieldDescriptor::setType(long $wiretype[, mixed $value])
+/* {{{ proto void ProtocolBuffersFieldDescriptor::setType(long $wiretype[, mixed $value])
 */
 PHP_METHOD(protocolbuffers_field_descriptor, setType)
 {
@@ -192,7 +192,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, setType)
 }
 /* }}} */
 
-/* {{{ proto mixed ProtocolBuffers_FieldDescriptor::getDefault()
+/* {{{ proto mixed ProtocolBuffersFieldDescriptor::getDefault()
 */
 PHP_METHOD(protocolbuffers_field_descriptor, getDefault)
 {
@@ -211,7 +211,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, getDefault)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_FieldDescriptor::setDefault(mixed $value)
+/* {{{ proto void ProtocolBuffersFieldDescriptor::setDefault(mixed $value)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, setDefault)
 {
@@ -247,6 +247,6 @@ void php_pb_filed_descriptor_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_FieldDescriptor", php_protocolbuffers_field_descriptor_methods);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersFieldDescriptor", php_protocolbuffers_field_descriptor_methods);
 	protocol_buffers_field_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 }

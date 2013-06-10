@@ -6,7 +6,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARAT
 
 try {
 	$data = ProtocolBuffers::decode("Tutorial_Bytes", "");
-} catch (ProtocolBuffers_InvalidProtocolBufferException $e) {
+} catch (ProtocolBuffersInvalidProtocolBufferException $e) {
 	echo "OK";	
 }
 

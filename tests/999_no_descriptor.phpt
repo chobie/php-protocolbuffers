@@ -49,7 +49,7 @@ $b->setValue($droid);
 
 try {
 	ProtocolBuffers::encode($b);
-} catch (ProtocolBuffers_InvalidProtocolBufferException $e) {
+} catch (ProtocolBuffersInvalidProtocolBufferException $e) {
 	echo "OK";
 }
 

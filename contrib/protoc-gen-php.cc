@@ -525,11 +525,11 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Indent();
     printer.Print("if (!isset(self::$descriptor)) {\n");
     printer.Indent();
-    printer.Print("$desc = new ProtocolBuffers_DescriptorBuilder();\n");
+    printer.Print("$desc = new ProtocolBuffersDescriptorBuilder();\n");
     for (int i = 0; i < message.field_count(); ++i) {
         const FieldDescriptor &field (*message.field(i));
 
-        printer.Print("$desc->addField(`tag`, new ProtocolBuffers_FieldDescriptor(array(\n",
+        printer.Print("$desc->addField(`tag`, new ProtocolBuffersFieldDescriptor(array(\n",
             "tag",
             SimpleItoa(field.number())
         );

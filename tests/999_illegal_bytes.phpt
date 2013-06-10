@@ -8,8 +8,8 @@ $droid  = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures"
 
 try {
 	$data = ProtocolBuffers::decode("Tutorial_Bytes", $droid);
-} catch (ProtocolBuffers_InvalidProtocolBufferException $e) {
-	echo "OK";	
+} catch (ProtocolBuffersInvalidProtocolBufferException $e) {
+	echo "OK";
 }
 
 --EXPECT--

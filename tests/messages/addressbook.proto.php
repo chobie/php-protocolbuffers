@@ -60,8 +60,8 @@ class Tutorial_User
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_INT32,
               "name"     => "id",
               "required" => true,
@@ -69,7 +69,7 @@ class Tutorial_User
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_FLOAT,
               "name"     => "offense",
               "required" => false,
@@ -77,7 +77,7 @@ class Tutorial_User
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(3, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_STRING,
               "name"     => "name",
               "required" => false,
@@ -129,8 +129,8 @@ class Tutorial_AddressBook
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_MESSAGE,
               "name"     => "user",
               "required" => false,

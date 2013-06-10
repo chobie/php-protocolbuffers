@@ -32,8 +32,8 @@ class Tutorial_BigTag
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(536870911, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(536870911, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_INT32,
               "name"     => "value",
               "packable" => false,

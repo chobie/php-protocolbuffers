@@ -46,15 +46,15 @@ class Tutorial_Person_PhoneNumber
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_ENUM,
               "name"     => "type",
               "packable" => false,
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_STRING,
               "name"     => "number",
               "packable" => false,
@@ -156,29 +156,29 @@ class Tutorial_Person
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_STRING,
               "name"     => "name",
               "packable" => false,
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_INT32,
               "name"     => "id",
               "packable" => false,
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(3, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_STRING,
               "name"     => "email",
               "packable" => false,
               "repeated" => false,
               "default"  => null,
           )));
-          $desc->addField(4, new ProtocolBuffers_FieldDescriptor(array(
+          $desc->addField(4, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_MESSAGE,
               "name"     => "phone",
               "packable" => false,

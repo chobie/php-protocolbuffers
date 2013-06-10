@@ -10,6 +10,6 @@ void php_pb_message_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_Message", php_protocolbuffers_message_methods);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersMessage", php_protocolbuffers_message_methods);
 	protocol_buffers_message_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 }

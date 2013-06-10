@@ -32,8 +32,8 @@ class Tutorial_Bytes
   public static function getDescriptor()
   {
       if (!isset(self::$descriptor)) {
-          $desc = new ProtocolBuffers_DescriptorBuilder();
-          $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+          $desc = new ProtocolBuffersDescriptorBuilder();
+          $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_BYTES,
               "name"     => "value",
               "packable" => false,

@@ -56,7 +56,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_get_options, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-/* {{{ proto void ProtocolBuffers_DescriptorBuilder::addField(int $index, ProtocolBuffers_DescriptorField $field)
+/* {{{ proto void ProtocolBuffersDescriptorBuilder::addField(int $index, ProtocolBuffers_DescriptorField $field)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 {
@@ -98,7 +98,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffers_DescriptorBuilder::setName(string $name)
+/* {{{ proto void ProtocolBuffersDescriptorBuilder::setName(string $name)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, setName)
 {
@@ -144,7 +144,7 @@ static int php_pb_field_descriptor_get_property(HashTable *hash, const char *nam
 	return 0;
 }
 
-/* {{{ proto ProtocolBuffers_Descriptor ProtocolBuffers_DescriptorBuilder::build()
+/* {{{ proto ProtocolBuffersDescriptor ProtocolBuffersDescriptorBuilder::build()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, build)
 {
@@ -300,15 +300,15 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 /* }}} */
 
 
-/* {{{ proto void ProtocolBuffers_DescriptorBuilder::setExtension()
+/* {{{ proto void ProtocolBuffersDescriptorBuilder::setExtension()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, setExtension)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffers_DescriptorBuilder::setExtension does not implement yet");
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersDescriptorBuilder::setExtension does not implement yet");
 }
 /* }}} */
 
-/* {{{ proto ProtocolBuffers_MessageOptions ProtocolBuffers_DescriptorBuilder::getOptions()
+/* {{{ proto ProtocolBuffersMessageOptions ProtocolBuffersDescriptorBuilder::getOptions()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 {
@@ -348,7 +348,7 @@ void php_pb_descriptor_builder_class(TSRMLS_D)
 	zend_class_entry ce;
 	zval *fields;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_DescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
 	protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_descriptor_builder_class_entry->create_object = php_protocolbuffers_descriptor_builder_new;
 
