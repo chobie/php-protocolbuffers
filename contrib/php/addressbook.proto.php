@@ -69,8 +69,8 @@ class Tutorial_Person_PhoneNumber
   public static function getDescriptor()
   {
     if (!isset(self::$descriptor)) {
-      $desc = new ProtocolBuffers_DescriptorBuilder();
-      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+      $desc = new ProtocolBuffersDescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "number",
         "required" => true,
@@ -79,7 +79,7 @@ class Tutorial_Person_PhoneNumber
         "packable" => false,
         "default"  => "",
       )));
-      $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+      $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_ENUM,
         "name"     => "type",
         "required" => false,
@@ -230,8 +230,8 @@ class Tutorial_Person
   public static function getDescriptor()
   {
     if (!isset(self::$descriptor)) {
-      $desc = new ProtocolBuffers_DescriptorBuilder();
-      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+      $desc = new ProtocolBuffersDescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "name",
         "required" => true,
@@ -240,7 +240,7 @@ class Tutorial_Person
         "packable" => false,
         "default"  => "",
       )));
-      $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
+      $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_INT32,
         "name"     => "id",
         "required" => true,
@@ -249,7 +249,7 @@ class Tutorial_Person
         "packable" => false,
         "default"  => 0,
       )));
-      $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
+      $desc->addField(3, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
         "name"     => "email",
         "required" => false,
@@ -258,7 +258,7 @@ class Tutorial_Person
         "packable" => false,
         "default"  => "",
       )));
-      $desc->addField(4, new ProtocolBuffers_FieldDescriptor(array(
+      $desc->addField(4, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "phone",
         "required" => false,
@@ -325,8 +325,8 @@ class Tutorial_AddressBook
   public static function getDescriptor()
   {
     if (!isset(self::$descriptor)) {
-      $desc = new ProtocolBuffers_DescriptorBuilder();
-      $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
+      $desc = new ProtocolBuffersDescriptorBuilder();
+      $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_MESSAGE,
         "name"     => "person",
         "required" => false,
