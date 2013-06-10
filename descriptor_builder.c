@@ -121,8 +121,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setName)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, getName)
 {
-    zval *result, *name;
-    php_protocolbuffers_descriptor *descriptor;
+    zval *name;
 
     name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "name", sizeof("name")-1, 0 TSRMLS_CC);
     RETURN_STRINGL(Z_STRVAL_P(name), Z_STRLEN_P(name), 1);

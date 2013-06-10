@@ -17,7 +17,6 @@ static void pb_serializer_init(pb_serializer **serializer);
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);
 static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value);
 static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value);
-static int pb_serializer_write64_le2(pb_serializer *serializer, int64_t value);
 static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value);
 static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value);
 static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len);

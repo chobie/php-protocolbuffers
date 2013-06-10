@@ -381,7 +381,7 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
     uint value = 0, tag = 0, wiretype = 0;
-    zval *tmp, *dz;
+    zval *dz;
     HashTable *hresult;
     char buffer[512] = {0};
 
@@ -500,7 +500,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                 data = data + value;
             } else if (s->type == TYPE_MESSAGE) {
                 const char *n_buffer_end = data + value;
-                zval *z_arr, *z_obj;
+                zval *z_obj;
                 pb_scheme_container *c_container;
                 char *name;
                 int name_length;
@@ -1305,11 +1305,9 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 {
     int i = 0;
     pb_serializer *ser;
-    zval **c, *targets = NULL;
+    zval **c;
     HashTable *hash = NULL;
     pb_scheme *scheme;
-    char *name;
-    int name_length;
 
     pb_serializer_init(&ser);
 
@@ -1417,7 +1415,7 @@ PHP_METHOD(protocolbuffers, decode)
     const char *data, *data_end, *res;
     long klass_len = 0, data_len = 0;
     long buffer_size = 0;
-    zval *obj, *z_result, *z_proto = NULL;
+    zval *obj, *z_proto = NULL;
     pb_scheme_container *container;
     int err = 0;
 
@@ -1445,10 +1443,7 @@ PHP_METHOD(protocolbuffers, decode)
     data_end = data + data_len;
 
     {
-        zval **pp[1];
         zend_class_entry **ce;
-        char *name;
-        int name_length;
 
         MAKE_STD_ZVAL(obj);
         zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
