@@ -1,8 +1,8 @@
 package Tutorial;
 
-import "php_options.proto";
-option (php).generate_getter = true;
-option (php).generate_setter = true;
+//import "php_options.proto";
+//option (php).generate_getter = true;
+//option (php).generate_setter = true;
 
 message User {
     required int32 id = 1;

@@ -247,9 +247,14 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
 
 
         if (descriptor == NULL) {
-            zend_class_entry **ce;
+            zend_class_entry **ce = NULL;
 
             zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC);
+            if (ce == NULL) {
+                fprintf(stderr, "%s NOT FOUND", klass);
+                return 1;
+            }
+
             if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
                 if (Z_TYPE_P(ret) == IS_ARRAY) {
                     proto = Z_ARRVAL_P(ret);
@@ -500,25 +505,24 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
                 pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
 
-                // TODO: remove needles value
-                //MAKE_STD_ZVAL(z_arr);
-                //array_init(z_arr);
-
                 MAKE_STD_ZVAL(z_obj);
                 object_init_ex(z_obj, s->ce);
 
                 pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
 
-                //TODO: able to choose single property or else.
-                //zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
-                //zend_hash_update(Z_OBJPROP_P(z_obj), name, name_length, (void **)&z_arr, sizeof(zval*), NULL);
-                //efree(name);
-
                 // TODO
                 //pb_execute_wakeup(z_obj TSRMLS_CC);
 
+                if (container->use_single_property < 1) {
+                    name = s->mangled_name;
+                    name_length = s->mangled_name_len;
+                } else {
+                    name = s->name;
+                    name_length = s->name_len;
+                }
+
                 if (s->repeated) {
-                    if (!zend_hash_exists(hresult, s->mangled_name, s->mangled_name_len)) {
+                    if (!zend_hash_exists(hresult, name, name_length)) {
                         zval *arr;
 
                         MAKE_STD_ZVAL(arr);
@@ -527,19 +531,19 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
                         zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&z_obj, sizeof(z_obj), NULL);
                         Z_ADDREF_P(z_obj);
 
-                        zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr, sizeof(arr), NULL);
+                        zend_hash_update(hresult, name, name_length, (void **)&arr, sizeof(arr), NULL);
                         Z_ADDREF_P(arr);
                         zval_ptr_dtor(&arr);
                     } else {
                         zval **arr2;
 
-                        if (zend_hash_find(hresult, s->mangled_name, s->mangled_name_len, (void **)&arr2) == SUCCESS) {
+                        if (zend_hash_find(hresult, name, name_length, (void **)&arr2) == SUCCESS) {
                             zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
                             Z_ADDREF_P(z_obj);
                         }
                     }
                 } else {
-                    zend_hash_update(hresult, s->mangled_name, s->mangled_name_len, (void **)&z_obj, sizeof(z_obj), NULL);
+                    zend_hash_update(hresult, name, name_length, (void **)&z_obj, sizeof(z_obj), NULL);
                     Z_ADDREF_P(z_obj);
                 }
 
@@ -1439,7 +1443,6 @@ PHP_METHOD(protocolbuffers, decode)
     data_end = data + data_len;
 
     {
-        //zval func;
         zval **pp[1];
         zend_class_entry **ce;
         char *name;
@@ -1447,37 +1450,14 @@ PHP_METHOD(protocolbuffers, decode)
 
         MAKE_STD_ZVAL(obj);
         zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
-        //pp[0] = &z_result;
-
-        //ZVAL_STRINGL(&func, "__construct", sizeof("__construct") - 1, 0);
-
         object_init_ex(obj, *ce);
 
-        //MAKE_STD_ZVAL(z_result);
-        //array_init(z_result);
         res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
         if (res == NULL) {
             zval_ptr_dtor(&obj);
             zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
             return;
         }
-
-        //call_user_function_ex(NULL, &obj, &func, &ret, 1, pp, 0, NULL  TSRMLS_CC);
-        //Z_OBJPROP_P(obj)
-        //zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal)
-        //zend_mangle_property_name(&kkey, &klen, "*", 1, "_properties", sizeof("_properties")+1, 0);
-        //zend_hash_add(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
-
-        //zend_hash_find(Z_OBJPROP_P(obj), "_properties", sizeof("_properties")+1, (void **)&h);
-
-//        zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
-//        zend_hash_update(Z_OBJPROP_P(obj), name, name_length, (void **)&z_result, sizeof(zval*), NULL);
-//        efree(name);
-
-        //zend_hash_update(Z_OBJPROP_P(obj), kkey, klen, (void **)&z_result, sizeof(zval*), NULL);
-
-        //Z_ADDREF_P(z_result);
-        //zval_ptr_dtor(&z_result);
 
         // TODO:
         //pb_execute_wakeup(obj TSRMLS_CC);

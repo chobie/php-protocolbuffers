@@ -131,28 +131,13 @@ class Tutorial_AddressBook
       if (!isset(self::$descriptor)) {
           $desc = new ProtocolBuffers_DescriptorBuilder();
           $desc->addField(1, new ProtocolBuffers_FieldDescriptor(array(
-              "type"     => ProtocolBuffers::TYPE_INT32,
-              "name"     => "id",
-              "required" => true,
-              "packable" => false,
-              "repeated" => false,
-              "default"  => null,
-          )));
-          $desc->addField(2, new ProtocolBuffers_FieldDescriptor(array(
-              "type"     => ProtocolBuffers::TYPE_FLOAT,
-              "name"     => "offense",
+              "type"     => ProtocolBuffers::TYPE_MESSAGE,
+              "name"     => "user",
               "required" => false,
               "packable" => false,
-              "repeated" => false,
+              "repeated" => true,
               "default"  => null,
-          )));
-          $desc->addField(3, new ProtocolBuffers_FieldDescriptor(array(
-              "type"     => ProtocolBuffers::TYPE_STRING,
-              "name"     => "name",
-              "required" => false,
-              "packable" => false,
-              "repeated" => false,
-              "default"  => null,
+              "message"  => "Tutorial_User",
           )));
 
           self::$descriptor = $desc->build();
