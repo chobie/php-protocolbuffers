@@ -240,7 +240,12 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
                 php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "message", sizeof("message"), &tmp TSRMLS_CC);
                 if (Z_TYPE_P(tmp) == IS_STRING) {
-                    zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC);
+                    if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
+                        efree(result);
+                        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
+                        return;
+                    }
+
                     ischeme[n].ce = *c;
                 } else {
                     efree(result);

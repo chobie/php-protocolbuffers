@@ -225,7 +225,10 @@ static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, p
 
                 pb_get_zval_from_hash_by_tag(proto, ttag, "message", sizeof("message"), &tmp TSRMLS_CC);
 
-                zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC);
+                if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
+                    zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
+                    return;
+                }
                 ischeme[n].ce = *c;
             }
         }
@@ -249,9 +252,8 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
         if (descriptor == NULL) {
             zend_class_entry **ce = NULL;
 
-            zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC);
-            if (ce == NULL) {
-                fprintf(stderr, "%s NOT FOUND", klass);
+            if (zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC) == FAILURE) {
+                php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does find", klass);
                 return 1;
             }
 
