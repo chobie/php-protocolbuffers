@@ -1,34 +1,35 @@
-// Protocol Buffers for PHP - Google's data interchange format
-// Copyright 2013 Shuhei Tanuma.  All rights reserved.
-//
-// https://github.com/chobie/php-protocolbuffers
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//	 * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//	 * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//	 * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+/*
+ * Protocol Buffers for PHP - Google's data interchange format
+ * Copyright 2013 Shuhei Tanuma.  All rights reserved.
+ *
+ * https://github.com/chobie/php-protocolbuffers
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *   * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "php_protocol_buffers.h"
 #include "protocol_buffers.h"
 
@@ -94,8 +95,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_encode, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
-	// Fast path:  We have enough bytes left in the buffer to guarantee that
-	// this read won't cross the end, so we can skip the checks.
+	/**
+	 * Fast path:  We have enough bytes left in the buffer to guarantee that
+	 * this read won't cross the end, so we can skip the checks.
+	 */
 	const char* ptr = buffer;
 	int b;
 	int result;
@@ -112,14 +115,18 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
 	b = *(ptr++); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
 	b = *(ptr++); result |=  b		 << 28; if (!(b & 0x80)) goto done;
 
-	// If the input is larger than 32 bits, we still need to read it all
-	// and discard the high-order bits.
+	/**
+	 * If the input is larger than 32 bits, we still need to read it all
+	 * and discard the high-order bits.
+	 */
 	for (int i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
 		b = *(ptr++); if (!(b & 0x80)) goto done;
 	}
 
-	// We have overrun the maximum size of a varint (10 bytes).  Assume
-	// the data is corrupt.
+	/**
+	 * We have overrun the maximum size of a varint (10 bytes).  Assume
+	 * the data is corrupt.
+	 */
 	return NULL;
 
 	done:
@@ -132,8 +139,10 @@ static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* va
 	const char* ptr = buffer;
 	uint32_t b;
 
-	// Splitting into 32-bit pieces gives better performance on 32-bit
-	// processors.
+	/**
+	 * Splitting into 32-bit pieces gives better performance on 32-bit
+	 * processors.
+	 */
 	uint32_t part0 = 0, part1 = 0, part2 = 0;
 
 	b = *(ptr++); part0  = (b & 0x7F)	  ; if (!(b & 0x80)) goto done;
@@ -147,8 +156,10 @@ static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* va
 	b = *(ptr++); part2  = (b & 0x7F)	  ; if (!(b & 0x80)) goto done;
 	b = *(ptr++); part2 |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
 
-	// We have overrun the maximum size of a varint (10 bytes).  The data
-	// must be corrupt.
+	/**
+	 * We have overrun the maximum size of a varint (10 bytes).  The data
+	 * must be corrupt.
+	 */
 	return "";
 
    done:
@@ -261,7 +272,7 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
 				if (Z_TYPE_P(ret) == IS_ARRAY) {
 					proto = Z_ARRVAL_P(ret);
 				} else if (Z_TYPE_P(ret) == IS_OBJECT) {
-					//TODO: needs refactoring.
+					/* TODO: needs refactoring. */
 					zend_class_entry *entry;
 					php_protocolbuffers_descriptor *desc;
 
@@ -385,9 +396,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 	HashTable *hresult;
 	char buffer[512] = {0};
 
-	//hresult = Z_ARRVAL_PP(result);
+	/* hresult = Z_ARRVAL_PP(result); */
 	hresult = Z_OBJPROP_PP(result);
-
 
 	while (data < data_end) {
 		pb_scheme *s;
@@ -404,7 +414,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
 		s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
 		if (s == NULL) {
-			//php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag);
+			/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag); */
 			return NULL;
 		}
 
@@ -512,8 +522,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
 				pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
 
-				// TODO
-				//pb_execute_wakeup(z_obj TSRMLS_CC);
+				/* TODO: pb_execute_wakeup(z_obj TSRMLS_CC); */
 
 				if (container->use_single_property < 1) {
 					name = s->mangled_name;
@@ -637,7 +646,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 							MAKE_STD_ZVAL(dz);
 #if SIZEOF_LONG == 4
 							if (l > 0x7fffffff) {
-								// PHP_INT_MAX is 0x7fffffff on this platform. cast to double.
+								/* PHP_INT_MAX is 0x7fffffff on this platform. cast to double. */
 								ZVAL_DOUBLE(dz, l);
 							} else {
 								ZVAL_LONG(dz, (unsigned long)l);
@@ -756,7 +765,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 				MAKE_STD_ZVAL(dz);
 #if SIZEOF_LONG == 4
 				if (l > 0x7fffffff) {
-					// PHP_INT_MAX is 0x7fffffff on this platform. cast to double.
+					/* PHP_INT_MAX is 0x7fffffff on this platform. cast to double. */
 					ZVAL_DOUBLE(dz, l);
 				} else {
 					ZVAL_LONG(dz, (unsigned long)l);
@@ -780,8 +789,6 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 		break;
 		}
 	}
-
-	//*result = tmp;
 
 	return data;
 }
@@ -919,8 +926,9 @@ static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t valu
 	int size = 0, i;
 
 	if (value > kint32max) {
-//		fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
-//		return 0;
+/* TODO:		fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
+		return 0;
+*/
 	}
 
 	if (pb_serializer_resize(serializer, 4)) {
@@ -1128,7 +1136,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	if (err) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
 	}
-	// TODO: add error handling
+	/* TODO: add error handling */
 
 	pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
 	pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
@@ -1311,11 +1319,12 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 
 	pb_serializer_init(&ser);
 
-	// TODO: consider interface.
-//	pb_execute_sleep(klass, &targets TSRMLS_CC);
-//	if (targets != NULL) {
-//		// TODO: make hash?
-//	}
+	/* TODO: consider interface.
+	pb_execute_sleep(klass, &targets TSRMLS_CC);
+	if (targets != NULL) {
+		TODO: make hash?
+	}
+	*/
 
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(klass);
@@ -1456,8 +1465,9 @@ PHP_METHOD(protocolbuffers, decode)
 			return;
 		}
 
-		// TODO:
-		//pb_execute_wakeup(obj TSRMLS_CC);
+		/* TODO:
+		pb_execute_wakeup(obj TSRMLS_CC);
+		*/
 	}
 
 	RETURN_ZVAL(obj, 0, 1);
@@ -1491,7 +1501,7 @@ PHP_METHOD(protocolbuffers, encode)
 		if (EG(exception)) {
 			return;
 		} else {
-			// TODO: improve displaying error message
+			/* TODO: improve displaying error message */
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
 			return;
 		}

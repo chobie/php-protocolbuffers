@@ -99,7 +99,7 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_descriptor, __construct)
 {
-	// do not create instance by user. we expect it always created from builder.
+	/* do not create instance by user. we expect it always created from builder. */
 }
 /* }}} */
 

@@ -254,7 +254,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 			}
 		}
 
-		// process options
+		/* process options */
 		{
 			zval *tmp;
 
