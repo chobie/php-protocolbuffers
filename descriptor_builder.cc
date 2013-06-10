@@ -242,6 +242,10 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
                 if (Z_TYPE_P(tmp) == IS_STRING) {
                     zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC);
                     ischeme[n].ce = *c;
+                } else {
+                    efree(result);
+                    zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "message wiretype set. we need message parameter for referencing class entry.");
+                    return;
                 }
             }
         }
