@@ -159,8 +159,8 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 			if (ischeme->type == TYPE_MESSAGE && ischeme->ce != NULL) {
 				php_printf("      message: \"%s\",\n", ischeme->ce->name);
 			}
-			php_printf("      repeated: %s,\n", (ischeme->repeated == true) ? "true" : "false");
-			php_printf("      packed: %s\n", (ischeme->packed== true) ? "true" : "false");
+			php_printf("      repeated: %s,\n", (ischeme->repeated == 1) ? "true" : "false");
+			php_printf("      packed: %s\n", (ischeme->packed == 1) ? "true" : "false");
 			php_printf("    }");
 
 			if (n+1 < descriptor->container->size) {
