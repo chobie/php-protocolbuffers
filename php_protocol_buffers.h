@@ -120,6 +120,8 @@ typedef struct pb_scheme
     int mangled_name_len;
     int type;
     int flags;
+    int required;
+    int optional;
     int scheme_type;
     int repeated;
     int packed;

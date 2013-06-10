@@ -222,6 +222,18 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 				ischeme[n].mangled_name_len = mangle_len;
 			}
 
+			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "required", sizeof("required"), &tmp TSRMLS_CC);
+			if (Z_TYPE_P(tmp) == IS_BOOL) {
+				convert_to_long(tmp);
+				ischeme[n].required = Z_LVAL_P(tmp);
+			}
+
+			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "optional", sizeof("optional"), &tmp TSRMLS_CC);
+			if (Z_TYPE_P(tmp) == IS_BOOL) {
+				convert_to_long(tmp);
+				ischeme[n].optional = Z_LVAL_P(tmp);
+			}
+
 			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "repeated", sizeof("repeated"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_BOOL) {
 				convert_to_long(tmp);
