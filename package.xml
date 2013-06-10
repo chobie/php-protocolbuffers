@@ -11,8 +11,8 @@
   <email>chobieeeee@php.net</email>
   <active>yes</active>
  </lead>
- <date>2013-06-08</date>
- <time>20:45:43</time>
+ <date>2013-06-11</date>
+ <time>02:31:48</time>
  <version>
   <release>0.1.0a</release>
   <api>0.1.0</api>
@@ -70,6 +70,7 @@
      <file role="test" name="001_string_small.bin"/>
      <file role="test" name="001_string_utf8.bin"/>
      <file role="test" name="002_repeated_int32.bin"/>
+     <file role="test" name="002_repeated_message.bin"/>
      <file role="test" name="002_repeated_string.bin"/>
      <file role="test" name="002_simple_encode.bin"/>
      <file role="test" name="003_bool_packed.bin"/>
@@ -187,6 +188,7 @@
     <file role="test" name="001_string_small.phpt"/>
     <file role="test" name="001_string_utf8.phpt"/>
     <file role="test" name="002_repeated_int32.phpt"/>
+    <file role="test" name="002_repeated_message.phpt"/>
     <file role="test" name="002_repeated_string.phpt"/>
     <file role="test" name="002_simple_encode.phpt"/>
     <file role="test" name="003_bool_packed.phpt"/>
@@ -238,26 +240,31 @@
     <file role="test" name="999_dummy_string.phpt"/>
     <file role="test" name="999_empty_string.phpt"/>
     <file role="test" name="999_illegal_bytes.phpt"/>
+    <file role="test" name="999_missing_message.phpt"/>
+    <file role="test" name="999_no_descriptor.phpt"/>
     <file role="test" name="999_null.phpt"/>
+    <file role="test" name="999_required_property.phpt"/>
    </dir>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
-   <file role="src" name="descriptor.cc"/>
+   <file role="src" name="descriptor.c"/>
    <file role="src" name="descriptor.h"/>
-   <file role="src" name="descriptor_builder.cc"/>
+   <file role="src" name="descriptor_builder.c"/>
    <file role="src" name="descriptor_builder.h"/>
-   <file role="src" name="field_descriptor.cc"/>
+   <file role="src" name="field_descriptor.c"/>
    <file role="src" name="field_descriptor.h"/>
-   <file role="src" name="field_options.cc"/>
+   <file role="src" name="field_options.c"/>
    <file role="src" name="field_options.h"/>
    <file role="src" name="helper.h"/>
    <file role="src" name="is_utf8.h"/>
-   <file role="src" name="message.cc"/>
+   <file role="src" name="message.c"/>
    <file role="src" name="message.h"/>
-   <file role="src" name="message_options.cc"/>
+   <file role="src" name="message_options.c"/>
    <file role="src" name="message_options.h"/>
+   <file role="src" name="php_message_options.c"/>
+   <file role="src" name="php_message_options.h"/>
    <file role="src" name="php_protocol_buffers.h"/>
-   <file role="src" name="protocol_buffers.cc"/>
+   <file role="src" name="protocol_buffers.c"/>
    <file role="src" name="protocol_buffers.h"/>
   </dir>
  </contents>
