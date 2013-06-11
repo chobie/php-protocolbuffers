@@ -12,6 +12,8 @@ message PHPFileOptions {
 
 message PHPMessageOptions {
     optional string trait = 1;
+    optional bool use_single_property = 2 [default = false];
+    optional string single_property_name = 3;
 }
 
 extend google.protobuf.FileOptions {

@@ -320,6 +320,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     const PHPFileOptions& options = message.file()->options().GetExtension(::php);
     bool  skip_unknown        = options.skip_unknown();
     const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
+    const PHPMessageOptions& moptions = message.options().GetExtension(::php_option);
 
     vector<const FieldDescriptor *> required_fields;
 
@@ -363,15 +364,19 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "full_name", message.full_name()
              );
     printer.Print(" *\n");
-    printer.Print(" * -*- magic properties -*-\n");
-    printer.Print(" *\n");
-    for (int i = 0; i < message.field_count(); ++i) {
-        const FieldDescriptor &field ( *message.field(i) );
-        printer.Print(" * @property `type` $`variable`\n",
-                "type", getTypeName(field),
-                "variable", VariableName(field)
-                 );
+
+    if (moptions.use_single_property()) {
+        printer.Print(" * -*- magic properties -*-\n");
+        printer.Print(" *\n");
+        for (int i = 0; i < message.field_count(); ++i) {
+            const FieldDescriptor &field ( *message.field(i) );
+            printer.Print(" * @property `type` $`variable`\n",
+                    "type", getTypeName(field),
+                    "variable", VariableName(field)
+                     );
+        }
     }
+
     printer.Print(" */\n");
 
     printer.Print("class `name`",
@@ -404,7 +409,30 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
     printer.Print("protected static $descriptor;\n");
     printer.Print("\n");
-    printer.Print("protected $_properties = array();\n");
+
+    if (moptions.use_single_property()) {
+        printer.Print("protected $`var` = array();\n",
+            "var",
+            moptions.single_property_name()
+        );
+    } else {
+        for (int i = 0; i < message.field_count(); ++i) {
+            const FieldDescriptor &field(*message.field(i));
+
+            if (field.is_repeated()) {
+                printer.Print("protected $`var` = array();\n",
+                    "var", field.name()
+                );
+            } else {
+                printer.Print("protected $`var`;\n",
+                    "var", field.name()
+                );
+            }
+
+            printer.Print("\n");
+        }
+    }
+
     printer.Print("\n");
 
     if (!skip_unknown) {
@@ -418,7 +446,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
         if (options.generate_has()) {
             printer.Print("/**\n");
-            printer.Print(" * checkinng value\n");
+            printer.Print(" * checking value\n");
             printer.Print(" *\n");
             printer.Print(" * @return bool\n",
                 "varname", field.name()
@@ -429,17 +457,30 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             );
             printer.Print("{\n");
             printer.Indent();
-            printer.Print("if (isset($this->_properties['`key`'])) {\n",
-                "key", field.name()
-            );
-            printer.Indent();
-            printer.Print("return true;\n",
-                "key", field.name()
-            );
-            printer.Outdent();
-            printer.Print("}\n");
-            printer.Print("\n");
-            printer.Print("return false;\n");
+
+            if (moptions.use_single_property()) {
+                printer.Print("if (isset($this->`var`['`key`'])) {\n",
+                    "var", moptions.single_property_name(),
+                    "key", field.name()
+                );
+                printer.Indent();
+                printer.Print("return true;\n");
+                printer.Outdent();
+                printer.Print("}\n");
+                printer.Print("\n");
+                printer.Print("return false;\n");
+            } else {
+                printer.Print("if (isset($this->`key`)) {\n",
+                    "key", field.name()
+                );
+                printer.Indent();
+                printer.Print("return true;\n");
+                printer.Outdent();
+                printer.Print("}\n");
+                printer.Print("\n");
+                printer.Print("return false;\n");
+
+            }
             printer.Outdent();
             printer.Print("}\n\n");
         }
@@ -457,19 +498,30 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             );
             printer.Print("{\n");
             printer.Indent();
-            printer.Print("$result = null;\n");
-            printer.Print("\n");
-            printer.Print("if (array_key_exists('`key`', $this->_properties)) {\n",
-                "key", field.name()
-            );
-            printer.Indent();
-            printer.Print("$result = $this->_properties['`key`'];\n",
-                "key", field.name()
-            );
-            printer.Outdent();
-            printer.Print("}\n");
-            printer.Print("\n");
-            printer.Print("return $result;\n");
+
+            if (moptions.use_single_property()) {
+                printer.Print("$result = null;\n");
+                printer.Print("\n");
+                printer.Print("if (array_key_exists('`key`', $this->`var`)) {\n",
+                    "key", field.name(),
+                    "var", moptions.single_property_name()
+                );
+                printer.Indent();
+                printer.Print("$result = $this->`var`['`key`'];\n",
+                    "var", moptions.single_property_name(),
+                    "key", field.name()
+                );
+                printer.Outdent();
+                printer.Print("}\n");
+                printer.Print("\n");
+                printer.Print("return $result;\n");
+            } else {
+                printer.Print("return $this->`var`;\n",
+                    "var",
+                    field.name()
+                );
+            }
+
             printer.Outdent();
             printer.Print("}\n\n");
         }
@@ -498,17 +550,35 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             printer.Print("{\n");
             printer.Indent();
 
-            if (field.is_repeated()) {
-                printer.Print("$this->_properties['`key`'][] = $`var`;\n",
-                    "key", field.name(),
-                    "var", field.name()
-                );
+            if (moptions.use_single_property()) {
+                if (field.is_repeated()) {
+                    printer.Print("$this->`prop`['`key`'][] = $`var`;\n",
+                        "prop", moptions.single_property_name(),
+                        "key", field.name(),
+                        "var", field.name()
+                    );
+                } else {
+                    printer.Print("$this->`prop`['`key`'] = $`var`;\n",
+                        "prop", moptions.single_property_name(),
+                        "key", field.name(),
+                        "var", field.name()
+                    );
+                }
             } else {
-                printer.Print("$this->_properties['`key`'] = $`var`;\n",
-                    "key", field.name(),
-                    "var", field.name()
-                );
+                if (field.is_repeated()) {
+                    printer.Print("$this->`key`[] = $`var`;\n",
+                        "key", field.name(),
+                        "var", field.name()
+                    );
+                } else {
+                    printer.Print("$this->`key` = $`var`;\n",
+                        "key", field.name(),
+                        "var", field.name()
+                    );
+                }
+
             }
+
 
             printer.Outdent();
             printer.Print("}\n\n");
@@ -572,6 +642,19 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         printer.Outdent();
         printer.Print(")));\n");
     }
+
+    if (moptions.use_single_property()) {
+        printer.Print("$phpoptions = $desc->getOptions()->getExtension(\"php\");\n");
+        printer.Print("$phpoptions->setUseSingleProperty(true);\n");
+        printer.Print("$phpoptions->setSinglePropertyName(\"`name`\");\n",
+            "name",
+            moptions.single_property_name()
+        );
+
+        printer.Print("\n");
+    }
+
+
     printer.Print("self::$descriptor = $desc->build();\n");
     printer.Outdent();
     printer.Print("}\n");

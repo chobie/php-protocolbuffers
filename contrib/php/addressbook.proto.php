@@ -12,10 +12,24 @@
  */
 class Tutorial_Person_PhoneNumber
 {
+
   protected static $descriptor;
 
-  protected $number;
-  protected $type;
+  protected $_properties = array();
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasNumber()
+  {
+    if (isset($this->_properties['number'])) {
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * getting value
@@ -24,7 +38,13 @@ class Tutorial_Person_PhoneNumber
    */
   public function getNumber()
   {
-    return $this->number;
+    $result = null;
+
+    if (array_key_exists('number', $this->_properties)) {
+      $result = $this->_properties['number'];
+    }
+
+    return $result;
   }
 
   /**
@@ -36,7 +56,21 @@ class Tutorial_Person_PhoneNumber
    */
   public function setNumber($number)
   {
-    $this->number = $number;
+    $this->_properties['number'] = $number;
+  }
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasType()
+  {
+    if (isset($this->_properties['type'])) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -46,7 +80,13 @@ class Tutorial_Person_PhoneNumber
    */
   public function getType()
   {
-    return $this->type;
+    $result = null;
+
+    if (array_key_exists('type', $this->_properties)) {
+      $result = $this->_properties['type'];
+    }
+
+    return $result;
   }
 
   /**
@@ -58,7 +98,7 @@ class Tutorial_Person_PhoneNumber
    */
   public function setType($type)
   {
-    $this->type = $type;
+    $this->_properties['type'] = $type;
   }
 
   /**
@@ -88,6 +128,10 @@ class Tutorial_Person_PhoneNumber
         "packable" => false,
         "default"  => Tutorial_Person_PhoneType::HOME,
       )));
+      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions->setUseSingleProperty(true);
+      $phpoptions->setSinglePropertyName("_properties");
+
       self::$descriptor = $desc->build();
     }
 
@@ -113,12 +157,6 @@ class Tutorial_Person_PhoneType
  *
  * @message Tutorial.Person
  *
- * -*- magic properties -*-
- *
- * @property string $name
- * @property int $id
- * @property string $email
- * @property array $phone
  */
 class Tutorial_Person
 {
@@ -130,9 +168,22 @@ class Tutorial_Person
 
   protected $email;
 
-  protected $phone;
+  protected $phone = array();
 
-  //protected $_properties = array();
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasName()
+  {
+    if (isset($this->name)) {
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * getting value
@@ -154,6 +205,20 @@ class Tutorial_Person
   public function setName($name)
   {
     $this->name = $name;
+  }
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasId()
+  {
+    if (isset($this->id)) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -179,6 +244,20 @@ class Tutorial_Person
   }
 
   /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasEmail()
+  {
+    if (isset($this->email)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * getting value
    *
    * @return mixed $email
@@ -198,6 +277,20 @@ class Tutorial_Person
   public function setEmail($email)
   {
     $this->email = $email;
+  }
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasPhone()
+  {
+    if (isset($this->phone)) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -268,10 +361,6 @@ class Tutorial_Person
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
-      $phpoptions = $desc->getOptions()->getExtension("php");
-      $phpoptions->setUseSingleProperty(false);
-      $phpoptions->setSinglePropertyName("_properties");
-
       self::$descriptor = $desc->build();
     }
 
@@ -291,9 +380,24 @@ class Tutorial_Person
  */
 class Tutorial_AddressBook
 {
+
   protected static $descriptor;
 
-  protected $person = array();
+  protected $facebook = array();
+
+  /**
+   * checking value
+   *
+   * @return bool
+   */
+  public function hasPerson()
+  {
+    if (isset($this->facebook['person'])) {
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * getting value
@@ -302,7 +406,13 @@ class Tutorial_AddressBook
    */
   public function getPerson()
   {
-    return $this->person;
+    $result = null;
+
+    if (array_key_exists('person', $this->facebook)) {
+      $result = $this->facebook['person'];
+    }
+
+    return $result;
   }
 
   /**
@@ -314,7 +424,7 @@ class Tutorial_AddressBook
    */
   public function addPerson($person)
   {
-    $this->person[] = $person;
+    $this->facebook['person'][] = $person;
   }
 
   /**
@@ -336,6 +446,10 @@ class Tutorial_AddressBook
         "default"  => null,
         "message"  => "Tutorial_Person",
       )));
+      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions->setUseSingleProperty(true);
+      $phpoptions->setSinglePropertyName("facebook");
+
       self::$descriptor = $desc->build();
     }
 

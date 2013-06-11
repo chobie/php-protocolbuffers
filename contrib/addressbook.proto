@@ -5,9 +5,12 @@ import "php_options.proto";
 //option (php).base_class = "Base";
 option (php).generate_getter = true;
 option (php).generate_setter = true;
+option (php).generate_has = true;
 
 message Person {
   //option (php_option).trait = "Hoge Fuga";
+  //option (php_option).use_single_property  = true;
+  //option (php_option).single_property_name = "_properties";
 
   required string name = 1;
   required int32 id = 2;
@@ -20,6 +23,9 @@ message Person {
   }
 
   message PhoneNumber {
+    option (php_option).use_single_property  = true;
+    option (php_option).single_property_name = "_properties";
+
     required string number = 1;
     optional PhoneType type = 2 [default = HOME];
   }
@@ -28,5 +34,8 @@ message Person {
 }
 
 message AddressBook {
+  option (php_option).use_single_property  = true;
+  option (php_option).single_property_name = "_properties";
+
   repeated Person person = 1;
 }
