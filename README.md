@@ -55,7 +55,7 @@ Overview
 php-protocolbuffers provides ProtocolBuffers class.
 
 
-### \ProtocolBuffers::decode(string $class_name, string $pb_bytes [, ProtocolBuffers_Descriptor $descriptor])
+### \ProtocolBuffers::decode(string $class_name, string $pb_bytes [, ProtocolBuffersDescriptor $descriptor])
 
 ##### *Description*
 
@@ -77,7 +77,7 @@ decode protocol buffers with specified descriptor.
 ##### *Example*
 
 
-### \ProtocolBuffers::encode(object $object [, ProtocolBuffers_Descriptor $descriptor])
+### \ProtocolBuffers::encode(object $object [, ProtocolBuffersDescriptor $descriptor])
 
 ##### *Description*
 
