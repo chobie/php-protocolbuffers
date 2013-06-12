@@ -112,6 +112,9 @@ Compatibility
   <tr>
     <td>unknown fields</td><td>not supported (will be add in July, 2013)</td>
   </tr>
+  <tr>
+    <td>Service (RPC)</td><td>not supported yet</td>
+  </tr>
 </table>
 
 Basically, php-protocolbuffers test cases were made by python generator.
