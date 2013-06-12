@@ -319,6 +319,8 @@ static int pb_get_scheme_container(const char *klass, size_t klass_len, pb_schem
 		container->scheme = ischeme;
 		container->size = scheme_size;
 		container->use_single_property = 0;
+		container->process_unknown_fields = 0;
+
 		{
 			char *prop;
 			int prop_len;
@@ -1419,6 +1421,42 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 			return 1;
 		}
 	}
+
+	if (container->process_unknown_fields > 0) {
+		char *name;
+		int name_len;
+		zval **unknown;
+
+		if (container->use_single_property > 0) {
+			name = "_unknown";
+			name_len = sizeof("_unknown");
+		} else {
+			zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		}
+
+		if (zend_hash_find(hash, name, name_len, (void**)&unknown) == SUCCESS) {
+			if (Z_TYPE_PP(unknown) == IS_ARRAY) {
+				HashTable *unkht;
+				HashPosition pos;
+				zval **element;
+
+				unkht = Z_ARRVAL_PP(unknown);
+
+				for(zend_hash_internal_pointer_reset_ex(unkht, &pos);
+								zend_hash_get_current_data_ex(unkht, (void **)&element, &pos) == SUCCESS;
+								zend_hash_move_forward_ex(unkht, &pos)
+				) {
+					//php_var_dump(element, 1 TSRMLS_CC);
+				}
+
+			}
+		}
+
+		if (container->use_single_property < 1) {
+			efree(name);
+		}
+	}
+
 
 	*serializer = ser;
 	return 0;

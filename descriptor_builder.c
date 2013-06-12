@@ -182,6 +182,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 		descriptor->container->size = sz;
 		descriptor->container->scheme = ischeme;
 		descriptor->container->use_single_property = 0;
+		descriptor->container->process_unknown_fields = 0;
 		{
 			char *prop;
 			int prop_len;
@@ -297,6 +298,11 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 								efree(descriptor->container->single_property_name);
 
 								zend_mangle_property_name(&descriptor->container->single_property_name, &descriptor->container->single_property_name_len, (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
+							}
+
+							val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);
+							if (Z_TYPE_P(val) == IS_BOOL) {
+								descriptor->container->process_unknown_fields = Z_LVAL_P(val);
 							}
 						}
 					}

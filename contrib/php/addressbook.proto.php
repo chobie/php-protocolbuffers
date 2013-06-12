@@ -170,6 +170,14 @@ class Tutorial_Person
 
   protected $phone = array();
 
+  protected $_unknown = array();
+
+
+  public function unk($key, $bytes)
+  {
+      $this->_unknown[$key] = $bytes;
+  }
+
 
   /**
    * checking value
@@ -361,6 +369,9 @@ class Tutorial_Person
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
+      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions->setProcessUnknownFields(true);
+
       self::$descriptor = $desc->build();
     }
 

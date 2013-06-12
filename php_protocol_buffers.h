@@ -142,6 +142,7 @@ typedef struct {
     char *single_property_name;
     int single_property_name_len;
     int size;
+    int process_unknown_fields;
 } pb_scheme_container;
 
 #ifdef ZTS
