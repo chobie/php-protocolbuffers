@@ -311,6 +311,8 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 			}
 		}
 
+	} else {
+		descriptor->container->size = 0;
 	}
 
 	RETURN_ZVAL(result, 0, 1);
