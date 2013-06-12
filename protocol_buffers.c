@@ -1423,18 +1423,18 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 	}
 
 	if (container->process_unknown_fields > 0) {
-		char *name;
-		int name_len;
+		char *uname;
+		int uname_len;
 		zval **unknown;
 
 		if (container->use_single_property > 0) {
-			name = "_unknown";
-			name_len = sizeof("_unknown");
+			uname = "_unknown";
+			uname_len = sizeof("_unknown");
 		} else {
-			zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
 		}
 
-		if (zend_hash_find(hash, name, name_len, (void**)&unknown) == SUCCESS) {
+		if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
 			if (Z_TYPE_PP(unknown) == IS_ARRAY) {
 				HashTable *unkht;
 				HashPosition pos;
@@ -1453,7 +1453,7 @@ static int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_schem
 		}
 
 		if (container->use_single_property < 1) {
-			efree(name);
+			efree(uname);
 		}
 	}
 
