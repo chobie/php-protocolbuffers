@@ -266,6 +266,10 @@
    <file role="src" name="php_protocol_buffers.h"/>
    <file role="src" name="protocol_buffers.c"/>
    <file role="src" name="protocol_buffers.h"/>
+   <file role="src" name="unknown_field.c"/>
+   <file role="src" name="unknown_field.h"/>
+   <file role="src" name="unknown_field_set.c"/>
+   <file role="src" name="unknown_field_set.h"/>
   </dir>
  </contents>
  <dependencies>

@@ -41,6 +41,8 @@
 #include "message_options.h"
 #include "php_message_options.h"
 #include "descriptor_builder.h"
+#include "unknown_field.h"
+#include "unknown_field_set.h"
 
 #ifdef ZTS
 int pb_globals_id;
@@ -59,6 +61,8 @@ zend_class_entry *protocol_buffers_field_options_class_entry;
 zend_class_entry *protocol_buffers_message_class_entry;
 zend_class_entry *protocol_buffers_message_options_class_entry;
 zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
+zend_class_entry *protocol_buffers_unknown_field_class_entry;
+zend_class_entry *protocol_buffers_unknown_field_set_class_entry;
 
 zend_class_entry *protocol_buffers_php_message_options_class_entry;
 
@@ -1624,6 +1628,8 @@ void php_protocolbuffers_init(TSRMLS_D)
 	php_pb_message_options_class(TSRMLS_C);
 	php_pb_php_message_options_class(TSRMLS_C);
 	php_pb_descriptor_builder_class(TSRMLS_C);
+	php_pb_unknown_field_class(TSRMLS_C);
+	php_pb_unknown_field_set_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_LONG(name, size, value) \
 	zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);

@@ -1,0 +1,6 @@
+#ifndef PHP_PROTOCOLBUFFERS_UNKNOWN_FIELD_H
+#define PHP_PROTOCOLBUFFERS_UNKNOWN_FIELD_H
+
+void php_pb_unknown_field_class(TSRMLS_D);
+
+#endif
