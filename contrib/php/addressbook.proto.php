@@ -158,7 +158,7 @@ class Tutorial_Person_PhoneType
  * @message Tutorial.Person
  *
  */
-class Tutorial_Person
+class Tutorial_Person extends ProtocolBuffersMessage
 {
   protected static $descriptor;
 

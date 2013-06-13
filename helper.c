@@ -1230,6 +1230,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	}
 
 	if (container->size < 1) {
+		pb_serializer_destroy(ser);
 		return -1;
 	}
 
