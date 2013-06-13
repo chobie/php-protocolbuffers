@@ -1873,7 +1873,9 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 					efree((*element)->single_property_name);
 				}
 
-				efree((*element)->scheme);
+				if ((*element)->scheme != NULL) {
+					efree((*element)->scheme);
+				}
 				efree(*element);
 			}
 

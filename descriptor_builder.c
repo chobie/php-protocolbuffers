@@ -266,51 +266,50 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 				}
 			}
 		}
+	}
 
-		/* process options */
-		{
-			zval *tmp;
+	/* process options */
+	{
+		zval *tmp;
 
-			tmp  = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "options", sizeof("options")-1, 0 TSRMLS_CC);
+		tmp  = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "options", sizeof("options")-1, 0 TSRMLS_CC);
 
-			if (Z_TYPE_P(tmp) == IS_OBJECT) {
-				zval *ext;
-				ext = zend_read_property(protocol_buffers_descriptor_builder_class_entry, tmp, "extensions", sizeof("extensions")-1, 0 TSRMLS_CC);
+		if (Z_TYPE_P(tmp) == IS_OBJECT) {
+			zval *ext;
+			ext = zend_read_property(protocol_buffers_descriptor_builder_class_entry, tmp, "extensions", sizeof("extensions")-1, 0 TSRMLS_CC);
 
-				if (Z_TYPE_P(ext) == IS_ARRAY) {
-					HashPosition pos;
-					zval **element;
+			if (Z_TYPE_P(ext) == IS_ARRAY) {
+				HashPosition pos;
+				zval **element;
 
-					for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ext), &pos);
-									zend_hash_get_current_data_ex(Z_ARRVAL_P(ext), (void **)&element, &pos) == SUCCESS;
-									zend_hash_move_forward_ex(Z_ARRVAL_P(ext), &pos)
-					) {
-						if (Z_OBJCE_PP(element) == protocol_buffers_php_message_options_class_entry) {
-							zval *val;
+				for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ext), &pos);
+								zend_hash_get_current_data_ex(Z_ARRVAL_P(ext), (void **)&element, &pos) == SUCCESS;
+								zend_hash_move_forward_ex(Z_ARRVAL_P(ext), &pos)
+				) {
+					if (Z_OBJCE_PP(element) == protocol_buffers_php_message_options_class_entry) {
+						zval *val;
 
-							val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "use_single_property", sizeof("use_single_property")-1, 0 TSRMLS_CC);
-							if (Z_TYPE_P(val) == IS_BOOL) {
-								descriptor->container->use_single_property = Z_LVAL_P(val);
-							}
+						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "use_single_property", sizeof("use_single_property")-1, 0 TSRMLS_CC);
+						if (Z_TYPE_P(val) == IS_BOOL) {
+							descriptor->container->use_single_property = Z_LVAL_P(val);
+						}
 
-							if (descriptor->container->use_single_property > 0) {
-								val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "single_property_name", sizeof("single_property_name")-1, 0 TSRMLS_CC);
-								efree(descriptor->container->single_property_name);
+						if (descriptor->container->use_single_property > 0) {
+							val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "single_property_name", sizeof("single_property_name")-1, 0 TSRMLS_CC);
+							efree(descriptor->container->single_property_name);
 
-								zend_mangle_property_name(&descriptor->container->single_property_name, &descriptor->container->single_property_name_len, (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
-							}
+							zend_mangle_property_name(&descriptor->container->single_property_name, &descriptor->container->single_property_name_len, (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
+						}
 
-							val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);
-							if (Z_TYPE_P(val) == IS_BOOL) {
-								descriptor->container->process_unknown_fields = Z_LVAL_P(val);
-							}
+						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);
+						if (Z_TYPE_P(val) == IS_BOOL) {
+							descriptor->container->process_unknown_fields = Z_LVAL_P(val);
 						}
 					}
-
 				}
+
 			}
 		}
-
 	}
 
 	RETURN_ZVAL(result, 0, 1);

@@ -76,6 +76,7 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->container->single_property_name = NULL;
 	object->container->size = 0;
 	object->container->scheme = NULL;
+	object->container->process_unknown_fields = 0;
 
 	return retval;
 }
