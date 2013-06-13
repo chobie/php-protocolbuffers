@@ -15,7 +15,7 @@ this library will provide really fast decoding / encoding pb message and also pr
 Status
 ------
 
-Under Development
+Alpha
 
 License
 -------
@@ -42,59 +42,71 @@ Install for developers
 Building protoc-gen-php
 -----------------------
 
-currently, protoc-php-gen does not do install. you have to put it on to PATH manually
+currently, protoc-php-gen does not set PATH. you have to put it on to PATH manually
 
     cd php-protocolbuffers/contrib
     make
 
 * you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
 
-Overview
---------
 
-php-protocolbuffers provides ProtocolBuffers class.
+Protocol Buffer Basics: PHP
+---------------------------
 
+This tutorial provides a basic PHP programmer's introduction to working with protocol buffers. By walking through creating a simple example application, it shows you how to
 
-### \ProtocolBuffers::decode(string $class_name, string $pb_bytes [, ProtocolBuffersDescriptor $descriptor])
+* Define message formats in a .proto file.
+* Use the protocol buffer compiler.
+* Use the PHP protocol buffer API to write and read messages.
 
-##### *Description*
+Why Use Protocol Buffers?
+-------------------------
 
-decode protocol buffers with specified descriptor.
+The example we're going to use is a very simple "address book" application that can read and write people's contact details to and from a file. Each person in the address book has a name, an ID, an email address, and a contact phone number.
 
-##### *Parameters*
+How do you serialize and retrieve structured data like this? There are a few ways to solve this problem:
 
-*class_name*: top level class name of pb message.
+* Use Database. This is the default approach since it's well documented.
 
-*pb_bytes*: protocol buffers bytes
+* Use PHP Serialization. also this is very useful, but it doesn't work very well if you need to share data with applications written in other languages.
 
-*descriptor*: optional.
+* Serialize the data to XML. This approach can be very attractive since XML is (sort of) human readable and there are binding libraries for lots of languages. This can be a good choice if you want to share data with other applications/projects. However, XML is notoriously space intensive, and encoding/decoding it can impose a huge performance penalty on applications. Also, navigating an XML DOM tree is considerably more complicated than navigating simple fields in a class normally would be.
 
+Protocol buffers are the flexible, efficient, automated solution to solve exactly this problem. With protocol buffers, you write a .proto description of the data structure you wish to store. From that, the protocol buffer compiler creates a class that implements automatic encoding and parsing of the protocol buffer data with an efficient binary format. The generated class provides getters and setters for the fields that make up a protocol buffer and takes care of the details of reading and writing the protocol buffer as a unit. Importantly, the protocol buffer format supports the idea of extending the format over time in such a way that the code can still read data encoded with the old format.
 
-##### *Return Value*
+Where to Find the Example Code
+------------------------------
 
-*mixed*: specified class
+TBD
 
-##### *Example*
+The Protocol Buffer API
+-----------------------
 
+TBD
 
-### \ProtocolBuffers::encode(object $object [, ProtocolBuffersDescriptor $descriptor])
+Parsing and Serialization
+-------------------------
 
-##### *Description*
+TBD
 
-encode object with specified descriptor.
+Writing A Message
+-----------------
 
-##### *Parameters*
+````
+<?php
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
-*object*: top level object.
+$person = new Tutorial_Person();
+$person->setId(21);
+$person->setName("John Doe");
 
-*descriptor*: optional.
+$data = $person->serializeToString($person);
+````
 
-##### *Return Value*
+Advanced Usage
+--------------
 
-*string*: bytes
-
-##### *Example*
-
+TBD
 
 Compatibility
 -------------
@@ -110,7 +122,7 @@ Compatibility
     <td>extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
   </tr>
   <tr>
-    <td>unknown fields</td><td>limited supported (don't care repeated field)</td>
+    <td>unknown fields</td><td>limited supported (decoding only and don't care repeated fields)</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>
