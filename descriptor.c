@@ -91,6 +91,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, tag)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_fields, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_option, 0, 0, 1)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
@@ -124,6 +127,36 @@ PHP_METHOD(protocolbuffers_descriptor, getName)
 */
 PHP_METHOD(protocolbuffers_descriptor, getField)
 {
+}
+/* }}} */
+
+/* {{{ proto ProtocolBuffersFieldDescriptor ProtocolBuffersDescriptor::getFields()
+*/
+PHP_METHOD(protocolbuffers_descriptor, getFields)
+{
+	zval *instance = getThis();
+	zval *result;
+	php_protocolbuffers_descriptor *descriptor;
+	pb_scheme *ischeme;
+	int n = 0;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, instance);
+	if (descriptor->container->size > 0) {
+		for (n = 0; n < descriptor->container->size; n++) {
+			zval *tmp;
+			ischeme = &(descriptor->container->scheme[n]);
+
+			MAKE_STD_ZVAL(tmp);
+			object_init_ex(tmp, protocol_buffers_field_descriptor_class_entry);
+
+			zend_hash_next_index_insert(Z_ARRVAL_P(result), (void *)&tmp, sizeof(zval *), NULL);
+		}
+	}
+
+	RETURN_ZVAL(result, 0, 1);
 }
 /* }}} */
 
@@ -186,6 +219,7 @@ static zend_function_entry php_protocolbuffers_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_descriptor, __construct, arginfo_pb_descriptor___construct, ZEND_ACC_PRIVATE)
 	PHP_ME(protocolbuffers_descriptor, getName,	 arginfo_pb_descriptor_get_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, getField,	arginfo_pb_descriptor_get_field, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getFields,	arginfo_pb_descriptor_get_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, getOption,   arginfo_pb_descriptor_get_option, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, dump,		arginfo_pb_descriptor_dump, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
