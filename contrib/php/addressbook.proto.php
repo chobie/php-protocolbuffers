@@ -10,7 +10,7 @@
  * @property string $number
  * @property int $type
  */
-class Tutorial_Person_PhoneNumber
+class Tutorial_Person_PhoneNumber extends ProtocolBuffersMessage
 {
 
   protected static $descriptor;
@@ -128,7 +128,7 @@ class Tutorial_Person_PhoneNumber
         "packable" => false,
         "default"  => Tutorial_Person_PhoneType::HOME,
       )));
-      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions = $desc->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);
       $phpoptions->setUseSingleProperty(true);
       $phpoptions->setSinglePropertyName("_properties");
 
@@ -169,14 +169,6 @@ class Tutorial_Person extends ProtocolBuffersMessage
   protected $email;
 
   protected $phone = array();
-
-  protected $_unknown = array();
-
-
-  public function unk($key, $bytes)
-  {
-      $this->_unknown[$key] = $bytes;
-  }
 
 
   /**
@@ -369,9 +361,6 @@ class Tutorial_Person extends ProtocolBuffersMessage
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
-      $phpoptions = $desc->getOptions()->getExtension("php");
-      $phpoptions->setProcessUnknownFields(false);
-
       self::$descriptor = $desc->build();
     }
 
@@ -389,12 +378,12 @@ class Tutorial_Person extends ProtocolBuffersMessage
  *
  * @property array $person
  */
-class Tutorial_AddressBook
+class Tutorial_AddressBook extends ProtocolBuffersMessage
 {
 
   protected static $descriptor;
 
-  protected $facebook = array();
+  protected $_properties = array();
 
   /**
    * checking value
@@ -403,7 +392,7 @@ class Tutorial_AddressBook
    */
   public function hasPerson()
   {
-    if (isset($this->facebook['person'])) {
+    if (isset($this->_properties['person'])) {
       return true;
     }
 
@@ -419,8 +408,8 @@ class Tutorial_AddressBook
   {
     $result = null;
 
-    if (array_key_exists('person', $this->facebook)) {
-      $result = $this->facebook['person'];
+    if (array_key_exists('person', $this->_properties)) {
+      $result = $this->_properties['person'];
     }
 
     return $result;
@@ -435,7 +424,7 @@ class Tutorial_AddressBook
    */
   public function addPerson($person)
   {
-    $this->facebook['person'][] = $person;
+    $this->_properties['person'][] = $person;
   }
 
   /**
@@ -457,9 +446,9 @@ class Tutorial_AddressBook
         "default"  => null,
         "message"  => "Tutorial_Person",
       )));
-      $phpoptions = $desc->getOptions()->getExtension("php");
+      $phpoptions = $desc->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);
       $phpoptions->setUseSingleProperty(true);
-      $phpoptions->setSinglePropertyName("facebook");
+      $phpoptions->setSinglePropertyName("_properties");
 
       self::$descriptor = $desc->build();
     }

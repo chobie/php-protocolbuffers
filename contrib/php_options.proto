@@ -3,7 +3,7 @@ import "google/protobuf/descriptor.proto";
 message PHPFileOptions {
     optional string namespace    = 1;
     optional bool   skip_unknown = 2;
-    optional string base_class   = 3;
+    optional string base_class   = 3 [default = "ProtocolBuffersMessage"];
     optional bool   generate_scheme = 4;
     optional bool   generate_getter = 5;
     optional bool   generate_setter = 6;

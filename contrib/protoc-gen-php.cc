@@ -383,9 +383,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "name", ClassName(message)
              );
 
-    if (options.has_base_class()) {
-        printer.Print(" extends `base`", "base", options.base_class());
-    }
+	printer.Print(" extends `base`", "base", options.base_class());
 
     printer.Print("\n{\n");
     printer.Indent();
