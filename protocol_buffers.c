@@ -134,10 +134,22 @@ PHP_METHOD(protocolbuffers, decode)
 	data_end = data + data_len;
 
 	{
-		zend_class_entry **ce;
+		zend_class_entry **ce = NULL;
+
+		if (PBG(classes)) {
+			/* Memo: fast lookup */
+			if (zend_hash_find(PBG(classes), klass, klass_len, (void **)&ce) == FAILURE) {
+				zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
+				if (ce != NULL) {
+					zend_hash_update(PBG(classes), klass, klass_len, (void **)ce, sizeof(ce), NULL);
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_ERROR, "class lookup failed. %s does exist", klass);
+					return;
+				}
+			}
+		}
 
 		MAKE_STD_ZVAL(obj);
-		zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
 		object_init_ex(obj, *ce);
 
 		/* add unknown fields */
@@ -365,10 +377,16 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
 	PBG(messages) = NULL;
+	PBG(classes) = NULL;
 
 	if (!PBG(messages)) {
 		ALLOC_HASHTABLE(PBG(messages));
 		zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
+	}
+
+	if (!PBG(classes)) {
+		ALLOC_HASHTABLE(PBG(classes));
+		zend_hash_init(PBG(classes), 0, NULL, NULL, 0);
 	}
 
 	return SUCCESS;
@@ -421,6 +439,19 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 			zend_hash_destroy(PBG(messages));
 			FREE_HASHTABLE(PBG(messages));
 			PBG(messages) = NULL;
+		}
+		zend_end_try();
+	}
+
+	if (PBG(classes)) {
+		zend_try {
+			int i = 0;
+			HashPosition pos;
+			zend_class_entry **ce;
+
+			zend_hash_destroy(PBG(classes));
+			FREE_HASHTABLE(PBG(classes));
+			PBG(classes) = NULL;
 		}
 		zend_end_try();
 	}

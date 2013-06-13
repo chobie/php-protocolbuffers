@@ -118,6 +118,7 @@ extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_
 
 typedef struct pb_globals{
     HashTable *messages;
+    HashTable *classes;
 } pb_globals;
 
 typedef struct pb_scheme

@@ -370,7 +370,7 @@ class Tutorial_Person extends ProtocolBuffersMessage
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
       $phpoptions = $desc->getOptions()->getExtension("php");
-      $phpoptions->setProcessUnknownFields(true);
+      $phpoptions->setProcessUnknownFields(false);
 
       self::$descriptor = $desc->build();
     }
