@@ -203,6 +203,15 @@ typedef struct{
     pb_scheme_container *container;
 } php_protocolbuffers_descriptor;
 
+typedef struct{
+    zend_object zo;
+    int number;
+    int type;
+    uint8_t *buffer;
+    size_t buffer_len;
+} php_protocolbuffers_unknown_field;
+
+
 #  if ZEND_MODULE_API_NO >= 20100525
 #  define PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(STRUCT_NAME) \
     STRUCT_NAME *object;\
