@@ -3,6 +3,10 @@
 
 static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_unknown_field *object TSRMLS_DC)
 {
+	if (object->buffer_len > 0) {
+		efree(object->buffer);
+	}
+
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);
 }
@@ -29,17 +33,19 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_type, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_varint, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_fixed64, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ proto void ProtocolBuffersUnknownField::setNumber(int $number)
 */
 PHP_METHOD(protocolbuffers_unknown_field, setNumber)
 {
 	long number = 0;
-	char *name;
-	int name_len;
-	zval **result = NULL;
 	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &number) == FAILURE) {
@@ -51,14 +57,7 @@ PHP_METHOD(protocolbuffers_unknown_field, setNumber)
 		return;
 	}
 
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"number", sizeof("number"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
-		ZVAL_LONG(*result, number);
-		field->number = number;
-	}
-	efree(name);
+	php_pb_unknown_field_set_number(instance, number TSRMLS_CC);
 }
 /* }}} */
 
@@ -67,24 +66,14 @@ PHP_METHOD(protocolbuffers_unknown_field, setNumber)
 PHP_METHOD(protocolbuffers_unknown_field, setType)
 {
 	long type = 0;
-	char *name;
-	int name_len;
-	zval **result = NULL;
 	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &type) == FAILURE) {
 		return;
 	}
 
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
-		ZVAL_LONG(*result, type);
-		field->type = type;
-	}
-	efree(name);
+	php_pb_unknown_field_set_type(instance, type TSRMLS_CC);
 }
 /* }}} */
 
@@ -112,14 +101,39 @@ PHP_METHOD(protocolbuffers_unknown_field, getType)
 }
 /* }}} */
 
+/* {{{ proto long ProtocolBuffersUnknownField::getAsVarint()
+*/
+PHP_METHOD(protocolbuffers_unknown_field, getAsVarint)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	RETURN_LONG(field->varint);
+}
+/* }}} */
+
+/* {{{ proto long ProtocolBuffersUnknownField::getAsVarint()
+*/
+PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimited)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	/* TODO: improve memory handling */
+	RETURN_STRINGL(field->buffer, field->buffer_len, 1);
+}
+/* }}} */
 
 static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
 	PHP_ME(protocolbuffers_unknown_field, setNumber, arginfo_pb_unknown_field_set_number, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, setType, arginfo_pb_unknown_field_set_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getNumber, arginfo_pb_unknown_field_get_number, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getType, arginfo_pb_unknown_field_get_type, ZEND_ACC_PUBLIC)
-/*
 	PHP_ME(protocolbuffers_unknown_field, getAsVarint, arginfo_pb_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimited, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
+/*
 	PHP_ME(protocolbuffers_unknown_field, getAsFixed32, arginfo_pb_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsFixed64, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimited, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)

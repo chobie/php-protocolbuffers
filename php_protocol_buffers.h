@@ -207,6 +207,7 @@ typedef struct{
     zend_object zo;
     int number;
     int type;
+    int64_t varint;
     uint8_t *buffer;
     size_t buffer_len;
 } php_protocolbuffers_unknown_field;

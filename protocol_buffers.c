@@ -362,8 +362,6 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 	}
 
 	if (s->repeated) {
-
-
 		if (!zend_hash_exists(hresult, name, name_len)) {
 			zval *arr;
 	
@@ -396,9 +394,72 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 	zval_ptr_dtor(&dz);
 }
 
+static void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value)
+{
+	char *unknown_name;
+	int unknown_name_len;
+	zval **un;
+
+	php_protocolbuffers_unknown_field *p = NULL;
+
+	object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
+
+	p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
+
+	p->varint = value;
+	php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
+	php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
+
+	if (container->use_single_property > 0) {
+		unknown_name = "_unknown";
+		unknown_name_len = sizeof("_unknown");
+	} else {
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+	}
+
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&un) == SUCCESS) {
+		php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, dz);
+	}
+
+	if (container->use_single_property < 1) {
+		efree(unknown_name);
+	}
+}
+
+static void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, uint8_t *bytes, int length)
+{
+	char *unknown_name;
+	int unknown_name_len;
+	zval **un;
+
+	php_protocolbuffers_unknown_field *p = NULL;
+
+	object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
+	p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
+	p->buffer = bytes;
+	p->buffer_len = length;
+	php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
+	php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
+
+	if (container->use_single_property > 0) {
+		unknown_name = "_unknown";
+		unknown_name_len = sizeof("_unknown");
+	} else {
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+	}
+
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&un) == SUCCESS) {
+		php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, dz);
+	}
+
+	if (container->use_single_property < 1) {
+		efree(unknown_name);
+	}
+}
+
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
-	uint value = 0, tag = 0, wiretype = 0;
+	uint32_t value = 0, tag = 0, wiretype = 0;
 	zval *dz;
 	HashTable *hresult;
 	char buffer[512] = {0};
@@ -407,7 +468,7 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 	hresult = Z_OBJPROP_PP(result);
 
 	while (data < data_end) {
-		pb_scheme *s;
+		pb_scheme *s = NULL;
 
 		data = ReadVarint32FromArray(data, &value, data_end);
 
@@ -419,11 +480,14 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 		tag	  = (value >> 0x03);
 		wiretype = (value & 0x07);
 
-		s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
-		if (s == NULL) {
-			/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "tag %d NOTFOUND. this is bug (currently, unknown field does not support yet)\n", tag); */
+		if (tag < 1 || tag > ktagmax) {
 			return NULL;
 		}
+		if (wiretype > 5) {
+			return NULL;
+		}
+
+		s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
 
 		switch (wiretype) {
 		case WIRETYPE_VARINT:
@@ -431,21 +495,35 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 			data = ReadVarint32FromArray(data, &value, data_end);
 			MAKE_STD_ZVAL(dz);
 
-			if (s->type == TYPE_BOOL) {
+			if (s == NULL) {
+				if (container->process_unknown_fields > 0) {
+					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				}
+			} else if (s->type == TYPE_BOOL) {
 				ZVAL_BOOL(dz, value);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else if (s->type == TYPE_INT32) {
 				ZVAL_LONG(dz, (int32_t)value);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else if (s->type == TYPE_SINT32) {
 				ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else {
 				ZVAL_LONG(dz, value);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			}
-
-			php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 		}
 		break;
 		case WIRETYPE_FIXED64:
-			if (s->type == TYPE_DOUBLE) {
+			if (s == NULL) {
+				if (container->process_unknown_fields > 0) {
+					uint64_t l;
+					memcpy(&l, data, 8);
+
+					MAKE_STD_ZVAL(dz);
+					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				}
+			} else if (s->type == TYPE_DOUBLE) {
 				uint64_t _v;
 				double d;
 
@@ -469,7 +547,20 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 		case WIRETYPE_LENGTH_DELIMITED:
 			data = ReadVarint32FromArray(data, &value, data_end);
 
-			if (s->type == TYPE_STRING) {
+			if ((data+value) > data_end) {
+				return NULL;
+			}
+
+			if (s == NULL) {
+				if (container->process_unknown_fields > 0) {
+					uint8_t *bytes_array;
+					bytes_array = (uint8_t *)emalloc(value);
+					memcpy(bytes_array, data, value);
+
+					MAKE_STD_ZVAL(dz);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, bytes_array, value);
+				}
+			} else if (s->type == TYPE_STRING) {
 				if (value < 512) {
 					memcpy(buffer, data, value);
 					buffer[value] = '\0';
@@ -749,7 +840,12 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 			data += value;
 		break;
 		case WIRETYPE_FIXED32: {
-			if (s->type == TYPE_FLOAT) {
+			if (s == NULL) {
+				if (container->process_unknown_fields > 0) {
+					MAKE_STD_ZVAL(dz);
+					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				}
+			} else if (s->type == TYPE_FLOAT) {
 				uint32_t _v;
 				float a = 0;
 
@@ -1509,6 +1605,29 @@ PHP_METHOD(protocolbuffers, decode)
 		MAKE_STD_ZVAL(obj);
 		zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
 		object_init_ex(obj, *ce);
+
+		/* add unknown fields */
+		{
+			zval *unknown;
+			zval **un;
+			char *unknown_name;
+			int unknown_name_len;
+
+			MAKE_STD_ZVAL(unknown);
+
+			object_init_ex(unknown, protocol_buffers_unknown_field_set_class_entry);
+			zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+			if (zend_hash_find(Z_OBJPROP_P(obj), (char*)unknown_name, unknown_name_len, (void **)&un) == FAILURE) {
+				zend_hash_update(Z_OBJPROP_P(obj), unknown_name, unknown_name_len, (void **)&unknown, sizeof(unknown), NULL);
+			} else {
+				if (Z_TYPE_PP(un) == IS_NULL) {
+					zend_hash_update(Z_OBJPROP_P(obj), unknown_name, unknown_name_len, (void **)&unknown, sizeof(unknown), NULL);
+				} else {
+					efree(unknown);
+				}
+			}
+			efree(unknown_name);
+		}
 
 		res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
 		if (res == NULL) {
