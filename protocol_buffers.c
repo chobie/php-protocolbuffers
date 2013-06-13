@@ -1760,6 +1760,9 @@ void php_protocolbuffers_init(TSRMLS_D)
 	php_pb_unknown_field_class(TSRMLS_C);
 	php_pb_unknown_field_set_class(TSRMLS_C);
 
+#define PB_DECLARE_CONST_STRING(name, size, value) \
+	zend_declare_class_constant_string(protocol_buffers_class_entry, name, size, "php" TSRMLS_CC);
+
 #define PB_DECLARE_CONST_LONG(name, size, value) \
 	zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
 
@@ -1789,6 +1792,8 @@ void php_protocolbuffers_init(TSRMLS_D)
 	PB_DECLARE_CONST_LONG("TYPE_SINT32",			   sizeof("TYPE_SINT32")-1,			  17);
 	PB_DECLARE_CONST_LONG("TYPE_SINT64",			   sizeof("TYPE_SINT64")-1,			  18);
 	PB_DECLARE_CONST_LONG("MAX_FIELD_TYPE",			sizeof("MAX_FIELD_TYPE")-1,		   19);
+
+	PB_DECLARE_CONST_STRING("PHP_MESSAGE_OPTION",		   sizeof("PHP_MESSAGE_OPTION")-1,		   "php");
 
 #undef PB_DECLARE_CONST_LONG
 

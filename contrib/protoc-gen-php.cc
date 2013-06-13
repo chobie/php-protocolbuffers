@@ -644,7 +644,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     }
 
     if (moptions.use_single_property()) {
-        printer.Print("$phpoptions = $desc->getOptions()->getExtension(\"php\");\n");
+        printer.Print("$phpoptions = $desc->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);\n");
         printer.Print("$phpoptions->setUseSingleProperty(true);\n");
         printer.Print("$phpoptions->setSinglePropertyName(\"`name`\");\n",
             "name",
