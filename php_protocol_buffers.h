@@ -20,8 +20,7 @@
 #include "ext/standard/info.h"
 #include "limits.h"
 
-#include "helper.h"
-
+#include "is_utf8.h"
 
 #if defined(__osf__)
 #include <inttypes.h>
@@ -77,6 +76,11 @@ static const int64_t kint64min = -GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF) - 1;
 static const uint32_t kuint32max = 0xFFFFFFFFu;
 static const uint64_t kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 
+static const int kMaxVarintBytes = 10;
+static const int kMaxVarint32Bytes = 5;
+static const int64_t kLongMax = LONG_MAX;
+
+
 /* Define the entry point symbol
  * Zend will use when loading this module
  */
@@ -87,6 +91,9 @@ extern zend_class_entry *protocol_buffers_class_entry;
 extern zend_class_entry *protocol_buffers_descriptor_class_entry;
 extern zend_class_entry *protocol_buffers_field_descriptor_class_entry;
 extern zend_class_entry *protocol_buffers_field_options_class_entry;
+
+extern zend_class_entry *protocol_buffers_serializable_class_entry;
+
 extern zend_class_entry *protocol_buffers_message_class_entry;
 extern zend_class_entry *protocol_buffers_message_options_class_entry;
 extern zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
@@ -251,5 +258,9 @@ typedef struct{
 #  define Z_ADDREF(z)      Z_ADDREF_P(&(z))
 # endif
 #endif
+
+
+#include "helper.h"
+
 
 #endif /* PHP_PROTOCOLBUFFERS_H */

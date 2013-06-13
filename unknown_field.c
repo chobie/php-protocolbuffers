@@ -122,7 +122,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimited)
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	/* TODO: improve memory handling */
-	RETURN_STRINGL(field->buffer, field->buffer_len, 1);
+	RETURN_STRINGL((char*)field->buffer, field->buffer_len, 1);
 }
 /* }}} */
 
