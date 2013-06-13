@@ -1,5 +1,4 @@
 #include "php_protocol_buffers.h"
-#include "ext/spl/spl_iterators.h"
 #include "message.h"
 
 
@@ -300,7 +299,7 @@ void php_pb_message_class(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersMessage", php_protocolbuffers_message_methods);
 	protocol_buffers_message_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_class_implements(protocol_buffers_message_class_entry TSRMLS_CC, 1, spl_ce_Iterator);
+	zend_class_implements(protocol_buffers_message_class_entry TSRMLS_CC, 1, zend_ce_iterator);
 	zend_class_implements(protocol_buffers_message_class_entry TSRMLS_CC, 1, protocol_buffers_serializable_class_entry);
 
 	protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
