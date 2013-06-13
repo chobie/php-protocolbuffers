@@ -498,6 +498,9 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
 					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				} else {
+					/* skip unknown field */
+					zval_ptr_dtor(&dz);
 				}
 			} else if (s->type == TYPE_BOOL) {
 				ZVAL_BOOL(dz, value);
@@ -522,6 +525,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
 					MAKE_STD_ZVAL(dz);
 					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				} else {
+					/* skip unknown field */
 				}
 			} else if (s->type == TYPE_DOUBLE) {
 				uint64_t _v;
@@ -559,6 +564,8 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 
 					MAKE_STD_ZVAL(dz);
 					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, bytes_array, value);
+				} else {
+					/* skip unknown field */
 				}
 			} else if (s->type == TYPE_STRING) {
 				if (value < 512) {
@@ -844,6 +851,9 @@ static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *d
 				if (container->process_unknown_fields > 0) {
 					MAKE_STD_ZVAL(dz);
 					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+				} else {
+					/* skip unknown field */
+					zval_ptr_dtor(&dz);
 				}
 			} else if (s->type == TYPE_FLOAT) {
 				uint32_t _v;
