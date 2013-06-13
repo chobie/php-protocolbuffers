@@ -17,6 +17,7 @@ if test $PHP_PROTOCOLBUFFERS != "no"; then
 
     PHP_SUBST(PROTOCOLBUFFERS_SHARED_LIBADD)
     PHP_NEW_EXTENSION(protocolbuffers, $PHP_PROTOBUF_SRCS, $ext_shared)
+    PHP_ADD_EXTENSION_DEP(protocolbuffers, spl, true)
 
     PHP_SUBST([CFLAGS])
 fi
