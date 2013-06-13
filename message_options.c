@@ -18,7 +18,7 @@ PHP_METHOD(protocolbuffers_message_options, getExtension)
 		return;
 	}
 
-	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "extensions", sizeof("extensions")-1, 0 TSRMLS_CC);
+	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "extensions", sizeof("extensions")-1, 1 TSRMLS_CC);
 
 	if (Z_TYPE_P(options) == IS_NULL) {
 		zval *result;
