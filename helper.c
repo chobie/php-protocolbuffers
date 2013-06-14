@@ -233,7 +233,19 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	char buffer[512] = {0};
 
 	/* hresult = Z_ARRVAL_PP(result); */
-	hresult = Z_OBJPROP_PP(result);
+	if (container->use_single_property > 0) {
+		zval **tmp = NULL;
+
+		if (zend_hash_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len, (void **)&tmp) == SUCCESS) {
+			hresult = Z_ARRVAL_PP(tmp);
+		} else {
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have property.");
+			return NULL;
+		}
+
+	} else {
+		hresult = Z_OBJPROP_PP(result);
+	}
 
 	while (data < data_end) {
 		pb_scheme *s = NULL;
@@ -1219,7 +1231,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(klass);
 	} else {
-		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len, (void**)&c) == SUCCESS) {
 			hash = Z_ARRVAL_PP(c);
 		} else {
 			pb_serializer_destroy(ser);

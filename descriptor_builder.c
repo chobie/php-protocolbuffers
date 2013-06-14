@@ -298,7 +298,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 							val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "single_property_name", sizeof("single_property_name")-1, 0 TSRMLS_CC);
 							efree(descriptor->container->single_property_name);
 
-							zend_mangle_property_name(&descriptor->container->single_property_name, &descriptor->container->single_property_name_len, (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
+							zend_mangle_property_name(&(descriptor->container->single_property_name), &(descriptor->container->single_property_name_len), (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val)+1, 0);
 						}
 
 						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);
