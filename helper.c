@@ -237,6 +237,13 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		zval **tmp = NULL;
 
 		if (zend_hash_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len, (void **)&tmp) == SUCCESS) {
+			if (Z_TYPE_PP(tmp) == IS_NULL) {
+				array_init(*tmp);
+			} else if (Z_TYPE_PP(tmp) != IS_ARRAY) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "single property is not an array.");
+				return NULL;
+			}
+
 			hresult = Z_ARRVAL_PP(tmp);
 		} else {
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have property.");
