@@ -51,7 +51,8 @@ PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 
 	if (zend_hash_find(Z_OBJPROP_P(instance), "single_property_name", sizeof("single_property_name"), (void **)&target) == SUCCESS) {
 		if (Z_STRVAL_PP(target) != NULL) {
-			efree(Z_STRVAL_PP(target));
+			zval_ptr_dtor(target);
+			MAKE_STD_ZVAL(*target);
 		}
 
 		ZVAL_STRING(*target, value, 1);
