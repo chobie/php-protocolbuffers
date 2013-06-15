@@ -42,6 +42,7 @@ currently, protoc-php-gen does not set PATH. you have to put it on to PATH manua
 
 * you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
 
+* NOTE: you need protobuf when generate message via `.proto` file. you don't need it when just decoding / encoding message.
 
 Protocol Buffer Basics: PHP
 ---------------------------
