@@ -79,10 +79,12 @@ if ($field->getNumber() === 1) {
 	echo "NUMBER FAILED" . PHP_EOL;
 }
 
-if ($field->getAsVarint() === 0) {
-	echo "OK" . PHP_EOL;
-} else {
-	echo "getAsVarint FAILED" . PHP_EOL;
+foreach ($field->getAsVarintList() as $val) {
+	if ($val === 0) {
+		echo "OK" . PHP_EOL;
+	} else {
+		echo "getAsVarint FAILED" . PHP_EOL;
+	}
 }
 
 $bytes = $u->serializeToString();

@@ -39,9 +39,9 @@ $data = ProtocolBuffers::decode("UnknownFields", $bytes);
 $unk = $data->getUnknownFieldSet();
 if ($unk instanceof ProtocolBuffersUnknownFieldSet) {
 	$u = $unk->getField(1);
-	echo $u->getAsLengthDelimited() . PHP_EOL;
+	foreach($u->getAsLengthDelimitedList() as $d) {echo $d . PHP_EOL;};
 	$u = $unk->getField(2);
-	echo $u->getAsVarint() . PHP_EOL;
+	foreach($u->getAsVarintList() as $d) {echo $d . PHP_EOL;};
 } else {
 	var_dump($u);
 }

@@ -242,7 +242,7 @@ typedef struct{
 	zend_object zo;
 	int number;
 	int type;
-	unknown_value value;
+	HashTable *ht;
 } php_protocolbuffers_unknown_field;
 
 

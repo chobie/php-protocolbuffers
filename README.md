@@ -142,7 +142,7 @@ Compatibility
     <td>extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
   </tr>
   <tr>
-    <td>unknown fields</td><td>limited supported (doesn't care repeated fields, unfamiliar feature.)</td>
+    <td>unknown fields</td><td>limited supported (not fully tested. see test cases)</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>

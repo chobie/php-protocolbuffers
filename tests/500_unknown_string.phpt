@@ -80,16 +80,12 @@ if ($field->getNumber() === 1) {
 	echo "NUMBER FAILED" . PHP_EOL;
 }
 
-if ($field->getAsLengthDelimited() === $value) {
-	echo "OK" . PHP_EOL;
-} else {
-	echo "getAsLengthDelimited FAILED" . PHP_EOL;
-}
-
-if ($field->getLengthDelimitedSize() === strlen($value)) {
-	echo "OK" . PHP_EOL;
-} else {
-	echo "getLengthDelimitedSize FAILED" . PHP_EOL;
+foreach ($field->getAsLengthDelimitedList() as $val) {
+	if ($val === $value) {
+		echo "OK" . PHP_EOL;
+	} else {
+		echo "getAsLengthDelimited FAILED" . PHP_EOL;
+	}
 }
 
 $bytes = $u->serializeToString();
@@ -100,7 +96,6 @@ if ($bytes === $expected) {
 }
 
 --EXPECT--
-OK
 OK
 OK
 OK
