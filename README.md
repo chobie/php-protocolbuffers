@@ -77,7 +77,7 @@ The Protocol Buffer API
 
 basically, your message classes should inherit ProtocolBuffersMessage class.
 
-ProtocolBuffersMessage implements ProtocolBuffersDescribable, Iterator
+`ProtocolBuffersMessage` implements `ProtocolBuffersDescribable`, `Iterator`
 
 ````
 ProtocolBuffersMessage->serializeToString();
