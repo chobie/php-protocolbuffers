@@ -229,14 +229,19 @@ typedef struct{
 } php_protocolbuffers_message;
 
 
+typedef union {
+	int64_t varint;
+	struct {
+		uint8_t *val;
+		size_t len;
+	} buffer;
+} unknown_value;
 
 typedef struct{
-    zend_object zo;
-    int number;
-    int type;
-    int64_t varint;
-    uint8_t *buffer;
-    size_t buffer_len;
+	zend_object zo;
+	int number;
+	int type;
+	unknown_value value;
 } php_protocolbuffers_unknown_field;
 
 

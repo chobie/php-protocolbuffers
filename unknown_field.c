@@ -3,8 +3,8 @@
 
 static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_unknown_field *object TSRMLS_DC)
 {
-	if (object->buffer_len > 0) {
-		efree(object->buffer);
+	if (object->value.buffer.len > 0) {
+		efree((object->value).buffer.val);
 	}
 
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
@@ -115,7 +115,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarint)
 	php_protocolbuffers_unknown_field *field = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	RETURN_LONG(field->varint);
+	RETURN_LONG(field->value.varint);
 }
 /* }}} */
 
@@ -128,7 +128,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimited)
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	/* TODO: improve memory handling */
-	RETURN_STRINGL((char*)field->buffer, field->buffer_len, 1);
+	RETURN_STRINGL((char*)field->value.buffer.val, field->value.buffer.len, 1);
 }
 /* }}} */
 
@@ -140,7 +140,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getLengthDelimitedSize)
 	php_protocolbuffers_unknown_field *field = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	RETURN_LONG(field->buffer_len);
+	RETURN_LONG(field->value.buffer.len);
 }
 /* }}} */
 

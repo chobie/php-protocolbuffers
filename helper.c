@@ -178,7 +178,7 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 
 	p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
 
-	p->varint = value;
+	p->value.varint = value;
 	php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
 	php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
 
@@ -208,8 +208,8 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 
 	object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
 	p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
-	p->buffer = bytes;
-	p->buffer_len = length;
+	p->value.buffer.val = bytes;
+	p->value.buffer.len = length;
 	php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
 	php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
 
@@ -1360,21 +1360,21 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 						pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
 						switch (field->type) {
 							case WIRETYPE_VARINT:
-							pb_serializer_write_varint32(ser, field->varint);
+							pb_serializer_write_varint32(ser, field->value.varint);
 							break;
 							case WIRETYPE_FIXED64:
-							pb_serializer_write64_le(ser, field->varint);
+							pb_serializer_write64_le(ser, field->value.varint);
 							break;
 							case WIRETYPE_LENGTH_DELIMITED:
-							pb_serializer_write_varint32(ser, field->buffer_len);
-							pb_serializer_write_chararray(ser, field->buffer, field->buffer_len);
+							pb_serializer_write_varint32(ser, field->value.buffer.len);
+							pb_serializer_write_chararray(ser, field->value.buffer.val, field->value.buffer.len);
 							break;
 							case WIRETYPE_START_GROUP:
 							break;
 							case WIRETYPE_END_GROUP:
 							break;
 							case WIRETYPE_FIXED32:
-							pb_serializer_write32_le(ser, field->varint);
+							pb_serializer_write32_le(ser, field->value.varint);
 							break;
 						}
 					}
