@@ -86,6 +86,12 @@ if ($field->getAsLengthDelimited() === $value) {
 	echo "getAsLengthDelimited FAILED" . PHP_EOL;
 }
 
+if ($field->getLengthDelimitedSize() === strlen($value)) {
+	echo "OK" . PHP_EOL;
+} else {
+	echo "getLengthDelimitedSize FAILED" . PHP_EOL;
+}
+
 $bytes = $u->serializeToString();
 if ($bytes === $expected) {
 	echo "OK" . PHP_EOL;
@@ -94,6 +100,7 @@ if ($bytes === $expected) {
 }
 
 --EXPECT--
+OK
 OK
 OK
 OK

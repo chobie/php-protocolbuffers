@@ -39,6 +39,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_fixed64, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_length_delimited, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_length_delimited_size, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ proto void ProtocolBuffersUnknownField::setNumber(int $number)
 */
@@ -113,7 +119,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarint)
 }
 /* }}} */
 
-/* {{{ proto long ProtocolBuffersUnknownField::getAsVarint()
+/* {{{ proto string ProtocolBuffersUnknownField::getAsLengthDelimited()
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimited)
 {
@@ -126,18 +132,30 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimited)
 }
 /* }}} */
 
+/* {{{ proto long ProtocolBuffersUnknownField::getLengthDelimitedSize()
+*/
+PHP_METHOD(protocolbuffers_unknown_field, getLengthDelimitedSize)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	RETURN_LONG(field->buffer_len);
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
 	PHP_ME(protocolbuffers_unknown_field, setNumber, arginfo_pb_unknown_field_set_number, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, setType, arginfo_pb_unknown_field_set_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getNumber, arginfo_pb_unknown_field_get_number, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getType, arginfo_pb_unknown_field_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsVarint, arginfo_pb_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimited, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimited, arginfo_pb_unknown_field_get_as_length_delimited, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getLengthDelimitedSize, arginfo_pb_unknown_field_get_length_delimited_size, ZEND_ACC_PUBLIC)
 /*
 	PHP_ME(protocolbuffers_unknown_field, getAsFixed32, arginfo_pb_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsFixed64, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimited, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getLengthDelimitedSize, arginfo_pb_unknown_field_get_length_delimited_size, ZEND_ACC_PUBLIC)
 */
 	{NULL, NULL, NULL}
 };
