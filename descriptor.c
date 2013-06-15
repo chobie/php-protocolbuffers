@@ -232,4 +232,6 @@ void php_pb_descriptor_class(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptor", php_protocolbuffers_descriptor_methods);
 	protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_descriptor_class_entry->create_object = php_protocolbuffers_descriptor_new;
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Descriptor", protocol_buffers_descriptor_class_entry);
 }

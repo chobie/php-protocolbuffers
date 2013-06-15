@@ -52,6 +52,17 @@
 #endif
 
 
+#define PHP_PROTOCOLBUFFERS_NAMESPACE "ProtocolBuffers"
+
+#if PHP_VERSION_ID < 50300
+/* NOTE: do nothing */
+#define PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(ns, name, ce)
+#else
+/* NOTE: zend_register_ns_class_alias had TSRMLS bug under 5.4. we have to define it for compatibility */
+#define PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(ns, name, ce) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_CC)
+#endif
+
 // long long macros to be used because gcc and vc++ use different suffixes,
 // and different size specifiers in format strings
 #undef GOOGLE_LONGLONG

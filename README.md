@@ -78,11 +78,11 @@ The Protocol Buffer API
 
 basically, your message classes should inherit ProtocolBuffersMessage class.
 
-`ProtocolBuffersMessage` implements `ProtocolBuffersDescribable`, `Iterator`
+`ProtocolBuffers\Message` implements `ProtocolBuffers\Describable`, `Iterator`
 
 ````
-ProtocolBuffersMessage->serializeToString();
-ProtocolBuffersMessage::parseFromString($bytes);
+ProtocolBuffers\Message->serializeToString();
+ProtocolBuffers\Message::parseFromString($bytes);
 ````
 
 (will be add getter / setter magic methods soon.)
@@ -124,7 +124,7 @@ Advanced Usage
 --------------
 
 PHP Protocol Buffers implementation also provides `ProtocolBuffers::encode(ProtocolBuffersDescribable $message)` and `ProtocolBuffers::decode(string classname, $bytes)` methods.
-you can serialize / deserialize any object which implements `ProtocolBuffersDescribable` or "public static getDescriptor()" method. this is very useful when
+you can serialize / deserialize any object which implements `ProtocolBuffers\Describable` or "public static getDescriptor()" method. this is very useful when
 evaluating protocol buffers serialization.
 
 

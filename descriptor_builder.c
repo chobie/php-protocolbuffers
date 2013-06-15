@@ -375,4 +375,6 @@ void php_pb_descriptor_builder_class(TSRMLS_D)
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "options", sizeof("options")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "DescriptorBuilder", protocol_buffers_descriptor_builder_class_entry);
 }

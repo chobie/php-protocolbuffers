@@ -223,4 +223,6 @@ void php_pb_message_class(TSRMLS_D)
 
 	protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 	protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Message", protocol_buffers_message_class_entry);
 }

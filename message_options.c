@@ -62,4 +62,6 @@ void php_pb_message_options_class(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersMessageOptions", php_protocolbuffers_message_options_methods);
 	protocol_buffers_message_options_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "MessageOptions", protocol_buffers_message_options_class_entry);
 }

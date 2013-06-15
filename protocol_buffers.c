@@ -139,8 +139,10 @@ static void php_invalid_byte_sequence_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffers_InvalidByteSequenceException", 0);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidByteSequenceException", 0);
 	protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidByteSequenceException", protocol_buffers_invalid_byte_sequence_class_entry);
 }
 
 static void php_protocol_buffers_invalid_exception(TSRMLS_D)
@@ -150,6 +152,7 @@ static void php_protocol_buffers_invalid_exception(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidProtocolBufferException", 0);
 	protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidProtocolBufferException", protocol_buffers_invalid_protocolbuffers_exception_class_entry);
 }
 
 static void php_uninitialized_message_exception(TSRMLS_D)
@@ -159,6 +162,7 @@ static void php_uninitialized_message_exception(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUninitializedMessage", 0);
 	protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessage", protocol_buffers_uninitialized_message_exception_class_entry);
 }
 
 
@@ -173,6 +177,8 @@ static void php_protocol_buffers_serializable(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescribable", php_protocolbuffers_describable_methods);
 	protocol_buffers_serializable_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Describable", protocol_buffers_serializable_class_entry);
 }
 
 void php_protocolbuffers_init(TSRMLS_D)
