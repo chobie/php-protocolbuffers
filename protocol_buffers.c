@@ -195,55 +195,20 @@ PHP_METHOD(protocolbuffers, decode)
 }
 /* }}} */
 
-/* {{{ proto string ProtocolBuffers::encode($class[, array $descriptor])
+/* {{{ proto string ProtocolBuffers::encode($class)
 */
 PHP_METHOD(protocolbuffers, encode)
 {
-	zval *klass, *z_descriptor = NULL;
+	zval *klass = NULL;
 	zend_class_entry *ce;
-	pb_scheme_container *container;
-	HashTable *proto = NULL;
-	pb_serializer *ser = NULL;
-	int err = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"o|a", &klass, &z_descriptor) == FAILURE) {
+		"o", &klass) == FAILURE) {
 		return;
 	}
 
 	ce = Z_OBJCE_P(klass);
-
-	if (z_descriptor) {
-		proto	   = Z_ARRVAL_P(z_descriptor);
-	}
-
-	err = pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
-	if (err) {
-		if (EG(exception)) {
-			return;
-		} else {
-			/* TODO: improve displaying error message */
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
-			return;
-		}
-	}
-
-	if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
-		return;
-	}
-
-	if (ser == NULL) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (ser->buffer_size > 0) {
-		RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
-
-		pb_serializer_destroy(ser);
-	} else {
-		pb_serializer_destroy(ser);
-		RETURN_EMPTY_STRING();
-	}
+	php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU, ce, klass);
 }
 /* }}} */
 
@@ -449,10 +414,6 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 
 	if (PBG(classes)) {
 		zend_try {
-			int i = 0;
-			HashPosition pos;
-			zend_class_entry **ce;
-
 			zend_hash_destroy(PBG(classes));
 			FREE_HASHTABLE(PBG(classes));
 			PBG(classes) = NULL;

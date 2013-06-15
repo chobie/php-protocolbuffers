@@ -1363,3 +1363,40 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	*serializer = ser;
 	return 0;
 }
+
+int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
+{
+	int err;
+	pb_serializer *ser = NULL;
+	pb_scheme_container *container;
+
+	err = pb_get_scheme_container(ce->name, ce->name_length, &container, NULL TSRMLS_CC);
+	if (err) {
+		if (EG(exception)) {
+			return 1;
+		} else {
+			/* TODO: improve displaying error message */
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+			return 1;
+		}
+	}
+
+	if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &ser)) {
+		return 1;
+	}
+
+	if (ser == NULL) {
+		return 1;
+	}
+
+	if (ser->buffer_size > 0) {
+		RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
+
+		pb_serializer_destroy(ser);
+		return 0;
+	} else {
+		pb_serializer_destroy(ser);
+		return 0;
+	}
+}
+

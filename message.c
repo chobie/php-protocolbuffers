@@ -46,32 +46,9 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_message, serializeToString)
 {
-	/* TODO: refactor this block. please see protocol_buffers.c too */
 	zval *instance = getThis();
-	zend_class_entry *ce;
-	pb_scheme_container *container;
-	HashTable *proto = NULL;
-	pb_serializer *ser = NULL;
-	int err = 0;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
-
-	if (pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, &ser)) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (ser == NULL) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (ser->buffer_size > 0) {
-		RETVAL_STRINGL((char*)ser->buffer, ser->buffer_size, 1);
-
-		pb_serializer_destroy(ser);
-	} else {
-		pb_serializer_destroy(ser);
-		RETURN_EMPTY_STRING();
-	}
+	php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance);
 }
 /* }}} */
 
