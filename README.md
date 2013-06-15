@@ -16,7 +16,9 @@ BSD License
 Requirements
 ------------
 
-PHP5.3 higher
+* PHP5.3 higher
+
+PHP5.2 is limited support (can't use ProtocolBuffersMessage class. you have to encode / decode via ProtocolBuffers methods).
 
 Install for developers
 ----------------------
