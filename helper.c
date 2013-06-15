@@ -1379,6 +1379,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 						}
 					}
 				}
+				efree(uuname);
 			}
 		}
 
