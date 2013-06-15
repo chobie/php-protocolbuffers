@@ -230,7 +230,8 @@ typedef struct{
 
 
 typedef union {
-	int64_t varint;
+	uint64_t varint;
+	uint32_t fixed32;
 	struct {
 		uint8_t *val;
 		size_t len;
