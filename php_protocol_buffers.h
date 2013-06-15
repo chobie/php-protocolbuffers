@@ -128,42 +128,42 @@ extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_
 #endif
 
 typedef struct pb_globals{
-    HashTable *messages;
-    HashTable *classes;
+	HashTable *messages;
+	HashTable *classes;
 } pb_globals;
 
 typedef struct pb_scheme
 {
-    int tag;
-    char *name;
-    int name_len;
-    char *mangled_name;
-    int mangled_name_len;
-    int type;
-    int flags;
-    int required;
-    int optional;
-    int scheme_type;
-    int repeated;
-    int packed;
-    char *message;
-    char *enum_msg;
-    zend_class_entry *ce;
+	int tag;
+	char *name;
+	int name_len;
+	char *mangled_name;
+	int mangled_name_len;
+	int type;
+	int flags;
+	int required;
+	int optional;
+	int scheme_type;
+	int repeated;
+	int packed;
+	char *message;
+	char *enum_msg;
+	zend_class_entry *ce;
 } pb_scheme;
 
 typedef struct {
-    char *name;
-    int name_len;
-    char *filename;
-    int filename_len;
-    int is_extendable;
-    //int extension_range_min;
-    pb_scheme *scheme;
-    int use_single_property;
-    char *single_property_name;
-    int single_property_name_len;
-    int size;
-    int process_unknown_fields;
+	char *name;
+	int name_len;
+	char *filename;
+	int filename_len;
+	int is_extendable;
+	//int extension_range_min;
+	pb_scheme *scheme;
+	int use_single_property;
+	char *single_property_name;
+	int single_property_name_len;
+	int size;
+	int process_unknown_fields;
 } pb_scheme_container;
 
 #ifdef ZTS
@@ -175,57 +175,57 @@ PHPAPI extern pb_globals php_pb_globals;
 #endif
 
 enum WireType {
-    WIRETYPE_VARINT           = 0,
-    WIRETYPE_FIXED64          = 1,
-    WIRETYPE_LENGTH_DELIMITED = 2,
-    WIRETYPE_START_GROUP      = 3,
-    WIRETYPE_END_GROUP        = 4,
-    WIRETYPE_FIXED32          = 5,
+	WIRETYPE_VARINT           = 0,
+	WIRETYPE_FIXED64          = 1,
+	WIRETYPE_LENGTH_DELIMITED = 2,
+	WIRETYPE_START_GROUP      = 3,
+	WIRETYPE_END_GROUP        = 4,
+	WIRETYPE_FIXED32          = 5,
 };
 
 // Lite alternative to FieldDescriptor::Type.  Must be kept in sync.
 enum FieldType {
-    TYPE_DOUBLE         = 1,
-    TYPE_FLOAT          = 2,
-    TYPE_INT64          = 3,
-    TYPE_UINT64         = 4,
-    TYPE_INT32          = 5,
-    TYPE_FIXED64        = 6,
-    TYPE_FIXED32        = 7,
-    TYPE_BOOL           = 8,
-    TYPE_STRING         = 9,
-    TYPE_GROUP          = 10,
-    TYPE_MESSAGE        = 11,
-    TYPE_BYTES          = 12,
-    TYPE_UINT32         = 13,
-    TYPE_ENUM           = 14,
-    TYPE_SFIXED32       = 15,
-    TYPE_SFIXED64       = 16,
-    TYPE_SINT32         = 17,
-    TYPE_SINT64         = 18,
-    MAX_FIELD_TYPE      = 18,
+	TYPE_DOUBLE         = 1,
+	TYPE_FLOAT          = 2,
+	TYPE_INT64          = 3,
+	TYPE_UINT64         = 4,
+	TYPE_INT32          = 5,
+	TYPE_FIXED64        = 6,
+	TYPE_FIXED32        = 7,
+	TYPE_BOOL           = 8,
+	TYPE_STRING         = 9,
+	TYPE_GROUP          = 10,
+	TYPE_MESSAGE        = 11,
+	TYPE_BYTES          = 12,
+	TYPE_UINT32         = 13,
+	TYPE_ENUM           = 14,
+	TYPE_SFIXED32       = 15,
+	TYPE_SFIXED64       = 16,
+	TYPE_SINT32         = 17,
+	TYPE_SINT64         = 18,
+	MAX_FIELD_TYPE      = 18,
 };
 
 typedef struct pb_serializer
 {
-    uint8_t *buffer;
-    size_t buffer_size;
-    size_t buffer_capacity;
-    size_t buffer_offset;
+	uint8_t *buffer;
+	size_t buffer_size;
+	size_t buffer_capacity;
+	size_t buffer_offset;
 } pb_serializer;
 
 typedef struct{
-    zend_object zo;
-    char *name;
-    size_t name_len;
-    int free_container;
-    pb_scheme_container *container;
+	zend_object zo;
+	char *name;
+	size_t name_len;
+	int free_container;
+	pb_scheme_container *container;
 } php_protocolbuffers_descriptor;
 
 typedef struct{
-    zend_object zo;
-    int max;
-    int offset;
+	zend_object zo;
+	int max;
+	int offset;
 } php_protocolbuffers_message;
 
 
@@ -248,31 +248,31 @@ typedef struct{
 
 #  if ZEND_MODULE_API_NO >= 20100525
 #  define PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(STRUCT_NAME) \
-    STRUCT_NAME *object;\
-    \
-    object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
-    zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-    object_properties_init(&object->zo, ce);\
-    \
-    retval.handle = zend_objects_store_put(object,\
-        (zend_objects_store_dtor_t)zend_objects_destroy_object,\
-        (zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
-    NULL TSRMLS_CC);\
-    retval.handlers = zend_get_std_object_handlers();
+	STRUCT_NAME *object;\
+	\
+	object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
+	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
+	object_properties_init(&object->zo, ce);\
+	\
+	retval.handle = zend_objects_store_put(object,\
+		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
+		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
+	NULL TSRMLS_CC);\
+	retval.handlers = zend_get_std_object_handlers();
 #  else
 #  define PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(STRUCT_NAME) \
-    STRUCT_NAME *object;\
-    zval *tmp = NULL;\
-    \
-    object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
-    zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-    zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
-    \
-    retval.handle = zend_objects_store_put(object,\
-        (zend_objects_store_dtor_t)zend_objects_destroy_object,\
-        (zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
-    NULL TSRMLS_CC);\
-    retval.handlers = zend_get_std_object_handlers();
+	STRUCT_NAME *object;\
+	zval *tmp = NULL;\
+	\
+	object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
+	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
+	zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+	\
+	retval.handle = zend_objects_store_put(object,\
+		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
+		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
+	NULL TSRMLS_CC);\
+	retval.handlers = zend_get_std_object_handlers();
 #  endif
 
 #define PHP_PROTOCOLBUFFERS_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *)zend_object_store_get_object(OBJECT TSRMLS_CC);
