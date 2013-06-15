@@ -1252,7 +1252,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		}
 	}
 
-	if (container->size < 1) {
+	if (container->size < 1 && container->process_unknown_fields < 1) {
 		pb_serializer_destroy(ser);
 		return -1;
 	}
@@ -1337,20 +1337,48 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		}
 
 		if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
-			if (Z_TYPE_PP(unknown) == IS_ARRAY) {
+			if (Z_TYPE_PP(unknown) == IS_OBJECT
+			 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
 				HashTable *unkht;
-				HashPosition pos;
-				zval **element;
+				zval **element, **elmh;
+				char *uuname;
+				int uuname_len;
 
-				unkht = Z_ARRVAL_PP(unknown);
+				unkht = Z_OBJPROP_PP(unknown);
 
-				for(zend_hash_internal_pointer_reset_ex(unkht, &pos);
-								zend_hash_get_current_data_ex(unkht, (void **)&element, &pos) == SUCCESS;
-								zend_hash_move_forward_ex(unkht, &pos)
-				) {
-					//php_var_dump(element, 1 TSRMLS_CC);
+				zend_mangle_property_name(&uuname, &uuname_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+				if (zend_hash_find(unkht, uuname, uuname_len, (void**)&elmh) == SUCCESS) {
+					HashPosition pos2;
+
+					for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(elmh), &pos2);
+									zend_hash_get_current_data_ex(Z_ARRVAL_PP(elmh), (void **)&element, &pos2) == SUCCESS;
+									zend_hash_move_forward_ex(Z_ARRVAL_PP(elmh), &pos2)
+					) {
+						php_protocolbuffers_unknown_field *field = NULL;
+						field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
+
+						pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+						switch (field->type) {
+							case WIRETYPE_VARINT:
+							pb_serializer_write_varint32(ser, field->varint);
+							break;
+							case WIRETYPE_FIXED64:
+							pb_serializer_write64_le(ser, field->varint);
+							break;
+							case WIRETYPE_LENGTH_DELIMITED:
+							pb_serializer_write_varint32(ser, field->buffer_len);
+							pb_serializer_write_chararray(ser, field->buffer, field->buffer_len);
+							break;
+							case WIRETYPE_START_GROUP:
+							break;
+							case WIRETYPE_END_GROUP:
+							break;
+							case WIRETYPE_FIXED32:
+							pb_serializer_write32_le(ser, field->varint);
+							break;
+						}
+					}
 				}
-
 			}
 		}
 

@@ -3,15 +3,6 @@ Protocol Buffers Extension for PHP
 
 [![Build Status](https://secure.travis-ci.org/chobie/php-protocolbuffers.png)](http://travis-ci.org/chobie/php-protocolbuffers)
 
-Motivation
-----------
-
-there are several protocol buffers implementation on php. but PHP really poor about decoding pb messeage.
-especially reading `varint` is the bottleneck as it have to be call `ord` function each bytes.
-(PHP's calling function is one of big cost. but we can't convert byte to int without `ord` or some function. as far as i known)
-
-this library will provide really fast decoding / encoding pb message and also provides generator for .proto file (see contrib directory)
-
 Status
 ------
 
@@ -82,7 +73,7 @@ TBD
 The Protocol Buffer API
 -----------------------
 
-basically, your message classes inherits ProtocolBuffersMessage class.
+basically, your message classes should inherit ProtocolBuffersMessage class.
 
 ProtocolBuffersMessage implements ProtocolBuffersDescribable, Iterator
 
@@ -91,7 +82,7 @@ ProtocolBuffersMessage->serializeToString();
 ProtocolBuffersMessage::parseFromString($bytes);
 ````
 
-will be add getter / setter magic methods soon.
+(will be add getter / setter magic methods soon.)
 
 Writing A Message
 -----------------
@@ -106,7 +97,6 @@ $person->setName("John Doe");
 
 $data = $person->serializeToString($person);
 ````
-
 
 Extending a Protocol Buffer
 ---------------------------
@@ -135,7 +125,6 @@ you can serialize / deserialize any object which implements `ProtocolBuffersDesc
 evaluating protocol buffers serialization.
 
 
-
 Compatibility
 -------------
 
@@ -150,7 +139,7 @@ Compatibility
     <td>extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
   </tr>
   <tr>
-    <td>unknown fields</td><td>limited supported (decoding only and don't care repeated fields)</td>
+    <td>unknown fields</td><td>limited supported (doesn't care repeated fields, unfamiliar feature.)</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>
