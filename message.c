@@ -61,77 +61,15 @@ PHP_METHOD(protocolbuffers_message, parseFromString)
 	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::parseFromString can't work under PHP 5.3. please use ProtocolBuffers:decode directly");
 	return;
 #else
-	const char *data, *data_end, *res;
+	const char *data;
 	int data_len = 0;
-	int err = 0;
-	long buffer_size = 0;
-	pb_scheme_container *container;
-	zval *obj = NULL;
-
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &data, &data_len) == FAILURE) {
 		return;
 	}
 	if (EG(called_scope)) {
-		/* TODO: refactor this block. please see protocol_buffers.c too */
-		buffer_size = (long)data + sizeof(data);
-
-		err = pb_get_scheme_container(EG(called_scope)->name, EG(called_scope)->name_length, &container, NULL TSRMLS_CC);
-		if (err) {
-			if (EG(exception)) {
-				// do nothing
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", EG(called_scope)->name);
-			}
-			return;
-		}
-
-		data_end = data + data_len;
-
-		{
-			zend_class_entry **ce;
-
-			MAKE_STD_ZVAL(obj);
-			zend_lookup_class(EG(called_scope)->name, EG(called_scope)->name_length, &ce TSRMLS_CC);
-			object_init_ex(obj, *ce);
-
-			/* add unknown fields */
-			{
-				zval *unknown;
-				zval **un;
-				char *unknown_name;
-				int unknown_name_len;
-
-				MAKE_STD_ZVAL(unknown);
-
-				object_init_ex(unknown, protocol_buffers_unknown_field_set_class_entry);
-				zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
-				if (zend_hash_find(Z_OBJPROP_P(obj), (char*)unknown_name, unknown_name_len, (void **)&un) == FAILURE) {
-					zend_hash_update(Z_OBJPROP_P(obj), unknown_name, unknown_name_len, (void **)&unknown, sizeof(unknown), NULL);
-				} else {
-					if (Z_TYPE_PP(un) == IS_NULL) {
-						zend_hash_update(Z_OBJPROP_P(obj), unknown_name, unknown_name_len, (void **)&unknown, sizeof(unknown), NULL);
-					} else {
-						efree(unknown);
-					}
-				}
-				efree(unknown_name);
-			}
-
-			res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
-			if (res == NULL) {
-				zval_ptr_dtor(&obj);
-				zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
-				return;
-			}
-
-			/* TODO:
-			pb_execute_wakeup(obj TSRMLS_CC);
-			*/
-		}
-
-		RETURN_ZVAL(obj, 0, 1);
+		php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_len, EG(called_scope)->name, EG(called_scope)->name_length);
 	} else {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Missing EG(current_scope). this is bug");
 	}

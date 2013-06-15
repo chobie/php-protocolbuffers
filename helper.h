@@ -309,5 +309,7 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer);
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass);
+int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, int data_len, const char *klass, int klass_len);
+
 
 #endif
