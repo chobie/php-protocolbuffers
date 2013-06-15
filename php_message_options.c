@@ -97,4 +97,6 @@ void php_pb_php_message_options_class(TSRMLS_D)
 	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, "use_single_property", sizeof("use_single_property")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(protocol_buffers_php_message_options_class_entry, "single_property_name", sizeof("single_property_name")-1, "_properties", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "PHPMessageOptions", protocol_buffers_php_message_options_class_entry);
 }
