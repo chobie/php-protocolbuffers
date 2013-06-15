@@ -34,12 +34,15 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
 			}
 
 			if (Z_LVAL_PP(zv) > MAX_FIELD_TYPE) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "ProtocolBuffersFieldDescriptor: type shoud be in %d - %d", 1, MAX_FIELD_TYPE);
 				return 1;
 			}
 			if (Z_LVAL_PP(zv) < 1) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "ProtocolBuffersFieldDescriptor: type shoud be in %d - %d", 1, MAX_FIELD_TYPE);
 				return 1;
 			}
 			if (Z_LVAL_PP(zv) == TYPE_GROUP) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "ProtocolBuffersFieldDescriptor: type shoud be in %d - %d. group type does not supported", 1, MAX_FIELD_TYPE);
 				return 1;
 			}
 
@@ -120,7 +123,10 @@ PHP_METHOD(protocolbuffers_field_descriptor, __construct)
 	}
 
 	if (params) {
-		zend_hash_apply_with_arguments(Z_ARRVAL_P(params) TSRMLS_CC, (apply_func_args_t) php_protocolbuffers_field_descriptor_process_params, 1, &instance);
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(params) TSRMLS_CC, (apply_func_args_t)php_protocolbuffers_field_descriptor_process_params, 1, &instance);
+		if (EG(exception)) {
+			return;
+		}
 	}
 }
 /* }}} */

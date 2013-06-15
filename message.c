@@ -102,7 +102,11 @@ PHP_METHOD(protocolbuffers_message, parseFromString)
 
 		err = pb_get_scheme_container(EG(called_scope)->name, EG(called_scope)->name_length, &container, NULL TSRMLS_CC);
 		if (err) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", EG(called_scope)->name);
+			if (EG(exception)) {
+				// do nothing
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", EG(called_scope)->name);
+			}
 			return;
 		}
 

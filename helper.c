@@ -123,7 +123,11 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 					return 1;
 				}
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
+				if (EG(exception)) {
+					// do nothing
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
+				}
 				return 1;
 			}
 		} else {

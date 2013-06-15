@@ -127,7 +127,11 @@ PHP_METHOD(protocolbuffers, decode)
 	buffer_size = (long)data + sizeof(data);
 	err = pb_get_scheme_container(klass, klass_len, &container, proto TSRMLS_CC);
 	if (err) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", klass);
+		if (EG(exception)) {
+			// do nothing
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", klass);
+		}
 		return;
 	}
 
