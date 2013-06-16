@@ -262,6 +262,13 @@ PHP_METHOD(protocolbuffers_message, __call)
 				name[i+4] == 'r') {
 				i += 5;
 				flag = 4;
+			} else if (i+3 < name_len &&
+				name[i] == 'h' &&
+				name[i+1] == 'a' &&
+				name[i+2] == 's'
+			) {
+				i += 3;
+				flag = 5;
 			} else {
 				break;
 			}
@@ -333,10 +340,11 @@ PHP_METHOD(protocolbuffers_message, __call)
 				if (scheme->repeated == 0) {
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp;
-						zval_ptr_dtor(e);
+						//zval_ptr_dtor(e);
 
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 						MAKE_STD_ZVAL(vl);
+
 						ZVAL_ZVAL(vl, *tmp, 1, 0);
 
 						/* TODO: message type check */
@@ -347,6 +355,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 								}
 							break;
 						}
+
 						zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
 					}
 				} else {
@@ -394,7 +403,25 @@ PHP_METHOD(protocolbuffers_message, __call)
 			break;
 			case 4:  /* clear */
 				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-					ZVAL_NULL(*e);
+					zval *t;
+					MAKE_STD_ZVAL(t);
+					ZVAL_NULL(t);
+
+					zend_hash_update(htt, n, n_len, (void **)&t, sizeof(zval), NULL);
+				}
+			case 5:  /* has*/
+				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+					if (Z_TYPE_PP(e) == IS_NULL) {
+						RETURN_FALSE;
+					} else if (Z_TYPE_PP(e) == IS_ARRAY) {
+						if (zend_hash_num_elements(Z_ARRVAL_PP(e)) < 1) {
+							RETURN_FALSE;
+						} else {
+							RETURN_TRUE;
+						}
+					} else {
+						RETURN_TRUE;
+					}
 				}
 			break;
 		}
