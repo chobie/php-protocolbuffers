@@ -1,5 +1,5 @@
 <?php
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
+require dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
 $person = new Tutorial_Person();
 $person->setId(21);

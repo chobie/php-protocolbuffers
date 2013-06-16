@@ -1,20 +1,20 @@
 <?php
-require dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
+require dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . "contrib/php/addressbook.proto.php";
 
 $person = new Tutorial_Person();
 $person->setId(21);
 $person->setName("John Doe");
 
-$data = msgpack_pack($person);
+$data = serialize($person);
 
-printf("# decoding benchmark (msgpack).\n");
+printf("# decoding benchmark (serialize / unserialize).\n");
 printf("# target message size: %d bytes.\n", strlen($data));
 printf("# start\n");
 
 $begin = microtime(true);
 $attempts = 100000;
 for ($i = 0; $i < $attempts; $i++) {
-    msgpack_unpack($data);
+    unserialize($data);
 }
 $end = microtime(true);
 
