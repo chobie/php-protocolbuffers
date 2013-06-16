@@ -77,6 +77,11 @@ basically, your message classes should inherit ProtocolBuffersMessage class.
 ````
 ProtocolBuffers\Message->serializeToString();
 ProtocolBuffers\Message::parseFromString($bytes);
+
+# magic methods.
+ProtocolBuffers\Message->set<CamelCaseFieldName>($value);
+ProtocolBuffers\Message->append<CamelCaseFieldNameForRepeatedField>($value);
+ProtocolBuffers\Message->clear<CamelCaseFieldName>();
 ````
 
 (will be add getter / setter magic methods soon.)
