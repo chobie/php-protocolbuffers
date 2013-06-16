@@ -78,8 +78,8 @@ if ($target instanceof ProtocolBuffersInvalidProtocolBufferException) {
 	echo get_class($target) . PHP_EOL;
 }
 
-$target = new ProtocolBuffers\UninitializedMessage();
-if ($target instanceof ProtocolBuffersUninitializedMessage) {
+$target = new ProtocolBuffers\UninitializedMessageException();
+if ($target instanceof ProtocolBuffersUninitializedMessageException) {
 	echo "OK" . PHP_EOL;
 } else {
 	echo get_class($target) . PHP_EOL;

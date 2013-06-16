@@ -159,10 +159,10 @@ static void php_uninitialized_message_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUninitializedMessage", 0);
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUninitializedMessageException", 0);
 	protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessage", protocol_buffers_uninitialized_message_exception_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessageException", protocol_buffers_uninitialized_message_exception_class_entry);
 }
 
 

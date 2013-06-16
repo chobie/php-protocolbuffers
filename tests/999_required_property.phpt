@@ -41,7 +41,7 @@ $person = new Person();
 try {
     $data = ProtocolBuffers::encode($person);
     echo "FAILED";
-} catch (ProtocolBuffersInvalidProtocolBufferException $e) {
+} catch (ProtocolBuffersUninitializedMessageException $e) {
     echo "OK";
 }
 
