@@ -263,7 +263,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	if (container->use_single_property > 0) {
 		zval **tmp = NULL;
 
-		if (zend_hash_quick_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len, container->single_property_h, (void **)&tmp) == SUCCESS) {
+		if (zend_hash_quick_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len+1, container->single_property_h, (void **)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_NULL) {
 				array_init(*tmp);
 			} else if (Z_TYPE_PP(tmp) != IS_ARRAY) {
@@ -1265,7 +1265,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(klass);
 	} else {
-		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len, (void**)&c) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
 			hash = Z_ARRVAL_PP(c);
 		} else {
 			pb_serializer_destroy(ser);

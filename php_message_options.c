@@ -50,12 +50,12 @@ PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 
 
 	if (zend_hash_find(Z_OBJPROP_P(instance), "single_property_name", sizeof("single_property_name"), (void **)&target) == SUCCESS) {
-		if (Z_STRVAL_PP(target) != NULL) {
-			zval_ptr_dtor(target);
-			MAKE_STD_ZVAL(*target);
-		}
+		zval *tmp;
 
-		ZVAL_STRING(*target, value, 1);
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_STRING(tmp, value, 1);
+
+		zend_hash_update(Z_OBJPROP_P(instance), "single_property_name", sizeof("single_property_name"), (void **)&tmp, sizeof(zval*), NULL);
 	}
 }
 /* }}} */
