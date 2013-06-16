@@ -117,6 +117,7 @@ extern zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 extern zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
 
+#define PHP_PROTOCOL_BUFFERS_LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 #ifndef GOOGLE_PREDICT_TRUE
 #ifdef __GNUC__

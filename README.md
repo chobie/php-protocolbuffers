@@ -3,25 +3,26 @@ Protocol Buffers Extension for PHP
 
 [![Build Status](https://secure.travis-ci.org/chobie/php-protocolbuffers.png)](http://travis-ci.org/chobie/php-protocolbuffers)
 
-Status
-------
+## Status
 
 Alpha
 
-License
--------
+## License
 
 BSD License
 
-Requirements
-------------
+## Requirements
 
 * PHP5.3 higher
 
-PHP5.2 is limited support (can't use `ProtocolBuffersMessage::parseFromString()`. you have to encode / decode via ProtocolBuffers methods).
+PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()`. you have to encode / decode via ProtocolBuffers methods).
 
-Install for developers
-----------------------
+* Google's `protoc` compiler version 2.3 or above ¹
+
+ ¹Only needed for generate classes from `.proto` file.
+
+
+## Install for developers
 
     git clone https://github.com/chobie/php-protocolbuffers.git
     cd php-protocolbuffers
@@ -32,20 +33,16 @@ Install for developers
     # please add following line to your php.ini
     # extension=protocolbuffers.so
 
-Building protoc-gen-php
------------------------
+## Building protoc-gen-php
 
-currently, protoc-php-gen does not set PATH. you have to put it on to PATH manually
+currently, `protoc-php-gen` does not set PATH. you have to put it on to PATH manually
 
     cd php-protocolbuffers/contrib
     make
 
 * you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
 
-* NOTE: you need protobuf when generate message via `.proto` file. you don't need it when just decoding / encoding message.
-
-Protocol Buffer Basics: PHP
----------------------------
+## Protocol Buffer Basics: PHP
 
 This tutorial provides a basic PHP programmer's introduction to working with protocol buffers. By walking through creating a simple example application, it shows you how to
 
@@ -53,8 +50,7 @@ This tutorial provides a basic PHP programmer's introduction to working with pro
 * Use the protocol buffer compiler.
 * Use the PHP protocol buffer API to write and read messages.
 
-Why Use Protocol Buffers?
--------------------------
+### Why Use Protocol Buffers?
 
 The example we're going to use is a very simple "address book" application that can read and write people's contact details to and from a file. Each person in the address book has a name, an ID, an email address, and a contact phone number.
 
@@ -68,13 +64,11 @@ How do you serialize and retrieve structured data like this? There are a few way
 
 Protocol buffers are the flexible, efficient, automated solution to solve exactly this problem. With protocol buffers, you write a .proto description of the data structure you wish to store. From that, the protocol buffer compiler creates a class that implements automatic encoding and parsing of the protocol buffer data with an efficient binary format. The generated class provides getters and setters for the fields that make up a protocol buffer and takes care of the details of reading and writing the protocol buffer as a unit. Importantly, the protocol buffer format supports the idea of extending the format over time in such a way that the code can still read data encoded with the old format.
 
-Where to Find the Example Code
-------------------------------
+### Where to Find the Example Code
 
 TBD
 
-The Protocol Buffer API
------------------------
+### The Protocol Buffer API
 
 basically, your message classes should inherit ProtocolBuffersMessage class.
 
@@ -87,8 +81,7 @@ ProtocolBuffers\Message::parseFromString($bytes);
 
 (will be add getter / setter magic methods soon.)
 
-Writing A Message
------------------
+### Writing A Message
 
 ````php
 <?php
@@ -101,8 +94,7 @@ $person->setName("John Doe");
 $data = $person->serializeToString($person);
 ````
 
-Extending a Protocol Buffer
----------------------------
+### Extending a Protocol Buffer
 
 Sooner or later after you release the code that uses your protocol buffer, you will undoubtedly want to "improve" the protocol buffer's definition. If you want your new buffers to be backwards-compatible, and your old buffers to be forward-compatible – and you almost certainly do want this – then there are some rules you need to follow. In the new version of the protocol buffer:
 
@@ -120,29 +112,30 @@ Sooner or later after you release the code that uses your protocol buffer, you w
 If you follow these rules, old code will happily read new messages and simply ignore any new fields. To the old code, optional fields that were deleted will simply have their default value, and deleted repeated fields will be empty. New code will also transparently read old messages. However, keep in mind that new optional fields will not be present in old messages, so you will need to either check explicitly whether they're set with has_, or provide a reasonable default value in your .proto file with [default = value] after the tag number. If the default value is not specified for an optional element, a type-specific default value is used instead: for strings, the default value is the empty string. For booleans, the default value is false. For numeric types, the default value is zero. Note also that if you added a new repeated field, your new code will not be able to tell whether it was left empty (by new code) or never set at all (by old code) since there is no has_ flag for it.
 
 
-Advanced Usage
---------------
+### Advanced Usage
 
 PHP Protocol Buffers implementation also provides `ProtocolBuffers::encode(ProtocolBuffersDescribable $message)` and `ProtocolBuffers::decode(string classname, $bytes)` methods.
 you can serialize / deserialize any object which implements `ProtocolBuffers\Describable` or "public static getDescriptor()" method. this is very useful when
 evaluating protocol buffers serialization.
 
 
-Compatibility
--------------
+### Features
 
 <table>
   <tr>
-    <td>repeated fields</td><td>supported</td>
+    <td>Standard types (numbers, string, enums, messages, etc)</td><td>supported</td>
   </tr>
   <tr>
-    <td>packed attributes</td><td>supported</td>
+    <td>Repeated fields</td><td>supported</td>
   </tr>
   <tr>
-    <td>extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
+    <td>Packed attributes</td><td>supported</td>
   </tr>
   <tr>
-    <td>unknown fields</td><td>limited supported (not fully tested. see test cases)</td>
+    <td>Extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
+  </tr>
+  <tr>
+    <td>Unknown fields</td><td>limited supported (not fully tested. see test cases)</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>
@@ -152,8 +145,7 @@ Compatibility
 Basically, php-protocolbuffers test cases were made by python generator.
 at least it proves correct behavior in those test cases.
 
-Thanks
--------
+## Thanks
 
 - Google Protocol Buffers team.
 
