@@ -199,6 +199,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 			zend_mangle_property_name(&prop, &prop_len, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
 			descriptor->container->single_property_name = prop;
 			descriptor->container->single_property_name_len = prop_len;
+			descriptor->container->single_property_h = zend_inline_hash_func(prop, prop_len);
 		}
 
 
@@ -226,10 +227,12 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 				memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
 				ischeme[n].name[tsize] = '\0';
+				ischeme[n].name_h = zend_inline_hash_func(ischeme[n].name, tsize);
 
 				zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].name, ischeme[n].name_len, 0);
 				ischeme[n].mangled_name	 = mangle;
 				ischeme[n].mangled_name_len = mangle_len;
+				ischeme[n].mangled_name_h = zend_inline_hash_func(mangle, mangle_len);
 			}
 
 			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "required", sizeof("required"), &tmp TSRMLS_CC);
@@ -308,6 +311,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 							efree(descriptor->container->single_property_name);
 
 							zend_mangle_property_name(&(descriptor->container->single_property_name), &(descriptor->container->single_property_name_len), (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val)+1, 0);
+							descriptor->container->single_property_h = zend_inline_hash_func(descriptor->container->single_property_name, descriptor->container->single_property_name_len);
 						}
 
 						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);

@@ -229,17 +229,20 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 {
 	char *name;
 	int name_len;
+	ulong hash;
 
 	if (container->use_single_property < 1) {
 		name = s->mangled_name;
 		name_len = s->mangled_name_len;
+		hash = s->mangled_name_h;
 	} else {
 		name = s->name;
 		name_len = s->name_len;
+		hash = s->name_h;
 	}
 
 	if (s->repeated) {
-		if (!zend_hash_exists(hresult, name, name_len)) {
+		if (!zend_hash_quick_exists(hresult, name, name_len, hash)) {
 			zval *arr;
 
 			MAKE_STD_ZVAL(arr);
@@ -248,13 +251,13 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 			zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);
 			Z_ADDREF_P(dz);
 
-			zend_hash_update(hresult, name, name_len, (void **)&arr, sizeof(arr), NULL);
+			zend_hash_quick_update(hresult, name, name_len, hash, (void **)&arr, sizeof(arr), NULL);
 			Z_ADDREF_P(arr);
 			zval_ptr_dtor(&arr);
 		} else {
 			zval **arr2;
 
-			if (zend_hash_find(hresult, name, name_len, (void **)&arr2) == SUCCESS) {
+			if (zend_hash_quick_find(hresult, name, name_len, hash, (void **)&arr2) == SUCCESS) {
 				if (Z_TYPE_PP(arr2) == IS_NULL) {
 					array_init(*arr2);
 				}
@@ -264,7 +267,7 @@ static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_conta
 			}
 		}
 	} else {
-		zend_hash_update(hresult, name, name_len, (void **)&dz, sizeof(dz), NULL);
+		zend_hash_quick_update(hresult, name, name_len, hash, (void **)&dz, sizeof(dz), NULL);
 		Z_ADDREF_P(dz);
 	}
 

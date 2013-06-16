@@ -138,8 +138,10 @@ typedef struct pb_scheme
 	int tag;
 	char *name;
 	int name_len;
+	ulong name_h;
 	char *mangled_name;
 	int mangled_name_len;
+	ulong mangled_name_h;
 	int type;
 	int flags;
 	int required;
@@ -163,6 +165,7 @@ typedef struct {
 	int use_single_property;
 	char *single_property_name;
 	int single_property_name_len;
+	ulong single_property_h;
 	int size;
 	int process_unknown_fields;
 } pb_scheme_container;

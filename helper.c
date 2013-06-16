@@ -263,7 +263,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	if (container->use_single_property > 0) {
 		zval **tmp = NULL;
 
-		if (zend_hash_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len, (void **)&tmp) == SUCCESS) {
+		if (zend_hash_quick_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len, container->single_property_h, (void **)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_NULL) {
 				array_init(*tmp);
 			} else if (Z_TYPE_PP(tmp) != IS_ARRAY) {
@@ -1182,9 +1182,9 @@ void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
 {
-	zval **tmp;
-	char *name;
-	int name_len;
+	zval **tmp = NULL;
+	char *name = {0};
+	int name_len = 0;
 
 	if (container->use_single_property < 1) {
 		name = scheme->mangled_name;
