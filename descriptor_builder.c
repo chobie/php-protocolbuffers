@@ -36,6 +36,7 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_add_field, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, field)
+	ZEND_ARG_INFO(0, force_add)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_get_name, 0, 0, 0)
@@ -64,9 +65,10 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 	zval *field = NULL;
 	zval **fields = NULL;
 	long index;
+	zend_bool force_add = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"lO", &index, &field, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
+		"lO|b", &index, &field, protocol_buffers_field_descriptor_class_entry, &force_add) == FAILURE) {
 		return;
 	}
 
@@ -75,23 +77,30 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 		return;
 	}
 
-	Z_ADDREF_P(field);
-
 	if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
-		if (Z_TYPE_PP(fields) != IS_ARRAY) {
-			zval *tmp;
+		zval *tmp = NULL;
 
+		if (Z_TYPE_PP(fields) != IS_ARRAY) {
 			MAKE_STD_ZVAL(tmp);
 			array_init(tmp);
 			zend_hash_update(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&tmp, sizeof(zval*), NULL);
 			fields = &tmp;
 		}
 
+		if (zend_hash_index_exists(Z_ARRVAL_PP(fields), index)) {
+			if (force_add < 1) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "tag number `%d` has already registered.", index);
+			}
+			return;
+		}
+
+		Z_ADDREF_P(field);
 		zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
 	} else {
 		MAKE_STD_ZVAL(*fields);
 		array_init(*fields);
 
+		Z_ADDREF_P(field);
 		zend_hash_index_update(Z_ARRVAL_PP(fields), index, (void**)&field, sizeof(zval *), NULL);
 		zend_hash_update(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields, sizeof(zval*), NULL);
 	}
