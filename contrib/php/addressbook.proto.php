@@ -13,93 +13,7 @@
 class Tutorial_Person_PhoneNumber extends ProtocolBuffersMessage
 {
 
-  protected static $descriptor;
-
   protected $_properties = array();
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasNumber()
-  {
-    if (isset($this->_properties['number'])) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $number
-   */
-  public function getNumber()
-  {
-    $result = null;
-
-    if (array_key_exists('number', $this->_properties)) {
-      $result = $this->_properties['number'];
-    }
-
-    return $result;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $number
-   *
-   * @return void
-   */
-  public function setNumber($number)
-  {
-    $this->_properties['number'] = $number;
-  }
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasType()
-  {
-    if (isset($this->_properties['type'])) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $type
-   */
-  public function getType()
-  {
-    $result = null;
-
-    if (array_key_exists('type', $this->_properties)) {
-      $result = $this->_properties['type'];
-    }
-
-    return $result;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $type
-   *
-   * @return void
-   */
-  public function setType($type)
-  {
-    $this->_properties['type'] = $type;
-  }
 
   /**
    * get descriptor for protocol buffers
@@ -108,7 +22,9 @@ class Tutorial_Person_PhoneNumber extends ProtocolBuffersMessage
    */
   public static function getDescriptor()
   {
-    if (!isset(self::$descriptor)) {
+    static $descriptor;
+
+    if (!isset($descriptor)) {
       $desc = new ProtocolBuffersDescriptorBuilder();
       $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
@@ -132,10 +48,10 @@ class Tutorial_Person_PhoneNumber extends ProtocolBuffersMessage
       $phpoptions->setUseSingleProperty(true);
       $phpoptions->setSinglePropertyName("_properties");
 
-      self::$descriptor = $desc->build();
+      $descriptor = $desc->build();
     }
 
-    return self::$descriptor;
+    return $descriptor;
   }
 
 }
@@ -160,8 +76,6 @@ class Tutorial_Person_PhoneType
  */
 class Tutorial_Person extends ProtocolBuffersMessage
 {
-  protected static $descriptor;
-
   protected $name;
 
   protected $id;
@@ -172,157 +86,15 @@ class Tutorial_Person extends ProtocolBuffersMessage
 
 
   /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasName()
-  {
-    if (isset($this->name)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $name
-   */
-  public function getName()
-  {
-    return $this->name;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $name
-   *
-   * @return void
-   */
-  public function setName($name)
-  {
-    $this->name = $name;
-  }
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasId()
-  {
-    if (isset($this->id)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $id
-   */
-  public function getId()
-  {
-    return $this->id;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $id
-   *
-   * @return void
-   */
-  public function setId($id)
-  {
-    $this->id = $id;
-  }
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasEmail()
-  {
-    if (isset($this->email)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $email
-   */
-  public function getEmail()
-  {
-    return $this->email;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $email
-   *
-   * @return void
-   */
-  public function setEmail($email)
-  {
-    $this->email = $email;
-  }
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasPhone()
-  {
-    if (isset($this->phone)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $phone
-   */
-  public function getPhone()
-  {
-    return $this->phone;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $phone
-   *
-   * @return void
-   */
-  public function addPhone($phone)
-  {
-    $this->phone[] = $phone;
-  }
-
-  /**
    * get descriptor for protocol buffers
    * 
    * @return array
    */
   public static function getDescriptor()
   {
-    if (!isset(self::$descriptor)) {
+    static $descriptor;
+
+    if (!isset($descriptor)) {
       $desc = new ProtocolBuffersDescriptorBuilder();
       $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_STRING,
@@ -361,10 +133,10 @@ class Tutorial_Person extends ProtocolBuffersMessage
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
-      self::$descriptor = $desc->build();
+      $descriptor = $desc->build();
     }
 
-    return self::$descriptor;
+    return $descriptor;
   }
 
 }
@@ -381,51 +153,7 @@ class Tutorial_Person extends ProtocolBuffersMessage
 class Tutorial_AddressBook extends ProtocolBuffersMessage
 {
 
-  protected static $descriptor;
-
   protected $_properties = array();
-
-  /**
-   * checking value
-   *
-   * @return bool
-   */
-  public function hasPerson()
-  {
-    if (isset($this->_properties['person'])) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * getting value
-   *
-   * @return mixed $person
-   */
-  public function getPerson()
-  {
-    $result = null;
-
-    if (array_key_exists('person', $this->_properties)) {
-      $result = $this->_properties['person'];
-    }
-
-    return $result;
-  }
-
-  /**
-   * setting value
-   *
-   * @property mixed $person
-   *
-   * @return void
-   */
-  public function addPerson($person)
-  {
-    $this->_properties['person'][] = $person;
-  }
 
   /**
    * get descriptor for protocol buffers
@@ -434,7 +162,9 @@ class Tutorial_AddressBook extends ProtocolBuffersMessage
    */
   public static function getDescriptor()
   {
-    if (!isset(self::$descriptor)) {
+    static $descriptor;
+
+    if (!isset($descriptor)) {
       $desc = new ProtocolBuffersDescriptorBuilder();
       $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
         "type"     => ProtocolBuffers::TYPE_MESSAGE,
@@ -450,10 +180,10 @@ class Tutorial_AddressBook extends ProtocolBuffersMessage
       $phpoptions->setUseSingleProperty(true);
       $phpoptions->setSinglePropertyName("_properties");
 
-      self::$descriptor = $desc->build();
+      $descriptor = $desc->build();
     }
 
-    return self::$descriptor;
+    return $descriptor;
   }
 
 }

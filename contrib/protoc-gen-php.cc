@@ -405,9 +405,6 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
     // Print fields map
 
-    printer.Print("protected static $descriptor;\n");
-    printer.Print("\n");
-
     if (moptions.use_single_property()) {
         printer.Print("protected $`var` = array();\n",
             "var",
@@ -591,7 +588,9 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("public static function getDescriptor()\n");
     printer.Print("{\n");
     printer.Indent();
-    printer.Print("if (!isset(self::$descriptor)) {\n");
+    printer.Print("static $descriptor;\n");
+    printer.Print("\n");
+    printer.Print("if (!isset($descriptor)) {\n");
     printer.Indent();
     printer.Print("$desc = new ProtocolBuffersDescriptorBuilder();\n");
     for (int i = 0; i < message.field_count(); ++i) {
@@ -653,12 +652,12 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     }
 
 
-    printer.Print("self::$descriptor = $desc->build();\n");
+    printer.Print("$descriptor = $desc->build();\n");
     printer.Outdent();
     printer.Print("}\n");
 
     printer.Print("\n");
-    printer.Print("return self::$descriptor;\n");
+    printer.Print("return $descriptor;\n");
     printer.Outdent();
     printer.Print("}\n");
     printer.Print("\n");
