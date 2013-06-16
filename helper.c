@@ -196,7 +196,7 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 
 			p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
 
-			val = (unknown_value*)emalloc(sizeof(val));
+			val = (unknown_value*)emalloc(sizeof(unknown_value));
 			val->varint = value;
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(unknown_value), NULL);
 
