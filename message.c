@@ -312,8 +312,8 @@ PHP_METHOD(protocolbuffers_message, __call)
 	}
 
 	{
-		HashTable *htt;
-		zval **e;
+		HashTable *htt = NULL;
+		zval **e = NULL;
 		zval *vl = NULL;
 
 		if (container->use_single_property > 0) {
@@ -383,18 +383,19 @@ PHP_METHOD(protocolbuffers_message, __call)
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp;
 
-						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-						MAKE_STD_ZVAL(vl);
-						ZVAL_ZVAL(vl, *tmp, 1, 0);
-
-						switch (scheme->type) {
-							case TYPE_STRING:
-								if (Z_TYPE_P(vl) != IS_STRING) {
-									convert_to_string(vl);
-								}
-							break;
+						if (Z_TYPE_PP(e) == IS_NULL ||
+							Z_TYPE_PP(e) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0
+						) {
+							zval **garvage = e;
+							MAKE_STD_ZVAL(*e);
+							array_init(*e);
+							zval_ptr_dtor(&garvage);
 						}
-						zend_hash_next_index_insert(Z_ARRVAL_PP(e), &vl, sizeof(zval *), NULL);
+
+						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+
+						Z_ADDREF_PP(tmp);
+						zend_hash_next_index_insert(Z_ARRVAL_PP(e), tmp, sizeof(zval *), NULL);
 					}
 				} else {
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);

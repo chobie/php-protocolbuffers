@@ -13,7 +13,12 @@ $person->setEmail("john.doe@example.com");
 $phone = new Tutorial_Person_PhoneNumber();
 $phone->setNumber("1234 5 67 78");
 $phone->setType(Tutorial_Person_PhoneType::HOME);
-$person->addPhone($phone);
+$person->appendPhone($phone);
+
+$phone = new Tutorial_Person_PhoneNumber();
+$phone->setNumber("1234 5 67 79");
+$phone->setType(Tutorial_Person_PhoneType::HOME);
+$person->appendPhone($phone);
 
 echo "____________________\n";
 
@@ -21,6 +26,8 @@ $addressbook->appendPerson($person);
 var_dump($addressbook);
 
 save($db, $addressbook);
+
+exit;
 
 function load($path)
 {
