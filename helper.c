@@ -378,6 +378,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 					MAKE_STD_ZVAL(dz);
 					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, bytes_array, value);
+					Z_ADDREF_P(dz);
+					zval_ptr_dtor(&dz);
 				} else {
 					/* skip unknown field */
 				}

@@ -68,7 +68,6 @@ void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *inst
 		}
 	}
 
-	Z_ADDREF_P(field);
 	zend_hash_next_index_insert(Z_ARRVAL_PP(fields), (void *)&field, sizeof(zval *), NULL);
 	efree(name);
 }
@@ -186,6 +185,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 	a = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
 
 	php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, a->number, name, name_len, field);
+	Z_ADDREF_P(field);
 }
 /* }}} */
 
