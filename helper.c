@@ -429,10 +429,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				data = data + value;
 			} else if (s->type == TYPE_MESSAGE) {
 				const char *n_buffer_end = data + value;
-				zval *z_obj;
-				pb_scheme_container *c_container;
-				char *name;
-				int name_length;
+				zval *z_obj = NULL;
+				pb_scheme_container *c_container = NULL;
+				char *name = {0};
+				int name_length = 0;
 
 				pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
 
