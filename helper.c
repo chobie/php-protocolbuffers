@@ -1082,6 +1082,10 @@ void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	/* TODO: add error handling */
 
 	pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
+	if (EG(exception)) {
+		return;
+	}
+
 	pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
 	pb_serializer_write_varint32(ser, n_ser->buffer_size);
 	pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
