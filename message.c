@@ -453,7 +453,7 @@ void php_pb_message_class(TSRMLS_D)
 	zend_class_implements(protocol_buffers_message_class_entry TSRMLS_CC, 1, protocol_buffers_serializable_class_entry);
 
 	protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
+	//protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
 
 	memcpy(&php_protocolbuffers_message_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 

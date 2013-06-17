@@ -453,7 +453,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 				if (s->repeated) {
 					if (!zend_hash_exists(hresult, name, name_length)) {
-						zval *arr;
+						zval *arr = NULL;
 
 						MAKE_STD_ZVAL(arr);
 						array_init(arr);
@@ -465,11 +465,28 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						Z_ADDREF_P(arr);
 						zval_ptr_dtor(&arr);
 					} else {
-						zval **arr2;
+						zval **arr2 = NULL;
 
+						/* TODO: improve refcount, memory allocation */
 						if (zend_hash_find(hresult, name, name_length, (void **)&arr2) == SUCCESS) {
-							zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
-							Z_ADDREF_P(z_obj);
+						    zval *tt;
+						    if (Z_TYPE_PP(arr2) == IS_NULL) {
+								MAKE_STD_ZVAL(tt);
+								array_init(tt);
+
+								Z_ADDREF_P(z_obj);
+								zend_hash_next_index_insert(Z_ARRVAL_P(tt), (void *)&z_obj, sizeof(z_obj), NULL);
+								zend_hash_update(hresult, name, name_length, (void **)&tt, sizeof(zval), NULL);
+							} else {
+								/* TODO: temporary fix. something wrong when declare property as an array. probably refcounting is the problem */
+								if (zend_hash_num_elements(Z_ARRVAL_PP(arr2)) == 0) {
+									SEPARATE_ZVAL(arr2);
+								}
+								Z_ADDREF_PP(arr2);
+
+								Z_ADDREF_P(z_obj);
+								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
+							}
 						}
 					}
 				} else {
