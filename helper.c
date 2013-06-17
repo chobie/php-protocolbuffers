@@ -1068,8 +1068,8 @@ void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	zend_class_entry *ce;
-	pb_scheme_container *n_container;
+	zend_class_entry *ce = NULL;
+	pb_scheme_container *n_container = NULL;
 	pb_serializer *n_ser = NULL;
 	int err = 0;
 
@@ -1078,6 +1078,7 @@ void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
 	if (err) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+		return;
 	}
 	/* TODO: add error handling */
 
@@ -1090,8 +1091,7 @@ void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, n_ser->buffer_size);
 	pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
 
-	efree(n_ser->buffer);
-	efree(n_ser);
+	pb_serializer_destroy(n_ser);
 }
 
 void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
