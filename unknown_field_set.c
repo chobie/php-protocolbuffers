@@ -68,6 +68,7 @@ void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *inst
 		}
 	}
 
+	Z_ADDREF_P(field);
 	zend_hash_next_index_insert(Z_ARRVAL_PP(fields), (void *)&field, sizeof(zval *), NULL);
 	efree(name);
 }
