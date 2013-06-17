@@ -1,0 +1,13 @@
+package Tutorial;
+
+message Prefecture {
+	required uint32 id = 1;
+	optional string name = 2;
+	optional uint32 population = 3;
+	optional uint32 area = 4;
+	optional uint32 population_density = 5;
+}
+
+message Japan {
+	repeated Prefecture prefecture = 1;
+}

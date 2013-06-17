@@ -354,6 +354,20 @@ PHP_METHOD(protocolbuffers_message, __call)
 									convert_to_string(vl);
 								}
 							break;
+							case TYPE_SINT32:
+							case TYPE_INT32:
+							case TYPE_UINT32:
+								if (Z_TYPE_P(vl) != IS_LONG) {
+									convert_to_long(vl);
+								}
+							break;
+							case TYPE_SINT64:
+							case TYPE_INT64:
+							case TYPE_UINT64:
+								if (Z_TYPE_P(vl) != IS_LONG) {
+									convert_to_long(vl);
+								}
+							break;
 						}
 
 						zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
