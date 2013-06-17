@@ -482,7 +482,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 								if (zend_hash_num_elements(Z_ARRVAL_PP(arr2)) == 0) {
 									SEPARATE_ZVAL(arr2);
 								}
-								Z_ADDREF_PP(arr2);
 
 								Z_ADDREF_P(z_obj);
 								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
@@ -1533,7 +1532,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		object_init_ex(obj, *ce);
 
 		/* add unknown fields */
-		{
+		if (container->process_unknown_fields > 0) {
 			zval *unknown;
 			zval **un;
 			char *unknown_name;
