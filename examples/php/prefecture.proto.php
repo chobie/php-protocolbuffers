@@ -92,6 +92,14 @@ class Tutorial_Japan extends ProtocolBuffersMessage
 {
   protected $prefecture = array();
 
+    public function addPrefecture($p)
+    {
+        $this->prefecture[] = $p;
+    }
+    public function debugPrefecture()
+    {
+        ProtocolBuffersHelper::debugZval($this->prefecture);
+    }
 
   /**
    * get descriptor for protocol buffers

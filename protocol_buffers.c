@@ -61,6 +61,7 @@ zend_class_entry *protocol_buffers_message_options_class_entry;
 zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
 zend_class_entry *protocol_buffers_unknown_field_class_entry;
 zend_class_entry *protocol_buffers_unknown_field_set_class_entry;
+zend_class_entry *protocol_buffers_helper_class_entry;
 
 zend_class_entry *protocol_buffers_php_message_options_class_entry;
 
@@ -201,6 +202,7 @@ void php_protocolbuffers_init(TSRMLS_D)
 	php_pb_descriptor_builder_class(TSRMLS_C);
 	php_pb_unknown_field_class(TSRMLS_C);
 	php_pb_unknown_field_set_class(TSRMLS_C);
+	php_pb_helper_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_STRING(name, size, value) \
 	zend_declare_class_constant_string(protocol_buffers_class_entry, name, size, "php" TSRMLS_CC);

@@ -314,5 +314,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass);
 int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, int data_len, const char *klass, int klass_len);
 
+void php_pb_helper_class(TSRMLS_D);
 
+void php_pb_helper_debug_zval(zval **value TSRMLS_DC);
 #endif

@@ -257,7 +257,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	uint32_t value = 0, tag = 0, wiretype = 0;
 	zval *dz;
 	HashTable *hresult;
-	char buffer[512] = {0};
 
 	/* hresult = Z_ARRVAL_PP(result); */
 	if (container->use_single_property > 0) {
@@ -384,49 +383,16 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 					/* skip unknown field */
 				}
 			} else if (s->type == TYPE_STRING) {
-				if (value < 512) {
-					memcpy(buffer, data, value);
-					buffer[value] = '\0';
+				MAKE_STD_ZVAL(dz);
+				ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-					MAKE_STD_ZVAL(dz);
-					ZVAL_STRINGL(dz, (char*)data, value, 1);
-
-					php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
-				} else {
-					char *sub_buffer;
-
-					sub_buffer = (char *)emalloc(value);
-					memcpy(sub_buffer, data, value);
-
-					MAKE_STD_ZVAL(dz);
-					ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
-
-					php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
-					efree(sub_buffer);
-				}
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
 			} else if (s->type == TYPE_BYTES) {
-				if (value < 512) {
-					memcpy(buffer, data, value);
-					buffer[value] = '\0';
-					MAKE_STD_ZVAL(dz);
-					ZVAL_STRINGL(dz, (char*)data, value, 1);
+				MAKE_STD_ZVAL(dz);
+				ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-					php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
-				} else {
-					char *sub_buffer;
-
-					sub_buffer = (char *)emalloc(value);
-
-					memcpy(sub_buffer, data, value);
-
-					MAKE_STD_ZVAL(dz);
-					ZVAL_STRINGL(dz, (char*)sub_buffer, value, 1);
-
-					php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
-
-					efree(sub_buffer);
-				}
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 
 				data = data + value;
 			} else if (s->type == TYPE_MESSAGE) {
@@ -1574,4 +1540,67 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 	RETVAL_ZVAL(obj, 0, 1);
 	return 0;
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
+	ZEND_ARG_INFO(0, zval)
+ZEND_END_ARG_INFO()
+
+void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
+{
+	zval *val = *value;
+
+	printf("{\n");
+	printf("  address: 0x%x,\n", (unsigned int)val);
+	printf("  type: %d,\n", val->type);
+	printf("  is_ref: %d,\n", val->is_ref__gc);
+	printf("  refcount: %d,\n", val->refcount__gc);
+	printf("  value: {\n");
+	printf("    lval: %ld,\n", val->value.lval);
+	printf("    double: %f,\n", val->value.dval);
+	if (val->type == 4) {
+		printf("    ht: {\n");
+		printf("      address: 0x%x,\n", (unsigned int)val->value.ht);
+		printf("      num_of_elements: %d,\n", (unsigned int)val->value.ht->nNumOfElements);
+		printf("      next_free_elements: %d,\n", (unsigned int)val->value.ht->nNextFreeElement);
+		printf("    },\n");
+	}
+	printf("    object: {\n");
+	printf("      handle: 0x%x,\n", val->value.obj.handle);
+	printf("      handlers: 0x%x,\n", (unsigned int)val->value.obj.handlers);
+	printf("    },\n");
+	printf("  }\n");
+	printf("}\n");
+}
+
+/* {{{ proto bool ProtocolBuffersHelper::debugZval()
+*/
+PHP_METHOD(protocolbuffers_helper, debugZval)
+{
+	zval *val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"z", &val) == FAILURE) {
+		return;
+	}
+	php_pb_helper_debug_zval(&val TSRMLS_CC);
+
+
+}
+/* }}} */
+
+
+static zend_function_entry protocolbuffers_helper_field_methods[] = {
+	PHP_ME(protocolbuffers_helper, debugZval, arginfo_pb_helper_debug_zval, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	{NULL, NULL, NULL}
+};
+
+void php_pb_helper_class(TSRMLS_D)
+{
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersHelper", protocolbuffers_helper_field_methods);
+	protocol_buffers_helper_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Helper", protocol_buffers_helper_class_entry);
 }
