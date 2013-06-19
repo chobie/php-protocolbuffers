@@ -225,6 +225,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 	int i = 0;
 	int flag = 0;
 	smart_str buf = {0};
+	smart_str buf2 = {0};
 	char *n;
 	int n_len;
 	pb_scheme *scheme;
@@ -279,14 +280,18 @@ PHP_METHOD(protocolbuffers_message, __call)
 				smart_str_appendc(&buf, '_');
 			}
 			smart_str_appendc(&buf, name[i] + ('a' - 'A'));
+			smart_str_appendc(&buf2, name[i]);
 		} else {
 			smart_str_appendc(&buf, name[i]);
+			smart_str_appendc(&buf2, name[i]);
 		}
 	}
 	smart_str_0(&buf);
+	smart_str_0(&buf2);
 
 	if (flag == 0) {
 		smart_str_free(&buf);
+		smart_str_free(&buf2);
 		zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}
@@ -301,12 +306,17 @@ PHP_METHOD(protocolbuffers_message, __call)
 			// OK
 			break;
 		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, buf2.c) == 0) {
+			break;
+		}
 		scheme = NULL;
 	}
 	smart_str_free(&buf);
+	smart_str_free(&buf2);
 
 	if (scheme == NULL) {
 		smart_str_free(&buf);
+		smart_str_free(&buf2);
 		zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}

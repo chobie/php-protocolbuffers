@@ -42,6 +42,9 @@ static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_desc
 		int i;
 
 		for (i = 0; i < (object->container)->size; i++) {
+			if ((object->container)->scheme[i].original_name != NULL) {
+				efree((object->container)->scheme[i].original_name);
+			}
 			if ((object->container)->scheme[i].name != NULL) {
 				efree((object->container)->scheme[i].name);
 			}

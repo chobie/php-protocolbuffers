@@ -222,14 +222,29 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 				int mangle_len;
 
 				tsize				  = Z_STRLEN_P(tmp)+1;
+
+				ischeme[n].original_name		= (char*)emalloc(sizeof(char*) * tsize);
+				ischeme[n].original_name_len	= tsize;
+
+				memcpy(ischeme[n].original_name, Z_STRVAL_P(tmp), tsize);
+				ischeme[n].original_name[tsize] = '\0';
+
 				ischeme[n].name		= (char*)emalloc(sizeof(char*) * tsize);
 				ischeme[n].name_len	= tsize;
 
 				memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
 				ischeme[n].name[tsize] = '\0';
+				php_strtolower(ischeme[n].name, tsize);
 				ischeme[n].name_h = zend_inline_hash_func(ischeme[n].name, tsize);
 
-				zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].name, ischeme[n].name_len, 0);
+				if (strcmp(ischeme[n].name, ischeme[n].original_name) == 0) {
+					// use snake case?
+					ischeme[n].magic_type = 0;
+				} else {
+					ischeme[n].magic_type = 1;
+				}
+
+				zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].original_name, ischeme[n].original_name_len, 0);
 				ischeme[n].mangled_name	 = mangle;
 				ischeme[n].mangled_name_len = mangle_len;
 				ischeme[n].mangled_name_h = zend_inline_hash_func(mangle, mangle_len);

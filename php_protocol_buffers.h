@@ -16,6 +16,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/spl/spl_exceptions.h"
 #include "ext/standard/php_var.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "limits.h"
@@ -26,6 +27,14 @@
 #include <inttypes.h>
 #elif !defined(_MSC_VER)
 #include <stdint.h>
+#endif
+
+#if defined(_MSC_VER) && !defined(strcasecmp)
+#define strcasecmp stricmp
+#endif
+
+#if defined(_MSC_VER) && !defined(strncasecmp)
+#define strncasecmp strnicmp
 #endif
 
 #ifndef PHP_PROTOCOLBUFFERS_DEBUG
@@ -140,9 +149,12 @@ typedef struct pb_scheme
 	char *name;
 	int name_len;
 	ulong name_h;
+	char *original_name;
+	int original_name_len;
 	char *mangled_name;
 	int mangled_name_len;
 	ulong mangled_name_h;
+	int magic_type;
 	int type;
 	int flags;
 	int required;

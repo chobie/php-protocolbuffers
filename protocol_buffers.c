@@ -310,6 +310,9 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 			) {
 
 				for (i = 0; i < (*element)->size; i++) {
+					if ((*element)->scheme[i].original_name != NULL) {
+						efree((*element)->scheme[i].original_name);
+					}
 					if ((*element)->scheme[i].name != NULL) {
 						efree((*element)->scheme[i].name);
 					}
