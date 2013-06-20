@@ -15,6 +15,7 @@ $phone->setNumber("1234 5 67 78");
 $phone->setType(Tutorial_Person_PhoneType::HOME);
 $person->appendPhone($phone);
 
+
 $phone = new Tutorial_Person_PhoneNumber();
 $phone->setNumber("1234 5 67 79");
 $phone->setType(Tutorial_Person_PhoneType::HOME);
@@ -23,6 +24,8 @@ $person->appendPhone($phone);
 echo "____________________\n";
 
 $addressbook->appendPerson($person);
+
+
 var_dump($addressbook);
 
 save($db, $addressbook);
@@ -33,7 +36,7 @@ function load($path)
 {
     $data = @file_get_contents($path);
     try {
-        $result = Tutorial_AddressBook::parseFromString($data);
+        $result = ProtocolBuffers::decode("Tutorial_AddressBook", $data);
     } catch (ProtocolBuffersInvalidProtocolBufferException $e) {
         $result = new Tutorial_AddressBook();
     }

@@ -92,6 +92,11 @@ class Tutorial_Japan extends ProtocolBuffersMessage
 {
   protected $prefecture = array();
 
+    public function __destruct()
+    {
+        $this->prefecture = array();
+    }
+
     public function addPrefecture($p)
     {
         $this->prefecture[] = $p;

@@ -406,25 +406,36 @@ PHP_METHOD(protocolbuffers_message, __call)
 				if (scheme->repeated > 0) {
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp = NULL;
+						zval *nval = NULL;
+						zval *xval = NULL;
 
-						if (Z_TYPE_PP(e) == IS_NULL ||
-							(Z_TYPE_PP(e) == IS_ARRAY && Z_REFCOUNT_P(*e) == 3)
-						) {
-							zval **garvage = e;
-
-							MAKE_STD_ZVAL(*e);
-							array_init(*e);
-							Z_ADDREF_PP(e);
-							zval_ptr_dtor(garvage);
+						if (zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0) {
+							MAKE_STD_ZVAL(nval);
+							array_init(nval);
+							//Z_ADDREF_P(nval);
+						} else {
+							nval = *e;
 						}
+//						ALLOC_ZVAL(nval);
+//						*nval = **e;
+//						zval_copy_ctor(nval);
+//						INIT_PZVAL(nval)
+//						Z_ADDREF_P(*e);
 
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+//						ALLOC_ZVAL(xval);
+//						*xval = **tmp;
+//						zval_copy_ctor(xval);
+//						INIT_PZVAL(xval);
+						Z_ADDREF_P(*tmp);
 
-						if (tmp != NULL) {
-//							php_pb_helper_debug_zval(tmp TSRMLS_CC) ;
-							zend_hash_next_index_insert(Z_ARRVAL_PP(e), tmp, sizeof(zval *), NULL);
-							Z_ADDREF_P(*tmp);
-						}
+						Z_ADDREF_P(nval);
+						zend_hash_next_index_insert(Z_ARRVAL_P(nval), tmp, sizeof(zval *), NULL);
+						zend_hash_update(htt, n, n_len, (void **)&nval, sizeof(zval *), NULL);
+//						Z_ADDREF_P(nval);
+						zval_ptr_dtor(&tmp);
+//						zval_ptr_dtor(&nval);
+
 					}
 				} else {
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);

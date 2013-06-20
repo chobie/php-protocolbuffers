@@ -442,22 +442,29 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 								MAKE_STD_ZVAL(tt);
 								array_init(tt);
 
-								Z_ADDREF_P(z_obj);
-								zend_hash_next_index_insert(Z_ARRVAL_P(tt), (void *)&z_obj, sizeof(z_obj), NULL);
-								zend_hash_update(hresult, name, name_length, (void **)&tt, sizeof(zval), NULL);
+								zend_hash_next_index_insert(Z_ARRVAL_P(tt), (void *)&z_obj, sizeof(zval *), NULL);
+								zend_hash_update(hresult, name, name_length, (void **)&tt, sizeof(zval *), NULL);
 							} else {
 								/* TODO: temporary fix. something wrong when declare property as an array. probably refcounting is the problem */
 								if (zend_hash_num_elements(Z_ARRVAL_PP(arr2)) == 0) {
-									SEPARATE_ZVAL(arr2);
+									zval *m;
+
+									MAKE_STD_ZVAL(m);
+									array_init(m);
+									Z_ADDREF_P(m);
+									zend_hash_update(hresult, name, name_length, (void **)&m, sizeof(zval *), NULL);
+									zval_ptr_dtor(arr2);
+									*arr2 = m;
 								}
 
 								Z_ADDREF_P(z_obj);
-								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(z_obj), NULL);
+								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(zval *), NULL);
+//								//php_pb_helper_debug_zval(arr2 TSRMLS_CC);
 							}
 						}
 					}
 				} else {
-					zend_hash_update(hresult, name, name_length, (void **)&z_obj, sizeof(z_obj), NULL);
+					zend_hash_update(hresult, name, name_length, (void **)&z_obj, sizeof(zval *), NULL);
 					Z_ADDREF_P(z_obj);
 				}
 
@@ -1481,6 +1488,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		}
 		return 1;
 	}
+
 
 	data_end = data + data_len;
 
