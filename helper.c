@@ -1562,8 +1562,8 @@ void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
 	printf("{\n");
 	printf("  address: 0x%x,\n", (unsigned int)val);
 	printf("  type: %d,\n", val->type);
-	printf("  is_ref: %d,\n", PZVAL_ISREF_P(*val));
-	printf("  refcount: %d,\n", Z_REFCOUNT_PP(val));
+	printf("  is_ref: %d,\n", PZVAL_IS_REF(val));
+	printf("  refcount: %d,\n", Z_REFCOUNT_PP(value));
 	printf("  value: {\n");
 	printf("    lval: %ld,\n", val->value.lval);
 	printf("    double: %f,\n", val->value.dval);
