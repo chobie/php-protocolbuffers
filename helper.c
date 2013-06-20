@@ -1497,10 +1497,10 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 		if (PBG(classes)) {
 			/* Memo: fast lookup */
-			if (zend_hash_find(PBG(classes), klass, klass_len, (void **)&ce) == FAILURE) {
-				zend_lookup_class(klass, klass_len, &ce TSRMLS_CC);
+			if (zend_hash_find(PBG(classes), (char*)klass, klass_len, (void **)&ce) == FAILURE) {
+				zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC);
 				if (ce != NULL) {
-					zend_hash_update(PBG(classes), klass, klass_len, (void **)ce, sizeof(ce), NULL);
+					zend_hash_update(PBG(classes), (char*)klass, klass_len, (void **)ce, sizeof(ce), NULL);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "class lookup failed. %s does exist", klass);
 					return 1;
@@ -1562,8 +1562,8 @@ void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
 	printf("{\n");
 	printf("  address: 0x%x,\n", (unsigned int)val);
 	printf("  type: %d,\n", val->type);
-	printf("  is_ref: %d,\n", val->is_ref__gc);
-	printf("  refcount: %d,\n", val->refcount__gc);
+	printf("  is_ref: %d,\n", PZVAL_ISREF_P(*val));
+	printf("  refcount: %d,\n", Z_REFCOUNT_PP(val));
 	printf("  value: {\n");
 	printf("    lval: %ld,\n", val->value.lval);
 	printf("    double: %f,\n", val->value.dval);
