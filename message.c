@@ -95,7 +95,7 @@ static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_sche
 {
 	char *n;
 	int n_len;
-	HashTable *htt;
+	HashTable *htt = NULL;
 
 	if (container->use_single_property > 0) {
 		n     = container->single_property_name;
@@ -113,7 +113,7 @@ static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_sche
 
 	name = &n;
 	name_len = &n_len;
-	ht = &htt;
+	*ht = htt;
 
 }
 
@@ -125,13 +125,13 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 	zval *object;
 	int data_len = 0;
 	php_protocolbuffers_message *from, *current;
-	pb_scheme_container *container;
-	pb_scheme *scheme;
+	pb_scheme_container *container = NULL;
+	pb_scheme *scheme = NULL;
 	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	char *n;
 	int n_len;
-	HashTable *htt;
+	HashTable *htt = NULL, *hts = NULL;
 	int err;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -152,14 +152,62 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	from = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
-	php_protocolbuffers_get_hash(container, scheme, object, &n, &n_len, &htt TSRMLS_CC);
+	php_protocolbuffers_get_hash(container, container->scheme, instance, &n, &n_len, &htt TSRMLS_CC);
+	php_protocolbuffers_get_hash(container, container->scheme, object, &n, &n_len, &hts TSRMLS_CC);
 
 	{
+		php_array_merge(htt, hts, 1 TSRMLS_CC);
+/*
 		int i = 0;
 		for (i = 0; i < container->size; i++) {
+			zval **tmp = NULL;
+			char *name;
+			int name_len;
+
 			scheme = &(container->scheme[i]);
-			fprintf(stderr, "name: %s\n", scheme->name);
+
+			if (container->use_single_property > 0) {
+				name = scheme->name;
+				name_len = scheme->name_len;
+			} else {
+				name = scheme->mangled_name;
+				name_len = scheme->mangled_name_len;
+			}
+
+			if (zend_hash_find(hts, name, name_len, (void **)&tmp) == SUCCESS) {
+				zval *val;
+
+				switch (Z_TYPE_PP(tmp)) {
+				case IS_STRING:
+					MAKE_STD_ZVAL(val);
+					ZVAL_STRINGL(val, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+
+					Z_ADDREF_P(val);
+					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+					break;
+				case IS_LONG:
+					MAKE_STD_ZVAL(val);
+					ZVAL_LONG(val, Z_LVAL_PP(tmp));
+
+					Z_ADDREF_P(val);
+					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				break;
+				case IS_DOUBLE:
+					MAKE_STD_ZVAL(val);
+					ZVAL_DOUBL(val, Z_DVAL_PP(tmp));
+
+					Z_ADDREF_P(val);
+					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				break;
+				case IS_OBJECT:
+				break;
+				case IS_ARRAY:
+				break;
+				}
+			}
+
 		}
+*/
 	}
 }
 /* }}} */
