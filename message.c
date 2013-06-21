@@ -376,7 +376,82 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 */
 PHP_METHOD(protocolbuffers_message, clear)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::clear does not implement yet");
+	zval *instance = getThis();
+	int err = 0, i = 0;
+	zend_class_entry *ce;
+	HashTable *proto = NULL, *hash = NULL;
+	pb_scheme_container *container;
+	php_protocolbuffers_message *message;
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	if (container->use_single_property < 1) {
+		hash = Z_OBJPROP_P(instance);
+	} else {
+		zval **c;
+		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
+			hash = Z_ARRVAL_PP(c);
+		} else {
+			return;
+		}
+	}
+
+	for (i = 0; i < container->size; i++) {
+		char *name;
+		int name_len;
+		zval **tmp = NULL;
+		zval *val = NULL;
+
+		if (container->use_single_property < 1) {
+			name = container->scheme[i].mangled_name;
+			name_len = container->scheme[i].mangled_name_len;
+		} else {
+			name = container->scheme[i].name;
+			name_len = container->scheme[i].name_len;
+		}
+
+		if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
+			switch (Z_TYPE_PP(tmp)) {
+			case IS_ARRAY:
+				MAKE_STD_ZVAL(val);
+				array_init(val);
+
+				Z_ADDREF_P(val);
+				zend_hash_update(hash, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				zval_ptr_dtor(&val);
+				break;
+			case IS_STRING:
+			case IS_LONG:
+			case IS_DOUBLE:
+			case IS_OBJECT:
+				MAKE_STD_ZVAL(val);
+				ZVAL_NULL(val);
+
+				Z_ADDREF_P(val);
+				zend_hash_update(hash, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				zval_ptr_dtor(&val);
+				break;
+			}
+		}
+	}
+
+	if (container->process_unknown_fields > 0) {
+		char *uname;
+		int uname_len;
+		zval **unknown;
+
+		if (container->use_single_property > 0) {
+			uname = "_unknown";
+			uname_len = sizeof("_unknown");
+		} else {
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
+			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown);
+		}
+	}
 }
 /* }}} */
 
