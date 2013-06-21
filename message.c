@@ -55,6 +55,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_merge_from, 0, 0, 1)
 	ZEND_ARG_INFO(0, message)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_discard_unknown_fields, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 /* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
 */
 PHP_METHOD(protocolbuffers_message, serializeToString)
@@ -123,10 +129,8 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 {
 	zval *instance = getThis();
 	zval *object;
-	int data_len = 0;
-	php_protocolbuffers_message *from, *current;
+	php_protocolbuffers_message *from;
 	pb_scheme_container *container = NULL;
-	pb_scheme *scheme = NULL;
 	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	char *n;
@@ -335,6 +339,23 @@ PHP_METHOD(protocolbuffers_message, valid)
 }
 /* }}} */
 
+/* {{{ proto void ProtocolBuffersMessage::discardUnknownFields()
+*/
+PHP_METHOD(protocolbuffers_message, discardUnknownFields)
+{
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::discardUnknownFields does not implement yet");
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffersMessage::clear()
+*/
+PHP_METHOD(protocolbuffers_message, clear)
+{
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::clear does not implement yet");
+}
+/* }}} */
+
+
 /* {{{ proto bool ProtocolBuffersMessage::__call()
 */
 PHP_METHOD(protocolbuffers_message, __call)
@@ -534,7 +555,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp = NULL;
 						zval *nval = NULL;
-						zval *xval = NULL;
 						int flag = 0;
 
 						if (zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0) {
@@ -593,6 +613,8 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, serializeToString, arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, parseFromString, arginfo_pb_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_message, mergeFrom, arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, clear, arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)

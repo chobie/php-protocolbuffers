@@ -24,22 +24,19 @@ foreach (explode("\n", $a) as $line) {
 }
 
 file_put_contents("prefecture.db", $jpn->serializeToString());
-$data = $jpn->serializeToString();
 
+$data = $jpn->serializeToString();
 $data = file_get_contents("prefecture.db");
+
 printf("# decoding benchmark (protocolbuffers).\n");
 printf("# target message size: %d bytes.\n", strlen($data));
 printf("# start\n");
 
 $begin = microtime(true);
 $attempts = 10000;
-$b = memory_get_usage();
 for ($i = 0; $i < $attempts; $i++) {
-    $a = ProtocolBuffers::decode("Tutorial_Japan", $data);
+    ProtocolBuffers::decode("Tutorial_Japan", $data);
 }
-$e = memory_get_usage();
-var_dump(($e - $b) / 1024);
-exit;
 $end = microtime(true);
 
 printf("# Result:\n");

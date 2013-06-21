@@ -401,6 +401,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				pb_scheme_container *c_container = NULL;
 				char *name = {0};
 				int name_length = 0;
+				ulong name_hash = 0;
 
 				pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
 
@@ -414,13 +415,15 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				if (container->use_single_property < 1) {
 					name = s->mangled_name;
 					name_length = s->mangled_name_len;
+					name_hash = s->mangled_name_h;
 				} else {
 					name = s->name;
 					name_length = s->name_len;
+					name_hash = s->name_h;
 				}
 
 				if (s->repeated) {
-					if (!zend_hash_exists(hresult, name, name_length)) {
+					if (!zend_hash_quick_exists(hresult, name, name_length, name_hash)) {
 						zval *arr = NULL;
 
 						MAKE_STD_ZVAL(arr);
@@ -436,14 +439,14 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						zval **arr2 = NULL;
 
 						/* TODO: improve refcount, memory allocation */
-						if (zend_hash_find(hresult, name, name_length, (void **)&arr2) == SUCCESS) {
+						if (zend_hash_quick_find(hresult, name, name_length, name_hash, (void **)&arr2) == SUCCESS) {
 						    zval *tt;
 						    if (Z_TYPE_PP(arr2) == IS_NULL) {
 								MAKE_STD_ZVAL(tt);
 								array_init(tt);
 
 								zend_hash_next_index_insert(Z_ARRVAL_P(tt), (void *)&z_obj, sizeof(zval *), NULL);
-								zend_hash_update(hresult, name, name_length, (void **)&tt, sizeof(zval *), NULL);
+								zend_hash_quick_update(hresult, name, name_length, name_hash, (void **)&tt, sizeof(zval *), NULL);
 							} else {
 								/* TODO: temporary fix. something wrong when declare property as an array. probably refcounting is the problem */
 								if (zend_hash_num_elements(Z_ARRVAL_PP(arr2)) == 0) {
@@ -452,19 +455,18 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 									MAKE_STD_ZVAL(m);
 									array_init(m);
 									Z_ADDREF_P(m);
-									zend_hash_update(hresult, name, name_length, (void **)&m, sizeof(zval *), NULL);
+									zend_hash_quick_update(hresult, name, name_length, name_hash, (void **)&m, sizeof(zval *), NULL);
 									zval_ptr_dtor(arr2);
 									*arr2 = m;
 								}
 
 								Z_ADDREF_P(z_obj);
 								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(zval *), NULL);
-//								//php_pb_helper_debug_zval(arr2 TSRMLS_CC);
 							}
 						}
 					}
 				} else {
-					zend_hash_update(hresult, name, name_length, (void **)&z_obj, sizeof(zval *), NULL);
+					zend_hash_quick_update(hresult, name, name_length, name_hash, (void **)&z_obj, sizeof(zval *), NULL);
 					Z_ADDREF_P(z_obj);
 				}
 

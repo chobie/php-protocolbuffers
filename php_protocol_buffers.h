@@ -19,6 +19,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_array.h"
 #include "limits.h"
 
 #include "is_utf8.h"

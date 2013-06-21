@@ -75,8 +75,11 @@ basically, your message classes should inherit ProtocolBuffersMessage class.
 `ProtocolBuffers\Message` implements `ProtocolBuffers\Describable`, `Iterator`
 
 ````
-ProtocolBuffers\Message->serializeToString();
 ProtocolBuffers\Message::parseFromString($bytes);
+ProtocolBuffers\Message->serializeToString();
+ProtocolBuffers\Message->mergeFrom((SameMessageClass) $message);
+ProtocolBuffers\Message->clear();
+ProtocolBUffers\Message->discardUnknownFields();
 
 # magic methods.
 ProtocolBuffers\Message->set<CamelCaseFieldName>($value);
