@@ -12,6 +12,22 @@
 			fields = &tmp;\
 		}\
 
+
+void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
+{
+	char *name;
+	int name_len;
+	zval *val;
+
+	MAKE_STD_ZVAL(val);
+	array_init(val);
+	Z_ADDREF_P(val);
+
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&val, sizeof(zval *), NULL);
+	efree(name);
+}
+
 int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, php_protocolbuffers_unknown_field **f)
 {
 	HashPosition pos;

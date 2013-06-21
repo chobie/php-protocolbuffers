@@ -343,7 +343,32 @@ PHP_METHOD(protocolbuffers_message, valid)
 */
 PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::discardUnknownFields does not implement yet");
+	zval *instance = getThis();
+	int err = 0;
+	zend_class_entry *ce;
+	HashTable *proto = NULL;
+	pb_scheme_container *container;
+	php_protocolbuffers_message *message;
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	if (container->process_unknown_fields > 0) {
+		char *uname;
+		int uname_len;
+		zval **unknown;
+
+		if (container->use_single_property > 0) {
+			uname = "_unknown";
+			uname_len = sizeof("_unknown");
+		} else {
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
+			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown);
+		}
+	}
 }
 /* }}} */
 
