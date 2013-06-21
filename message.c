@@ -418,7 +418,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 	if (flag == 0) {
 		smart_str_free(&buf);
 		smart_str_free(&buf2);
-		zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
+		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}
 
@@ -443,7 +443,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 	if (scheme == NULL) {
 		smart_str_free(&buf);
 		smart_str_free(&buf2);
-		zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
+		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}
 
@@ -516,7 +516,8 @@ PHP_METHOD(protocolbuffers_message, __call)
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 
 						if (Z_TYPE_PP(tmp) != IS_ARRAY) {
-							zend_error_noreturn(E_ERROR, "Can't call method %s::%s(). only accept array parameter for repeated fields", Z_OBJCE_P(instance)->name, name);
+							zend_error(E_ERROR, "Can't call method %s::%s(). only accept array parameter for repeated fields", Z_OBJCE_P(instance)->name, name);
+							return;
 						}
 
 						MAKE_STD_ZVAL(vl);
@@ -556,7 +557,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 						}
 					}
 				} else {
-					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
+					zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 					return;
 				}
 			break;
