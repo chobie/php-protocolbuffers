@@ -393,8 +393,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				ZVAL_STRINGL(dz, (char*)data, value, 1);
 
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
-
-				data = data + value;
 			} else if (s->type == TYPE_MESSAGE) {
 				const char *n_buffer_end = data + value;
 				zval *z_obj = NULL;
