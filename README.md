@@ -82,9 +82,11 @@ ProtocolBuffers\Message->clear();
 ProtocolBUffers\Message->discardUnknownFields();
 
 # magic methods.
+ProtocolBuffers\Message->get<CamelCaseFieldName>();
 ProtocolBuffers\Message->set<CamelCaseFieldName>($value);
 ProtocolBuffers\Message->append<CamelCaseFieldNameForRepeatedField>($value);
 ProtocolBuffers\Message->clear<CamelCaseFieldName>();
+ProtocolBuffers\Message->has<CamelCaseFieldName>();
 ````
 
 (will be add getter / setter magic methods soon.)
