@@ -290,7 +290,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			return NULL;
 		}
 
-		tag	  = (value >> 0x03);
+		tag      = (value >> 0x03);
 		wiretype = (value & 0x07);
 
 		if (tag < 1 || tag > ktagmax) {
@@ -1210,6 +1210,10 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 							zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
 							zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
 			) {
+				if (Z_TYPE_PP(element) == IS_NULL) {
+					continue;
+				}
+
 				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, n_ser, is_packed);
 			}
 
@@ -1227,6 +1231,9 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 			} else {
 				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					zend_throw_exception_ex(protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+					return;
+				}
+				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					return;
 				}
 				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
