@@ -1,6 +1,7 @@
 #include "php_protocol_buffers.h"
 #include "message.h"
 #include "ext/standard/php_smart_str.h"
+#include "unknown_field_set.h"
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
 

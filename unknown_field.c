@@ -28,7 +28,6 @@ static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, in
 
 	return ht;
 }
-#endif
 
 void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
@@ -45,6 +44,50 @@ void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	field->type = type;
 }
+
+#else
+
+void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
+{
+	php_protocolbuffers_unknown_field *field = NULL;
+	char *name;
+	int name_len;
+	zval **result = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"number", sizeof("number"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+		zval *tmp;
+
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_LONG(tmp, number);
+		zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&tmp, sizeof(zval), NULL);
+		field->number = number;
+	}
+	efree(name);
+}
+
+void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
+{
+	php_protocolbuffers_unknown_field *field = NULL;
+	char *name;
+	int name_len;
+	zval **result = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+		zval *tmp;
+
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_LONG(tmp, type);
+		zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&tmp, sizeof(zval), NULL);
+		field->type = type;
+	}
+	efree(name);
+}
+#endif
+
 
 static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_unknown_field *object TSRMLS_DC)
 {
@@ -287,6 +330,10 @@ void php_pb_unknown_field_class(TSRMLS_D)
 	memcpy(&php_protocolbuffers_unknown_field_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 2)
 	php_protocolbuffers_unknown_field_object_handlers.get_debug_info = php_protocolbuffers_unknown_field_get_debug_info;
+#else
+	/* for var_dump. */
+	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "number", sizeof("number")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "type", sizeof("type")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 #endif
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownField", protocol_buffers_unknown_field_class_entry);
