@@ -1,44 +1,47 @@
 #include "php_protocol_buffers.h"
 #include "unknown_field.h"
 
+static zend_object_handlers php_protocolbuffers_unknown_field_object_handlers;
+
+static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, int *is_temp TSRMLS_DC)
+{
+	HashTable *ht;
+	HashTable *props = Z_OBJPROP_P(obj);
+	zval *number, *type;
+	php_protocolbuffers_unknown_field *field;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, obj);
+	*is_temp = 1;
+
+	ALLOC_HASHTABLE(ht);
+	ZEND_INIT_SYMTABLE_EX(ht, zend_hash_num_elements(props), 0);
+
+	MAKE_STD_ZVAL(number);
+	MAKE_STD_ZVAL(type);
+
+	ZVAL_LONG(number, field->number);
+	ZVAL_LONG(type, field->type);
+
+	zend_hash_update(ht, "number", sizeof("number"), (void **)&number, sizeof(zval *), NULL);
+	zend_hash_update(ht, "type", sizeof("type"), (void **)&type, sizeof(zval *), NULL);
+
+	return ht;
+}
+
 void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
-	char *name;
-	int name_len;
-	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"number", sizeof("number"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
-		zval *tmp;
-
-		MAKE_STD_ZVAL(tmp);
-		ZVAL_LONG(tmp, number);
-		zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&tmp, sizeof(zval), NULL);
-		field->number = number;
-	}
-	efree(name);
+	field->number = number;
 }
 
 void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
-	char *name;
-	int name_len;
-	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
-		zval *tmp;
-
-		MAKE_STD_ZVAL(tmp);
-		ZVAL_LONG(tmp, type);
-		zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&tmp, sizeof(zval), NULL);
-		field->type = type;
-	}
-	efree(name);
+	field->type = type;
 }
 
 static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_unknown_field *object TSRMLS_DC)
@@ -79,6 +82,8 @@ zend_object_value php_protocolbuffers_unknown_field_new(zend_class_entry *ce TSR
 
 	ALLOC_HASHTABLE(object->ht);
 	zend_hash_init(object->ht, 0, NULL, NULL, 0);
+
+	retval.handlers = &php_protocolbuffers_unknown_field_object_handlers;
 
 	return retval;
 }
@@ -277,9 +282,8 @@ void php_pb_unknown_field_class(TSRMLS_D)
 	protocol_buffers_unknown_field_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_unknown_field_class_entry->create_object = php_protocolbuffers_unknown_field_new;
 
-	/* for var_dump. */
-	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "number", sizeof("number")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
-	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "type", sizeof("type")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	memcpy(&php_protocolbuffers_unknown_field_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	php_protocolbuffers_unknown_field_object_handlers.get_debug_info = php_protocolbuffers_unknown_field_get_debug_info;
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownField", protocol_buffers_unknown_field_class_entry);
 }
