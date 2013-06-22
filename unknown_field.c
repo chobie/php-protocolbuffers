@@ -3,6 +3,7 @@
 
 static zend_object_handlers php_protocolbuffers_unknown_field_object_handlers;
 
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 2)
 static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, int *is_temp TSRMLS_DC)
 {
 	HashTable *ht;
@@ -27,6 +28,7 @@ static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, in
 
 	return ht;
 }
+#endif
 
 void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
@@ -283,7 +285,9 @@ void php_pb_unknown_field_class(TSRMLS_D)
 	protocol_buffers_unknown_field_class_entry->create_object = php_protocolbuffers_unknown_field_new;
 
 	memcpy(&php_protocolbuffers_unknown_field_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 2)
 	php_protocolbuffers_unknown_field_object_handlers.get_debug_info = php_protocolbuffers_unknown_field_get_debug_info;
+#endif
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownField", protocol_buffers_unknown_field_class_entry);
 }
