@@ -79,7 +79,7 @@ ProtocolBuffers\Message::parseFromString($bytes);
 ProtocolBuffers\Message->serializeToString();
 ProtocolBuffers\Message->mergeFrom((SameMessageClass) $message);
 ProtocolBuffers\Message->clear();
-ProtocolBUffers\Message->discardUnknownFields();
+ProtocolBuffers\Message->discardUnknownFields();
 
 # magic methods.
 ProtocolBuffers\Message->get<CamelCaseFieldName>();
