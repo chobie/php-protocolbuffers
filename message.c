@@ -62,6 +62,15 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_has, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+
 /* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
 */
 PHP_METHOD(protocolbuffers_message, serializeToString)
@@ -710,12 +719,155 @@ PHP_METHOD(protocolbuffers_message, __call)
 }
 /* }}} */
 
+/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersMessage::has($key)
+*/
+PHP_METHOD(protocolbuffers_message, has)
+{
+	zval *instance = getThis();
+	char *name;
+	int name_len;
+	HashTable *proto = NULL, *hash = NULL, *htt;
+	pb_scheme *scheme;
+	pb_scheme_container *container;
+	php_protocolbuffers_message *message;
+	zend_class_entry *ce;
+	char *n;
+	int n_len;
+	int err;
+	int i;
+	zval **e;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &container->scheme[i];
+
+		if (strcmp(scheme->name, name) == 0) {
+			// OK
+			break;
+		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
+			break;
+		}
+		scheme = NULL;
+	}
+
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+
+	if (container->use_single_property > 0) {
+		n     = container->single_property_name;
+		n_len = container->single_property_name_len;
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+			return;
+		}
+	} else {
+		htt = Z_OBJPROP_P(instance);
+
+		n = scheme->mangled_name;
+		n_len = scheme->mangled_name_len;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		if (Z_TYPE_PP(e) == IS_NULL) {
+			RETURN_FALSE;
+		} else if (Z_TYPE_PP(e) == IS_ARRAY) {
+			if (zend_hash_num_elements(Z_ARRVAL_PP(e)) < 1) {
+				RETURN_FALSE;
+			} else {
+				RETURN_TRUE;
+			}
+		} else {
+			RETURN_TRUE;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersMessage::get($key)
+*/
+PHP_METHOD(protocolbuffers_message, get)
+{
+	zval *instance = getThis();
+	char *name;
+	int name_len;
+	HashTable *proto = NULL, *hash = NULL, *htt;
+	pb_scheme *scheme;
+	pb_scheme_container *container;
+	php_protocolbuffers_message *message;
+	zend_class_entry *ce;
+	char *n;
+	int n_len;
+	int err;
+	int i;
+	zval **e;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &container->scheme[i];
+
+		if (strcmp(scheme->name, name) == 0) {
+			// OK
+			break;
+		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
+			break;
+		}
+		scheme = NULL;
+	}
+
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+
+	if (container->use_single_property > 0) {
+		n     = container->single_property_name;
+		n_len = container->single_property_name_len;
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+			return;
+		}
+	} else {
+		htt = Z_OBJPROP_P(instance);
+
+		n = scheme->mangled_name;
+		n_len = scheme->mangled_name_len;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		RETURN_ZVAL(*e, 1, 0);
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, serializeToString, arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, parseFromString, arginfo_pb_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_message, mergeFrom, arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clear, arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, has, arginfo_pb_message_has, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, get, arginfo_pb_message_get, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)

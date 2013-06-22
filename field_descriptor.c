@@ -240,8 +240,28 @@ PHP_METHOD(protocolbuffers_field_descriptor, setDefault)
 }
 /* }}} */
 
+/* {{{ proto string ProtocolBuffersFieldDescriptor::getName()
+*/
+PHP_METHOD(protocolbuffers_field_descriptor, getName)
+{
+	zval *instance = getThis();
+	zval **result = NULL;
+	char *name;
+	int name_len;
+
+	zend_mangle_property_name(&name, &name_len, "*", 1, "name", sizeof("name"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+		RETVAL_STRING(Z_STRVAL_PP(result), 1);
+	} else {
+		RETVAL_NULL();
+	}
+	efree(name);
+}
+/* }}} */
+
 static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_field_descriptor, getName, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_pb_field_descriptor_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, setType,  arginfo_pb_field_descriptor_set_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_pb_field_descriptor_get_default, ZEND_ACC_PUBLIC)

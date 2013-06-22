@@ -131,6 +131,7 @@ PHP_METHOD(protocolbuffers_descriptor, getName)
 */
 PHP_METHOD(protocolbuffers_descriptor, getField)
 {
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersDescriptor::getField does not implement yet");
 }
 /* }}} */
 
@@ -155,6 +156,24 @@ PHP_METHOD(protocolbuffers_descriptor, getFields)
 
 			MAKE_STD_ZVAL(tmp);
 			object_init_ex(tmp, protocol_buffers_field_descriptor_class_entry);
+			{
+				char *name;
+				int name_length;
+				zval *value;
+
+				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"name", sizeof("name"), 0);
+				MAKE_STD_ZVAL(value);
+				ZVAL_STRING(value, ischeme->name, 1);
+				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+				efree(name);
+
+				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
+				MAKE_STD_ZVAL(value);
+				ZVAL_LONG(value, ischeme->type);
+				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+				efree(name);
+
+			}
 
 			zend_hash_next_index_insert(Z_ARRVAL_P(result), (void *)&tmp, sizeof(zval *), NULL);
 		}
@@ -168,6 +187,7 @@ PHP_METHOD(protocolbuffers_descriptor, getFields)
 */
 PHP_METHOD(protocolbuffers_descriptor, getOption)
 {
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersDescriptor::getOption does not implement yet");
 }
 /* }}} */
 
