@@ -1395,10 +1395,15 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 									pb_serializer_write_varint32(ser, (*unknown)->varint);
 								}
 							}
-							//pb_serializer_write_varint32(ser, field->value.varint);
 							break;
 							case WIRETYPE_FIXED64:
-							//pb_serializer_write65_le(ser, field->value.varint);
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write64_le(ser, (*unknown)->varint);
+								}
 							break;
 							case WIRETYPE_LENGTH_DELIMITED:
 							{
@@ -1417,7 +1422,13 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 							case WIRETYPE_END_GROUP:
 							break;
 							case WIRETYPE_FIXED32:
-							//pb_serializer_write32_le(ser, field->value.fixed32);
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write32_le(ser, (*unknown)->fixed32);
+								}
 							break;
 						}
 					}

@@ -286,14 +286,27 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersUnknownField::getAsFixed64List does not implement yet");
-	return;
-
 	zval *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
+	unknown_value **element;
+	HashPosition pos;
+	zval *result;
 
+	MAKE_STD_ZVAL(result);
+	array_init(result);
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	//RETURN_LONG(field->value.fixed32);
+	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
+						zend_hash_move_forward_ex(field->ht, &pos)
+		) {
+		zval *tmp;
+		MAKE_STD_ZVAL(tmp);
+
+		ZVAL_LONG(tmp, (*element)->fixed32);
+		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
+	}
+
+	RETURN_ZVAL(result, 0, 1);
 }
 /* }}} */
 
@@ -301,14 +314,27 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersUnknownField::getAsFixed64List does not implement yet");
-	return;
-
 	zval *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
+	unknown_value **element;
+	HashPosition pos;
+	zval *result;
 
+	MAKE_STD_ZVAL(result);
+	array_init(result);
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	//RETURN_LONG(field->value.varint);
+	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
+						zend_hash_move_forward_ex(field->ht, &pos)
+		) {
+		zval *tmp;
+		MAKE_STD_ZVAL(tmp);
+
+		ZVAL_LONG(tmp, (*element)->varint);
+		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
+	}
+
+	RETURN_ZVAL(result, 0, 1);
 }
 /* }}} */
 
