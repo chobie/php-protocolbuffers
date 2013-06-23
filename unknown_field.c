@@ -299,10 +299,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
+		uint32_t fixed;
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
+		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
-		ZVAL_LONG(tmp, (*element)->fixed32);
+		ZVAL_LONG(tmp, fixed);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 
@@ -327,10 +329,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
+		uint64_t fixed;
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
+		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
-		ZVAL_LONG(tmp, (*element)->varint);
+		ZVAL_LONG(tmp, fixed);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 

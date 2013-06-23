@@ -185,7 +185,6 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, &p)) {
 			val = (unknown_value*)emalloc(sizeof(val));
 			val->varint = value;
-			val->fixed32 = 0;
 
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(unknown_value), NULL);
 		} else {
@@ -333,11 +332,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_FIXED64:
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					uint64_t l;
-					memcpy(&l, data, 8);
-
 					MAKE_STD_ZVAL(dz);
-					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t *)data, 8);
 				} else {
 					/* skip unknown field */
 				}
@@ -655,7 +651,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
 					MAKE_STD_ZVAL(dz);
-					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t*)data, 4);
 				} else {
 					/* skip unknown field */
 					zval_ptr_dtor(&dz);
@@ -1402,7 +1398,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 													zend_hash_move_forward_ex(field->ht, &pos)
 									) {
 									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write64_le(ser, (*unknown)->varint);
+									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
 								}
 							break;
 							case WIRETYPE_LENGTH_DELIMITED:
@@ -1427,7 +1423,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 													zend_hash_move_forward_ex(field->ht, &pos)
 									) {
 									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write32_le(ser, (*unknown)->fixed32);
+									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
 								}
 							break;
 						}
@@ -1611,8 +1607,6 @@ PHP_METHOD(protocolbuffers_helper, debugZval)
 		return;
 	}
 	php_pb_helper_debug_zval(&val TSRMLS_CC);
-
-
 }
 /* }}} */
 
