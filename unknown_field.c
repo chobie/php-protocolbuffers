@@ -286,6 +286,9 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersUnknownField::getAsFixed64List does not implement yet");
+	return;
+
 	zval *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 
@@ -298,6 +301,9 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersUnknownField::getAsFixed64List does not implement yet");
+	return;
+
 	zval *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 
