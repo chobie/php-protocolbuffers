@@ -1569,6 +1569,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
 	ZEND_ARG_INFO(0, zval)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_write_varint32, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_write_varint64, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_encode32, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_decode32, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_encode64, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_decode64, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
 {
 	zval *val = *value;
@@ -1610,8 +1634,163 @@ PHP_METHOD(protocolbuffers_helper, debugZval)
 }
 /* }}} */
 
+/* {{{ proto long ProtocolBuffersHelper::zigzagEncode32()
+*/
+PHP_METHOD(protocolbuffers_helper, zigzagEncode32)
+{
+	long val;
+	union {
+		long l;
+		uint32_t v;
+	} u;
+	uint32_t value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	u.l = val;
+
+	value = zigzag_encode32(u.v);
+	RETURN_LONG(value);
+}
+/* }}} */
+
+/* {{{ proto long ProtocolBuffersHelper::zigzagDecode32()
+*/
+PHP_METHOD(protocolbuffers_helper, zigzagDecode32)
+{
+	long val;
+	union {
+		long l;
+		int32_t v;
+	} u;
+	int32_t value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	u.l = val;
+
+	value = zigzag_decode32(u.v);
+	RETURN_LONG(value);
+}
+/* }}} */
+
+/* {{{ proto long ProtocolBuffersHelper::zigzagEncode64()
+*/
+PHP_METHOD(protocolbuffers_helper, zigzagEncode64)
+{
+	long val;
+	union {
+		long l;
+		uint64_t v;
+	} u;
+	uint64_t value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	u.l = val;
+
+	value = zigzag_encode64(u.v);
+	RETURN_LONG(value);
+}
+/* }}} */
+
+/* {{{ proto long ProtocolBuffersHelper::zigzagDecode64()
+*/
+PHP_METHOD(protocolbuffers_helper, zigzagDecode64)
+{
+	long val;
+	union {
+		long l;
+		int64_t v;
+	} u;
+	int64_t value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	u.l = val;
+
+	value = zigzag_decode64(u.v);
+	RETURN_LONG(value);
+}
+/* }}} */
+
+
+/* {{{ proto string ProtocolBuffersHelper::writeVarint32(long value)
+*/
+PHP_METHOD(protocolbuffers_helper, writeVarint32)
+{
+	long val;
+	int32_t value;
+	uint8_t bytes[kMaxVarint32Bytes] = {0};
+	int size = 0, i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	if (val > kint32max) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable exceeds int32 max.");
+		return;
+	}
+	if (val < kint32min) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable exceeds int32 min.");
+		return;
+	}
+
+	value = val;
+	while (value > 0x7F) {
+		bytes[size++] = (value & 0x7F) | 0x80;
+		value >>= 7;
+	}
+	bytes[size++] = value & 0x7F;
+
+	RETURN_STRINGL((char*)bytes, size, 1);
+}
+/* }}} */
+
+
+
+/* {{{ proto string ProtocolBuffersHelper::writeVarint64(long value)
+*/
+PHP_METHOD(protocolbuffers_helper, writeVarint64)
+{
+	long val;
+	int64_t value;
+	uint8_t bytes[kMaxVarintBytes] = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &val) == FAILURE) {
+		return;
+	}
+	value = val;
+
+	int size = 0, i;
+
+	while (value > 0x7F) {
+		bytes[size++] = (value & 0x7F) | 0x80;
+		value >>= 7;
+	}
+	bytes[size++] = value & 0x7F;
+
+	RETURN_STRINGL((char*)bytes, size, 1);
+}
+/* }}} */
 
 static zend_function_entry protocolbuffers_helper_field_methods[] = {
+	PHP_ME(protocolbuffers_helper, writeVarint32, arginfo_pb_helper_write_varint32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, writeVarint64, arginfo_pb_helper_write_varint64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagEncode32, arginfo_pb_helper_zigzag_encode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagDecode32, arginfo_pb_helper_zigzag_decode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagEncode64, arginfo_pb_helper_zigzag_encode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagDecode64, arginfo_pb_helper_zigzag_decode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_helper, debugZval, arginfo_pb_helper_debug_zval, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
