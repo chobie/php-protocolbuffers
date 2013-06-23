@@ -1729,7 +1729,7 @@ PHP_METHOD(protocolbuffers_helper, writeVarint32)
 {
 	long val;
 	int32_t value;
-	uint8_t bytes[kMaxVarint32Bytes] = {0};
+	uint8_t bytes[kMaxVarint32Bytes];
 	int size = 0, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1764,7 +1764,7 @@ PHP_METHOD(protocolbuffers_helper, writeVarint64)
 {
 	long val;
 	int64_t value;
-	uint8_t bytes[kMaxVarintBytes] = {0};
+	uint8_t bytes[kMaxVarintBytes];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
