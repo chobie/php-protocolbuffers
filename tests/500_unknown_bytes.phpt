@@ -73,6 +73,12 @@ $u = ProtocolBuffers::decode("Unknown", $expected);
 $set = $u->getUnknownFieldSet();
 $field = $set->getField(1);
 
+if ($field->getNumber() === 1) {
+	echo "OK" . PHP_EOL;
+} else {
+	echo "NUMBER FAILED" . PHP_EOL;
+}
+
 if (current($field->getAsLengthDelimitedList()) === "Hello World") {
 	echo "OK" . PHP_EOL;
 } else {
@@ -88,5 +94,6 @@ if ($bytes === $expected) {
 
 
 --EXPECT--
+OK
 OK
 OK
