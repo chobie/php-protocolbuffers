@@ -208,6 +208,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 	MAKE_STD_ZVAL(result);
 	array_init(result);
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+
+	if (field->type != WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -234,6 +239,9 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 	zval *result;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
@@ -263,9 +271,14 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 	HashPosition pos;
 	zval *result;
 
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
+
 	MAKE_STD_ZVAL(result);
 	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -293,9 +306,13 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 	HashPosition pos;
 	zval *result;
 
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
+
 	MAKE_STD_ZVAL(result);
 	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -323,9 +340,13 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 	HashPosition pos;
 	zval *result;
 
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
+
 	MAKE_STD_ZVAL(result);
 	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -337,7 +358,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
-		memcpy(&u.v, (*element)->buffer.val, (*element)->buffer.len);
+		memcpy(&u.v, (*element)->buffer.val, sizeof(float));
 
 		ZVAL_DOUBLE(tmp, u.f);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
@@ -357,9 +378,13 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 	HashPosition pos;
 	zval *result;
 
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == WIRETYPE_VARINT) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	}
+
 	MAKE_STD_ZVAL(result);
 	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -371,7 +396,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
-		memcpy(&u.v, (*element)->buffer.val, (*element)->buffer.len);
+		memcpy(&u.v, (*element)->buffer.val, sizeof(double));
 
 		ZVAL_DOUBLE(tmp, u.d);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
