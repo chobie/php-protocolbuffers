@@ -167,6 +167,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_float_list, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_double_list, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ proto void ProtocolBuffersUnknownField::getNumber()
 */
@@ -344,6 +347,40 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 }
 /* }}} */
 
+/* {{{ proto long ProtocolBuffersUnknownField::getAsDoubleList()
+*/
+PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+	unknown_value **element;
+	HashPosition pos;
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
+						zend_hash_move_forward_ex(field->ht, &pos)
+		) {
+		union {
+			uint64_t v;
+			double d;
+		} u;
+
+		zval *tmp;
+		MAKE_STD_ZVAL(tmp);
+		memcpy(&u.v, (*element)->buffer.val, (*element)->buffer.len);
+
+		ZVAL_DOUBLE(tmp, u.d);
+		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
+	}
+
+	RETURN_ZVAL(result, 0, 1);
+}
+/* }}} */
+
 
 
 static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
@@ -352,7 +389,8 @@ static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
 	PHP_ME(protocolbuffers_unknown_field, getAsVarintList, arginfo_pb_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimitedList, arginfo_pb_unknown_field_get_as_length_delimited, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsFloatList, arginfo_pb_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsFixed32List, arginfo_pb_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsDoubleList, arginfo_pb_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
+    	PHP_ME(protocolbuffers_unknown_field, getAsFixed32List, arginfo_pb_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsFixed64List, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
