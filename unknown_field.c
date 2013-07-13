@@ -102,6 +102,7 @@ static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_u
 			case WIRETYPE_VARINT:
 				efree(*element);
 			break;
+			case WIRETYPE_FIXED64:
 			case WIRETYPE_FIXED32:
 			case WIRETYPE_LENGTH_DELIMITED:
 				if ((*element)->buffer.len > 0) {

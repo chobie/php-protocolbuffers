@@ -332,8 +332,12 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_FIXED64:
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
+					uint8_t *bytes_array;
+					bytes_array = (uint8_t *)emalloc(value);
+					memcpy(bytes_array, data, value);
+
 					MAKE_STD_ZVAL(dz);
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t *)data, 8);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t *)bytes_array, 8);
 				} else {
 					/* skip unknown field */
 				}
