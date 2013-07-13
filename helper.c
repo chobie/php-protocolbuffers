@@ -650,8 +650,12 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_FIXED32: {
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
+					uint8_t *bytes_array;
+					bytes_array = (uint8_t *)emalloc(value);
+					memcpy(bytes_array, data, value);
+
 					MAKE_STD_ZVAL(dz);
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t*)data, 4);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t*)bytes_array, 4);
 				} else {
 					/* skip unknown field */
 					zval_ptr_dtor(&dz);
@@ -696,7 +700,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				ZVAL_LONG(dz, l);
 			}
 
-			php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+			if (s != NULL) {
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+			}
 
 			data += 4;
 		}
