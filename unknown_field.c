@@ -162,44 +162,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_fixed64, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
-/* {{{ proto void ProtocolBuffersUnknownField::setNumber(int $number)
-*/
-PHP_METHOD(protocolbuffers_unknown_field, setNumber)
-{
-	long number = 0;
-	zval *instance = getThis();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"l", &number) == FAILURE) {
-		return;
-	}
-
-	if (number < 1 || number > ktagmax) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "number should be in %d - %d", 1, ktagmax);
-		return;
-	}
-
-	php_pb_unknown_field_set_number(instance, number TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ proto void ProtocolBuffersUnknownField::setType(int $type)
-*/
-PHP_METHOD(protocolbuffers_unknown_field, setType)
-{
-	long type = 0;
-	zval *instance = getThis();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"l", &type) == FAILURE) {
-		return;
-	}
-
-	php_pb_unknown_field_set_type(instance, type TSRMLS_CC);
-}
-/* }}} */
-
 /* {{{ proto void ProtocolBuffersUnknownField::getNumber()
 */
 PHP_METHOD(protocolbuffers_unknown_field, getNumber)
@@ -344,8 +306,6 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 
 
 static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
-	PHP_ME(protocolbuffers_unknown_field, setNumber, arginfo_pb_unknown_field_set_number, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, setType, arginfo_pb_unknown_field_set_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getNumber, arginfo_pb_unknown_field_get_number, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getType, arginfo_pb_unknown_field_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, getAsVarintList, arginfo_pb_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
