@@ -54,6 +54,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension, 0, 0, 2)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension_range, 0, 0, 2)
+	ZEND_ARG_INFO(0, begin)
+	ZEND_ARG_INFO(0, end)
+ZEND_END_ARG_INFO()
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_get_options, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -376,6 +382,77 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 }
 /* }}} */
 
+/* {{{ proto ProtocolBuffersMessageOptions ProtocolBuffersDescriptorBuilder::setExtensionRange(int $begin, int $end)
+*/
+PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
+{
+	zval *instance = getThis();
+	long begin, end;
+	zval **extension_range;
+	zval *z_begin, *z_end;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"ll", &begin, &end) == FAILURE) {
+		return;
+	}
+
+	if (begin >= end) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be bigger than range begin.");
+	}
+	if (end > 536870911) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", 536870911);
+	}
+	if (begin < 1 || end < 1) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range must be greater than zero");
+	}
+
+	if (zend_hash_find(Z_OBJPROP_P(instance), "extension_range", sizeof("extension_range"), (void **)&extension_range) == SUCCESS) {
+		zval *tmp = NULL;
+
+		if (Z_TYPE_PP(extension_range) != IS_ARRAY) {
+			MAKE_STD_ZVAL(tmp);
+			array_init(tmp);
+			zend_hash_update(Z_OBJPROP_P(instance), "extension_range", sizeof("extension_range"), (void **)&tmp, sizeof(zval*), NULL);
+			extension_range = &tmp;
+		}
+
+		MAKE_STD_ZVAL(z_begin);
+		MAKE_STD_ZVAL(z_end);
+		ZVAL_LONG(z_begin, begin);
+		ZVAL_LONG(z_end, end);
+
+		Z_ADDREF_P(z_begin);
+		Z_ADDREF_P(z_end);
+		zend_hash_update(Z_ARRVAL_PP(extension_range), "begin", sizeof("begin"), (void **)&z_begin, sizeof(zval*), NULL);
+		zend_hash_update(Z_ARRVAL_PP(extension_range), "end",   sizeof("end"),   (void **)&z_end, sizeof(zval*), NULL);
+		zval_ptr_dtor(&z_begin);
+		zval_ptr_dtor(&z_end);
+
+	} else {
+		MAKE_STD_ZVAL(*extension_range);
+		MAKE_STD_ZVAL(z_begin);
+		MAKE_STD_ZVAL(z_end);
+
+		array_init(*extension_range);
+		Z_ADDREF_P(*extension_range);
+
+		ZVAL_LONG(z_begin, begin);
+		ZVAL_LONG(z_end, end);
+
+
+		Z_ADDREF_P(z_begin);
+		Z_ADDREF_P(z_end);
+		zend_hash_update(Z_ARRVAL_PP(extension_range), "begin", sizeof("begin"), (void **)&z_begin, sizeof(zval*), NULL);
+		zend_hash_update(Z_ARRVAL_PP(extension_range), "end",   sizeof("end"),   (void **)&z_end, sizeof(zval*), NULL);
+		zval_ptr_dtor(&z_begin);
+		zval_ptr_dtor(&z_end);
+
+		zend_hash_update(Z_OBJPROP_P(instance), "extension_range", sizeof("extension_range"), (void **)&extension_range, sizeof(zval*), NULL);
+	}
+
+}
+/* }}} */
+
 
 
 static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
@@ -384,6 +461,7 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_pb_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, build,	 arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, setExtension, arginfo_pb_descriptor_builder_set_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, setExtensionRange, arginfo_pb_descriptor_builder_set_extension_range, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_pb_descriptor_builder_get_options, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -403,6 +481,7 @@ void php_pb_descriptor_builder_class(TSRMLS_D)
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "options", sizeof("options")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "extension_range", sizeof("extension_range")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "DescriptorBuilder", protocol_buffers_descriptor_builder_class_entry);
 }
