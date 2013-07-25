@@ -250,6 +250,7 @@ typedef struct{
 
 typedef struct{
 	zend_object zo;
+	HashTable *registry;
 } php_protocolbuffers_extension_registry;
 
 typedef union {

@@ -3,6 +3,12 @@
 
 static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuffers_extension_registry *object TSRMLS_DC)
 {
+	if (object->registry != NULL) {
+		zend_hash_destroy(object->registry);
+		efree(object->registry);
+		object->registry = NULL;
+	}
+
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);
 }
@@ -12,15 +18,16 @@ zend_object_value php_protocolbuffers_extension_registry_new(zend_class_entry *c
 	zend_object_value retval;
 	PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(php_protocolbuffers_extension_registry);
 
+    ALLOC_HASHTABLE(object->registry);
+    zend_hash_init(object->registry, 0, NULL, NULL, 0);
+
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_extension_registry_add, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_extension_registry_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, message_class_name)
 	ZEND_ARG_INFO(0, extension)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, field_type)
-	ZEND_ARG_INFO(0, child_message_class_name)
+	ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
 
@@ -55,17 +62,15 @@ PHP_METHOD(protocolbuffers_extension_registry, getInstance)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffersExtensionRegistry::add(string $message_class_name, long $extension, string $name, long $field_type[, string $child_message_class_name])
+/* {{{ proto void ProtocolBuffersExtensionRegistry::add(string $message_class_name, long $extension, ProtocolBuffersFieldDescriptor $descriptor)
 */
 PHP_METHOD(protocolbuffers_extension_registry, add)
 {
-	zval *message_class_name, child_message_class_name;
-	long extension, field_type;
-	char *name;
-	long name_len;
+	zval *message_class_name, *descriptor;
+	long extension;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"zlsl|z", &message_class_name, &extension, &name, &name_len, &field_type, &child_message_class_name) == FAILURE) {
+		"zlO", &message_class_name, &extension, &descriptor, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
 		return;
 	}
 }
