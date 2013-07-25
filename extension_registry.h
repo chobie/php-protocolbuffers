@@ -1,0 +1,6 @@
+#ifndef PHP_PROTOCOLBUFFERS_EXTENSION_REGISTRY_H
+#define PHP_PROTOCOLBUFFERS_EXTENSION_REGISTRY_H
+
+void php_pb_extension_registry_class(TSRMLS_D);
+
+#endif
