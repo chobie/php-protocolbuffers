@@ -272,6 +272,7 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 {
 	PBG(messages) = NULL;
 	PBG(classes) = NULL;
+	PBG(extension_registry) = NULL;
 
 	if (!PBG(messages)) {
 		ALLOC_HASHTABLE(PBG(messages));
@@ -347,6 +348,10 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 			PBG(classes) = NULL;
 		}
 		zend_end_try();
+	}
+
+	if (PBG(extension_registry)) {
+        zval_ptr_dtor(&(PBG(extension_registry)));
 	}
 
 	return SUCCESS;

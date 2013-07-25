@@ -143,6 +143,7 @@ extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_
 typedef struct pb_globals{
 	HashTable *messages;
 	HashTable *classes;
+	zval *extension_registry;
 } pb_globals;
 
 typedef struct pb_scheme
@@ -247,6 +248,9 @@ typedef struct{
 	int offset;
 } php_protocolbuffers_message;
 
+typedef struct{
+	zend_object zo;
+} php_protocolbuffers_extension_registry;
 
 typedef union {
 	uint64_t varint;
