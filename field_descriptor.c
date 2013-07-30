@@ -60,7 +60,7 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
 			PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
 		} else if (strcmp(key, "packable") == 0) {
 			PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
-		} else if (strcmp(key, "message") == 0) {
+		} else if (strcmp(key, "message") == 0 && Z_TYPE_PP(zv) == IS_STRING) {
 			zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)key, key_length, 0);
 
 			MAKE_STD_ZVAL(value);
