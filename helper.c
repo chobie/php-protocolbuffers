@@ -124,7 +124,7 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 				}
 			} else {
 				if (EG(exception)) {
-					// do nothing
+					PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(EG(exception));
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
 				}
