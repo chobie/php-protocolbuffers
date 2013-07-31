@@ -305,25 +305,28 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_VARINT:
 		{
 			data = ReadVarint32FromArray(data, &value, data_end);
-			MAKE_STD_ZVAL(dz);
 
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
+					MAKE_STD_ZVAL(dz);
 					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
 				} else {
 					/* skip unknown field */
-					zval_ptr_dtor(&dz);
 				}
 			} else if (s->type == TYPE_BOOL) {
+				MAKE_STD_ZVAL(dz);
 				ZVAL_BOOL(dz, value);
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else if (s->type == TYPE_INT32) {
+				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, (int32_t)value);
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else if (s->type == TYPE_SINT32) {
+				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			} else {
+				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, value);
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
 			}
@@ -1242,6 +1245,11 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					return;
 				}
+				if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+					//php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not repeated field but array given", scheme->name);
+					return;
+				}
+
 				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
 			}
 		}
