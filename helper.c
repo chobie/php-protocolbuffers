@@ -262,8 +262,15 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		zval **tmp = NULL;
 
 		if (zend_hash_quick_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len+1, container->single_property_h, (void **)&tmp) == SUCCESS) {
-			if (Z_TYPE_PP(tmp) == IS_NULL) {
-				array_init(*tmp);
+			if (Z_TYPE_PP(tmp) == IS_NULL || Z_TYPE_PP(tmp) == IS_ARRAY) {
+				zval *arr = NULL;
+
+				MAKE_STD_ZVAL(arr);
+				array_init(arr);
+
+				Z_ADDREF_P(arr);
+				zend_hash_update(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len+1, (void **)&arr, sizeof(arr), NULL);
+				zval_ptr_dtor(&arr);
 			} else if (Z_TYPE_PP(tmp) != IS_ARRAY) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "single property is not an array.");
 				return NULL;
@@ -430,11 +437,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						MAKE_STD_ZVAL(arr);
 						array_init(arr);
 
-						zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&z_obj, sizeof(z_obj), NULL);
 						Z_ADDREF_P(z_obj);
-
-						zend_hash_update(hresult, name, name_length, (void **)&arr, sizeof(arr), NULL);
+						zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&z_obj, sizeof(z_obj), NULL);
 						Z_ADDREF_P(arr);
+						zend_hash_update(hresult, name, name_length, (void **)&arr, sizeof(arr), NULL);
 						zval_ptr_dtor(&arr);
 					} else {
 						zval **arr2 = NULL;
