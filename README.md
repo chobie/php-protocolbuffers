@@ -143,7 +143,7 @@ evaluating protocol buffers serialization.
     <td>Packed attributes</td><td>supported</td>
   </tr>
   <tr>
-    <td>Extensions</td><td>limited(only php message options) supported (fully feature will be add in July, 2013)</td>
+    <td>Extensions</td><td>limited(only php message options) supported</td>
   </tr>
   <tr>
     <td>Unknown fields</td><td>limited supported (not fully tested. see test cases)</td>
