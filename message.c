@@ -583,18 +583,31 @@ PHP_METHOD(protocolbuffers_message, __call)
 		zval **e = NULL;
 		zval *vl = NULL;
 
-		if (container->use_single_property > 0) {
-			n     = container->single_property_name;
-			n_len = container->single_property_name_len;
 
-			if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+		if (container->use_single_property < 1) {
+			name     = scheme->mangled_name;
+			name_len = scheme->mangled_name_len;
+
+			htt   = Z_OBJPROP_P(instance);
+			n     = scheme->mangled_name;
+			n_len = scheme->mangled_name_len;
+		} else {
+			zval **th = NULL;
+			if (zend_hash_quick_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, container->single_property_h, (void **)&th) == FAILURE) {
+				const char *tmp, *ck;
+				zend_unmangle_property_name(container->single_property_name, container->single_property_name_len-1, &ck, &tmp);
+
+				zend_error(E_ERROR, "single property %s does not find for class %s\n", tmp, ck);
 				return;
 			}
-		} else {
-			htt = Z_OBJPROP_P(instance);
 
-			n = scheme->mangled_name;
-			n_len = scheme->mangled_name_len;
+			htt   = Z_ARRVAL_PP(th);
+			n     = scheme->name;
+			n_len = scheme->name_len;
+		}
+
+		if (htt == NULL) {
+			return;
 		}
 
 		switch (flag) {
@@ -605,9 +618,18 @@ PHP_METHOD(protocolbuffers_message, __call)
 			break;
 			case 2: /* set */
 				if (scheme->repeated == 0) {
+					if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
+						zval *z;
+						MAKE_STD_ZVAL(z);
+						ZVAL_NULL(z);
+
+						Z_ADDREF_P(z);
+						zend_hash_update(htt, n, n_len, (void **)&z, sizeof(zval), NULL);
+						zval_ptr_dtor(&z);
+						z = NULL;
+					}
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp;
-						//zval_ptr_dtor(e);
 
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 						MAKE_STD_ZVAL(vl);
@@ -662,6 +684,17 @@ PHP_METHOD(protocolbuffers_message, __call)
 			break;
 			case 3: /* append */
 				if (scheme->repeated > 0) {
+					if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
+						zval *z;
+						MAKE_STD_ZVAL(z);
+						array_init(z);
+
+						Z_ADDREF_P(z);
+						zend_hash_update(htt, n, n_len, (void **)&z, sizeof(zval), NULL);
+						zval_ptr_dtor(&z);
+						z = NULL;
+					}
+
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp = NULL;
 						zval *nval = NULL;
