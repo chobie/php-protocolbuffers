@@ -198,6 +198,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 		descriptor->container->scheme = ischeme;
 		descriptor->container->use_single_property = 0;
 		descriptor->container->process_unknown_fields = 0;
+		descriptor->container->use_wakeup_and_sleep = 0;
 		{
 			char *prop;
 			int prop_len;
@@ -325,6 +326,11 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "use_single_property", sizeof("use_single_property")-1, 0 TSRMLS_CC);
 						if (Z_TYPE_P(val) == IS_BOOL) {
 							descriptor->container->use_single_property = Z_LVAL_P(val);
+						}
+
+						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "use_wakeup_and_sleep", sizeof("use_wakeup_and_sleep")-1, 0 TSRMLS_CC);
+						if (Z_TYPE_P(val) == IS_BOOL) {
+							descriptor->container->use_wakeup_and_sleep = Z_LVAL_P(val);
 						}
 
 						if (descriptor->container->use_single_property > 0) {

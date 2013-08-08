@@ -76,6 +76,8 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->name_len = 0;
 	object->free_container = 0;
 	object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
+	object->container->use_single_property = 0;
+	object->container->use_wakeup_and_sleep = 0;
 	object->container->single_property_name = NULL;
 	object->container->single_property_h = 0;
 	object->container->size = 0;

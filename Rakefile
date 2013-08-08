@@ -1,3 +1,7 @@
+if File.exists?(".Rakefile") 
+  import ".Rakefile"
+end
+
 def cmd_run(command)
   print "\#execute #{command}...\n"
   IO.popen(command) {|pipe|

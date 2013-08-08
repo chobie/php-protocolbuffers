@@ -190,6 +190,7 @@ typedef struct {
 	ulong single_property_h;
 	int size;
 	int process_unknown_fields;
+	int use_wakeup_and_sleep;
 } pb_scheme_container;
 
 #ifdef ZTS

@@ -142,6 +142,7 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 		container->size = scheme_size;
 		container->use_single_property = 0;
 		container->process_unknown_fields = 0;
+		container->use_wakeup_and_sleep = 0;
 
 		{
 			char *prop;
@@ -418,7 +419,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 				pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
 
-				/* TODO: pb_execute_wakeup(z_obj TSRMLS_CC); */
+				if (c_container->use_wakeup_and_sleep > 0) {
+					pb_execute_wakeup(z_obj, c_container TSRMLS_CC);
+				}
 
 				if (container->use_single_property < 1) {
 					name = s->mangled_name;
@@ -1277,12 +1280,9 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 	pb_serializer_init(&ser);
 
-	/* TODO: consider interface.
-	pb_execute_sleep(klass, &targets TSRMLS_CC);
-	if (targets != NULL) {
-		TODO: make hash?
+	if (container->use_wakeup_and_sleep > 0) {
+		pb_execute_sleep(klass, container, &klass TSRMLS_CC);
 	}
-	*/
 
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(klass);
@@ -1579,9 +1579,9 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 			return 0;
 		}
 
-		/* TODO:
-		pb_execute_wakeup(obj TSRMLS_CC);
-		*/
+		if (container->use_wakeup_and_sleep > 0) {
+			pb_execute_wakeup(obj, container TSRMLS_CC);
+		}
 	}
 
 	RETVAL_ZVAL(obj, 0, 1);
