@@ -1620,7 +1620,8 @@ static void pb_execute_sleep(zval *obj, pb_scheme_container *container, zval **r
     }
 
     if (retval_ptr) {
-        *retval = retval_ptr;
+        //*retval = retval_ptr;
+        zval_ptr_dtor(&retval_ptr);
     }
 }
 
