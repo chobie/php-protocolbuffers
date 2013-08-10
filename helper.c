@@ -297,7 +297,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			return NULL;
 		}
 
-		tag      = (value >> 0x03);
+		tag	  = (value >> 0x03);
 		wiretype = (value & 0x07);
 
 		if (tag < 1 || tag > ktagmax) {
@@ -450,8 +450,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 						/* TODO: improve refcount, memory allocation */
 						if (zend_hash_quick_find(hresult, name, name_length, name_hash, (void **)&arr2) == SUCCESS) {
-						    zval *tt;
-						    if (Z_TYPE_PP(arr2) == IS_NULL) {
+							zval *tt;
+							if (Z_TYPE_PP(arr2) == IS_NULL) {
 								MAKE_STD_ZVAL(tt);
 								array_init(tt);
 
@@ -1590,39 +1590,39 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
-    zval fname, *retval_ptr = NULL;
+	zval fname, *retval_ptr = NULL;
 
-    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
-        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
+	if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
+		zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__wakeup", sizeof("__wakeup"))) {
 
-            INIT_PZVAL(&fname);
-            ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
+			INIT_PZVAL(&fname);
+			ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") -1, 0);
 
-            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-    }
+			call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+	}
 
-    if (retval_ptr) {
-        zval_ptr_dtor(&retval_ptr);
-    }
+	if (retval_ptr) {
+		zval_ptr_dtor(&retval_ptr);
+	}
 }
 
 static void pb_execute_sleep(zval *obj, pb_scheme_container *container, zval **retval TSRMLS_DC)
 {
-    zval fname, *retval_ptr = NULL;
+	zval fname, *retval_ptr = NULL;
 
-    if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
-        zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__sleep", sizeof("__sleep"))) {
+	if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
+		zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__sleep", sizeof("__sleep"))) {
 
-            INIT_PZVAL(&fname);
-            ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
+			INIT_PZVAL(&fname);
+			ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
 
-            call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-    }
+			call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+	}
 
-    if (retval_ptr) {
-        //*retval = retval_ptr;
-        zval_ptr_dtor(&retval_ptr);
-    }
+	if (retval_ptr) {
+		//*retval = retval_ptr;
+		zval_ptr_dtor(&retval_ptr);
+	}
 }
 
 
