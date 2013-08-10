@@ -100,7 +100,7 @@ static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, cons
 
 static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
 
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container, zval **retval TSRMLS_DC);
+static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
 
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
 	/**

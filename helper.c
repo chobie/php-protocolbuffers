@@ -1270,11 +1270,6 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 	}
 }
 
-#define PHP_PB_CLEAR_EXCLUDES() \
-			if (excludes != NULL) {	\
-				zval_ptr_dtor(&excludes); \
-			}
-
 int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
 	int i = 0;
@@ -1286,7 +1281,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	pb_serializer_init(&ser);
 
 	if (container->use_wakeup_and_sleep > 0) {
-		pb_execute_sleep(klass, container, &excludes TSRMLS_CC);
+		pb_execute_sleep(klass, container TSRMLS_CC);
 	}
 
 	if (container->use_single_property < 1) {
@@ -1305,12 +1300,17 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 	if (container->size < 1 && container->process_unknown_fields < 1) {
 		pb_serializer_destroy(ser);
-		PHP_PB_CLEAR_EXCLUDES();
 		return -1;
 	}
 
 	for (i = 0; i < container->size; i++) {
 		scheme = &(container->scheme[i]);
+
+		if (container->use_wakeup_and_sleep > 0) {
+			if (scheme->skip > 0) {
+				continue;
+			}
+		}
 
 		switch (scheme->type) {
 			case TYPE_DOUBLE:
@@ -1372,7 +1372,6 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 		if (EG(exception)) {
 			pb_serializer_destroy(ser);
-			PHP_PB_CLEAR_EXCLUDES();
 			return 1;
 		}
 	}
@@ -1470,7 +1469,6 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		}
 	}
 
-	PHP_PB_CLEAR_EXCLUDES();
 	*serializer = ser;
 	return 0;
 }
@@ -1614,26 +1612,57 @@ static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_D
 	}
 }
 
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container, zval **retval TSRMLS_DC)
+static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
 	if (Z_OBJCE_P(obj) != PHP_IC_ENTRY &&
 		zend_hash_exists(&Z_OBJCE_P(obj)->function_table, "__sleep", sizeof("__sleep"))) {
 
-			INIT_PZVAL(&fname);
-			ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
+		INIT_PZVAL(&fname);
+		ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") -1, 0);
 
-			call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+		call_user_function_ex(CG(function_table), &obj, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+
+		if (retval_ptr) {
+			if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_execute_sleep failed. __sleep method have to return an array");
+				zval_ptr_dtor(&retval_ptr);
+				retval_ptr = NULL;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_execute_sleep failed. __sleep method have to return an array");
+		}
 	}
 
 	if (retval_ptr) {
-		zval *resval = NULL;
+		zval **entry;
+		HashPosition pos;
+		pb_scheme *scheme;
+		int i;
 
-		MAKE_STD_ZVAL(resval);
-		ZVAL_ZVAL(resval, retval_ptr, 1, 1);
+		for (i = 0; i < container->size; i++) {
+			scheme = &(container->scheme[i]);
+			scheme->skip = 1;
+		}
 
-		*retval = resval;
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(retval_ptr), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(retval_ptr), (void **)&entry, &pos) == SUCCESS) {
+			for (i = 0; i < container->size; i++) {
+				if (Z_TYPE_PP(entry) != IS_STRING) {
+					convert_to_string(*entry);
+				}
+
+				scheme = &(container->scheme[i]);
+				if (strcmp(scheme->name, Z_STRVAL_PP(entry)) == 0) {
+					scheme->skip = 0;
+				}
+			}
+
+			zend_hash_move_forward_ex(Z_ARRVAL_P(retval_ptr), &pos);
+		}
+
+		zval_ptr_dtor(&retval_ptr);
 	}
 }
 

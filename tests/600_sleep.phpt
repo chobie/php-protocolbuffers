@@ -7,10 +7,8 @@ class TestSleep extends ProtocolBuffersMessage
 {
     protected $value;
 
-	public function setValue($value)
-	{
-		$this->value = $value;
-	}
+    protected $name;
+
     /**
      * get descriptor for protocol buffers
      *
@@ -24,11 +22,20 @@ class TestSleep extends ProtocolBuffersMessage
             $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
               "type"     => ProtocolBuffers::TYPE_STRING,
               "name"     => "value",
-              "required" => true,
-              "optional" => false,
+              "required" => false,
+              "optional" => true,
               "repeated" => false,
               "packable" => false,
               "default"  => "",
+            )));
+            $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_STRING,
+                "name"     => "name",
+                "required" => false,
+                "optional" => true,
+                "repeated" => false,
+                "packable" => false,
+                "default"  => "",
             )));
             $php = $desc->getOptions()->getExtension("php");
             $php->setUseWakeupAndSleep(true);
@@ -39,17 +46,21 @@ class TestSleep extends ProtocolBuffersMessage
 
     public function __sleep()
     {
-        echo "Good Night" . PHP_EOL;
-        return array();
+        return array("value");
     }
 }
 
 $value = "Hello";
+$value2 = "World";
 $message = new TestSleep();
 $message->setValue($value);
+$message->setName($value2);
 
 $expected = $message->serializeToString();
+
 $u = ProtocolBuffers::decode("TestSleep", $expected);
 
+echo $u->getValue();
+echo $u->getName();
 --EXPECT--
-Good Night
+Hello

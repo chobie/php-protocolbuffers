@@ -255,6 +255,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 				ischeme[n].mangled_name	 = mangle;
 				ischeme[n].mangled_name_len = mangle_len;
 				ischeme[n].mangled_name_h = zend_inline_hash_func(mangle, mangle_len);
+				ischeme[n].skip = 0;
 			}
 
 			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "required", sizeof("required"), &tmp TSRMLS_CC);
