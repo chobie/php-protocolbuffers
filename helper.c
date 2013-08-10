@@ -1487,7 +1487,7 @@ int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 			return 1;
 		} else {
 			/* TODO: improve displaying error message */
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
 			return 1;
 		}
 	}
