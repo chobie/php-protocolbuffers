@@ -1270,18 +1270,23 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 	}
 }
 
+#define PHP_PB_CLEAR_EXCLUDES() \
+			if (excludes != NULL) {	\
+				zval_ptr_dtor(&excludes); \
+			}
+
 int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
 	int i = 0;
 	pb_serializer *ser;
-	zval **c;
+	zval **c, *excludes = NULL;
 	HashTable *hash = NULL;
 	pb_scheme *scheme;
 
 	pb_serializer_init(&ser);
 
 	if (container->use_wakeup_and_sleep > 0) {
-		pb_execute_sleep(klass, container, &klass TSRMLS_CC);
+		pb_execute_sleep(klass, container, &excludes TSRMLS_CC);
 	}
 
 	if (container->use_single_property < 1) {
@@ -1292,6 +1297,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		} else {
 			pb_serializer_destroy(ser);
 
+			PHP_PB_CLEAR_EXCLUDES();
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
 			return -1;
 		}
@@ -1299,6 +1305,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 	if (container->size < 1 && container->process_unknown_fields < 1) {
 		pb_serializer_destroy(ser);
+		PHP_PB_CLEAR_EXCLUDES();
 		return -1;
 	}
 
@@ -1365,6 +1372,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 		if (EG(exception)) {
 			pb_serializer_destroy(ser);
+			PHP_PB_CLEAR_EXCLUDES();
 			return 1;
 		}
 	}
@@ -1462,7 +1470,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		}
 	}
 
-
+	PHP_PB_CLEAR_EXCLUDES();
 	*serializer = ser;
 	return 0;
 }
@@ -1620,8 +1628,12 @@ static void pb_execute_sleep(zval *obj, pb_scheme_container *container, zval **r
 	}
 
 	if (retval_ptr) {
-		//*retval = retval_ptr;
-		zval_ptr_dtor(&retval_ptr);
+		zval *resval = NULL;
+
+		MAKE_STD_ZVAL(resval);
+		ZVAL_ZVAL(resval, retval_ptr, 1, 1);
+
+		*retval = resval;
 	}
 }
 
