@@ -700,7 +700,11 @@ PHP_METHOD(protocolbuffers_message, __call)
 						zval *nval = NULL;
 						int flag = 0;
 
-						if (zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0) {
+						if (Z_TYPE_PP(e) != IS_ARRAY) {
+							MAKE_STD_ZVAL(nval);
+							array_init(nval);
+							flag = 1;
+						} else if (zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0) {
 							MAKE_STD_ZVAL(nval);
 							array_init(nval);
 							flag = 1;
