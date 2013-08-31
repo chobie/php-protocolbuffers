@@ -5,21 +5,26 @@
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
 
-#define PHP_PB_MESSAGE_CHECK_SCHEME \
+#define PHP_PB_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
 	{\
-		ce = Z_OBJCE_P(instance);\
-		err = pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);\
-		if (err) {\
+		zend_class_entry *__ce;\
+		int __err;\
+		\
+		__ce  = Z_OBJCE_P(instance);\
+		__err = pb_get_scheme_container(__ce->name, __ce->name_length, container, proto TSRMLS_CC);\
+		if (__err) {\
 			if (EG(exception)) {\
 				return;\
 			} else {\
 				/* TODO: improve displaying error message */\
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);\
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", __ce->name);\
 				return;\
 			}\
 		}\
 	}
 
+
+#define PHP_PB_MESSAGE_CHECK_SCHEME PHP_PB_MESSAGE_CHECK_SCHEME2(instance, &container, proto)
 
 static void php_protocolbuffers_message_free_storage(php_protocolbuffers_message *object TSRMLS_DC)
 {
@@ -133,13 +138,128 @@ static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_sche
 
 }
 
+static void php_protocolbuffers_message_merge_from(pb_scheme_container *container, HashTable *htt, HashTable *hts TSRMLS_DC)
+{
+	pb_scheme *scheme;
+
+	int i = 0;
+	for (i = 0; i < container->size; i++) {
+		zval **tmp = NULL;
+		char *name;
+		int name_len;
+
+		scheme = &(container->scheme[i]);
+
+		if (container->use_single_property > 0) {
+			name = scheme->name;
+			name_len = scheme->name_len;
+		} else {
+			name = scheme->mangled_name;
+			name_len = scheme->mangled_name_len;
+		}
+
+		if (zend_hash_find(hts, name, name_len, (void **)&tmp) == SUCCESS) {
+			zval *val;
+
+			switch (Z_TYPE_PP(tmp)) {
+			case IS_NULL:
+			break;
+			case IS_STRING:
+				MAKE_STD_ZVAL(val);
+				ZVAL_STRINGL(val, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+
+				Z_ADDREF_P(val);
+				zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				zval_ptr_dtor(&val);
+				break;
+			case IS_LONG:
+				MAKE_STD_ZVAL(val);
+				ZVAL_LONG(val, Z_LVAL_PP(tmp));
+
+				Z_ADDREF_P(val);
+				zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				zval_ptr_dtor(&val);
+			break;
+			case IS_DOUBLE:
+				MAKE_STD_ZVAL(val);
+				ZVAL_DOUBLE(val, Z_DVAL_PP(tmp));
+
+				Z_ADDREF_P(val);
+				zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+				zval_ptr_dtor(&val);
+			break;
+			case IS_OBJECT:
+			{
+				zval **tmp2 = NULL;
+
+				if (zend_hash_find(htt, name, name_len, (void **)&tmp2) == SUCCESS) {
+					if (Z_TYPE_PP(tmp2) == IS_OBJECT) {
+						char *n;
+						int n_len;
+						pb_scheme_container *c;
+						HashTable *p, *_htt, *_hts;
+
+						PHP_PB_MESSAGE_CHECK_SCHEME2(*tmp, &c, p)
+						php_protocolbuffers_get_hash(c, c->scheme, *tmp, &n, &n_len, &_htt TSRMLS_CC);
+						php_protocolbuffers_get_hash(c, c->scheme, *tmp2, &n, &n_len, &_hts TSRMLS_CC);
+
+						php_protocolbuffers_message_merge_from(c, _htt, _hts TSRMLS_CC);
+					} else {
+						MAKE_STD_ZVAL(val);
+						ZVAL_ZVAL(val, *tmp, 1, 0);
+
+						Z_ADDREF_P(val);
+						zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+						zval_ptr_dtor(&val);
+					}
+				} else {
+					MAKE_STD_ZVAL(val);
+					ZVAL_ZVAL(val, *tmp, 1, 0);
+
+					Z_ADDREF_P(val);
+					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+					zval_ptr_dtor(&val);
+				}
+			}
+			break;
+			case IS_ARRAY: {
+				zval **tmp2 = NULL;
+
+				if (zend_hash_find(htt, name, name_len, (void **)&tmp2) == SUCCESS) {
+					if (Z_TYPE_PP(tmp2) == IS_ARRAY) {
+						php_array_merge(Z_ARRVAL_PP(tmp2), Z_ARRVAL_PP(tmp), 1 TSRMLS_CC);
+					} else {
+						MAKE_STD_ZVAL(val);
+						ZVAL_ZVAL(val, *tmp, 1, 0);
+
+						Z_ADDREF_P(val);
+						zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+						zval_ptr_dtor(&val);
+					}
+				} else {
+					MAKE_STD_ZVAL(val);
+					ZVAL_ZVAL(val, *tmp, 1, 0);
+
+					Z_ADDREF_P(val);
+					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
+					zval_ptr_dtor(&val);
+				}
+			}
+			break;
+			default:
+				zend_error(E_NOTICE, "mergeFrom: zval type %d is not supported.", Z_TYPE_PP(tmp));
+			}
+		}
+
+	}
+}
+
 /* {{{ proto mixed ProtocolBuffersMessage::mergeFrom($message)
 */
 PHP_METHOD(protocolbuffers_message, mergeFrom)
 {
 	zval *instance = getThis();
 	zval *object;
-	php_protocolbuffers_message *from;
 	pb_scheme_container *container = NULL;
 	zend_class_entry *ce;
 	HashTable *proto = NULL;
@@ -164,65 +284,10 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	from = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	php_protocolbuffers_get_hash(container, container->scheme, instance, &n, &n_len, &htt TSRMLS_CC);
 	php_protocolbuffers_get_hash(container, container->scheme, object, &n, &n_len, &hts TSRMLS_CC);
-
-	{
-		php_array_merge(htt, hts, 1 TSRMLS_CC);
-/*
-		int i = 0;
-		for (i = 0; i < container->size; i++) {
-			zval **tmp = NULL;
-			char *name;
-			int name_len;
-
-			scheme = &(container->scheme[i]);
-
-			if (container->use_single_property > 0) {
-				name = scheme->name;
-				name_len = scheme->name_len;
-			} else {
-				name = scheme->mangled_name;
-				name_len = scheme->mangled_name_len;
-			}
-
-			if (zend_hash_find(hts, name, name_len, (void **)&tmp) == SUCCESS) {
-				zval *val;
-
-				switch (Z_TYPE_PP(tmp)) {
-				case IS_STRING:
-					MAKE_STD_ZVAL(val);
-					ZVAL_STRINGL(val, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
-
-					Z_ADDREF_P(val);
-					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
-					break;
-				case IS_LONG:
-					MAKE_STD_ZVAL(val);
-					ZVAL_LONG(val, Z_LVAL_PP(tmp));
-
-					Z_ADDREF_P(val);
-					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
-				break;
-				case IS_DOUBLE:
-					MAKE_STD_ZVAL(val);
-					ZVAL_DOUBL(val, Z_DVAL_PP(tmp));
-
-					Z_ADDREF_P(val);
-					zend_hash_update(htt, name, name_len, (void **)&val, sizeof(zval *), NULL);
-				break;
-				case IS_OBJECT:
-				break;
-				case IS_ARRAY:
-				break;
-				}
-			}
-
-		}
-*/
-	}
+	php_protocolbuffers_message_merge_from(container, htt, hts TSRMLS_CC);
 }
 /* }}} */
 
@@ -234,8 +299,8 @@ PHP_METHOD(protocolbuffers_message, current)
 	zval *instance = getThis();
 	int err = 0;
 	zend_class_entry *ce;
-	HashTable *proto = NULL;
 	pb_scheme_container *container;
+	HashTable *proto = NULL;
 	php_protocolbuffers_message *message;
 	const char *name;
 	int name_len = 0;
