@@ -4,6 +4,17 @@
 static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuffers_extension_registry *object TSRMLS_DC)
 {
 	if (object->registry != NULL) {
+		HashPosition pos;
+		int n = 0;
+		zval **element;
+
+		for(n = 0, zend_hash_internal_pointer_reset_ex(object->registry, &pos);
+			zend_hash_get_current_data_ex(object->registry, (void **)&element, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(object->registry, &pos), n++
+		) {
+            zval_ptr_dtor(element);
+		}
+
 		zend_hash_destroy(object->registry);
 		efree(object->registry);
 		object->registry = NULL;
@@ -18,8 +29,8 @@ zend_object_value php_protocolbuffers_extension_registry_new(zend_class_entry *c
 	zend_object_value retval;
 	PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(php_protocolbuffers_extension_registry);
 
-    ALLOC_HASHTABLE(object->registry);
-    zend_hash_init(object->registry, 0, NULL, NULL, 0);
+	ALLOC_HASHTABLE(object->registry);
+	zend_hash_init(object->registry, 0, NULL, NULL, 0);
 
 	return retval;
 }
@@ -66,12 +77,45 @@ PHP_METHOD(protocolbuffers_extension_registry, getInstance)
 */
 PHP_METHOD(protocolbuffers_extension_registry, add)
 {
-	zval *message_class_name, *descriptor;
+	zval *instance = getThis();
+	char *message_class_name;
+	long message_class_name_len;
+	zval *descriptor, **bucket;
+	zend_class_entry **ce;
 	long extension;
+	php_protocolbuffers_extension_registry *registry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"zlO", &message_class_name, &extension, &descriptor, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
+		"slO", &message_class_name, &message_class_name_len, &extension, &descriptor, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
 		return;
+	}
+
+	if (zend_lookup_class((char*)message_class_name, message_class_name_len, &ce TSRMLS_CC) == FAILURE) {
+		// TODO: check the class has getDescriptor method.
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "%s class does not find", message_class_name);
+		return;
+	}
+
+	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
+	if (!zend_hash_exists(registry->registry, message_class_name, message_class_name_len)) {
+		zval *p = NULL;
+
+		MAKE_STD_ZVAL(p);
+		array_init(p);
+
+		Z_ADDREF_P(p);
+		zend_hash_update(registry->registry, message_class_name, message_class_name_len, (void **)&p, sizeof(zval*), NULL);
+		zval_ptr_dtor(&p);
+		p = NULL;
+	}
+
+	if (zend_hash_find(registry->registry, message_class_name, message_class_name_len, (void **)&bucket) == SUCCESS) {
+		if (zend_hash_index_exists(Z_ARRVAL_PP(bucket), extension)) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't override specified extension number: already exists");
+			return;
+		}
+
+		zend_hash_index_update(Z_ARRVAL_PP(bucket), extension, (void **)&descriptor, sizeof(zval*), NULL);
 	}
 }
 /* }}} */
