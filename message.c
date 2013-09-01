@@ -75,6 +75,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get_extension, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set_extension, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear_extension, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
 */
@@ -961,6 +973,30 @@ PHP_METHOD(protocolbuffers_message, get)
 }
 /* }}} */
 
+/* {{{ proto mixed ProtocolBuffersMessage::getExtension(string $name)
+*/
+PHP_METHOD(protocolbuffers_message, getExtension)
+{
+	zval *instance = getThis();
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffersMessage::setExtension(string $name, mixed $value)
+*/
+PHP_METHOD(protocolbuffers_message, setExtension)
+{
+	zval *instance = getThis();
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffersMessage::setExtension(string $name)
+*/
+PHP_METHOD(protocolbuffers_message, clearExtension)
+{
+	zval *instance = getThis();
+}
+/* }}} */
+
 
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, serializeToString, arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
@@ -970,6 +1006,9 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, clear, arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, has, arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get, arginfo_pb_message_get, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, setExtension, arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, clearExtension, arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
