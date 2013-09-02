@@ -264,7 +264,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			}
 
 			container->size++;
-			qsort(container->scheme, container->size, sizeof(pb_scheme*), sort_cb);
+			qsort(container->scheme, container->size, sizeof(pb_scheme), sort_cb);
 		}
 	}
 }
