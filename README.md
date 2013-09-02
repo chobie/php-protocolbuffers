@@ -144,10 +144,10 @@ evaluating protocol buffers serialization.
     <td>Packed attributes</td><td>supported</td>
   </tr>
   <tr>
-    <td>Extensions</td><td>limited(only php message options) supported</td>
+    <td>Extensions</td><td>alpha</td>
   </tr>
   <tr>
-    <td>Unknown fields</td><td>limited supported (not fully tested. see test cases)</td>
+    <td>Unknown fields</td><td>alpha</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>

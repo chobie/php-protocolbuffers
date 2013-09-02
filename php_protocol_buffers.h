@@ -172,6 +172,7 @@ typedef struct pb_scheme
 	int repeated;
 	int packed;
 	int skip;
+	int is_extension;
 	char *message;
 	char *enum_msg;
 	zend_class_entry *ce;

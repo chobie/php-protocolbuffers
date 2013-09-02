@@ -145,7 +145,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getName)
 /* }}} */
 
 
-static int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
+int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
 {
 	char *key;
 	int key_len;
@@ -218,6 +218,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 			zval *tmp = NULL;
 			int tsize = 0;
 
+			ischeme[n].is_extension = 0;
 			ischeme[n].tag = (int)pos->h;
 			php_pb_field_descriptor_get_property(Z_OBJPROP_PP(element), "type", sizeof("type"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_LONG) {
