@@ -647,6 +647,12 @@ PHP_METHOD(protocolbuffers_message, __call)
 		}
 		scheme = NULL;
 	}
+
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "magic method can't use for extension value", name);
+		return;
+	}
+
 	smart_str_free(&buf);
 	smart_str_free(&buf2);
 
@@ -954,6 +960,10 @@ PHP_METHOD(protocolbuffers_message, get)
 		return;
 	}
 
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "get method can't use for extension value", name);
+		return;
+	}
 
 	if (container->use_single_property > 0) {
 		n     = container->single_property_name;
