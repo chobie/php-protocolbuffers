@@ -75,6 +75,12 @@ PHP_METHOD(protocolbuffers_extension_registry, getInstance)
 }
 /* }}} */
 
+static int sort_cb(const void *a, const void *b)
+{
+    return ((pb_scheme*)a)->tag - ((pb_scheme*)b)->tag;
+}
+
+
 /* {{{ proto void ProtocolBuffersExtensionRegistry::add(string $message_class_name, long $extension, ProtocolBuffersFieldDescriptor $descriptor)
 */
 PHP_METHOD(protocolbuffers_extension_registry, add)
@@ -258,6 +264,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			}
 
 			container->size++;
+			qsort(container->scheme, container->size, sizeof(pb_scheme*), sort_cb);
 		}
 	}
 }
