@@ -110,6 +110,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_default, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 
+int php_pb_field_descriptor_get_name(zval *instance, char **retval, int *len TSRMLS_DC)
+{
+	zval **result = NULL;
+	char *name;
+	int name_len;
+
+	zend_mangle_property_name(&name, &name_len, "*", 1, "name", sizeof("name"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+		*retval = Z_STRVAL_PP(result);
+		*len    = Z_STRLEN_PP(result)+1;
+		efree(name);
+		return 1;
+	} else {
+		return 0;
+	}
+
+	 return 0;
+}
+
 /* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersFieldDescriptor::__construct(array $params)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, __construct)

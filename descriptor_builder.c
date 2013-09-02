@@ -132,6 +132,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setName)
 }
 /* }}} */
 
+
 /* {{{ proto string ProtocolBuffers_DescriptorBuilder::getName()
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, getName)

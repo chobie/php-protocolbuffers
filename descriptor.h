@@ -3,5 +3,4 @@
 
 void php_pb_descriptor_class(TSRMLS_D);
 
-
 #endif

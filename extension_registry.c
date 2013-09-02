@@ -1,5 +1,6 @@
 #include "php_protocol_buffers.h"
 #include "extension_registry.h"
+#include "field_descriptor.h"
 
 static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuffers_extension_registry *object TSRMLS_DC)
 {
@@ -49,7 +50,7 @@ PHP_METHOD(protocolbuffers_extension_registry, __construct)
 }
 /* }}} */
 
-static zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
+zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
 {
 	zval *extension_registry;
 
@@ -98,10 +99,24 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 
 	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
 	if (!zend_hash_exists(registry->registry, message_class_name, message_class_name_len)) {
-		zval *p = NULL;
+		zval *p, *p2, *p3, *p4 = NULL;
 
 		MAKE_STD_ZVAL(p);
 		array_init(p);
+
+		MAKE_STD_ZVAL(p2);
+		array_init(p2);
+
+		MAKE_STD_ZVAL(p3);
+		array_init(p3);
+
+		MAKE_STD_ZVAL(p4);
+		array_init(p4);
+
+
+		zend_hash_update(Z_ARRVAL_P(p), "map", sizeof("map"), (void **)&p2, sizeof(zval*), NULL);
+		zend_hash_update(Z_ARRVAL_P(p), "index", sizeof("index"), (void **)&p3, sizeof(zval*), NULL);
+		zend_hash_update(Z_ARRVAL_P(p), "emap", sizeof("emap"), (void **)&p4, sizeof(zval*), NULL);
 
 		Z_ADDREF_P(p);
 		zend_hash_update(registry->registry, message_class_name, message_class_name_len, (void **)&p, sizeof(zval*), NULL);
@@ -110,15 +125,74 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	}
 
 	if (zend_hash_find(registry->registry, message_class_name, message_class_name_len, (void **)&bucket) == SUCCESS) {
-		if (zend_hash_index_exists(Z_ARRVAL_PP(bucket), extension)) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't override specified extension number: already exists");
-			return;
+		zval **bucket2;
+		char *name = NULL;
+		int len = 0;
+
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), "index", sizeof("index"), (void **)&bucket2) == SUCCESS) {
+			if (zend_hash_index_exists(Z_ARRVAL_PP(bucket), extension)) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't override specified extension number: already exists");
+				return;
+			}
+
+			Z_ADDREF_P(descriptor);
+			zend_hash_index_update(Z_ARRVAL_PP(bucket2), extension, (void **)&descriptor, sizeof(zval*), NULL);
 		}
 
-		zend_hash_index_update(Z_ARRVAL_PP(bucket), extension, (void **)&descriptor, sizeof(zval*), NULL);
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), "map", sizeof("map"), (void **)&bucket2) == SUCCESS) {
+			php_pb_field_descriptor_get_name(descriptor, &name, &len TSRMLS_CC);
+
+			if (zend_hash_exists(Z_ARRVAL_PP(bucket), name, len)) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't override specified extension number: already exists");
+				return;
+			}
+
+			Z_ADDREF_P(descriptor);
+			zend_hash_update(Z_ARRVAL_PP(bucket2), name, len, (void **)&descriptor, sizeof(zval*), NULL);
+
+			if (zend_hash_find(Z_ARRVAL_PP(bucket), "emap", sizeof("emap"), (void **)&bucket2) == SUCCESS) {
+				zval *nm;
+
+				MAKE_STD_ZVAL(nm);
+				ZVAL_LONG(nm, extension);
+
+				zend_hash_update(Z_ARRVAL_PP(bucket2), name, len, (void **)&nm, sizeof(zval*), NULL);
+			}
+		}
+
+		zend_declare_property_null(*ce, name, len-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	}
 }
 /* }}} */
+
+int php_protocolbuffers_extension_registry_get_registry(zval *instance, const char* message_class, size_t message_class_len, zval **result TSRMLS_DC)
+{
+	zval **bucket;
+	php_protocolbuffers_extension_registry *registry;
+	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
+
+	if (zend_hash_find(registry->registry, message_class, message_class_len, (void **)&bucket) == SUCCESS) {
+		*result = *bucket;
+		return 1;
+	}
+
+	return 0;
+}
+
+int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, const char* name, size_t name_len, zval **result TSRMLS_DC)
+{
+	zval **bucket, **bucket2;
+
+	if (zend_hash_find(Z_ARRVAL_P(hash), "map", sizeof("map"), (void **)&bucket) == SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), name, name_len+1, (void **)&bucket2) == SUCCESS) {
+			*result = *bucket2;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 
 static zend_function_entry php_protocolbuffers_extension_registry_methods[] = {
 	PHP_ME(protocolbuffers_extension_registry, __construct,  NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
