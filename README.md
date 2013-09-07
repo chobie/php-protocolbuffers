@@ -157,6 +157,23 @@ evaluating protocol buffers serialization.
 Basically, php-protocolbuffers test cases were made by python generator.
 at least it proves correct behavior in those test cases.
 
+## PHP specific features
+
+* `__sleep` and `__wakeup` method support.
+
+You can use above magic methods when enabling UseWakeupAndSleep flag. Be careful, this feature is not part of protocolbuffers specification.
+these method will call when `parseFromString` and `serializeToString` (also supports `ProtocolBuffers::decode` and `ProtocolBuffers::encode`)
+
+
+````
+            $phpoptions = $descriptor_builder->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);
+            $phpoptions->setUseWakeupAndSleep(true); // default is off
+            $descriptor = $descriptor_builder->build();
+````
+
+NOTE: We do not support Serializable interface.
+
+
 ## Thanks
 
 - Google Protocol Buffers team.
