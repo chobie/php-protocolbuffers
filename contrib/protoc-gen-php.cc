@@ -383,7 +383,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "name", ClassName(message)
              );
 
-	printer.Print(" extends `base`", "base", options.base_class());
+    printer.Print(" extends `base`", "base", options.base_class());
 
     printer.Print("\n{\n");
     printer.Indent();
@@ -651,6 +651,11 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         printer.Print("\n");
     }
 
+    for (int i = 0; i < message.extension_range_count(); ++i) {
+        const Descriptor::ExtensionRange &er(*message.extension_range(i));
+        printer.Print("$desc->setExtensionRange(`start`, `end`);\n", "start", SimpleItoa(er.start), "end", SimpleItoa(er.end));
+    }
+
 
     printer.Print("$descriptor = $desc->build();\n");
     printer.Outdent();
@@ -672,6 +677,50 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
     printer.Outdent();
     printer.Print("}\n\n");
+}
+
+void PHPCodeGenerator::PrintExtension(io::Printer &printer, const FieldDescriptor & e) const {
+    //const Descriptor &message(*e->)
+    printer.Print("$__extension_registry->add('`message`', `extension`, new ProtocolBuffersFieldDescriptor(array(\n", "message", ClassName(*e.containing_type()), "extension", SimpleItoa(e.number()));
+    printer.Indent();
+    printer.Print("\"type\"     => `type`,\n",
+        "type",
+        field_type_to_str(e.type())
+    );
+    printer.Print("\"name\"     => \"`name`\",\n",
+        "name",
+        VariableName(e)
+    );
+    printer.Print("\"required\" => `required`,\n",
+        "required",
+        (e.is_required()) ? "true" : "false"
+    );
+    printer.Print("\"optional\" => `optional`,\n",
+        "optional",
+        (e.is_optional()) ? "true" : "false"
+    );
+    printer.Print("\"repeated\" => `repeated`,\n",
+        "repeated",
+        (e.is_repeated()) ? "true" : "false"
+    );
+    printer.Print("\"packable\" => `packable`,\n",
+        "packable",
+        (e.is_packable()) ? "true" : "false"
+    );
+    printer.Print("\"default\"  => `value`,\n",
+        "value",
+        DefaultValueAsString(e, true)
+    );
+    if (e.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
+        const Descriptor &desc(*e.message_type());
+        printer.Print("\"message\"  => \"`message`\",\n",
+            "message",
+            ClassName(desc)
+        );
+    }
+    printer.Outdent();
+
+    printer.Print(")));\n");
 }
 
 void PHPCodeGenerator::PrintEnum(io::Printer &printer, const EnumDescriptor & e) const {
@@ -717,6 +766,20 @@ void PHPCodeGenerator::PrintEnums(io::Printer &printer, const FileDescriptor & f
     }
 }
 
+void PHPCodeGenerator::PrintExtensions(io::Printer &printer, const FileDescriptor & file) const {
+    if (file.extension_count() > 0) {
+        printer.Print("$__extension_registry = ProtocolBuffersExtensionRegistry::getInstance();\n");
+    }
+
+    for (int i = 0; i < file.extension_count(); ++i) {
+        PrintExtension(printer, *file.extension(i));
+    }
+
+    if (file.extension_count() > 0) {
+        printer.Print("unset($__extension_registry);\n");
+    }
+}
+
 void PHPCodeGenerator::PrintServices(io::Printer &printer, const FileDescriptor & file) const {
     for (int i = 0; i < file.service_count(); ++i) {
         printer.Print("////\n//TODO Service\n////\n");
@@ -752,6 +815,8 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
         PrintMessages  (printer, *file);
 
         PrintEnums     (printer, *file);
+
+        PrintExtensions(printer, *file);
 
         PrintServices  (printer, *file);
 

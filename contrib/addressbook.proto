@@ -31,6 +31,8 @@ message Person {
   }
 
   repeated PhoneNumber phone = 4;
+
+  extensions 100 to max;
 }
 
 message AddressBook {
@@ -38,4 +40,8 @@ message AddressBook {
   option (php_option).single_property_name = "_properties";
 
   repeated Person person = 1;
+}
+
+extend Tutorial.Person {
+  optional string fullname = 100;
 }

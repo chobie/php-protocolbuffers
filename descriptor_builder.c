@@ -391,6 +391,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 }
 /* }}} */
 
+
 /* {{{ proto ProtocolBuffersMessageOptions ProtocolBuffersDescriptorBuilder::setExtensionRange(int $begin, int $end)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
@@ -408,8 +409,8 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
 	if (begin >= end) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be bigger than range begin.");
 	}
-	if (end > 536870911) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", 536870911);
+	if (end > 536870912) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", 536870912);
 	}
 	if (begin < 1 || end < 1) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range must be greater than zero");

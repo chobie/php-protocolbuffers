@@ -133,6 +133,7 @@ class Tutorial_Person extends ProtocolBuffersMessage
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
+      $desc->setExtensionRange(100, 536870912);
       $descriptor = $desc->build();
     }
 
@@ -188,3 +189,14 @@ class Tutorial_AddressBook extends ProtocolBuffersMessage
 
 }
 
+$__extension_registry = ProtocolBuffersExtensionRegistry::getInstance();
+$__extension_registry->add('Tutorial_Person', 100, new ProtocolBuffersFieldDescriptor(array(
+  "type"     => ProtocolBuffers::TYPE_STRING,
+  "name"     => "fullname",
+  "required" => false,
+  "optional" => true,
+  "repeated" => false,
+  "packable" => false,
+  "default"  => "",
+)));
+unset($__extension_registry);

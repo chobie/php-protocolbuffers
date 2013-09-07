@@ -42,6 +42,9 @@ class PHPCodeGenerator : public CodeGenerator {
         void PrintEnum      (io::Printer &printer, const EnumDescriptor & e) const;
         void PrintEnums     (io::Printer &printer, const FileDescriptor & file) const;
 
+        void PrintExtension (io::Printer &printer, const FieldDescriptor & e) const;
+        void PrintExtensions(io::Printer &printer, const FileDescriptor & file) const;
+
         void PrintService   (io::Printer &printer, const ServiceDescriptor & service) const;
         void PrintServices  (io::Printer &printer, const FileDescriptor & file) const;
 
