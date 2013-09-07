@@ -1085,7 +1085,7 @@ PHP_METHOD(protocolbuffers_message, setExtension)
 		}
 
 		n = name;
-		n_len = name_len;
+		n_len = name_len+1;
 		htt = Z_ARRVAL_PP(b);
 	} else {
 		htt = Z_OBJPROP_P(instance);
