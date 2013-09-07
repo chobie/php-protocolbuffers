@@ -714,7 +714,9 @@ PHP_METHOD(protocolbuffers_message, __call)
 						z = NULL;
 					}
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-						zval **tmp;
+						zval **tmp, *garvage;
+
+						garvage = *e;
 
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 						MAKE_STD_ZVAL(vl);
@@ -744,7 +746,9 @@ PHP_METHOD(protocolbuffers_message, __call)
 							break;
 						}
 
-						zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
+						*e = vl;
+						zval_ptr_dtor(&garvage);
+						//zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
 					}
 				} else {
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
