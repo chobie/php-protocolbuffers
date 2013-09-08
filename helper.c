@@ -258,21 +258,11 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	zval *dz;
 	HashTable *hresult;
 
-	/* hresult = Z_ARRVAL_PP(result); */
 	if (container->use_single_property > 0) {
 		zval **tmp = NULL;
 
 		if (zend_hash_quick_find(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len+1, container->single_property_h, (void **)&tmp) == SUCCESS) {
-			if (Z_TYPE_PP(tmp) == IS_NULL || Z_TYPE_PP(tmp) == IS_ARRAY) {
-				zval *arr = NULL;
-
-				MAKE_STD_ZVAL(arr);
-				array_init(arr);
-
-				Z_ADDREF_P(arr);
-				zend_hash_update(Z_OBJPROP_PP(result), container->single_property_name, container->single_property_name_len+1, (void **)&arr, sizeof(arr), NULL);
-				zval_ptr_dtor(&arr);
-			} else if (Z_TYPE_PP(tmp) != IS_ARRAY) {
+			if (Z_TYPE_PP(tmp) != IS_ARRAY) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "single property is not an array.");
 				return NULL;
 			}
@@ -425,13 +415,13 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				}
 
 				if (container->use_single_property < 1) {
-					name = s->mangled_name;
+					name        = s->mangled_name;
 					name_length = s->mangled_name_len;
-					name_hash = s->mangled_name_h;
+					name_hash   = s->mangled_name_h;
 				} else {
-					name = s->name;
+					name        = s->name;
 					name_length = s->name_len;
-					name_hash = s->name_h;
+					name_hash   = s->name_h;
 				}
 
 				if (s->repeated) {
@@ -449,31 +439,11 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 					} else {
 						zval **arr2 = NULL;
 
-						/* TODO: improve refcount, memory allocation */
 						if (zend_hash_quick_find(hresult, name, name_length, name_hash, (void **)&arr2) == SUCCESS) {
 							zval *tt;
-							if (Z_TYPE_PP(arr2) == IS_NULL) {
-								MAKE_STD_ZVAL(tt);
-								array_init(tt);
 
-								zend_hash_next_index_insert(Z_ARRVAL_P(tt), (void *)&z_obj, sizeof(zval *), NULL);
-								zend_hash_quick_update(hresult, name, name_length, name_hash, (void **)&tt, sizeof(zval *), NULL);
-							} else {
-								/* TODO: temporary fix. something wrong when declare property as an array. probably refcounting is the problem */
-								if (zend_hash_num_elements(Z_ARRVAL_PP(arr2)) == 0) {
-									zval *m;
-
-									MAKE_STD_ZVAL(m);
-									array_init(m);
-									Z_ADDREF_P(m);
-									zend_hash_quick_update(hresult, name, name_length, name_hash, (void **)&m, sizeof(zval *), NULL);
-									zval_ptr_dtor(arr2);
-									*arr2 = m;
-								}
-
-								Z_ADDREF_P(z_obj);
-								zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(zval *), NULL);
-							}
+							Z_ADDREF_P(z_obj);
+							zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(zval *), NULL);
 						}
 					}
 				} else {
@@ -1669,10 +1639,10 @@ static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC
 
 int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 {
-	zval *pp;
-	int j;
-	pb_scheme_container *container;
-	pb_scheme *scheme;
+	zval *pp = NULL;
+	int j = 0;
+	pb_scheme_container *container = NULL;
+	pb_scheme *scheme = NULL;
 	HashTable *proto = NULL;
 	HashTable *properties = NULL;
 
@@ -1681,10 +1651,8 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	zend_hash_init(properties, 0, NULL, NULL, 0);
 
 	if (container->use_single_property > 0) {
-		zval *prop = NULL;
-
-		MAKE_STD_ZVAL(prop);
-		array_init(prop);
+		MAKE_STD_ZVAL(pp);
+		array_init(pp);
 		zend_hash_update(properties, container->single_property_name, container->single_property_name_len, (void **)&pp, sizeof(zval), NULL);
 	} else {
 		for (j = 0; j < container->size; j++) {
@@ -1697,14 +1665,64 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 				ZVAL_NULL(pp);
 			}
 
+			Z_ADDREF_P(pp);
 			zend_hash_update(properties, scheme->name, scheme->name_len, (void **)&pp, sizeof(zval), NULL);
 		}
 	}
 
 	zend_merge_properties(object, properties, 1 TSRMLS_CC);
-
 	return 0;
 }
+
+static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz)
+{
+	char *name;
+	int name_len;
+	ulong hash;
+
+	if (container->use_single_property < 1) {
+		name = s->mangled_name;
+		name_len = s->mangled_name_len;
+		hash = s->mangled_name_h;
+	} else {
+		name = s->name;
+		name_len = s->name_len;
+		hash = s->name_h;
+	}
+
+	if (s->repeated) {
+		if (!zend_hash_quick_exists(hresult, name, name_len, hash)) {
+			zval *arr;
+
+			MAKE_STD_ZVAL(arr);
+			array_init(arr);
+
+			zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);
+			Z_ADDREF_P(dz);
+
+			zend_hash_quick_update(hresult, name, name_len, hash, (void **)&arr, sizeof(arr), NULL);
+			Z_ADDREF_P(arr);
+			zval_ptr_dtor(&arr);
+		} else {
+			zval **arr2;
+
+			if (zend_hash_quick_find(hresult, name, name_len, hash, (void **)&arr2) == SUCCESS) {
+				if (Z_TYPE_PP(arr2) == IS_NULL) {
+					array_init(*arr2);
+				}
+
+				zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&dz, sizeof(dz), NULL);
+				Z_ADDREF_P(dz);
+			}
+		}
+	} else {
+		Z_ADDREF_P(dz);
+		zend_hash_quick_update(hresult, name, name_len, hash, (void **)&dz, sizeof(dz), NULL);
+	}
+
+	zval_ptr_dtor(&dz);
+}
+
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
 	ZEND_ARG_INFO(0, zval)
