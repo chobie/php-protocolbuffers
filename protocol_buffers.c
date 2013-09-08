@@ -42,6 +42,7 @@
 #include "descriptor_builder.h"
 #include "unknown_field.h"
 #include "unknown_field_set.h"
+#include "extension_registry.h"
 
 #ifdef ZTS
 int pb_globals_id;

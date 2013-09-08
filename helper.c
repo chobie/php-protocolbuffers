@@ -1270,11 +1270,12 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 	}
 }
 
+
 int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
 	int i = 0;
 	pb_serializer *ser;
-	zval **c, *excludes = NULL;
+	zval **c = NULL;
 	HashTable *hash = NULL;
 	pb_scheme *scheme;
 
@@ -1291,8 +1292,6 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 			hash = Z_ARRVAL_PP(c);
 		} else {
 			pb_serializer_destroy(ser);
-
-			PHP_PB_CLEAR_EXCLUDES();
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
 			return -1;
 		}

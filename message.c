@@ -787,6 +787,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 						zval **tmp = NULL;
 						zval *nval = NULL;
+						zval *val = NULL;
 						int flag = 0;
 
 						if (Z_TYPE_PP(e) != IS_ARRAY) {
@@ -802,11 +803,12 @@ PHP_METHOD(protocolbuffers_message, __call)
 						}
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 
-						Z_ADDREF_P(*tmp);
+						MAKE_STD_ZVAL(val);
+						ZVAL_ZVAL(val, *tmp, 0, 1);
+
 						Z_ADDREF_P(nval);
-						zend_hash_next_index_insert(Z_ARRVAL_P(nval), tmp, sizeof(zval *), NULL);
+						zend_hash_next_index_insert(Z_ARRVAL_P(nval), &val, sizeof(zval *), NULL);
 						zend_hash_update(htt, n, n_len, (void **)&nval, sizeof(zval *), NULL);
-						zval_ptr_dtor(&tmp);
 
 						if (flag == 1) {
 							zval_ptr_dtor(&nval);
