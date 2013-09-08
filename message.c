@@ -276,7 +276,6 @@ PHP_METHOD(protocolbuffers_message, __construct)
 {
 	zval *instance = getThis();
 	zval *params = NULL;
-	HashPosition pos;
 	HashTable *proto = NULL;
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
@@ -293,7 +292,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		PHP_PB_MESSAGE_CHECK_SCHEME
 
 		if (container->use_single_property > 0) {
-			zval *z;
+			zval *z = NULL;
 
 			MAKE_STD_ZVAL(z);
 			array_init(z);
@@ -304,33 +303,77 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		}
 
 		for (i = 0; i < container->size; i++) {
-			char *n;
+			char *n = NULL;
 			int n_len;
-			zval **tmp;
-			zval **e;
+			zval **tmp = NULL;
+			zval **e = NULL;
 			zval *value = NULL;
 
 			scheme = &container->scheme[i];
 
 			if (zend_hash_find(Z_ARRVAL_P(params), scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
 				if (container->use_single_property > 0) {
-					MAKE_STD_ZVAL(value);
-					ZVAL_ZVAL(value, *tmp, 0, 1);
-                    php_pb_typeconvert(scheme, value TSRMLS_CC);
+					if (scheme->type == TYPE_MESSAGE) {
+						if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+							zval *p;
+							MAKE_STD_ZVAL(value);
+							MAKE_STD_ZVAL(p);
 
-					Z_ADDREF_P(value);
+							ZVAL_ZVAL(p, *tmp, 1, 0);
+
+							object_init_ex(value, scheme->ce);
+							zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
+						} else {
+							if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
+								MAKE_STD_ZVAL(value);
+								ZVAL_ZVAL(value, *tmp, 0, 1);
+							} else {
+								zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
+								return;
+							}
+						}
+					} else {
+						MAKE_STD_ZVAL(value);
+						ZVAL_ZVAL(value, *tmp, 0, 1);
+						php_pb_typeconvert(scheme, value TSRMLS_CC);
+
+						Z_ADDREF_P(value);
+					}
 					zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
 				} else {
 					if (zend_hash_find(Z_OBJPROP_P(instance), scheme->mangled_name, scheme->mangled_name_len, (void **)&e) == SUCCESS) {
 						zval *garvage = *e;
 
-						MAKE_STD_ZVAL(value);
-						ZVAL_ZVAL(value, *tmp, 0, 1);
-						php_pb_typeconvert(scheme, value TSRMLS_CC);
-						Z_ADDREF_P(value);
+						if (scheme->type == TYPE_MESSAGE) {
+							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+								zval *p = NULL;
+								MAKE_STD_ZVAL(value);
+								MAKE_STD_ZVAL(p);
 
+								ZVAL_ZVAL(p, *tmp, 1, 0);
+
+								object_init_ex(value, scheme->ce);
+								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
+							} else {
+								if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
+									MAKE_STD_ZVAL(value);
+									ZVAL_ZVAL(value, *tmp, 0, 1);
+								} else {
+									MAKE_STD_ZVAL(value); // probably missed something
+									zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
+									return;
+								}
+							}
+						} else {
+							MAKE_STD_ZVAL(value);
+							ZVAL_ZVAL(value, *tmp, 0, 1);
+							php_pb_typeconvert(scheme, value TSRMLS_CC);
+						}
+
+						Z_ADDREF_P(value);
 						*e = value;
 						zval_ptr_dtor(&garvage);
+						zval_ptr_dtor(&value);
 					}
 				}
 			}
