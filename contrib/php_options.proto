@@ -14,6 +14,7 @@ message PHPMessageOptions {
     optional string trait = 1;
     optional bool use_single_property = 2 [default = false];
     optional string single_property_name = 3;
+    optional bool use_wakeup_and_sleep = 4 [default = false];
 }
 
 extend google.protobuf.FileOptions {
