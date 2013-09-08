@@ -80,6 +80,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get_extension, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
@@ -1072,6 +1077,95 @@ PHP_METHOD(protocolbuffers_message, get)
 }
 /* }}} */
 
+/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersMessage::set($name, $value)
+*/
+PHP_METHOD(protocolbuffers_message, set)
+{
+	zval *instance = getThis();
+	zval *value;
+	char *name;
+	int name_len, i = 0;
+	pb_scheme_container *container;
+	pb_scheme *scheme;
+	HashTable *proto;
+	php_protocolbuffers_message *message;
+	char *n;
+	int n_len;
+	HashTable *htt;
+	zval **e;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sz", &name, &name_len, &value) == FAILURE) {
+		return;
+	}
+
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &container->scheme[i];
+
+		if (strcmp(scheme->name, name) == 0) {
+			// OK
+			break;
+		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
+			break;
+		}
+		scheme = NULL;
+	}
+
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't use for extension value", name);
+		return;
+	}
+
+	if (container->use_single_property > 0) {
+		n     = container->single_property_name;
+		n_len = container->single_property_name_len;
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+			return;
+		}
+	} else {
+		htt = Z_OBJPROP_P(instance);
+
+		n = scheme->mangled_name;
+		n_len = scheme->mangled_name_len;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		zval *vl;
+
+		if (container->use_single_property > 0) {
+			MAKE_STD_ZVAL(vl);
+			ZVAL_ZVAL(vl, *e, 0, 1);
+			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+
+			Z_ADDREF_P(vl);
+			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
+		} else {
+			zval *garvage = *e;
+
+			MAKE_STD_ZVAL(vl);
+			ZVAL_ZVAL(vl, value, 0, 1);
+
+			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+			Z_ADDREF_P(vl);
+			*e = vl;
+			zval_ptr_dtor(&garvage);
+		}
+	}
+
+}
+
+
 /* {{{ proto mixed ProtocolBuffersMessage::getExtension(string $name)
 */
 PHP_METHOD(protocolbuffers_message, getExtension)
@@ -1210,7 +1304,8 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, clear, arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, has, arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get, arginfo_pb_message_get, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, set, arginfo_pb_message_set, ZEND_ACC_PUBLIC)
+    	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setExtension, arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearExtension, arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
 	/* iterator */
