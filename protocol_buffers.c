@@ -35,7 +35,6 @@
 
 #include "descriptor.h"
 #include "field_descriptor.h"
-#include "field_options.h"
 #include "message.h"
 #include "message_options.h"
 #include "php_message_options.h"
@@ -53,7 +52,6 @@ pb_globals php_pb_globals;
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_descriptor_class_entry;
 zend_class_entry *protocol_buffers_field_descriptor_class_entry;
-zend_class_entry *protocol_buffers_field_options_class_entry;
 
 zend_class_entry *protocol_buffers_serializable_class_entry;
 
@@ -196,7 +194,6 @@ void php_protocolbuffers_init(TSRMLS_D)
 	php_uninitialized_message_exception(TSRMLS_C);
 	php_pb_descriptor_class(TSRMLS_C);
 	php_pb_filed_descriptor_class(TSRMLS_C);
-	php_pb_filed_options_class(TSRMLS_C);
 	php_protocol_buffers_serializable(TSRMLS_C);
 	php_pb_message_class(TSRMLS_C);
 	php_pb_message_options_class(TSRMLS_C);

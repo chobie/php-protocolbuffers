@@ -117,7 +117,6 @@ extern zend_module_entry protocolbuffers_module_entry;
 extern zend_class_entry *protocol_buffers_class_entry;
 extern zend_class_entry *protocol_buffers_descriptor_class_entry;
 extern zend_class_entry *protocol_buffers_field_descriptor_class_entry;
-extern zend_class_entry *protocol_buffers_field_options_class_entry;
 
 extern zend_class_entry *protocol_buffers_serializable_class_entry;
 
