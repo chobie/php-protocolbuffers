@@ -313,6 +313,7 @@ void php_pb_extension_registry_class(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersExtensionRegistry", php_protocolbuffers_extension_registry_methods);
 	protocol_buffers_extension_registry_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_extension_registry_class_entry->create_object = php_protocolbuffers_extension_registry_new;
+	protocol_buffers_extension_registry_class_entry->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "ExtensionRegistry", protocol_buffers_extension_registry_class_entry);
 }
