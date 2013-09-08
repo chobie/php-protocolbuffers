@@ -60,6 +60,8 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
 			PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
 		} else if (strcmp(key, "packable") == 0) {
 			PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
+		} else if (strcmp(key, "extension") == 0) {
+			PHP_PROTOCOLBUFFERS_PROCESS_BOOL;
 		} else if (strcmp(key, "message") == 0 && Z_TYPE_PP(zv) == IS_STRING) {
 			zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)key, key_length, 0);
 
@@ -278,6 +280,28 @@ PHP_METHOD(protocolbuffers_field_descriptor, getName)
 }
 /* }}} */
 
+
+/* {{{ proto long ProtocolBuffersFieldDescriptor::isExtension()
+*/
+PHP_METHOD(protocolbuffers_field_descriptor, isExtension)
+{
+	zval *instance = getThis();
+	zval **result = NULL;
+	char *name = NULL;
+	int name_len = 0;
+
+	zend_mangle_property_name(&name, &name_len, "*", 1, "extension", sizeof("extension"), 0);
+
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+		RETVAL_BOOL(Z_BVAL_PP(result));
+	} else {
+		RETVAL_BOOL(0);
+	}
+
+	efree(name);
+}
+/* }}} */
+
 static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getName, NULL, ZEND_ACC_PUBLIC)
@@ -285,6 +309,7 @@ static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_field_descriptor, setType,  arginfo_pb_field_descriptor_set_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_pb_field_descriptor_get_default, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, setDefault, arginfo_pb_field_descriptor_set_default, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_field_descriptor, isExtension, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

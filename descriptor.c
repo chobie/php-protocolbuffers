@@ -175,6 +175,12 @@ PHP_METHOD(protocolbuffers_descriptor, getFields)
 				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
 				efree(name);
 
+
+				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"extension", sizeof("extension"), 0);
+				MAKE_STD_ZVAL(value);
+				ZVAL_BOOL(value, ischeme->is_extension);
+				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+				efree(name);
 			}
 
 			zend_hash_next_index_insert(Z_ARRVAL_P(result), (void *)&tmp, sizeof(zval *), NULL);
