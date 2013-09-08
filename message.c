@@ -277,10 +277,10 @@ PHP_METHOD(protocolbuffers_message, __construct)
 	zval *instance = getThis();
 	zval *params = NULL;
 	HashPosition pos;
-	HashTable *proto;
-	pb_scheme_container *container;
-	pb_scheme *scheme;
-	HashTable *htt;
+	HashTable *proto = NULL;
+	pb_scheme_container *container = NULL;
+	pb_scheme *scheme = NULL;
+	HashTable *htt = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|a", &params) == FAILURE) {
