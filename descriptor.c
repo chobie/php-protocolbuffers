@@ -243,11 +243,11 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 
 static zend_function_entry php_protocolbuffers_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_descriptor, __construct, arginfo_pb_descriptor___construct, ZEND_ACC_PRIVATE)
-	PHP_ME(protocolbuffers_descriptor, getName,	 arginfo_pb_descriptor_get_name, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getField,	arginfo_pb_descriptor_get_field, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getFields,	arginfo_pb_descriptor_get_fields, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getOption,   arginfo_pb_descriptor_get_option, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, dump,		arginfo_pb_descriptor_dump, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getName,     arginfo_pb_descriptor_get_name,    ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getField,    arginfo_pb_descriptor_get_field,   ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getFields,   arginfo_pb_descriptor_get_fields,  ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getOption,   arginfo_pb_descriptor_get_option,  ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, dump,        arginfo_pb_descriptor_dump,        ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
