@@ -46,6 +46,10 @@ zend_object_value php_protocolbuffers_message_new(zend_class_entry *ce TSRMLS_DC
 	return retval;
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message___construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_serialize_to_string, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -89,43 +93,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear_extension, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-
-/* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
-*/
-PHP_METHOD(protocolbuffers_message, serializeToString)
-{
-	zval *instance = getThis();
-
-	php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance);
-}
-/* }}} */
-
-/* {{{ proto mixed ProtocolBuffersMessage::parseFromString()
-*/
-PHP_METHOD(protocolbuffers_message, parseFromString)
-{
-#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
-	/* I tried to lookup current scope from EG(current_execute_data). but it doesn't have current scope. we can't do anymore */
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::parseFromString can't work under PHP 5.3. please use ProtocolBuffers:decode directly");
-	return;
-#else
-	const char *data;
-	int data_len = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s", &data, &data_len) == FAILURE) {
-		return;
-	}
-	if (EG(called_scope)) {
-		php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_len, EG(called_scope)->name, EG(called_scope)->name_length);
-	} else {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Missing EG(current_scope). this is bug");
-	}
-
-#endif
-}
-/* }}} */
-
 static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_scheme *scheme, zval *object, char **name, int *name_len, HashTable **ht TSRMLS_DC)
 {
 	char *n;
@@ -139,6 +106,9 @@ static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_sche
 		if (zend_hash_find(Z_OBJPROP_P(object), n, n_len, (void **)&htt) == FAILURE) {
 			return;
 		}
+
+		n = scheme->name;
+		n_len = scheme->name_len;
 	} else {
 		htt = Z_OBJPROP_P(object);
 
@@ -267,6 +237,109 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 
 	}
 }
+
+/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
+*/
+PHP_METHOD(protocolbuffers_message, __construct)
+{
+	zval *instance = getThis();
+	zval *params = NULL;
+	HashPosition pos;
+	HashTable *proto;
+	pb_scheme_container *container;
+	pb_scheme *scheme;
+	HashTable *htt;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"|a", &params) == FAILURE) {
+		return;
+	}
+
+	if (params != NULL) {
+		int i = 0;
+
+		PHP_PB_MESSAGE_CHECK_SCHEME
+
+		if (container->use_single_property > 0) {
+			zval *z;
+
+			MAKE_STD_ZVAL(z);
+			array_init(z);
+
+			Z_ADDREF_P(z);
+			zend_hash_update(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void **)&z, sizeof(zval), NULL);
+			htt = Z_ARRVAL_P(z);
+		}
+
+		for (i = 0; i < container->size; i++) {
+			char *n;
+			int n_len;
+			zval **tmp;
+			zval **e;
+			zval *value = NULL;
+
+			scheme = &container->scheme[i];
+
+			if (zend_hash_find(Z_ARRVAL_P(params), scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+				if (container->use_single_property > 0) {
+					MAKE_STD_ZVAL(value);
+					ZVAL_ZVAL(value, *tmp, 0, 1);
+					Z_ADDREF_P(value);
+					zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
+				} else {
+					if (zend_hash_find(Z_OBJPROP_P(instance), scheme->mangled_name, scheme->mangled_name_len, (void **)&e) == SUCCESS) {
+						zval *garvage = *e;
+
+						MAKE_STD_ZVAL(value);
+						ZVAL_ZVAL(value, *tmp, 0, 1);
+						Z_ADDREF_P(value);
+
+						*e = value;
+						zval_ptr_dtor(&garvage);
+					}
+				}
+			}
+
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
+*/
+PHP_METHOD(protocolbuffers_message, serializeToString)
+{
+	zval *instance = getThis();
+
+	php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance);
+}
+/* }}} */
+
+/* {{{ proto mixed ProtocolBuffersMessage::parseFromString()
+*/
+PHP_METHOD(protocolbuffers_message, parseFromString)
+{
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
+	/* I tried to lookup current scope from EG(current_execute_data). but it doesn't have current scope. we can't do anymore */
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersMessage::parseFromString can't work under PHP 5.3. please use ProtocolBuffers:decode directly");
+	return;
+#else
+	const char *data;
+	int data_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &data, &data_len) == FAILURE) {
+		return;
+	}
+	if (EG(called_scope)) {
+		php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_len, EG(called_scope)->name, EG(called_scope)->name_length);
+	} else {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Missing EG(current_scope). this is bug");
+	}
+
+#endif
+}
+/* }}} */
 
 /* {{{ proto mixed ProtocolBuffersMessage::mergeFrom($message)
 */
@@ -1121,6 +1194,7 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 
 
 static zend_function_entry php_protocolbuffers_message_methods[] = {
+	PHP_ME(protocolbuffers_message, __construct, arginfo_pb_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_message, serializeToString, arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, parseFromString, arginfo_pb_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_message, mergeFrom, arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
