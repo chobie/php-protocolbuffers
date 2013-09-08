@@ -238,6 +238,33 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 	}
 }
 
+static inline void php_pb_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
+{
+	// TODO: check message
+	switch (scheme->type) {
+		case TYPE_STRING:
+			if (Z_TYPE_P(vl) != IS_STRING) {
+				convert_to_string(vl);
+			}
+		break;
+		case TYPE_SINT32:
+		case TYPE_INT32:
+		case TYPE_UINT32:
+			if (Z_TYPE_P(vl) != IS_LONG) {
+				convert_to_long(vl);
+			}
+		break;
+		case TYPE_SINT64:
+		case TYPE_INT64:
+		case TYPE_UINT64:
+			if (Z_TYPE_P(vl) != IS_LONG) {
+				convert_to_long(vl);
+			}
+		break;
+	}
+
+}
+
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
 PHP_METHOD(protocolbuffers_message, __construct)
@@ -284,6 +311,8 @@ PHP_METHOD(protocolbuffers_message, __construct)
 				if (container->use_single_property > 0) {
 					MAKE_STD_ZVAL(value);
 					ZVAL_ZVAL(value, *tmp, 0, 1);
+                    php_pb_typeconvert(scheme, value TSRMLS_CC);
+
 					Z_ADDREF_P(value);
 					zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
 				} else {
@@ -292,6 +321,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 
 						MAKE_STD_ZVAL(value);
 						ZVAL_ZVAL(value, *tmp, 0, 1);
+						php_pb_typeconvert(scheme, value TSRMLS_CC);
 						Z_ADDREF_P(value);
 
 						*e = value;
@@ -795,29 +825,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 						MAKE_STD_ZVAL(vl);
 
 						ZVAL_ZVAL(vl, *tmp, 1, 0);
-
-						/* TODO: message type check */
-						switch (scheme->type) {
-							case TYPE_STRING:
-								if (Z_TYPE_P(vl) != IS_STRING) {
-									convert_to_string(vl);
-								}
-							break;
-							case TYPE_SINT32:
-							case TYPE_INT32:
-							case TYPE_UINT32:
-								if (Z_TYPE_P(vl) != IS_LONG) {
-									convert_to_long(vl);
-								}
-							break;
-							case TYPE_SINT64:
-							case TYPE_INT64:
-							case TYPE_UINT64:
-								if (Z_TYPE_P(vl) != IS_LONG) {
-									convert_to_long(vl);
-								}
-							break;
-						}
+						php_pb_typeconvert(scheme, vl TSRMLS_CC);
 
 						*e = vl;
 						zval_ptr_dtor(&garvage);
