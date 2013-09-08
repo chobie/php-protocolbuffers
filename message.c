@@ -290,7 +290,6 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		int i = 0;
 
 		PHP_PB_MESSAGE_CHECK_SCHEME
-
 		if (container->use_single_property > 0) {
 			zval *z = NULL;
 
@@ -322,6 +321,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 							ZVAL_ZVAL(p, *tmp, 1, 0);
 
 							object_init_ex(value, scheme->ce);
+							php_pb_properties_init(value, scheme->ce TSRMLS_CC);
 							zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
 						} else {
 							if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
@@ -346,14 +346,18 @@ PHP_METHOD(protocolbuffers_message, __construct)
 
 						if (scheme->type == TYPE_MESSAGE) {
 							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+								HashTable *hoge;
 								zval *p = NULL;
 								MAKE_STD_ZVAL(value);
 								MAKE_STD_ZVAL(p);
 
 								ZVAL_ZVAL(p, *tmp, 1, 0);
+								Z_SET_REFCOUNT_P(p, 1);
 
 								object_init_ex(value, scheme->ce);
+								php_pb_properties_init(value, scheme->ce TSRMLS_CC);
 								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
+								zval_ptr_dtor(&p);
 							} else {
 								if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
 									MAKE_STD_ZVAL(value);
@@ -370,10 +374,8 @@ PHP_METHOD(protocolbuffers_message, __construct)
 							php_pb_typeconvert(scheme, value TSRMLS_CC);
 						}
 
-						Z_ADDREF_P(value);
 						*e = value;
 						zval_ptr_dtor(&garvage);
-						zval_ptr_dtor(&value);
 					}
 				}
 			}

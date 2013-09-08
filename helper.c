@@ -416,6 +416,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 				MAKE_STD_ZVAL(z_obj);
 				object_init_ex(z_obj, s->ce);
+				php_pb_properties_init(z_obj, s->ce TSRMLS_CC);
 
 				pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
 
@@ -1553,6 +1554,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 		MAKE_STD_ZVAL(obj);
 		object_init_ex(obj, *ce);
+		php_pb_properties_init(obj, *ce TSRMLS_CC);
 
 		/* add unknown fields */
 		if (container->process_unknown_fields > 0) {
@@ -1665,6 +1667,44 @@ static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC
 	}
 }
 
+int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
+{
+	zval *pp;
+	int j;
+	pb_scheme_container *container;
+	pb_scheme *scheme;
+	HashTable *proto = NULL;
+	HashTable *properties = NULL;
+
+	pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+	ALLOC_HASHTABLE(properties);
+	zend_hash_init(properties, 0, NULL, NULL, 0);
+
+	if (container->use_single_property > 0) {
+		zval *prop = NULL;
+
+		MAKE_STD_ZVAL(prop);
+		array_init(prop);
+		zend_hash_update(properties, container->single_property_name, container->single_property_name_len, (void **)&pp, sizeof(zval), NULL);
+	} else {
+		for (j = 0; j < container->size; j++) {
+			scheme= &container->scheme[j];
+
+			MAKE_STD_ZVAL(pp);
+			if (scheme->repeated > 0) {
+				array_init(pp);
+			} else {
+				ZVAL_NULL(pp);
+			}
+
+			zend_hash_update(properties, scheme->name, scheme->name_len, (void **)&pp, sizeof(zval), NULL);
+		}
+	}
+
+	zend_merge_properties(object, properties, 1 TSRMLS_CC);
+
+	return 0;
+}
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
 	ZEND_ARG_INFO(0, zval)
