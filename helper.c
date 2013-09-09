@@ -314,19 +314,19 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			} else if (s->type == TYPE_BOOL) {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_BOOL(dz, value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else if (s->type == TYPE_INT32) {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, (int32_t)value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else if (s->type == TYPE_SINT32) {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			}
 		}
 		break;
@@ -351,14 +351,14 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 				MAKE_STD_ZVAL(dz);
 				ZVAL_DOUBLE(dz, d);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else {
 				uint64_t l;
 				memcpy(&l, data, 8);
 
 				MAKE_STD_ZVAL(dz);
 				ZVAL_DOUBLE(dz, l);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			}
 
 			data += 8;
@@ -387,13 +387,13 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				MAKE_STD_ZVAL(dz);
 				ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 			} else if (s->type == TYPE_BYTES) {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_STRINGL(dz, (char*)data, value, 1);
 
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else if (s->type == TYPE_MESSAGE) {
 				const char *n_buffer_end = data + value;
 				zval *z_obj = NULL;
@@ -468,7 +468,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							d = decode_double(_v);
 							MAKE_STD_ZVAL(dz);
 							ZVAL_DOUBLE(dz, d);
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 8;
 						}
@@ -483,7 +483,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 							MAKE_STD_ZVAL(dz);
 							ZVAL_DOUBLE(dz, a);
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 4;
 						}
@@ -496,7 +496,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int64_t)v2);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
 						break;
 						case TYPE_UINT64:
@@ -507,7 +507,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, v2);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
 						break;
 						break;
@@ -517,7 +517,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int32_t)value);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_FIXED64:
 						{
@@ -527,7 +527,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, l);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 8;
 						}
 						break;
@@ -548,7 +548,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							ZVAL_LONG(dz, (unsigned long)l);
 #endif
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 4;
 						}
@@ -559,7 +559,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_BOOL(dz, value);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_UINT32:
 							data = ReadVarint32FromArray(data, &value, data_end);
@@ -567,7 +567,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int32_t)value);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_ENUM:
 							data = ReadVarint32FromArray(data, &value, data_end);
@@ -575,7 +575,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int32_t)value);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_SFIXED32:
 						{
@@ -586,7 +586,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 							ZVAL_LONG(dz, (int32_t)l);
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 4;
 						}
 						break;
@@ -597,7 +597,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 							MAKE_STD_ZVAL(dz);
 							ZVAL_DOUBLE(dz, l);
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 8;
 						}
@@ -608,7 +608,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_SINT64:
 						{
@@ -618,7 +618,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							MAKE_STD_ZVAL(dz);
 							ZVAL_LONG(dz, (int64_t)zigzag_decode64(v2));
 
-							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
 						break;
 					}
@@ -688,7 +688,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			}
 
 			if (s != NULL) {
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz);
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			}
 
 			data += 4;
