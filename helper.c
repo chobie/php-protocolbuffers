@@ -1674,20 +1674,20 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	return 0;
 }
 
-static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz)
+static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
 {
 	char *name;
 	int name_len;
 	ulong hash;
 
 	if (container->use_single_property < 1) {
-		name = s->mangled_name;
+		name     = s->mangled_name;
 		name_len = s->mangled_name_len;
-		hash = s->mangled_name_h;
+		hash     = s->mangled_name_h;
 	} else {
-		name = s->name;
+		name     = s->name;
 		name_len = s->name_len;
-		hash = s->name_h;
+		hash     = s->name_h;
 	}
 
 	if (s->repeated) {
