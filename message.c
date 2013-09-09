@@ -290,6 +290,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		int i = 0;
 
 		PHP_PB_MESSAGE_CHECK_SCHEME
+
 		if (container->use_single_property > 0) {
 			zval *z = NULL;
 
@@ -342,8 +343,9 @@ PHP_METHOD(protocolbuffers_message, __construct)
 					zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
 				} else {
 					if (zend_hash_find(Z_OBJPROP_P(instance), scheme->mangled_name, scheme->mangled_name_len, (void **)&e) == SUCCESS) {
-						zval *garvage = *e;
+						zval *garvage = NULL;
 
+						garvage = *e;
 						if (scheme->type == TYPE_MESSAGE) {
 							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 								HashTable *hoge;
@@ -356,8 +358,9 @@ PHP_METHOD(protocolbuffers_message, __construct)
 
 								object_init_ex(value, scheme->ce);
 								php_pb_properties_init(value, scheme->ce TSRMLS_CC);
+
 								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
-								zval_ptr_dtor(&p);
+								Z_ADDREF_P(value);
 							} else {
 								if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
 									MAKE_STD_ZVAL(value);

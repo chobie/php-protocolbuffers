@@ -277,6 +277,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		hresult = Z_OBJPROP_PP(result);
 	}
 
+
 	while (data < data_end) {
 		pb_scheme *s = NULL;
 
@@ -1648,24 +1649,24 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 
 	pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
 	ALLOC_HASHTABLE(properties);
-	zend_hash_init(properties, 0, NULL, NULL, 0);
+	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (container->use_single_property > 0) {
 		MAKE_STD_ZVAL(pp);
 		array_init(pp);
+		Z_ADDREF_P(pp);
 		zend_hash_update(properties, container->single_property_name, container->single_property_name_len, (void **)&pp, sizeof(zval), NULL);
 	} else {
 		for (j = 0; j < container->size; j++) {
 			scheme= &container->scheme[j];
-
 			MAKE_STD_ZVAL(pp);
+
 			if (scheme->repeated > 0) {
 				array_init(pp);
 			} else {
 				ZVAL_NULL(pp);
 			}
 
-			Z_ADDREF_P(pp);
 			zend_hash_update(properties, scheme->name, scheme->name_len, (void **)&pp, sizeof(zval), NULL);
 		}
 	}
@@ -1712,15 +1713,13 @@ static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme
 				}
 
 				zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&dz, sizeof(dz), NULL);
-				Z_ADDREF_P(dz);
+				//Z_ADDREF_P(dz);
 			}
 		}
 	} else {
 		Z_ADDREF_P(dz);
 		zend_hash_quick_update(hresult, name, name_len, hash, (void **)&dz, sizeof(dz), NULL);
 	}
-
-	zval_ptr_dtor(&dz);
 }
 
 
