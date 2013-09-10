@@ -36,15 +36,6 @@ class UnknownFields
 $bytes = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "003_has_message.bin");
 
 $data = ProtocolBuffers::decode("UnknownFields", $bytes);
-$unk = $data->getUnknownFieldSet();
-if ($unk instanceof ProtocolBuffersUnknownFieldSet) {
-	$u = $unk->getField(1);
-	foreach($u->getAsLengthDelimitedList() as $d) {echo $d . PHP_EOL;};
-	$u = $unk->getField(2);
-	foreach($u->getAsVarintList() as $d) {echo $d . PHP_EOL;};
-} else {
-	var_dump($u);
-}
 --EXPECT--
 chobie
 20
