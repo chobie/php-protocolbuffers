@@ -186,7 +186,7 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 						char *n;
 						int n_len;
 						pb_scheme_container *c;
-						HashTable *p, *_htt, *_hts;
+						HashTable *p = NULL, *_htt = NULL, *_hts = NULL;
 
 						PHP_PB_MESSAGE_CHECK_SCHEME2(*tmp, &c, p)
 						php_protocolbuffers_get_hash(c, c->scheme, *tmp, &n, &n_len, &_htt TSRMLS_CC);
