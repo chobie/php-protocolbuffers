@@ -79,7 +79,10 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->container->use_single_property = 0;
 	object->container->use_wakeup_and_sleep = 0;
 	object->container->single_property_name = NULL;
+	object->container->single_property_name_len = 0;
 	object->container->single_property_h = 0;
+	object->container->orig_single_property_name = NULL;
+	object->container->orig_single_property_name_len = 0;
 	object->container->size = 0;
 	object->container->scheme = NULL;
 	object->container->process_unknown_fields = 0;
