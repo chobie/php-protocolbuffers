@@ -350,17 +350,17 @@ PHP_METHOD(protocolbuffers_message, __construct)
 							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 								HashTable *hoge;
 								zval *p = NULL;
+
 								MAKE_STD_ZVAL(value);
 								MAKE_STD_ZVAL(p);
-
 								ZVAL_ZVAL(p, *tmp, 1, 0);
 								Z_SET_REFCOUNT_P(p, 1);
 
 								object_init_ex(value, scheme->ce);
 								php_pb_properties_init(value, scheme->ce TSRMLS_CC);
 
-								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
-								Z_ADDREF_P(value);
+								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, *tmp);
+								zval_ptr_dtor(&p);
 							} else {
 								if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
 									MAKE_STD_ZVAL(value);
@@ -373,7 +373,9 @@ PHP_METHOD(protocolbuffers_message, __construct)
 							}
 						} else {
 							MAKE_STD_ZVAL(value);
-							ZVAL_ZVAL(value, *tmp, 0, 1);
+							ZVAL_ZVAL(value, *tmp, 1, 0);
+
+							Z_SET_REFCOUNT_P(value, 1);
 							php_pb_typeconvert(scheme, value TSRMLS_CC);
 						}
 
