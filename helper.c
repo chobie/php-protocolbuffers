@@ -456,8 +456,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						zval **arr2 = NULL;
 
 						if (zend_hash_quick_find(hresult, name, name_length, name_hash, (void **)&arr2) == SUCCESS) {
-							zval *tt;
-
 							Z_ADDREF_P(z_obj);
 							zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&z_obj, sizeof(zval *), NULL);
 						}
@@ -1110,12 +1108,9 @@ void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	long v;
-
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
 	}
-	v = Z_LVAL_PP(element);
 
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
@@ -1497,7 +1492,6 @@ int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 
 int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, int data_len, const char *klass, int klass_len)
 {
-	long buffer_size = 0;
 	zval *obj = NULL;
 	pb_scheme_container *container;
 	const char *data_end, *res;
@@ -1508,7 +1502,6 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		return 1;
 	}
 
-	buffer_size = (long)data + sizeof(data);
 	err = pb_get_scheme_container(klass, klass_len, &container, NULL TSRMLS_CC);
 	if (err) {
 		if (EG(exception)) {
@@ -1903,7 +1896,7 @@ PHP_METHOD(protocolbuffers_helper, writeVarint32)
 	long val;
 	int32_t value;
 	uint8_t bytes[kMaxVarint32Bytes];
-	int size = 0, i;
+	int size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
@@ -1936,6 +1929,7 @@ PHP_METHOD(protocolbuffers_helper, writeVarint32)
 PHP_METHOD(protocolbuffers_helper, writeVarint64)
 {
 	long val;
+	int size = 0;
 	int64_t value;
 	uint8_t bytes[kMaxVarintBytes];
 
@@ -1944,8 +1938,6 @@ PHP_METHOD(protocolbuffers_helper, writeVarint64)
 		return;
 	}
 	value = val;
-
-	int size = 0, i;
 
 	while (value > 0x7F) {
 		bytes[size++] = (value & 0x7F) | 0x80;

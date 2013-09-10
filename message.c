@@ -430,7 +430,6 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 	zval *instance = getThis();
 	zval *object;
 	pb_scheme_container *container = NULL;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	char *n;
 	int n_len;
@@ -465,7 +464,6 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 PHP_METHOD(protocolbuffers_message, current)
 {
 	zval *instance = getThis();
-	int err = 0;
 	pb_scheme_container *container;
 	HashTable *proto = NULL;
 	php_protocolbuffers_message *message;
@@ -964,7 +962,7 @@ PHP_METHOD(protocolbuffers_message, has)
 	zval *instance = getThis();
 	char *name;
 	int name_len;
-	HashTable *proto = NULL, *hash = NULL, *htt;
+	HashTable *proto = NULL, *htt;
 	pb_scheme *scheme;
 	pb_scheme_container *container;
 	char *n;
@@ -1035,7 +1033,7 @@ PHP_METHOD(protocolbuffers_message, get)
 	zval *instance = getThis();
 	char *name;
 	int name_len;
-	HashTable *proto = NULL, *hash = NULL, *htt;
+	HashTable *proto = NULL, *htt;
 	pb_scheme *scheme;
 	pb_scheme_container *container;
 	char *n;
@@ -1103,11 +1101,9 @@ PHP_METHOD(protocolbuffers_message, set)
 	int name_len, i = 0;
 	pb_scheme_container *container;
 	pb_scheme *scheme;
-	HashTable *proto;
-	php_protocolbuffers_message *message;
 	char *n;
 	int n_len;
-	HashTable *htt;
+	HashTable *htt = NULL, *proto = NULL;
 	zval **e;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1117,7 +1113,6 @@ PHP_METHOD(protocolbuffers_message, set)
 
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	for (i = 0; i < container->size; i++) {
 		scheme = &container->scheme[i];
@@ -1191,13 +1186,13 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 	zval *extension_registry = NULL;
 	zval *field_descriptor = NULL;
 	zend_class_entry *ce;
-	HashTable *proto = NULL, *htt = NULL;
+	HashTable *htt = NULL;
 	char *name, *n;
 	int name_len, n_len;
 	pb_scheme_container *container;
-	pb_scheme *scheme;
 	zval **e, **b;
 	int is_mangled = 0;
+	HashTable *proto = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {
@@ -1256,8 +1251,7 @@ PHP_METHOD(protocolbuffers_message, setExtension)
 	char *name, *n;
 	int name_len, n_len;
 	pb_scheme_container *container;
-	pb_scheme *scheme;
-	zval **e, *value, **b;
+	zval *value, **b;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
