@@ -1551,6 +1551,8 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 			MAKE_STD_ZVAL(unknown);
 
 			object_init_ex(unknown, protocol_buffers_unknown_field_set_class_entry);
+			php_pb_unknown_field_properties_init(unknown TSRMLS_CC);
+
 			zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
 			if (zend_hash_find(Z_OBJPROP_P(obj), (char*)unknown_name, unknown_name_len, (void **)&un) == FAILURE) {
 				zend_hash_update(Z_OBJPROP_P(obj), unknown_name, unknown_name_len, (void **)&unknown, sizeof(unknown), NULL);
