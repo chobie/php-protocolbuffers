@@ -303,8 +303,6 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		}
 
 		for (i = 0; i < container->size; i++) {
-			char *n = NULL;
-			int n_len;
 			zval **tmp = NULL;
 			zval **e = NULL;
 			zval *value = NULL;
@@ -348,7 +346,6 @@ PHP_METHOD(protocolbuffers_message, __construct)
 						garvage = *e;
 						if (scheme->type == TYPE_MESSAGE) {
 							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-								HashTable *hoge;
 								zval *p = NULL;
 
 								MAKE_STD_ZVAL(value);
@@ -438,7 +435,6 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 	char *n;
 	int n_len;
 	HashTable *htt = NULL, *hts = NULL;
-	int err;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"z", &object) == FAILURE) {
@@ -470,7 +466,6 @@ PHP_METHOD(protocolbuffers_message, current)
 {
 	zval *instance = getThis();
 	int err = 0;
-	zend_class_entry *ce;
 	pb_scheme_container *container;
 	HashTable *proto = NULL;
 	php_protocolbuffers_message *message;
@@ -511,8 +506,6 @@ PHP_METHOD(protocolbuffers_message, current)
 PHP_METHOD(protocolbuffers_message, key)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
@@ -529,8 +522,6 @@ PHP_METHOD(protocolbuffers_message, key)
 PHP_METHOD(protocolbuffers_message, next)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
@@ -547,8 +538,6 @@ PHP_METHOD(protocolbuffers_message, next)
 PHP_METHOD(protocolbuffers_message, rewind)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
@@ -569,8 +558,6 @@ PHP_METHOD(protocolbuffers_message, rewind)
 PHP_METHOD(protocolbuffers_message, valid)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
@@ -591,15 +578,10 @@ PHP_METHOD(protocolbuffers_message, valid)
 PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
-	php_protocolbuffers_message *message;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
-
 	if (container->process_unknown_fields > 0) {
 		char *uname;
 		int uname_len;
@@ -624,14 +606,11 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 PHP_METHOD(protocolbuffers_message, clear)
 {
 	zval *instance = getThis();
-	int err = 0, i = 0;
-	zend_class_entry *ce;
+	int i = 0;
 	HashTable *proto = NULL, *hash = NULL;
 	pb_scheme_container *container;
-	php_protocolbuffers_message *message;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(instance);
@@ -708,11 +687,8 @@ PHP_METHOD(protocolbuffers_message, clear)
 PHP_METHOD(protocolbuffers_message, __call)
 {
 	zval *instance = getThis();
-	int err = 0;
-	zend_class_entry *ce;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
-	php_protocolbuffers_message *message;
 	char *name;
 	int name_len;
 	zval *params;
@@ -791,8 +767,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
-
 	for (i = 0; i < container->size; i++) {
 		scheme = &container->scheme[i];
 
@@ -993,11 +967,8 @@ PHP_METHOD(protocolbuffers_message, has)
 	HashTable *proto = NULL, *hash = NULL, *htt;
 	pb_scheme *scheme;
 	pb_scheme_container *container;
-	php_protocolbuffers_message *message;
-	zend_class_entry *ce;
 	char *n;
 	int n_len;
-	int err;
 	int i;
 	zval **e;
 
@@ -1007,7 +978,6 @@ PHP_METHOD(protocolbuffers_message, has)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	for (i = 0; i < container->size; i++) {
 		scheme = &container->scheme[i];
@@ -1068,11 +1038,8 @@ PHP_METHOD(protocolbuffers_message, get)
 	HashTable *proto = NULL, *hash = NULL, *htt;
 	pb_scheme *scheme;
 	pb_scheme_container *container;
-	php_protocolbuffers_message *message;
-	zend_class_entry *ce;
 	char *n;
 	int n_len;
-	int err;
 	int i;
 	zval **e;
 
@@ -1082,7 +1049,6 @@ PHP_METHOD(protocolbuffers_message, get)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	for (i = 0; i < container->size; i++) {
 		scheme = &container->scheme[i];

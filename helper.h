@@ -98,9 +98,9 @@ static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, cons
     return 0;
 }
 
-static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
+void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
 
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
+void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
 
 static inline const char* ReadVarint32FromArray(const char* buffer, uint* value, const char* buffer_end) {
 	/**
@@ -192,7 +192,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
 	return NULL;
 }
 
-static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC);
+/* static inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC);
 
 
 #define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser, int is_packed

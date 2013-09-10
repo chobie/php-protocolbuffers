@@ -1582,7 +1582,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 	return 0;
 }
 
-static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
@@ -1600,7 +1600,7 @@ static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_D
 	}
 }
 
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
@@ -1690,7 +1690,7 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	return 0;
 }
 
-static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
+/* static inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
 {
 	char *name;
 	int name_len;
