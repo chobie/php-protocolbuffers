@@ -2,6 +2,19 @@
 #include "unknown_field_set.h"
 #include "unknown_field.h"
 
+static char *single_property_name_default = "_properties";
+static int single_property_name_default_len = sizeof(single_property_name_default);
+
+char *pb_get_default_single_property_name()
+{
+	return single_property_name_default;
+}
+
+int pb_get_default_single_property_name_len()
+{
+	return single_property_name_default_len;
+}
+
 void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
 {
 	int n, sz;
@@ -149,6 +162,8 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 			int prop_len;
 
 			zend_mangle_property_name(&prop, &prop_len, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
+			container->orig_single_property_name = single_property_name_default;
+			container->orig_single_property_name_len = sizeof(single_property_name_default);
 			container->single_property_name = prop;
 			container->single_property_name_len = prop_len;
 		}
@@ -1504,7 +1519,6 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		return 1;
 	}
 
-
 	data_end = data + data_len;
 
 	{
@@ -1654,8 +1668,7 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	if (container->use_single_property > 0) {
 		MAKE_STD_ZVAL(pp);
 		array_init(pp);
-		Z_ADDREF_P(pp);
-		zend_hash_update(properties, container->single_property_name, container->single_property_name_len, (void **)&pp, sizeof(zval), NULL);
+		zend_hash_update(properties, container->orig_single_property_name, container->orig_single_property_name_len, (void **)&pp, sizeof(zval), NULL);
 	} else {
 		for (j = 0; j < container->size; j++) {
 			scheme= &container->scheme[j];
@@ -1717,7 +1730,7 @@ static /* inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme
 			}
 		}
 	} else {
-		Z_ADDREF_P(dz);
+		//Z_ADDREF_P(dz);
 		zend_hash_quick_update(hresult, name, name_len, hash, (void **)&dz, sizeof(dz), NULL);
 	}
 }

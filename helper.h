@@ -236,6 +236,8 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 void php_pb_helper_class(TSRMLS_D);
 int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC);
+char *pb_get_default_single_property_name();
+int pb_get_default_single_property_name_len();
 
 void php_pb_helper_debug_zval(zval **value TSRMLS_DC);
 #endif

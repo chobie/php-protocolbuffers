@@ -1,5 +1,5 @@
 --TEST--
-Check for protocol buffers unknown fields implementations
+Check for protocol buffers use single property implementations
 --FILE--
 <?php
 class SingleProperty

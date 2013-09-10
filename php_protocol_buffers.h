@@ -186,6 +186,8 @@ typedef struct {
 	//int extension_range_min;
 	pb_scheme *scheme;
 	int use_single_property;
+	char *orig_single_property_name;
+	int orig_single_property_name_len;
 	char *single_property_name;
 	int single_property_name_len;
 	ulong single_property_h;

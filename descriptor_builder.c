@@ -200,6 +200,8 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 		descriptor->container->use_single_property = 0;
 		descriptor->container->process_unknown_fields = 0;
 		descriptor->container->use_wakeup_and_sleep = 0;
+		descriptor->container->orig_single_property_name = pb_get_default_single_property_name();
+		descriptor->container->orig_single_property_name_len = pb_get_default_single_property_name_len();
 		{
 			char *prop;
 			int prop_len;
@@ -342,6 +344,13 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 							zend_mangle_property_name(&(descriptor->container->single_property_name), &(descriptor->container->single_property_name_len), (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
 							descriptor->container->single_property_h = zend_inline_hash_func(descriptor->container->single_property_name, descriptor->container->single_property_name_len+1);
+
+							if (memcmp(descriptor->container->orig_single_property_name, Z_STRVAL_P(val), Z_STRLEN_P(val)) != 0) {
+								descriptor->container->orig_single_property_name = emalloc(sizeof(char*) * Z_STRLEN_P(val));
+								memcpy(descriptor->container->orig_single_property_name, Z_STRVAL_P(val), Z_STRLEN_P(val));
+								descriptor->container->orig_single_property_name[Z_STRLEN_P(val)] = '\0';
+								descriptor->container->orig_single_property_name_len = Z_STRLEN_P(val)+1;
+							}
 						}
 
 						val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, "process_unknown_fields", sizeof("process_unknown_fields")-1, 0 TSRMLS_CC);
@@ -469,7 +478,7 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	PHP_ME(protocolbuffers_descriptor_builder, addField,  arginfo_pb_descriptor_builder_add_field, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, getName,   arginfo_pb_descriptor_builder_get_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_pb_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, build,	 arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, setExtension, arginfo_pb_descriptor_builder_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, setExtensionRange, arginfo_pb_descriptor_builder_set_extension_range, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_pb_descriptor_builder_get_options, ZEND_ACC_PUBLIC)

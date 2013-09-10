@@ -326,6 +326,10 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 					efree((*element)->single_property_name);
 				}
 
+				if (memcmp((*element)->orig_single_property_name, pb_get_default_single_property_name(), pb_get_default_single_property_name_len()) != 0) {
+					efree((*element)->orig_single_property_name);
+				}
+
 				if ((*element)->scheme != NULL) {
 					efree((*element)->scheme);
 				}
