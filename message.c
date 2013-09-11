@@ -400,6 +400,66 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
+static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len)
+{
+	char *n;
+	int n_len, i;
+	HashTable *htt = NULL;
+	pb_scheme *scheme;
+	zval **e;
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &container->scheme[i];
+
+		if (strcmp(scheme->name, name) == 0) {
+			// OK
+			break;
+		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
+			break;
+		}
+		scheme = NULL;
+	}
+
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "get method can't use for extension value", name);
+		return;
+	}
+
+	if (container->use_single_property > 0) {
+		n     = container->single_property_name;
+		n_len = container->single_property_name_len;
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+			return;
+		}
+	} else {
+		htt = Z_OBJPROP_P(instance);
+
+		n = scheme->mangled_name;
+		n_len = scheme->mangled_name_len;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		if (Z_TYPE_PP(e) == IS_NULL) {
+			RETURN_FALSE;
+		} else if (Z_TYPE_PP(e) == IS_ARRAY) {
+			if (zend_hash_num_elements(Z_ARRVAL_PP(e)) < 1) {
+				RETURN_FALSE;
+			} else {
+				RETURN_TRUE;
+			}
+		} else {
+			RETURN_TRUE;
+		}
+	}
+}
+
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
 PHP_METHOD(protocolbuffers_message, __construct)
@@ -1020,19 +1080,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 					zend_hash_update(htt, n, n_len, (void **)&t, sizeof(zval), NULL);
 				}
 			case MAGICMETHOD_HAS:
-				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-					if (Z_TYPE_PP(e) == IS_NULL) {
-						RETURN_FALSE;
-					} else if (Z_TYPE_PP(e) == IS_ARRAY) {
-						if (zend_hash_num_elements(Z_ARRVAL_PP(e)) < 1) {
-							RETURN_FALSE;
-						} else {
-							RETURN_TRUE;
-						}
-					} else {
-						RETURN_TRUE;
-					}
-				}
+				php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len);
 			break;
 		}
 	}
@@ -1046,13 +1094,8 @@ PHP_METHOD(protocolbuffers_message, has)
 	zval *instance = getThis();
 	char *name;
 	int name_len;
-	HashTable *proto = NULL, *htt;
-	pb_scheme *scheme;
+	HashTable *proto = NULL;
 	pb_scheme_container *container;
-	char *n;
-	int n_len;
-	int i;
-	zval **e;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {
@@ -1060,53 +1103,7 @@ PHP_METHOD(protocolbuffers_message, has)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-
-	for (i = 0; i < container->size; i++) {
-		scheme = &container->scheme[i];
-
-		if (strcmp(scheme->name, name) == 0) {
-			// OK
-			break;
-		}
-		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
-			break;
-		}
-		scheme = NULL;
-	}
-
-	if (scheme == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
-		return;
-	}
-
-
-	if (container->use_single_property > 0) {
-		n     = container->single_property_name;
-		n_len = container->single_property_name_len;
-
-		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
-			return;
-		}
-	} else {
-		htt = Z_OBJPROP_P(instance);
-
-		n = scheme->mangled_name;
-		n_len = scheme->mangled_name_len;
-	}
-
-	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		if (Z_TYPE_PP(e) == IS_NULL) {
-			RETURN_FALSE;
-		} else if (Z_TYPE_PP(e) == IS_ARRAY) {
-			if (zend_hash_num_elements(Z_ARRVAL_PP(e)) < 1) {
-				RETURN_FALSE;
-			} else {
-				RETURN_TRUE;
-			}
-		} else {
-			RETURN_TRUE;
-		}
-	}
+	php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len);
 }
 /* }}} */
 
