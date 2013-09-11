@@ -902,17 +902,13 @@ PHP_METHOD(protocolbuffers_message, __call)
 							MAKE_STD_ZVAL(nval);
 							array_init(nval);
 							flag = 1;
-						} else if (zend_hash_num_elements(Z_ARRVAL_PP(e)) == 0) {
-							MAKE_STD_ZVAL(nval);
-							array_init(nval);
-							flag = 1;
 						} else {
 							nval = *e;
 						}
 						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
 
 						MAKE_STD_ZVAL(val);
-						ZVAL_ZVAL(val, *tmp, 0, 1);
+						ZVAL_ZVAL(val, *tmp, 1, 0);
 
 						Z_ADDREF_P(nval);
 						zend_hash_next_index_insert(Z_ARRVAL_P(nval), &val, sizeof(zval *), NULL);
@@ -1315,7 +1311,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, has, arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get, arginfo_pb_message_get, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, set, arginfo_pb_message_set, ZEND_ACC_PUBLIC)
-    	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setExtension, arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearExtension, arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
 	/* iterator */
