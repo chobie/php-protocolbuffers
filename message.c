@@ -325,9 +325,75 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 		RETURN_ZVAL(*e, 1, 0);
 	}
-
 }
 
+static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, zval *value)
+{
+	int i;
+	pb_scheme *scheme;
+	zval **e;
+	HashTable *htt;
+	char *n;
+	int n_len;
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &container->scheme[i];
+
+		if (strcmp(scheme->name, name) == 0) {
+			// OK
+			break;
+		}
+		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
+			break;
+		}
+		scheme = NULL;
+	}
+
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't use for extension value", name);
+		return;
+	}
+
+	if (container->use_single_property > 0) {
+		n     = container->single_property_name;
+		n_len = container->single_property_name_len;
+
+		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
+			return;
+		}
+	} else {
+		htt = Z_OBJPROP_P(instance);
+
+		n = scheme->mangled_name;
+		n_len = scheme->mangled_name_len;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		zval *vl;
+
+		if (container->use_single_property > 0) {
+			MAKE_STD_ZVAL(vl);
+			ZVAL_ZVAL(vl, *e, 1, 1);
+			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+
+			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
+		} else {
+			zval *garvage = *e;
+
+			MAKE_STD_ZVAL(vl);
+			ZVAL_ZVAL(vl, value, 1, 1);
+
+			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+			*e = vl;
+			zval_ptr_dtor(&garvage);
+		}
+	}
+}
 
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
@@ -889,52 +955,12 @@ PHP_METHOD(protocolbuffers_message, __call)
 				php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len);
 			break;
 			case MAGICMETHOD_SET:
-				if (scheme->repeated == 0) {
-					if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
-						zval *z;
-						MAKE_STD_ZVAL(z);
-						ZVAL_NULL(z);
+			{
+				zval **tmp = NULL;
 
-						Z_ADDREF_P(z);
-						zend_hash_update(htt, n, n_len, (void **)&z, sizeof(zval), NULL);
-						zval_ptr_dtor(&z);
-						z = NULL;
-					}
-					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-						zval **tmp, *garvage;
-
-						garvage = *e;
-
-						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-						MAKE_STD_ZVAL(vl);
-
-						ZVAL_ZVAL(vl, *tmp, 1, 0);
-						php_pb_typeconvert(scheme, vl TSRMLS_CC);
-
-						*e = vl;
-						zval_ptr_dtor(&garvage);
-						//zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
-					}
-				} else {
-					if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-						zval **tmp;
-						zval_ptr_dtor(e);
-
-						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-
-						if (Z_TYPE_PP(tmp) != IS_ARRAY) {
-							zend_error(E_ERROR, "Can't call method %s::%s(). only accept array parameter for repeated fields", Z_OBJCE_P(instance)->name, name);
-							return;
-						}
-
-						MAKE_STD_ZVAL(vl);
-						ZVAL_ZVAL(vl, *tmp, 1, 0);
-						Z_ADDREF_P(vl);
-
-						zend_hash_update(htt, n, n_len, (void **)&vl, sizeof(zval), NULL);
-					}
-					return;
-				}
+				zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+				php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len, *tmp);
+			}
 			break;
 			case MAGICMETHOD_APPEND:
 				if (scheme->repeated > 0) {
@@ -1108,80 +1134,15 @@ PHP_METHOD(protocolbuffers_message, set)
 	char *name;
 	int name_len, i = 0;
 	pb_scheme_container *container;
-	pb_scheme *scheme;
-	char *n;
-	int n_len;
-	HashTable *htt = NULL, *proto = NULL;
-	zval **e;
+	HashTable *proto = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &value) == FAILURE) {
 		return;
 	}
 
-
 	PHP_PB_MESSAGE_CHECK_SCHEME
-
-	for (i = 0; i < container->size; i++) {
-		scheme = &container->scheme[i];
-
-		if (strcmp(scheme->name, name) == 0) {
-			// OK
-			break;
-		}
-		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
-			break;
-		}
-		scheme = NULL;
-	}
-
-	if (scheme == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
-		return;
-	}
-
-	if (scheme->is_extension) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't use for extension value", name);
-		return;
-	}
-
-	if (container->use_single_property > 0) {
-		n     = container->single_property_name;
-		n_len = container->single_property_name_len;
-
-		if (zend_hash_find(Z_OBJPROP_P(instance), n, n_len, (void **)&htt) == FAILURE) {
-			return;
-		}
-	} else {
-		htt = Z_OBJPROP_P(instance);
-
-		n = scheme->mangled_name;
-		n_len = scheme->mangled_name_len;
-	}
-
-	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		zval *vl;
-
-		if (container->use_single_property > 0) {
-			MAKE_STD_ZVAL(vl);
-			ZVAL_ZVAL(vl, *e, 0, 1);
-			php_pb_typeconvert(scheme, vl TSRMLS_CC);
-
-			Z_ADDREF_P(vl);
-			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
-		} else {
-			zval *garvage = *e;
-
-			MAKE_STD_ZVAL(vl);
-			ZVAL_ZVAL(vl, value, 0, 1);
-
-			php_pb_typeconvert(scheme, vl TSRMLS_CC);
-			Z_ADDREF_P(vl);
-			*e = vl;
-			zval_ptr_dtor(&garvage);
-		}
-	}
-
+	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, value);
 }
 
 
