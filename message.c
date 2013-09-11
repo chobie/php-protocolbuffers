@@ -93,6 +93,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_append, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get_extension, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
@@ -1125,7 +1130,7 @@ PHP_METHOD(protocolbuffers_message, get)
 }
 /* }}} */
 
-/* {{{ proto ProtocolBuffers_FieldDescriptor ProtocolBuffersMessage::set($name, $value)
+/* {{{ proto void ProtocolBuffersMessage::set($name, $value)
 */
 PHP_METHOD(protocolbuffers_message, set)
 {
@@ -1144,6 +1149,15 @@ PHP_METHOD(protocolbuffers_message, set)
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, value);
 }
+
+
+/* {{{ proto void ProtocolBuffersMessage::append($name, $value)
+*/
+PHP_METHOD(protocolbuffers_message, append)
+{
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Not implemented yet");
+}
+
 
 
 /* {{{ proto mixed ProtocolBuffersMessage::getExtension(string $name)
@@ -1284,6 +1298,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, has, arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get, arginfo_pb_message_get, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, set, arginfo_pb_message_set, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, append, arginfo_pb_message_append, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getExtension, arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setExtension, arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearExtension, arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
