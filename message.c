@@ -814,7 +814,7 @@ PHP_METHOD(protocolbuffers_message, valid)
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
-	if (message->offset < message->max) {
+	if (-1 < message->offset && message->offset < message->max) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
