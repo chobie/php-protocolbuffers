@@ -1025,6 +1025,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 			zval **tmp = NULL;
 
 			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+			Z_ADDREF_PP(tmp);
 			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
 		}
 		break;
