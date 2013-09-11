@@ -426,35 +426,32 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
+	if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
+		zend_error(E_ERROR, "not initialized");
+		return;
+	}
+
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
-			zend_error(E_ERROR, "not initialized");
-			return;
+		zval *nval = NULL, *val = NULL;
+		int flag = 0;
+
+		if (Z_TYPE_PP(e) != IS_ARRAY) {
+			MAKE_STD_ZVAL(nval);
+			array_init(nval);
+			flag = 1;
+		} else {
+			nval = *e;
 		}
 
-		if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-			zval *nval = NULL, *val = NULL, **tmp = NULL;
-			int flag = 0;
+		MAKE_STD_ZVAL(val);
+		ZVAL_ZVAL(val, value, 1, 1);
 
-			if (Z_TYPE_PP(e) != IS_ARRAY) {
-				MAKE_STD_ZVAL(nval);
-				array_init(nval);
-				flag = 1;
-			} else {
-				nval = *e;
-			}
-			zend_hash_get_current_data(Z_ARRVAL_P(value), (void **)&tmp);
+		Z_ADDREF_P(nval);
+		zend_hash_next_index_insert(Z_ARRVAL_P(nval), &val, sizeof(zval *), NULL);
+		zend_hash_update(htt, n, n_len, (void **)&nval, sizeof(zval *), NULL);
 
-			MAKE_STD_ZVAL(val);
-			ZVAL_ZVAL(val, *tmp, 1, 0);
-
-			Z_ADDREF_P(nval);
-			zend_hash_next_index_insert(Z_ARRVAL_P(nval), &val, sizeof(zval *), NULL);
-			zend_hash_update(htt, n, n_len, (void **)&nval, sizeof(zval *), NULL);
-
-			if (flag == 1) {
-				zval_ptr_dtor(&nval);
-			}
+		if (flag == 1) {
+			zval_ptr_dtor(&nval);
 		}
 	}
 }
@@ -1030,7 +1027,13 @@ PHP_METHOD(protocolbuffers_message, __call)
 		}
 		break;
 		case MAGICMETHOD_APPEND:
-			php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, params);
+		{
+			zval **tmp = NULL;
+
+			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+			Z_ADDREF_PP(tmp);
+			php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
+		}
 		break;
 		case MAGICMETHOD_CLEAR:
 			php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
@@ -1109,7 +1112,20 @@ PHP_METHOD(protocolbuffers_message, set)
 */
 PHP_METHOD(protocolbuffers_message, append)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Not implemented yet");
+	zval *instance = getThis();
+	zval *value;
+	char *name;
+	int name_len, i = 0;
+	pb_scheme_container *container;
+	HashTable *proto = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sz", &name, &name_len, &value) == FAILURE) {
+		return;
+	}
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0, value);
 }
 
 
