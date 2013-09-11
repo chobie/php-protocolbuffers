@@ -4,6 +4,14 @@
 #include "unknown_field_set.h"
 #include "extension_registry.h"
 
+enum ProtocolBuffers_MagicMethod {
+	MAGICMETHOD_GET    = 1,
+	MAGICMETHOD_SET    = 2,
+	MAGICMETHOD_APPEND = 3,
+	MAGICMETHOD_CLEAR  = 4,
+	MAGICMETHOD_HAS    = 5,
+};
+
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
 
 #define PHP_PB_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
@@ -826,12 +834,12 @@ PHP_METHOD(protocolbuffers_message, __call)
 		}
 
 		switch (flag) {
-			case 1: /* get */
+			case MAGICMETHOD_GET:
 				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 					RETVAL_ZVAL(*e, 1, 0);
 				}
 			break;
-			case 2: /* set */
+			case MAGICMETHOD_SET:
 				if (scheme->repeated == 0) {
 					if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
 						zval *z;
@@ -879,7 +887,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 					return;
 				}
 			break;
-			case 3: /* append */
+			case MAGICMETHOD_APPEND:
 				if (scheme->repeated > 0) {
 					if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
 						zval *z;
@@ -923,7 +931,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 					return;
 				}
 			break;
-			case 4:  /* clear */
+			case MAGICMETHOD_CLEAR:
 				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 					zval *t;
 					MAKE_STD_ZVAL(t);
@@ -931,7 +939,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 
 					zend_hash_update(htt, n, n_len, (void **)&t, sizeof(zval), NULL);
 				}
-			case 5:  /* has*/
+			case MAGICMETHOD_HAS:
 				if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 					if (Z_TYPE_PP(e) == IS_NULL) {
 						RETURN_FALSE;
