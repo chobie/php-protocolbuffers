@@ -283,7 +283,7 @@ static inline void php_pb_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
 }
 
 
-static pb_scheme *php_protocolbuffers_message_get_scheme_by_name(pb_scheme_container *container, char *name, int name_len)
+static pb_scheme *php_protocolbuffers_message_get_scheme_by_name(pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	int i = 0;
 	pb_scheme *scheme = NULL;
@@ -294,8 +294,10 @@ static pb_scheme *php_protocolbuffers_message_get_scheme_by_name(pb_scheme_conta
 		if (strcmp(scheme->name, name) == 0) {
 			break;
 		}
-		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name) == 0) {
-			break;
+		if (name2 != NULL) {
+			if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, name2) == 0) {
+				break;
+			}
 		}
 		scheme = NULL;
 	}
@@ -328,7 +330,7 @@ static void php_protocolbuffers_message_get_hash_table_by_container(pb_scheme_co
 	*name_len = n_len;
 }
 
-static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len)
+static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
 	int n_len, i;
@@ -336,7 +338,7 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	pb_scheme *scheme;
 	zval **e;
 
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len);
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
@@ -354,7 +356,7 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, zval *value)
+static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	int i;
 	pb_scheme *scheme;
@@ -363,7 +365,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	char *n;
 	int n_len;
 
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len);
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
@@ -397,7 +399,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, zval *value)
+static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	int i;
 	pb_scheme *scheme;
@@ -406,7 +408,7 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 	char *n;
 	int n_len;
 
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len);
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
@@ -457,7 +459,7 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 	}
 }
 
-static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len)
+static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
 	int n_len, i;
@@ -465,7 +467,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	pb_scheme *scheme;
 	zval **e;
 
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len);
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
@@ -492,7 +494,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len)
+static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
 	int n_len, i;
@@ -500,7 +502,7 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 	pb_scheme *scheme;
 	zval **e;
 
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len);
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
@@ -958,11 +960,11 @@ PHP_METHOD(protocolbuffers_message, __call)
 		if (flag == 0) {
 			if (i+2 < name_len && name[i] == 'g' && name[i+1] == 'e' && name[i+2] == 't') {
 				i += 2;
-				flag = 1;
+				flag = MAGICMETHOD_GET;
 				continue;
 			} else if (i+2 < name_len && name[i] == 's' && name[i+1] == 'e' && name[i+2] == 't') {
 				i += 2;
-				flag = 2;
+				flag = MAGICMETHOD_SET;
 				continue;
 			} else if (i+6 < name_len &&
 				name[i] == 'a' &&
@@ -973,7 +975,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 				name[i+5] == 'd'
 			) {
 				i += 6;
-				flag = 3;
+				flag = MAGICMETHOD_APPEND;
 			} else if (i+5 < name_len &&
 				name[i] == 'c' &&
 				name[i+1] == 'l' &&
@@ -981,14 +983,14 @@ PHP_METHOD(protocolbuffers_message, __call)
 				name[i+3] == 'a' &&
 				name[i+4] == 'r') {
 				i += 5;
-				flag = 4;
+				flag = MAGICMETHOD_CLEAR;
 			} else if (i+3 < name_len &&
 				name[i] == 'h' &&
 				name[i+1] == 'a' &&
 				name[i+2] == 's'
 			) {
 				i += 3;
-				flag = 5;
+				flag = MAGICMETHOD_HAS;
 			} else {
 				break;
 			}
@@ -1009,95 +1011,35 @@ PHP_METHOD(protocolbuffers_message, __call)
 	smart_str_0(&buf2);
 
 	if (flag == 0) {
-		smart_str_free(&buf);
-		smart_str_free(&buf2);
 		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	for (i = 0; i < container->size; i++) {
-		scheme = &container->scheme[i];
+	switch (flag) {
+		case MAGICMETHOD_GET:
+			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
+		break;
+		case MAGICMETHOD_SET:
+		{
+			zval **tmp = NULL;
 
-		if (strcmp(scheme->name, buf.c) == 0) {
-			// OK
-			break;
+			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
 		}
-		if (scheme->magic_type == 1 && strcasecmp(scheme->original_name, buf2.c) == 0) {
-			break;
-		}
-		scheme = NULL;
-	}
-
-	if (scheme->is_extension) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "magic method can't use for extension value", name);
-		return;
+		break;
+		case MAGICMETHOD_APPEND:
+			php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, params);
+		break;
+		case MAGICMETHOD_CLEAR:
+			php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
+		case MAGICMETHOD_HAS:
+			php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
+		break;
 	}
 
 	smart_str_free(&buf);
 	smart_str_free(&buf2);
-
-	if (scheme == NULL) {
-		smart_str_free(&buf);
-		smart_str_free(&buf2);
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
-		return;
-	}
-
-	{
-		HashTable *htt = NULL;
-		zval **e = NULL;
-		zval *vl = NULL;
-
-
-		if (container->use_single_property < 1) {
-			name     = scheme->mangled_name;
-			name_len = scheme->mangled_name_len;
-
-			htt   = Z_OBJPROP_P(instance);
-			n     = scheme->mangled_name;
-			n_len = scheme->mangled_name_len;
-		} else {
-			zval **th = NULL;
-			if (zend_hash_quick_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, container->single_property_h, (void **)&th) == FAILURE) {
-				const char *tmp, *ck;
-				zend_unmangle_property_name(container->single_property_name, container->single_property_name_len-1, &ck, &tmp);
-
-				zend_error(E_ERROR, "single property %s does not find for class %s\n", tmp, ck);
-				return;
-			}
-
-			htt   = Z_ARRVAL_PP(th);
-			n     = scheme->name;
-			n_len = scheme->name_len;
-		}
-
-		if (htt == NULL) {
-			return;
-		}
-
-		switch (flag) {
-			case MAGICMETHOD_GET:
-				php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len);
-			break;
-			case MAGICMETHOD_SET:
-			{
-				zval **tmp = NULL;
-
-				zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-				php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len, *tmp);
-			}
-			break;
-			case MAGICMETHOD_APPEND:
-				php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len, params);
-			break;
-			case MAGICMETHOD_CLEAR:
-				php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len);
-			case MAGICMETHOD_HAS:
-				php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, scheme->name, scheme->name_len);
-			break;
-		}
-	}
 }
 /* }}} */
 
@@ -1117,7 +1059,7 @@ PHP_METHOD(protocolbuffers_message, has)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len);
+	php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0);
 }
 /* }}} */
 
@@ -1137,7 +1079,7 @@ PHP_METHOD(protocolbuffers_message, get)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len);
+	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0);
 }
 /* }}} */
 
@@ -1158,7 +1100,7 @@ PHP_METHOD(protocolbuffers_message, set)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, value);
+	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0, value);
 }
 
 
