@@ -4,6 +4,8 @@
 
 static char *single_property_name_default = "_properties";
 static int single_property_name_default_len = sizeof(single_property_name_default);
+static char *unknown_property_name_default = "_unknown";
+static int unknown_property_name_default_len = sizeof(unknown_property_name_default);
 
 char *pb_get_default_single_property_name()
 {
@@ -13,6 +15,16 @@ char *pb_get_default_single_property_name()
 int pb_get_default_single_property_name_len()
 {
 	return single_property_name_default_len;
+}
+
+char *pb_get_default_unknown_property_name()
+{
+	return unknown_property_name_default;
+}
+
+int pb_get_default_unknown_property_name_len()
+{
+	return unknown_property_name_default_len;
 }
 
 void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)

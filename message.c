@@ -837,10 +837,10 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 		zval **unknown;
 
 		if (container->use_single_property > 0) {
-			uname = "_unknown";
-			uname_len = sizeof("_unknown");
+			uname = pb_get_default_unknown_property_name();
+			uname_len = pb_get_default_unknown_property_name_len();
 		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 		}
 
 		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
@@ -917,10 +917,10 @@ PHP_METHOD(protocolbuffers_message, clear)
 		zval **unknown;
 
 		if (container->use_single_property > 0) {
-			uname = "_unknown";
-			uname_len = sizeof("_unknown");
+			uname = pb_get_default_unknown_property_name();
+			uname_len = pb_get_default_unknown_property_name_len();
 		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 		}
 
 		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
