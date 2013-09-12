@@ -268,27 +268,58 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 static inline void php_pb_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
 {
 	// TODO: check message
-	switch (scheme->type) {
-		case TYPE_STRING:
-			if (Z_TYPE_P(vl) != IS_STRING) {
-				convert_to_string(vl);
+#define TYPE_CONVERT(vl) \
+		switch (scheme->type) {\
+			case TYPE_STRING:\
+				if (Z_TYPE_P(vl) != IS_STRING) {\
+					convert_to_string(vl);\
+				}\
+			break;\
+			case TYPE_SINT32:\
+			case TYPE_INT32:\
+			case TYPE_UINT32:\
+				if (Z_TYPE_P(vl) != IS_LONG) {\
+					convert_to_long(vl);\
+				}\
+			break;\
+			case TYPE_SINT64:\
+			case TYPE_INT64:\
+			case TYPE_UINT64:\
+				if (Z_TYPE_P(vl) != IS_LONG) {\
+					convert_to_long(vl);\
+				}\
+			break;\
+			case TYPE_DOUBLE:\
+			case TYPE_FLOAT:\
+				if (Z_TYPE_P(vl) != IS_DOUBLE) {\
+					convert_to_double(vl);\
+				}\
+			break;\
+			case TYPE_BOOL:\
+				if (Z_TYPE_P(vl) != IS_BOOL) {\
+					convert_to_boolean(vl);\
+				}\
+			break;\
+		}\
+
+
+	if (scheme->repeated < 1) {
+		TYPE_CONVERT(vl)
+	} else {
+		zval **entry;
+		HashPosition pos;
+
+		if (Z_TYPE_P(vl) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(vl), &pos);
+			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(vl), (void **)&entry, &pos) == SUCCESS) {
+				TYPE_CONVERT(*entry)
+
+				zend_hash_move_forward_ex(Z_ARRVAL_P(vl), &pos);
 			}
-		break;
-		case TYPE_SINT32:
-		case TYPE_INT32:
-		case TYPE_UINT32:
-			if (Z_TYPE_P(vl) != IS_LONG) {
-				convert_to_long(vl);
-			}
-		break;
-		case TYPE_SINT64:
-		case TYPE_INT64:
-		case TYPE_UINT64:
-			if (Z_TYPE_P(vl) != IS_LONG) {
-				convert_to_long(vl);
-			}
-		break;
+		}
 	}
+
+#undef TYPE_CONVERT
 }
 
 
