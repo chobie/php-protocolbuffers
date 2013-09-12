@@ -52,7 +52,8 @@ basically, your message classes should inherit ProtocolBuffersMessage class.
 ProtocolBuffers\Message::parseFromString($bytes);
 ProtocolBuffers\Message->serializeToString();
 ProtocolBuffers\Message->mergeFrom((SameMessageClass) $message);
-ProtocolBuffers\Message->clear();
+ProtocolBuffers\Message->clear($name);
+ProtocolBuffers\Message->clearAll($clear_unknown_fields = true);
 ProtocolBuffers\Message->getUnknownFieldSet();
 ProtocolBuffers\Message->discardUnknownFields();
 ProtocolBuffers\Message->get($name);

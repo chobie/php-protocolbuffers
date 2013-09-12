@@ -78,6 +78,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_discard_unknown_fields, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear, 0, 0, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear_alls, 0, 0, 0)
+	ZEND_ARG_INFO(0, clear_unknown_fields)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_has, 0, 0, 1)
@@ -402,6 +407,55 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
+static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+{
+	pb_scheme *scheme;
+	zval **e;
+	HashTable *htt;
+	char *n;
+	int n_len;
+
+	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
+	if (scheme == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		return;
+	}
+
+	if (scheme->is_extension) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "clear method can't use for extension value", name);
+		return;
+	}
+	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		zval *vl;
+
+		if (container->use_single_property > 0) {
+			MAKE_STD_ZVAL(vl);
+			if (scheme->repeated > 0) {
+				array_init(vl);
+			} else {
+				ZVAL_NULL(vl);
+			}
+			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+
+			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
+		} else {
+			zval *garvage = *e;
+
+			MAKE_STD_ZVAL(vl);
+			if (scheme->repeated > 0) {
+				array_init(vl);
+			} else {
+				ZVAL_NULL(vl);
+			}
+
+			*e = vl;
+			zval_ptr_dtor(&garvage);
+		}
+	}
+}
+
 static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	pb_scheme *scheme;
@@ -492,36 +546,6 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 		}
 	}
 }
-
-static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
-{
-	char *n;
-	int n_len;
-	HashTable *htt = NULL;
-	pb_scheme *scheme;
-	zval **e;
-
-	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
-	if (scheme == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
-		return;
-	}
-
-	if (scheme->is_extension) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "get method can't use for extension value", name);
-		return;
-	}
-	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
-
-	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		zval *t;
-		MAKE_STD_ZVAL(t);
-		ZVAL_NULL(t);
-
-		zend_hash_update(htt, n, n_len, (void **)&t, sizeof(zval), NULL);
-	}
-}
-
 
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
@@ -858,14 +882,40 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffersMessage::clear()
+/* {{{ proto void ProtocolBuffersMessage::clear(string $name)
 */
 PHP_METHOD(protocolbuffers_message, clear)
+{
+	zval *instance = getThis();
+	char *name;
+	int name_len;
+	HashTable *proto = NULL;
+	pb_scheme_container *container;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0);
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffersMessage::clearAll(bool $clear_unknown_fields = true)
+*/
+PHP_METHOD(protocolbuffers_message, clearAll)
 {
 	zval *instance = getThis();
 	int i = 0;
 	HashTable *proto = NULL, *hash = NULL;
 	pb_scheme_container *container;
+	zend_bool clear_unknown_fields = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"|b", &clear_unknown_fields) == FAILURE) {
+		return;
+	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 
@@ -919,7 +969,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 		}
 	}
 
-	if (container->process_unknown_fields > 0) {
+	if (clear_unknown_fields > 0 && container->process_unknown_fields > 0) {
 		char *uname;
 		int uname_len;
 		zval **unknown;
@@ -1331,7 +1381,6 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 	zval *instance = getThis();
 	HashTable *target = NULL, *proto = NULL;
 	pb_scheme_container *container;
-	int free = 0;
 	zval **unknown_fieldset;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
@@ -1377,6 +1426,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, mergeFrom,            arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clear,                arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, clearAll,             NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, has,                  arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get,                  arginfo_pb_message_get, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, set,                  arginfo_pb_message_set, ZEND_ACC_PUBLIC)
