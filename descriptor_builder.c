@@ -400,21 +400,49 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
 	zval *instance = getThis();
 	long begin, end;
 	zval **extension_range;
-	zval *z_begin, *z_end;
+	zval *z_begin, *z_end, **fields;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ll", &begin, &end) == FAILURE) {
 		return;
 	}
 
-	if (begin >= end) {
+	if (begin == end || begin > end) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be bigger than range begin.");
+		return;
 	}
 	if (end > 536870912) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", 536870912);
+		return;
 	}
 	if (begin < 1 || end < 1) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range must be greater than zero");
+		return;
+	}
+
+
+	if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
+		HashPosition pos;
+		char *string_key;
+		uint string_key_len;
+        ulong num_key;
+        zval **entry;
+
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(fields), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(fields), (void **)&entry, &pos) == SUCCESS) {
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(fields), &string_key, &string_key_len, &num_key, 1, &pos)) {
+				case HASH_KEY_IS_STRING:
+				break;
+				case HASH_KEY_IS_LONG:
+					if (begin <= num_key && num_key <= end) {
+						zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "extension range must be greater than existing tag number");
+						return;
+					}
+				break;
+			}
+
+			zend_hash_move_forward_ex(Z_ARRVAL_PP(fields), &pos);
+		}
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(instance), "extension_range", sizeof("extension_range"), (void **)&extension_range) == SUCCESS) {
