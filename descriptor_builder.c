@@ -478,14 +478,10 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 void php_pb_descriptor_builder_class(TSRMLS_D)
 {
 	zend_class_entry ce;
-	zval *fields;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
 	protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_descriptor_builder_class_entry->create_object = php_protocolbuffers_descriptor_builder_new;
-
-	MAKE_STD_ZVAL(fields);
-	array_init(fields);
 
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
