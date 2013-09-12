@@ -183,12 +183,16 @@ typedef struct pb_scheme
 } pb_scheme;
 
 typedef struct {
+	int begin;
+	int end;
+} pb_extension_range;
+
+typedef struct {
 	char *name;
 	int name_len;
 	char *filename;
 	int filename_len;
 	int is_extendable;
-	//int extension_range_min;
 	pb_scheme *scheme;
 	int use_single_property;
 	char *orig_single_property_name;
@@ -199,6 +203,8 @@ typedef struct {
 	int size;
 	int process_unknown_fields;
 	int use_wakeup_and_sleep;
+	int extension_cnt;
+	pb_extension_range *extensions;
 } pb_scheme_container;
 
 #ifdef ZTS

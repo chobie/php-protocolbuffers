@@ -168,6 +168,8 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 		container->use_single_property = 0;
 		container->process_unknown_fields = 0;
 		container->use_wakeup_and_sleep = 0;
+		container->extension_cnt = 0;
+		container->extensions = NULL;
 
 		{
 			char *prop;

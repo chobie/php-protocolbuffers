@@ -24,6 +24,7 @@ class Person extends ProtocolBuffersMessage
                 "default"  => null,
                 "message"  => "Tutorial_Person",
             )));
+            $desc->addExtensionRange(200, 500);
             $descriptor = $desc->build();
         }
 

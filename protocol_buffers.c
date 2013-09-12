@@ -334,6 +334,11 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 				if ((*element)->scheme != NULL) {
 					efree((*element)->scheme);
 				}
+
+				if ((*element)->extensions != NULL) {
+					efree((*element)->extensions);
+				}
+
 				efree(*element);
 			}
 

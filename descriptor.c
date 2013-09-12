@@ -60,6 +60,11 @@ static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_desc
 		if (object->container->scheme != NULL) {
 			efree(object->container->scheme);
 		}
+
+		if (object->container->extensions != NULL) {
+			efree(object->container->extensions);
+		}
+
 		efree(object->container);
 	}
 
