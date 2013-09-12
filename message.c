@@ -1259,6 +1259,52 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 /* }}} */
 
 
+/* {{{ proto ProtocolBuffersUnknownFieldSet ProtocolBuffersMessage::getUnknownFieldSet()
+*/
+PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
+{
+	zval *instance = getThis();
+	HashTable *target = NULL, *proto = NULL;
+	pb_scheme_container *container;
+	int free = 0;
+	zval **unknown_fieldset;
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+
+	if (container->process_unknown_fields > 0) {
+		char *unknown_name;
+		int unknown_name_len;
+		int free = 0;
+
+		if (container->use_single_property > 0) {
+			zval **b;
+			if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
+				return;
+			}
+
+			unknown_name     = pb_get_default_unknown_property_name();
+			unknown_name_len = pb_get_default_unknown_property_name_len();
+			target = Z_ARRVAL_PP(b);
+		} else {
+			zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
+			target = Z_OBJPROP_P(instance);
+			free = 1;
+		}
+
+		if (zend_hash_find(target, (char*)unknown_name, unknown_name_len+1, (void **)&unknown_fieldset) == SUCCESS) {
+			RETVAL_ZVAL(*unknown_fieldset, 1, 0);
+		}
+
+		if (free) {
+			efree(unknown_name);
+		}
+	} else {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "process unknown fileds flag seems false");
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_pb_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
@@ -1273,6 +1319,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, getExtension,         arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setExtension,         arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)

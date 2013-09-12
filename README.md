@@ -53,6 +53,7 @@ ProtocolBuffers\Message::parseFromString($bytes);
 ProtocolBuffers\Message->serializeToString();
 ProtocolBuffers\Message->mergeFrom((SameMessageClass) $message);
 ProtocolBuffers\Message->clear();
+ProtocolBuffers\Message->getUnknownFieldSet();
 ProtocolBuffers\Message->discardUnknownFields();
 ProtocolBuffers\Message->get($name);
 ProtocolBuffers\Message->has($name);

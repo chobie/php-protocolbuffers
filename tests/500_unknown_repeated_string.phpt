@@ -12,11 +12,6 @@ class UnknownFields extends ProtocolBuffersMessage
 
     protected $_unknown;
 
-    public function getUnknownFieldSet()
-    {
-        return $this->_unknown;
-    }
-
     /**
      * get descriptor for protocol buffers
      *
