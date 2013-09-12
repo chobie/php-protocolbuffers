@@ -333,7 +333,7 @@ static void php_protocolbuffers_message_get_hash_table_by_container(pb_scheme_co
 static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
-	int n_len, i;
+	int n_len;
 	HashTable *htt = NULL;
 	pb_scheme *scheme;
 	zval **e;
@@ -358,7 +358,6 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
-	int i;
 	pb_scheme *scheme;
 	zval **e;
 	HashTable *htt;
@@ -401,7 +400,6 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
-	int i;
 	pb_scheme *scheme;
 	zval **e;
 	HashTable *htt;
@@ -459,7 +457,7 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
-	int n_len, i;
+	int n_len;
 	HashTable *htt = NULL;
 	pb_scheme *scheme;
 	zval **e;
@@ -494,7 +492,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n;
-	int n_len, i;
+	int n_len;
 	HashTable *htt = NULL;
 	pb_scheme *scheme;
 	zval **e;
@@ -944,9 +942,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 	int flag = 0;
 	smart_str buf = {0};
 	smart_str buf2 = {0};
-	char *n;
-	int n_len;
-	pb_scheme *scheme;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &params) == FAILURE) {
@@ -1094,7 +1089,7 @@ PHP_METHOD(protocolbuffers_message, set)
 	zval *instance = getThis();
 	zval *value;
 	char *name;
-	int name_len, i = 0;
+	int name_len;
 	pb_scheme_container *container;
 	HashTable *proto = NULL;
 
@@ -1115,7 +1110,7 @@ PHP_METHOD(protocolbuffers_message, append)
 	zval *instance = getThis();
 	zval *value;
 	char *name;
-	int name_len, i = 0;
+	int name_len;
 	pb_scheme_container *container;
 	HashTable *proto = NULL;
 

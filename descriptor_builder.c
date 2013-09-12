@@ -70,8 +70,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, __construct)
 {
 	zval *instance = getThis();
 	HashTable *properties = NULL;
-	zend_class_entry *ce = Z_OBJCE_P(instance);
-	int i = 0;
 	zval *tmp = NULL;
 
 	ALLOC_HASHTABLE(properties);
@@ -116,7 +114,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(instance), "fields", sizeof("fields"), (void **)&fields) == SUCCESS) {
-		zval *tmp = NULL;
 		if (zend_hash_index_exists(Z_ARRVAL_PP(fields), index)) {
 			if (force_add < 1) {
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "tag number `%d` has already registered.", index);
@@ -389,7 +386,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 */
 PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 {
-	zval *options, *instance = getThis();
+	zval *options;
 	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "options", sizeof("options")-1, 0 TSRMLS_CC);
 	RETURN_ZVAL(options, 1, 0);
 }
@@ -421,8 +418,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(instance), "extension_range", sizeof("extension_range"), (void **)&extension_range) == SUCCESS) {
-		zval *tmp = NULL;
-
 		MAKE_STD_ZVAL(z_begin);
 		MAKE_STD_ZVAL(z_end);
 		ZVAL_LONG(z_begin, begin);

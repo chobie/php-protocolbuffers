@@ -9,7 +9,7 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_message_options, getExtension)
 {
-	zval **result, *options, *instance = getThis();
+	zval **result, *options;
 	char *name;
 	long name_len;
 
