@@ -265,6 +265,12 @@ typedef struct{
 
 typedef struct{
 	zend_object zo;
+	int max;
+	int offset;
+} php_protocolbuffers_unknown_field_set;
+
+typedef struct{
+	zend_object zo;
 	HashTable *registry;
 } php_protocolbuffers_extension_registry;
 

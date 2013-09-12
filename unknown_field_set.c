@@ -1,6 +1,24 @@
 #include "php_protocol_buffers.h"
 #include "unknown_field_set.h"
 
+static void php_protocolbuffers_unknown_field_set_free_storage(php_protocolbuffers_unknown_field_set *object TSRMLS_DC)
+{
+	zend_object_std_dtor(&object->zo TSRMLS_CC);
+	efree(object);
+}
+
+zend_object_value php_protocol_buffers_unknown_field_set_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(php_protocolbuffers_unknown_field_set);
+
+	object->max    = 0;
+	object->offset = 0;
+
+	return retval;
+}
+
+
 void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 {
 	HashTable *properties;
@@ -70,9 +88,7 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 
 void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, zval *field)
 {
-	HashPosition pos;
-	HashTable *fieldht = NULL;
-	zval **element, **fields;
+	zval **fields;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
@@ -199,10 +215,102 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 /* }}} */
 
 
+/* {{{ proto mixed ProtocolBuffersUnknownFieldSet::current()
+*/
+PHP_METHOD(protocolbuffers_unknown_field_set, current)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set;
+	char *name;
+	int name_len;
+	long num = 0;
+	zval **fields, **d;
+
+	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
+		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
+	}
+	efree(name);
+
+	if (zend_hash_index_find(Z_ARRVAL_PP(fields), set->offset, (void **)&d) == SUCCESS) {
+		RETURN_ZVAL(*d, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed ProtocolBuffersUnknownFieldSet::key()
+*/
+PHP_METHOD(protocolbuffers_unknown_field_set, key)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set;
+
+	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
+	RETURN_LONG(set->offset);
+}
+/* }}} */
+
+/* {{{ proto mixed ProtocolBuffersUnknownFieldSet::next()
+*/
+PHP_METHOD(protocolbuffers_unknown_field_set, next)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set;
+
+	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
+	set->offset++;
+}
+/* }}} */
+
+/* {{{ proto void ProtocolBuffersUnknownFieldSet::rewind()
+*/
+PHP_METHOD(protocolbuffers_unknown_field_set, rewind)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set;
+
+	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
+	set->offset = 0;
+}
+/* }}} */
+
+/* {{{ proto bool ProtocolBuffersUnknownFieldSet::valid()
+*/
+PHP_METHOD(protocolbuffers_unknown_field_set, valid)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set;
+	char *name;
+	int name_len;
+	long num = 0;
+	zval **fields;
+
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
+		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
+	}
+	efree(name);
+
+	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
+	if (-1 < set->offset && set->offset < num) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static zend_function_entry php_protocolbuffers_unknown_field_set_methods[] = {
 	PHP_ME(protocolbuffers_unknown_field_set, count, arginfo_pb_unknown_field_set_count, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field_set, getField, arginfo_pb_unknown_field_get_field, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field_set, addField, arginfo_pb_unknown_field_add_field, ZEND_ACC_PUBLIC)
+	/* iterator */
+	PHP_ME(protocolbuffers_unknown_field_set, current, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, key,     NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, next,    NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, rewind,  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, valid,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -212,6 +320,9 @@ void php_pb_unknown_field_set_class(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUnknownFieldSet", php_protocolbuffers_unknown_field_set_methods);
 	protocol_buffers_unknown_field_set_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	zend_class_implements(protocol_buffers_unknown_field_set_class_entry TSRMLS_CC, 1, zend_ce_iterator);
+	protocol_buffers_unknown_field_set_class_entry->create_object = php_protocol_buffers_unknown_field_set_new;
+
 	zend_declare_property_null(protocol_buffers_unknown_field_set_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownFieldSet", protocol_buffers_unknown_field_set_class_entry);
