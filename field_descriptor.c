@@ -303,7 +303,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, isExtension)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
-	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_field_descriptor, getName, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_pb_field_descriptor_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, setType,  arginfo_pb_field_descriptor_set_type, ZEND_ACC_PUBLIC)
