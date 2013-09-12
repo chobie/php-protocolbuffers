@@ -1,6 +1,7 @@
 #include "php_protocol_buffers.h"
 #include "descriptor_builder.h"
 #include "message_options.h"
+#include "descriptor.h"
 
 static void php_protocolbuffers_descriptor_builder_free_storage(zend_object *object TSRMLS_DC)
 {
@@ -186,6 +187,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 	MAKE_STD_ZVAL(result);
 	object_init_ex(result, protocol_buffers_descriptor_class_entry);
+	php_pb_descriptor_properties_init(result TSRMLS_CC);
 	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, result);
 
 	name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "name", sizeof("name")-1, 0 TSRMLS_CC);
@@ -398,6 +400,53 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 		}
 	}
+
+	if (descriptor->container->size > 0) {
+		int n = 0;
+		pb_scheme *ischeme;
+		zval *arrval;
+		char *property;
+		int property_len;
+		MAKE_STD_ZVAL(arrval);
+		array_init(arrval);
+
+		for (n = 0; n < descriptor->container->size; n++) {
+			zval *tmp;
+			ischeme = &(descriptor->container->scheme[n]);
+			char *name;
+			int name_length;
+			zval *value;
+
+			MAKE_STD_ZVAL(tmp);
+			object_init_ex(tmp, protocol_buffers_field_descriptor_class_entry);
+
+			zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"name", sizeof("name"), 0);
+			MAKE_STD_ZVAL(value);
+			ZVAL_STRING(value, ischeme->name, 1);
+			zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+			efree(name);
+
+			zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
+			MAKE_STD_ZVAL(value);
+			ZVAL_LONG(value, ischeme->type);
+			zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+			efree(name);
+
+			zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"extension", sizeof("extension"), 0);
+			MAKE_STD_ZVAL(value);
+			ZVAL_BOOL(value, ischeme->is_extension);
+			zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
+			efree(name);
+
+			zend_hash_index_update(Z_ARRVAL_P(arrval), ischeme->tag, (void *)&tmp, sizeof(zval *), NULL);
+		}
+
+		zend_mangle_property_name(&property, &property_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+		zend_hash_update(Z_OBJPROP_P(result), property, property_len, (void **)&arrval, sizeof(zval *), NULL);
+		efree(property);
+	}
+
+
 
 	RETURN_ZVAL(result, 0, 1);
 }

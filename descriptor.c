@@ -23,6 +23,23 @@ static const char *fields_map[] = {
 	"TYPE_SINT64",
 };
 
+int php_pb_descriptor_properties_init(zval *object TSRMLS_DC)
+{
+	zval *pp = NULL;
+	HashTable *properties = NULL;
+
+	ALLOC_HASHTABLE(properties);
+	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	MAKE_STD_ZVAL(pp);
+	array_init(pp);
+	zend_hash_update(properties, "fields", sizeof("fields"), (void **)&pp, sizeof(zval), NULL);
+
+	zend_merge_properties(object, properties, 1 TSRMLS_CC);
+	return 0;
+}
+
+
 static const char* field_type_to_str(int field_type)
 {
 	if (field_type > 0 && field_type <= MAX_FIELD_TYPE) {
@@ -82,6 +99,7 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->free_container = 0;
 	object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
 	pb_scheme_container_init(object->container);
+
 	return retval;
 }
 
@@ -131,7 +149,25 @@ PHP_METHOD(protocolbuffers_descriptor, getName)
 */
 PHP_METHOD(protocolbuffers_descriptor, getField)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersDescriptor::getField does not implement yet");
+	zval *instance = getThis();
+	zval **result;
+	char *property;
+	int property_len;
+	long tag = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &tag) == FAILURE) {
+		return;
+	}
+
+	zend_mangle_property_name(&property, &property_len, (char*)"*", 1, "fields", sizeof("fields"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), property, property_len, (void **)&result) == SUCCESS) {
+		zval **entry;
+		if (zend_hash_index_find(Z_ARRVAL_PP(result), tag, (void **)&entry) == SUCCESS) {
+			RETVAL_ZVAL(*entry, 0, 1);
+		}
+	}
+	efree(property);
 }
 /* }}} */
 
@@ -140,52 +176,15 @@ PHP_METHOD(protocolbuffers_descriptor, getField)
 PHP_METHOD(protocolbuffers_descriptor, getFields)
 {
 	zval *instance = getThis();
-	zval *result;
-	php_protocolbuffers_descriptor *descriptor;
-	pb_scheme *ischeme;
-	int n = 0;
+	zval **result;
+	char *property;
+	int property_len;
 
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-
-	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, instance);
-	if (descriptor->container->size > 0) {
-		for (n = 0; n < descriptor->container->size; n++) {
-			zval *tmp;
-			ischeme = &(descriptor->container->scheme[n]);
-
-			MAKE_STD_ZVAL(tmp);
-			object_init_ex(tmp, protocol_buffers_field_descriptor_class_entry);
-			{
-				char *name;
-				int name_length;
-				zval *value;
-
-				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"name", sizeof("name"), 0);
-				MAKE_STD_ZVAL(value);
-				ZVAL_STRING(value, ischeme->name, 1);
-				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
-				efree(name);
-
-				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
-				MAKE_STD_ZVAL(value);
-				ZVAL_LONG(value, ischeme->type);
-				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
-				efree(name);
-
-
-				zend_mangle_property_name(&name, &name_length, (char*)"*", 1, (char*)"extension", sizeof("extension"), 0);
-				MAKE_STD_ZVAL(value);
-				ZVAL_BOOL(value, ischeme->is_extension);
-				zend_hash_update(Z_OBJPROP_P(tmp), name, name_length, (void **)&value, sizeof(zval*), NULL);
-				efree(name);
-			}
-
-			zend_hash_next_index_insert(Z_ARRVAL_P(result), (void *)&tmp, sizeof(zval *), NULL);
-		}
+	zend_mangle_property_name(&property, &property_len, (char*)"*", 1, "fields", sizeof("fields"), 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), property, property_len, (void **)&result) == SUCCESS) {
+		RETVAL_ZVAL(*result, 0, 1);
 	}
-
-	RETURN_ZVAL(result, 0, 1);
+	efree(property);
 }
 /* }}} */
 
@@ -281,6 +280,8 @@ void php_pb_descriptor_class(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptor", php_protocolbuffers_descriptor_methods);
 	protocol_buffers_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	protocol_buffers_descriptor_class_entry->create_object = php_protocolbuffers_descriptor_new;
+
+	zend_declare_property_null(protocol_buffers_descriptor_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Descriptor", protocol_buffers_descriptor_class_entry);
 }
