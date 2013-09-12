@@ -214,23 +214,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 		memset(ischeme, '\0', sizeof(pb_scheme) * sz);
 		descriptor->container->size = sz;
 		descriptor->container->scheme = ischeme;
-		descriptor->container->use_single_property = 0;
-		descriptor->container->process_unknown_fields = 0;
-		descriptor->container->use_wakeup_and_sleep = 0;
-		descriptor->container->extension_cnt = 0;
-		descriptor->container->orig_single_property_name = pb_get_default_single_property_name();
-		descriptor->container->orig_single_property_name_len = pb_get_default_single_property_name_len();
-
-		{
-			char *prop;
-			int prop_len;
-
-			zend_mangle_property_name(&prop, &prop_len, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
-			descriptor->container->single_property_name = prop;
-			descriptor->container->single_property_name_len = prop_len;
-			descriptor->container->single_property_h = zend_inline_hash_func(prop, prop_len);
-		}
-
 
 		for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
 						zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;

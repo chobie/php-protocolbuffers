@@ -27,6 +27,34 @@ int pb_get_default_unknown_property_name_len()
 	return unknown_property_name_default_len;
 }
 
+void pb_scheme_container_init(pb_scheme_container *container)
+{
+	memset(container, '\0', sizeof(pb_scheme_container));
+
+	container->size = 0;
+	container->scheme = NULL;
+	container->use_single_property = 0;
+	container->process_unknown_fields = 0;
+	container->use_wakeup_and_sleep = 0;
+	container->extension_cnt = 0;
+	container->extensions = NULL;
+	container->use_wakeup_and_sleep = 0;
+	container->single_property_h = 0;
+	container->orig_single_property_name     = pb_get_default_single_property_name();
+	container->orig_single_property_name_len = pb_get_default_single_property_name_len();
+
+	zend_mangle_property_name(&container->single_property_name,
+		&container->single_property_name_len,
+		(char*)"*",
+		1,
+		(char*)container->orig_single_property_name,
+		container->orig_single_property_name_len,
+		0
+	);
+	container->single_property_h = zend_inline_hash_func(container->single_property_name, container->single_property_name_len);
+}
+
+
 void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
 {
 	int n, sz;
@@ -163,24 +191,9 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 		scheme_size = zend_hash_num_elements(proto);
 
 		container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
+		pb_scheme_container_init(container);
 		container->scheme = ischeme;
 		container->size = scheme_size;
-		container->use_single_property = 0;
-		container->process_unknown_fields = 0;
-		container->use_wakeup_and_sleep = 0;
-		container->extension_cnt = 0;
-		container->extensions = NULL;
-
-		{
-			char *prop;
-			int prop_len;
-
-			zend_mangle_property_name(&prop, &prop_len, (char*)"*", 1, (char*)"_properties", sizeof("_properties"), 0);
-			container->orig_single_property_name = single_property_name_default;
-			container->orig_single_property_name_len = sizeof(single_property_name_default);
-			container->single_property_name = prop;
-			container->single_property_name_len = prop_len;
-		}
 
 		zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container*), NULL);
 
