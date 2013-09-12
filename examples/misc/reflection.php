@@ -11,10 +11,12 @@ $descriptor = $person->getDescriptor();
 $result = array();
 
 foreach ($descriptor->getFields() as $field) {
-    if ($person->has($field->getName())) {
-        // this does not care about Message.
-        $value = $person->get($field->getName());
-        $result[$field->getName()] = $value;
+    if (!$field->isExtension()) {
+        if ($person->has($field->getName())) {
+            // this does not care about Message.
+            $value = $person->get($field->getName());
+            $result[$field->getName()] = $value;
+        }
     }
 }
 

@@ -57,6 +57,9 @@ ProtocolBuffers\Message->getUnknownFieldSet();
 ProtocolBuffers\Message->discardUnknownFields();
 ProtocolBuffers\Message->get($name);
 ProtocolBuffers\Message->has($name);
+ProtocolBuffers\Message->getExtension($name);
+ProtocolBuffers\Message->hasExtension($name);
+ProtocolBuffers\Message->setExtension($name, $value);
 
 # magic methods.
 ProtocolBuffers\Message->get<CamelCaseFieldName>();
