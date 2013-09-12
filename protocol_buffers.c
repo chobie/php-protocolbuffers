@@ -44,9 +44,9 @@
 #include "extension_registry.h"
 
 #ifdef ZTS
-int pb_globals_id;
+PHPAPI int pb_globals_id;
 #else
-pb_globals php_pb_globals;
+PHPAPI pb_globals php_pb_globals;
 #endif
 
 zend_class_entry *protocol_buffers_class_entry;

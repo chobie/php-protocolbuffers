@@ -103,8 +103,13 @@ static const int64_t kint64min = -GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF) - 1;
 static const uint32_t kuint32max = 0xFFFFFFFFu;
 static const uint64_t kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 
+#ifdef _MSC_VER
+#define kMaxVarintBytes = 10
+#define kMaxVarint32Bytes = 5
+#else
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
+#endif
 static const int64_t kLongMax = LONG_MAX;
 
 
