@@ -1,10 +1,11 @@
 #include "php_protocol_buffers.h"
 #include "unknown_field_set.h"
 
-void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
+void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 {
 	HashTable *properties;
 	zval *pp = NULL;
+
 	ALLOC_HASHTABLE(properties);
 	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
@@ -18,13 +19,18 @@ void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 {
 	char *name;
 	int name_len;
-	zval *val;
+	zval *val, **fields;
 
 	MAKE_STD_ZVAL(val);
 	array_init(val);
-	Z_ADDREF_P(val);
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+
+	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
+		zval_ptr_dtor(fields);
+		fields = NULL;
+	}
+
 	zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&val, sizeof(zval *), NULL);
 	efree(name);
 }
@@ -32,8 +38,9 @@ void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, php_protocolbuffers_unknown_field **f)
 {
 	HashPosition pos;
-	HashTable *fieldht;
+	HashTable *fieldht = NULL;
 	zval **element, **fields;
+	int found = 0;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
@@ -44,43 +51,48 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 						zend_hash_move_forward_ex(fieldht, &pos)
 		) {
 			php_protocolbuffers_unknown_field *t = NULL;
-			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
 
-			if (t->number == number) {
-				*f = t;
-				return 1;
+			if (Z_TYPE_PP(element) == IS_OBJECT) {
+				t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
+				if (t->number == number) {
+					*f = t;
+					found = 1;
+					break;
+				}
 			}
 		}
 	}
+
 	efree(name);
-	return 0;
+	return found;
 }
 
 
 void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, zval *field)
 {
 	HashPosition pos;
-	HashTable *fieldht;
+	HashTable *fieldht = NULL;
 	zval **element, **fields;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-
-		fieldht = Z_ARRVAL_PP(fields);
-		for(zend_hash_internal_pointer_reset_ex(fieldht, &pos);
-						zend_hash_get_current_data_ex(fieldht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(fieldht, &pos)
-		) {
-			php_protocolbuffers_unknown_field *s = NULL, *t = NULL;
-			s = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
-			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
-
-			if (t->number == number) {
-				//efree(name);
-				//zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "number %d has already added", number);
-				return;
-			}
-		}
+//		fieldht = Z_ARRVAL_PP(fields);
+//
+//		for(zend_hash_internal_pointer_reset_ex(fieldht, &pos);
+//						zend_hash_get_current_data_ex(fieldht, (void **)&element, &pos) == SUCCESS;
+//						zend_hash_move_forward_ex(fieldht, &pos)
+//		) {
+//			php_protocolbuffers_unknown_field *s = NULL, *t = NULL;
+//
+//			s = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
+//			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
+//
+//			if (t->number == number) {
+//				//efree(name);
+//				//zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "number %d has already added", number);
+//				return;
+//			}
+//		}
 	}
 
 	zend_hash_next_index_insert(Z_ARRVAL_PP(fields), (void *)&field, sizeof(zval *), NULL);
@@ -180,10 +192,9 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 		"O", &field, protocol_buffers_unknown_field_class_entry) == FAILURE) {
 		return;
 	}
-	a = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
 
+	a = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
 	php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, a->number, name, name_len, field);
-	Z_ADDREF_P(field);
 }
 /* }}} */
 

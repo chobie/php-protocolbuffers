@@ -3,12 +3,33 @@
 
 static zend_object_handlers php_protocolbuffers_unknown_field_object_handlers;
 
+
+void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
+{
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
+	HashTable *properties;
+	zval *pp = NULL;
+	ALLOC_HASHTABLE(properties);
+	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	MAKE_STD_ZVAL(pp);
+	ZVAL_NULL(pp);
+	zend_hash_update(properties, "number", sizeof("number"), (void **)&pp, sizeof(zval), NULL);
+	MAKE_STD_ZVAL(pp);
+	ZVAL_NULL(pp);
+	zend_hash_update(properties, "type", sizeof("type"), (void **)&pp, sizeof(zval), NULL);
+
+	zend_merge_properties(object, properties, 1 TSRMLS_CC);
+#endif
+}
+
+
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 2)
 static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, int *is_temp TSRMLS_DC)
 {
 	HashTable *ht;
 	HashTable *props = Z_OBJPROP_P(obj);
-	zval *number, *type;
+	zval *number, *type, *count;
 	php_protocolbuffers_unknown_field *field;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, obj);
@@ -19,12 +40,15 @@ static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, in
 
 	MAKE_STD_ZVAL(number);
 	MAKE_STD_ZVAL(type);
+	MAKE_STD_ZVAL(count);
 
 	ZVAL_LONG(number, field->number);
 	ZVAL_LONG(type, field->type);
+	ZVAL_LONG(count, zend_hash_num_elements(field->ht));
 
 	zend_hash_update(ht, "number", sizeof("number"), (void **)&number, sizeof(zval *), NULL);
 	zend_hash_update(ht, "type", sizeof("type"), (void **)&type, sizeof(zval *), NULL);
+	zend_hash_update(ht, "count", sizeof("count"), (void **)&count, sizeof(zval *), NULL);
 
 	return ht;
 }
@@ -117,6 +141,7 @@ static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_u
 
 	zend_hash_destroy(object->ht);
 	FREE_HASHTABLE(object->ht);
+	object->ht = NULL;
 
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);

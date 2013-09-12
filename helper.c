@@ -217,7 +217,7 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(unknown_value), NULL);
 		} else {
 			object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
-
+			php_pb_unknown_field_properties_init(dz TSRMLS_CC);
 			php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
 			php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
 
@@ -236,40 +236,54 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 	}
 }
 
-void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, uint8_t *bytes, int length)
+void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length)
 {
 	char *unknown_name;
 	int unknown_name_len;
-	zval **un;
-	unknown_value *val;
+	zval **unknown_fieldset = NULL;
+	unknown_value *val = NULL;
 	php_protocolbuffers_unknown_field *p = NULL;
+	uint8_t *buffer = NULL;
+	zval *dz = NULL;
 
 	if (container->use_single_property > 0) {
-		unknown_name = pb_get_default_unknown_property_name();
+		unknown_name     = pb_get_default_unknown_property_name();
 		unknown_name_len = pb_get_default_unknown_property_name_len();
 	} else {
 		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 	}
 
-	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&un) == SUCCESS) {
-		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, &p)) {
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&unknown_fieldset) == SUCCESS) {
+		if (Z_OBJCE_PP(unknown_fieldset) != protocol_buffers_unknown_field_set_class_entry) {
+			return;
+		}
+
+		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown_fieldset, tag, unknown_name, unknown_name_len, &p)) {
 			val = (unknown_value*)emalloc(sizeof(unknown_value));
-			val->buffer.val = bytes;
+			buffer = (uint8_t*)emalloc(length);
+			memcpy(buffer, bytes, length);
+
+			val->buffer.val = buffer;
 			val->buffer.len = length;
+
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(val), NULL);
 		} else {
+			MAKE_STD_ZVAL(dz);
 			object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
+			php_pb_unknown_field_properties_init(dz TSRMLS_CC);
 			php_pb_unknown_field_set_number(dz, tag TSRMLS_CC);
 			php_pb_unknown_field_set_type(dz, wiretype TSRMLS_CC);
 
 			p = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, dz);
 
 			val = (unknown_value*)emalloc(sizeof(unknown_value));
-			val->buffer.val = bytes;
+			buffer = (uint8_t*)emalloc(length);
+			memcpy(buffer, bytes, length);
+			val->buffer.val = buffer;
 			val->buffer.len = length;
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(val), NULL);
 
-			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, dz);
+			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown_fieldset, tag, unknown_name, unknown_name_len, dz);
 		}
 	}
 
@@ -303,7 +317,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	} else {
 		hresult = Z_OBJPROP_PP(result);
 	}
-
 
 	while (data < data_end) {
 		pb_scheme *s = NULL;
@@ -361,12 +374,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_FIXED64:
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					uint8_t *bytes_array;
-					bytes_array = (uint8_t *)emalloc(value);
-					memcpy(bytes_array, data, value);
-
-					MAKE_STD_ZVAL(dz);
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t *)bytes_array, 8);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
 				} else {
 					/* skip unknown field */
 				}
@@ -400,14 +408,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					uint8_t *bytes_array;
-					bytes_array = (uint8_t *)emalloc(value);
-					memcpy(bytes_array, data, value);
-
-					MAKE_STD_ZVAL(dz);
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, bytes_array, value);
-					Z_ADDREF_P(dz);
-					zval_ptr_dtor(&dz);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, data, value);
 				} else {
 					/* skip unknown field */
 				}
@@ -663,15 +664,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_FIXED32: {
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					uint8_t *bytes_array;
-					bytes_array = (uint8_t *)emalloc(value);
-					memcpy(bytes_array, data, value);
-
-					MAKE_STD_ZVAL(dz);
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, (uint8_t*)bytes_array, 4);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
 				} else {
 					/* skip unknown field */
-					zval_ptr_dtor(&dz);
 				}
 			} else if (s->type == TYPE_FLOAT) {
 				uint32_t _v;
@@ -1556,7 +1551,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 			MAKE_STD_ZVAL(unknown);
 
 			object_init_ex(unknown, protocol_buffers_unknown_field_set_class_entry);
-			php_pb_unknown_field_properties_init(unknown TSRMLS_CC);
+			php_pb_unknown_field_set_properties_init(unknown TSRMLS_CC);
 
 			zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
 			if (zend_hash_find(Z_OBJPROP_P(obj), (char*)unknown_name, unknown_name_len, (void **)&un) == FAILURE) {

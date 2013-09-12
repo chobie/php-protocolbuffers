@@ -9,6 +9,6 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 
 void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance);
 
-void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC);
+void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC);
 
 #endif

@@ -529,6 +529,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
 	HashTable *htt = NULL;
+	php_protocolbuffers_message *message;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|a", &params) == FAILURE) {
@@ -539,6 +540,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		int i = 0;
 
 		PHP_PB_MESSAGE_CHECK_SCHEME
+		message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 		if (container->use_single_property > 0) {
 			zval *z = NULL;
@@ -718,7 +720,7 @@ PHP_METHOD(protocolbuffers_message, current)
 	php_protocolbuffers_message *message;
 	const char *name;
 	int name_len = 0;
-	zval **tmp;
+	zval **tmp = NULL;
 	HashTable *hash;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
@@ -743,7 +745,7 @@ PHP_METHOD(protocolbuffers_message, current)
 	}
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
-    	RETURN_ZVAL(*tmp, 1, 0);
+    	RETVAL_ZVAL(*tmp, 1, 0);
 	}
 }
 /* }}} */
@@ -775,7 +777,6 @@ PHP_METHOD(protocolbuffers_message, next)
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
-
 	message->offset++;
 }
 /* }}} */
@@ -795,7 +796,6 @@ PHP_METHOD(protocolbuffers_message, rewind)
 	if (message->max == 0) {
 		message->max = container->size;
 	}
-
 	message->offset = 0;
 }
 /* }}} */
@@ -827,6 +827,7 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 	zval *instance = getThis();
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
+	int free = 0;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	if (container->process_unknown_fields > 0) {
@@ -839,10 +840,15 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 			uname_len = pb_get_default_unknown_property_name_len();
 		} else {
 			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
+			free = 1;
 		}
 
-		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len+1, (void**)&unknown) == SUCCESS) {
 			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown);
+		}
+
+		if (free) {
+			efree(uname);
 		}
 	}
 }
@@ -1288,7 +1294,7 @@ void php_pb_message_class(TSRMLS_D)
 	zend_class_implements(protocol_buffers_message_class_entry TSRMLS_CC, 1, protocol_buffers_serializable_class_entry);
 
 	protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	//protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
+	protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
 
 	memcpy(&php_protocolbuffers_message_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 

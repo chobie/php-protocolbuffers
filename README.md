@@ -100,7 +100,7 @@ evaluating protocol buffers serialization.
     <td>Extensions</td><td>alpha</td>
   </tr>
   <tr>
-    <td>Unknown fields</td><td>alpha</td>
+    <td>Unknown fields</td><td>beta</td>
   </tr>
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>
