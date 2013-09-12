@@ -203,13 +203,13 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 	php_protocolbuffers_unknown_field *p = NULL;
 
 	if (container->use_single_property > 0) {
-		unknown_name = "_unknown";
-		unknown_name_len = sizeof("_unknown");
+		unknown_name = pb_get_default_unknown_property_name();
+		unknown_name_len = pb_get_default_unknown_property_name_len();
 	} else {
-		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 	}
 
-	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&un) == SUCCESS) {
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&un) == SUCCESS) {
 		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, &p)) {
 			val = (unknown_value*)emalloc(sizeof(val));
 			val->varint = value;
@@ -245,13 +245,13 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 	php_protocolbuffers_unknown_field *p = NULL;
 
 	if (container->use_single_property > 0) {
-		unknown_name = "_unknown";
-		unknown_name_len = sizeof("_unknown");
+		unknown_name = pb_get_default_unknown_property_name();
+		unknown_name_len = pb_get_default_unknown_property_name_len();
 	} else {
-		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 	}
 
-	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&un) == SUCCESS) {
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&un) == SUCCESS) {
 		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, &p)) {
 			val = (unknown_value*)emalloc(sizeof(unknown_value));
 			val->buffer.val = bytes;
