@@ -247,7 +247,26 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 			}
 
 		}
+	}
+	php_printf("  }\n");
 
+	php_printf("  \"extension_ranges\": {\n");
+	if (descriptor->container->extension_cnt > 0) {
+		pb_extension_range *range;
+		for (n = 0; n < descriptor->container->extension_cnt; n++) {
+			range = &(descriptor->container->extensions[n]);
+
+			php_printf("    \"%d\": {\n", n);
+			php_printf("      begin: %d,\n", range->begin);
+			php_printf("      end: %d,\n", range->end);
+			php_printf("    }");
+
+			if (n+1 < descriptor->container->extension_cnt) {
+				php_printf(",\n");
+			} else {
+				php_printf("\n");
+			}
+		}
 	}
 	php_printf("  }\n");
 

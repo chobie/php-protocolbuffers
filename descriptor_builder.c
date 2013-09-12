@@ -399,8 +399,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 			descriptor->container->extensions = ranges;
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&entry, &pos) == SUCCESS) {
-				zval **value;
-				php_var_dump(entry, 1 TSRMLS_CC);
+				zval **value = NULL;
 
 				if (zend_hash_find(Z_ARRVAL_PP(entry), "begin", sizeof("begin"), (void **)&value) == SUCCESS) {
 					ranges[i].begin = Z_LVAL_PP(value);
@@ -411,6 +410,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 				}
 
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos);
+				i++;
 			}
 
 		}

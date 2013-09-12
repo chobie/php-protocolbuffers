@@ -25,13 +25,14 @@ class Person extends ProtocolBuffersMessage
                 "message"  => "Tutorial_Person",
             )));
             $desc->addExtensionRange(200, 500);
+            $desc->addExtensionRange(600, 700);
             $descriptor = $desc->build();
+            $descriptor->dump();
         }
 
         return $descriptor;
     }
 }
-
 $registry = ProtocolBuffers\ExtensionRegistry::getInstance();
 
 // You can extend Person message like this. (normally we generate these code from .proto. adding by hand is bad idea.)
@@ -44,6 +45,7 @@ $registry->add("Person", 256, new ProtocolBuffersFieldDescriptor(array(
     "packable" => false,
     "default"  => null,
 )));
+exit;
 
 $p = new Person();
 $p->setExtension("address", 256);
