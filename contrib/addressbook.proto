@@ -32,7 +32,8 @@ message Person {
 
   repeated PhoneNumber phone = 4;
 
-  extensions 100 to max;
+  extensions 100 to 110;
+  extensions 120 to 130;
 }
 
 message AddressBook {

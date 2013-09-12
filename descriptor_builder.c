@@ -55,7 +55,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension, 0, 0, 2)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension_range, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_add_extension_range, 0, 0, 2)
 	ZEND_ARG_INFO(0, begin)
 	ZEND_ARG_INFO(0, end)
 ZEND_END_ARG_INFO()
@@ -393,9 +393,9 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 /* }}} */
 
 
-/* {{{ proto ProtocolBuffersMessageOptions ProtocolBuffersDescriptorBuilder::setExtensionRange(int $begin, int $end)
+/* {{{ proto ProtocolBuffersMessageOptions ProtocolBuffersDescriptorBuilder::addExtensionRange(int $begin, int $end)
 */
-PHP_METHOD(protocolbuffers_descriptor_builder, setExtensionRange)
+PHP_METHOD(protocolbuffers_descriptor_builder, addExtensionRange)
 {
 	zval *instance = getThis();
 	long begin, end;
@@ -467,7 +467,7 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	PHP_ME(protocolbuffers_descriptor_builder, getName,   arginfo_pb_descriptor_builder_get_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_pb_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, setExtensionRange, arginfo_pb_descriptor_builder_set_extension_range, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, addExtensionRange, arginfo_pb_descriptor_builder_add_extension_range, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_pb_descriptor_builder_get_options, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };

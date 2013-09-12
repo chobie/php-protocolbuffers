@@ -1,5 +1,5 @@
 --TEST--
-Check for protocol buffers descriptor builder setExtensionRange implementation
+Check for protocol buffers descriptor builder addExtensionRange implementation
 --FILE--
 <?php
 
@@ -15,26 +15,26 @@ $builder->addField(16, new ProtocolBuffersFieldDescriptor(array(
 )));
 
 try {
-    $builder->setExtensionRange(-1, 100);
+    $builder->addExtensionRange(-1, 100);
 } catch (InvalidArgumentException $e) {
     echo "OK" . PHP_EOL;
 }
 
 try {
-    $builder->setExtensionRange(100, 1);
+    $builder->addExtensionRange(100, 1);
 } catch (InvalidArgumentException $e) {
     echo "OK" . PHP_EOL;
 }
 
 try {
-    $builder->setExtensionRange(10, 20);
+    $builder->addExtensionRange(10, 20);
     echo "FAULT" . PHP_EOL;
 } catch (InvalidArgumentException $e) {
     echo "OK" . PHP_EOL;
 }
 
 try {
-    $builder->setExtensionRange(10, 15);
+    $builder->addExtensionRange(10, 15);
     echo "OK" . PHP_EOL;
 } catch (InvalidArgumentException $e) {
     echo "FAULT" . PHP_EOL;

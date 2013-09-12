@@ -133,7 +133,8 @@ class Tutorial_Person extends ProtocolBuffersMessage
         "default"  => null,
         "message"  => "Tutorial_Person_PhoneNumber",
       )));
-      $desc->setExtensionRange(100, 536870912);
+      $desc->addExtensionRange(100, 111);
+      $desc->addExtensionRange(120, 131);
       $descriptor = $desc->build();
     }
 

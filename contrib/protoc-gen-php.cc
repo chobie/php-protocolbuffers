@@ -653,7 +653,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
     for (int i = 0; i < message.extension_range_count(); ++i) {
         const Descriptor::ExtensionRange &er(*message.extension_range(i));
-        printer.Print("$desc->setExtensionRange(`start`, `end`);\n", "start", SimpleItoa(er.start), "end", SimpleItoa(er.end));
+        printer.Print("$desc->addExtensionRange(`start`, `end`);\n", "start", SimpleItoa(er.start), "end", SimpleItoa(er.end));
     }
 
 
