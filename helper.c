@@ -1695,54 +1695,6 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	return 0;
 }
 
-/* static inline */ void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
-{
-	char *name;
-	int name_len;
-	ulong hash;
-
-	if (container->use_single_property < 1) {
-		name     = s->mangled_name;
-		name_len = s->mangled_name_len;
-		hash     = s->mangled_name_h;
-	} else {
-		name     = s->name;
-		name_len = s->name_len;
-		hash     = s->name_h;
-	}
-
-	if (s->repeated) {
-		if (!zend_hash_quick_exists(hresult, name, name_len, hash)) {
-			zval *arr;
-
-			MAKE_STD_ZVAL(arr);
-			array_init(arr);
-
-			zend_hash_next_index_insert(Z_ARRVAL_P(arr), (void *)&dz, sizeof(dz), NULL);
-			Z_ADDREF_P(dz);
-
-			zend_hash_quick_update(hresult, name, name_len, hash, (void **)&arr, sizeof(arr), NULL);
-			Z_ADDREF_P(arr);
-			zval_ptr_dtor(&arr);
-		} else {
-			zval **arr2;
-
-			if (zend_hash_quick_find(hresult, name, name_len, hash, (void **)&arr2) == SUCCESS) {
-				if (Z_TYPE_PP(arr2) == IS_NULL) {
-					array_init(*arr2);
-				}
-
-				zend_hash_next_index_insert(Z_ARRVAL_PP(arr2), (void *)&dz, sizeof(dz), NULL);
-				//Z_ADDREF_P(dz);
-			}
-		}
-	} else {
-		//Z_ADDREF_P(dz);
-		zend_hash_quick_update(hresult, name, name_len, hash, (void **)&dz, sizeof(dz), NULL);
-	}
-}
-
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
 	ZEND_ARG_INFO(0, zval)
 ZEND_END_ARG_INFO()
