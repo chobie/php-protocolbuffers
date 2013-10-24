@@ -623,7 +623,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         );
         printer.Print("\"packable\" => `packable`,\n",
             "packable",
-            (field.is_packable()) ? "true" : "false"
+            (field.is_packed()) ? "true" : "false"
         );
         printer.Print("\"default\"  => `value`,\n",
             "value",
@@ -705,7 +705,7 @@ void PHPCodeGenerator::PrintExtension(io::Printer &printer, const FieldDescripto
     );
     printer.Print("\"packable\" => `packable`,\n",
         "packable",
-        (e.is_packable()) ? "true" : "false"
+        (e.is_packed()) ? "true" : "false"
     );
     printer.Print("\"default\"  => `value`,\n",
         "value",
