@@ -94,28 +94,43 @@ PHPCodeGenerator::~PHPCodeGenerator() {}
 // Maps a Message full_name into a PHP name
 template <class DescriptorType>
     string PHPCodeGenerator::ClassName(const DescriptorType & descriptor, const bool scoped) const {
-        if (!scoped && descriptor.containing_type() == NULL) return descriptor.name();
+        // Parse the options to figure out how to deal with namespaces
+        const PHPFileOptions& options = descriptor.file()->options().GetExtension(::php);
+
+        // Early return for unscoped,unnested types (with packages)
+        if (!scoped && descriptor.containing_type() == NULL && options.generate_package()) return descriptor.name();
+
+        // Non-const string that will be mapped to PHP name
         string name (descriptor.full_name());
-        // Use package namespace up to first type, nested types use underscores
-        if (descriptor.containing_type() != NULL) {
-            if (scoped) {
-                string container(descriptor.containing_type()->full_name());
-                replace(container.begin(), container.end(), '.', '\\');
-                string partialname = name.substr(container.length(),name.length()-container.length());
-                replace(partialname.begin(), partialname.end(), '.', '_');
-                return string("\\") + container + partialname;
+
+        if (options.generate_package()) {
+            // Use package namespace up to first type, nested types use underscores
+            if (descriptor.containing_type() != NULL) {
+                if (scoped) {
+                    string container(descriptor.containing_type()->full_name());
+                    replace(container.begin(), container.end(), '.', '\\');
+                    string partialname = name.substr(container.length(),name.length()-container.length());
+                    replace(partialname.begin(), partialname.end(), '.', '_');
+                    return string("\\") + container + partialname;
+                } else {
+                    size_t containerPrefixLength = descriptor.containing_type()->full_name().length();
+                    size_t containerLength = descriptor.containing_type()->name().length();
+                    size_t packagePrefixLength = containerPrefixLength-containerLength;
+                    string partialname = name.substr(packagePrefixLength,name.length()-packagePrefixLength);
+                    replace(partialname.begin(), partialname.end(), '.', '_');
+                    return partialname;
+                }
             } else {
-                size_t containerPrefixLength = descriptor.containing_type()->full_name().length();
-                size_t containerLength = descriptor.containing_type()->name().length();
-                size_t packagePrefixLength = containerPrefixLength-containerLength;
-                string partialname = name.substr(packagePrefixLength,name.length()-packagePrefixLength);
-                replace(partialname.begin(), partialname.end(), '.', '_');
-                return partialname;
+                replace(name.begin(), name.end(), '.', '\\');
             }
+            return string("\\") + name;
+        } else if (!options.namespace_().empty()) {
+            replace(name.begin(), name.end(), '.', '_');
+            return scoped ? (string("\\") + options.namespace_() + string("\\") + name) : name;
         } else {
-            replace(name.begin(), name.end(), '.', '\\');
+            replace(name.begin(), name.end(), '.', '_');
+            return name;
         }
-        return string("\\") + name;
     }
 
 string PHPCodeGenerator::VariableName(const FieldDescriptor & field) const {
@@ -236,24 +251,24 @@ string getTypeName(const FieldDescriptor & field){
 
 static const char *fields_map[] = {
     "DUMMY",
-    "\\ProtocolBuffers::TYPE_DOUBLE",
-    "\\ProtocolBuffers::TYPE_FLOAT",
-    "\\ProtocolBuffers::TYPE_INT64",
-    "\\ProtocolBuffers::TYPE_UINT64",
-    "\\ProtocolBuffers::TYPE_INT32",
-    "\\ProtocolBuffers::TYPE_FIXED64",
-    "\\ProtocolBuffers::TYPE_FIXED32",
-    "\\ProtocolBuffers::TYPE_BOOL",
-    "\\ProtocolBuffers::TYPE_STRING",
-    "\\ProtocolBuffers::TYPE_GROUP",
-    "\\ProtocolBuffers::TYPE_MESSAGE",
-    "\\ProtocolBuffers::TYPE_BYTES",
-    "\\ProtocolBuffers::TYPE_UINT32",
-    "\\ProtocolBuffers::TYPE_ENUM",
-    "\\ProtocolBuffers::TYPE_SFIXED32",
-    "\\ProtocolBuffers::TYPE_SFIXED64",
-    "\\ProtocolBuffers::TYPE_SINT32",
-    "\\ProtocolBuffers::TYPE_SINT64",
+    "ProtocolBuffers::TYPE_DOUBLE",
+    "ProtocolBuffers::TYPE_FLOAT",
+    "ProtocolBuffers::TYPE_INT64",
+    "ProtocolBuffers::TYPE_UINT64",
+    "ProtocolBuffers::TYPE_INT32",
+    "ProtocolBuffers::TYPE_FIXED64",
+    "ProtocolBuffers::TYPE_FIXED32",
+    "ProtocolBuffers::TYPE_BOOL",
+    "ProtocolBuffers::TYPE_STRING",
+    "ProtocolBuffers::TYPE_GROUP",
+    "ProtocolBuffers::TYPE_MESSAGE",
+    "ProtocolBuffers::TYPE_BYTES",
+    "ProtocolBuffers::TYPE_UINT32",
+    "ProtocolBuffers::TYPE_ENUM",
+    "ProtocolBuffers::TYPE_SFIXED32",
+    "ProtocolBuffers::TYPE_SFIXED64",
+    "ProtocolBuffers::TYPE_SINT32",
+    "ProtocolBuffers::TYPE_SINT64",
 };
 
 static const char* field_type_to_str(int field_type)
@@ -336,7 +351,6 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
     const PHPFileOptions& options = message.file()->options().GetExtension(::php);
     bool  skip_unknown        = options.skip_unknown();
-    const char * pb_namespace = options.namespace_().empty() ? "" : "\\";
     const PHPMessageOptions& moptions = message.options().GetExtension(::php_option);
 
     vector<const FieldDescriptor *> required_fields;
@@ -400,7 +414,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "name", ClassName(message, false)
              );
 
-    printer.Print(" extends \\`base`", "base", options.base_class());
+    printer.Print(" extends `base`", "base", options.base_class());
 
     printer.Print("\n{\n");
     printer.Indent();
@@ -609,11 +623,11 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("\n");
     printer.Print("if (!isset($descriptor)) {\n");
     printer.Indent();
-    printer.Print("$desc = new \\ProtocolBuffersDescriptorBuilder();\n");
+    printer.Print("$desc = new ProtocolBuffersDescriptorBuilder();\n");
     for (int i = 0; i < message.field_count(); ++i) {
         const FieldDescriptor &field (*message.field(i));
 
-        printer.Print("$desc->addField(`tag`, new \\ProtocolBuffersFieldDescriptor(array(\n",
+        printer.Print("$desc->addField(`tag`, new ProtocolBuffersFieldDescriptor(array(\n",
             "tag",
             SimpleItoa(field.number())
         );
@@ -640,7 +654,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
         );
         printer.Print("\"packable\" => `packable`,\n",
             "packable",
-            (field.is_packable()) ? "true" : "false"
+            (field.is_packed()) ? "true" : "false"
         );
         printer.Print("\"default\"  => `value`,\n",
             "value",
@@ -669,7 +683,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     }
 
     if (moptions.use_single_property()) {
-        printer.Print("$phpoptions = $desc->getOptions()->getExtension(\\ProtocolBuffers::PHP_MESSAGE_OPTION);\n");
+        printer.Print("$phpoptions = $desc->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);\n");
         printer.Print("$phpoptions->setUseSingleProperty(true);\n");
         printer.Print("$phpoptions->setSinglePropertyName(\"`name`\");\n",
             "name",
@@ -709,7 +723,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
 
 void PHPCodeGenerator::PrintExtension(io::Printer &printer, const FieldDescriptor & e) const {
     //const Descriptor &message(*e->)
-    printer.Print("$__extension_registry->add('`message`', `extension`, new \\ProtocolBuffersFieldDescriptor(array(\n", "message", ClassName(*e.containing_type(), false), "extension", SimpleItoa(e.number()));
+    printer.Print("$__extension_registry->add('`message`', `extension`, new ProtocolBuffersFieldDescriptor(array(\n", "message", ClassName(*e.containing_type(),true), "extension", SimpleItoa(e.number()));
     printer.Indent();
     printer.Print("\"type\"     => `type`,\n",
         "type",
@@ -733,7 +747,7 @@ void PHPCodeGenerator::PrintExtension(io::Printer &printer, const FieldDescripto
     );
     printer.Print("\"packable\" => `packable`,\n",
         "packable",
-        (e.is_packable()) ? "true" : "false"
+        (e.is_packed()) ? "true" : "false"
     );
     printer.Print("\"default\"  => `value`,\n",
         "value",
@@ -796,7 +810,7 @@ void PHPCodeGenerator::PrintEnums(io::Printer &printer, const FileDescriptor & f
 
 void PHPCodeGenerator::PrintExtensions(io::Printer &printer, const FileDescriptor & file) const {
     if (file.extension_count() > 0) {
-        printer.Print("$__extension_registry = \\ProtocolBuffersExtensionRegistry::getInstance();\n");
+        printer.Print("$__extension_registry = ProtocolBuffersExtensionRegistry::getInstance();\n");
     }
 
     for (int i = 0; i < file.extension_count(); ++i) {
@@ -821,6 +835,9 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
 
     string php_filename ( file->name() + ".php" );
 
+    // Parse the options
+    const PHPFileOptions & options(file->options().GetExtension(::php));
+    const string & namespace_ (options.namespace_());
 
     // Generate main file.
     scoped_ptr<io::ZeroCopyOutputStream> output(
@@ -832,10 +849,22 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
     try {
         printer.Print("<?php\n");
 
-        if (!file->package().empty()) {
-            string package ( file->package() );
-            replace(package.begin(),package.end(),'.','\\');
-            printer.Print("namespace `ns`;\n", "ns", package.c_str());
+        if (!namespace_.empty() || options.generate_package()) {
+
+            if (options.generate_package() && !file->package().empty()) {
+                string package ( file->package() );
+                replace(package.begin(),package.end(),'.','\\');
+                printer.Print("namespace `ns`;\n\n", "ns", package.c_str());
+            } else {
+                printer.Print("namespace `ns`;\n\n", "ns", namespace_.c_str());
+            }
+
+            printer.Print("use ProtocolBuffers;\n");
+            printer.Print("use ProtocolBuffersMessage;\n");
+            printer.Print("use ProtocolBuffersFieldDescriptor;\n");
+            printer.Print("use ProtocolBuffersDescriptorBuilder;\n");
+            printer.Print("use ProtocolBuffersExtensionRegistry;\n");
+            printer.Print("\n");
         }
 
         PrintMessages  (printer, *file);
