@@ -310,7 +310,8 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 
 const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
-	uint32_t value = 0, tag = 0, wiretype = 0;
+	uint32_t payload = 0, tag = 0, wiretype = 0;
+	uint64_t value = 0;
 	zval *dz;
 	HashTable *hresult;
 
@@ -336,15 +337,15 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	while (data < data_end) {
 		pb_scheme *s = NULL;
 
-		data = ReadVarint32FromArray(data, &value, data_end);
+		data = ReadVarint32FromArray(data, &payload, data_end);
 
 		if (data == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message failed. ReadVarint32FromArray returns NULL.");
 			return NULL;
 		}
 
-		tag	  = (value >> 0x03);
-		wiretype = (value & 0x07);
+		tag	  = (payload >> 0x03);
+		wiretype = (payload & 0x07);
 
 		if (tag < 1 || tag > ktagmax) {
 			return NULL;
@@ -358,7 +359,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		switch (wiretype) {
 		case WIRETYPE_VARINT:
 		{
-			data = ReadVarint32FromArray(data, &value, data_end);
+			data = ReadVarint64FromArray(data, &value, data_end);
 
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
@@ -415,31 +416,31 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			data += 8;
 		break;
 		case WIRETYPE_LENGTH_DELIMITED:
-			data = ReadVarint32FromArray(data, &value, data_end);
+			data = ReadVarint32FromArray(data, &payload, data_end);
 
-			if ((data+value) > data_end) {
+			if ((data+payload) > data_end) {
 				return NULL;
 			}
 
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, data, value);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, data, payload);
 				} else {
 					/* skip unknown field */
 				}
 			} else if (s->type == TYPE_STRING) {
 				MAKE_STD_ZVAL(dz);
-				ZVAL_STRINGL(dz, (char*)data, value, 1);
+				ZVAL_STRINGL(dz, (char*)data, payload, 1);
 
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 			} else if (s->type == TYPE_BYTES) {
 				MAKE_STD_ZVAL(dz);
-				ZVAL_STRINGL(dz, (char*)data, value, 1);
+				ZVAL_STRINGL(dz, (char*)data, payload, 1);
 
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else if (s->type == TYPE_MESSAGE) {
-				const char *n_buffer_end = data + value;
+				const char *n_buffer_end = data + payload;
 				zval *z_obj = NULL;
 				pb_scheme_container *c_container = NULL;
 				char *name = {0};
@@ -498,7 +499,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				const char *packed_data_end, *last_data_offset;
 
 				last_data_offset = data;
-				packed_data_end = data + value;
+				packed_data_end = data + payload;
 				do {
 					switch (s->type) {
 						case TYPE_DOUBLE:
@@ -554,10 +555,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						break;
 						break;
 						case TYPE_INT32:
-							data = ReadVarint32FromArray(data, &value, data_end);
+							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)value);
+							ZVAL_LONG(dz, (int32_t)payload);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -596,26 +597,26 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						}
 						break;
 						case TYPE_BOOL:
-							data = ReadVarint32FromArray(data, &value, data_end);
+							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_BOOL(dz, value);
+							ZVAL_BOOL(dz, payload);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_UINT32:
-							data = ReadVarint32FromArray(data, &value, data_end);
+							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)value);
+							ZVAL_LONG(dz, (int32_t)payload);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_ENUM:
-							data = ReadVarint32FromArray(data, &value, data_end);
+							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)value);
+							ZVAL_LONG(dz, (int32_t)payload);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -645,10 +646,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 						}
 						break;
 						case TYPE_SINT32:
-							data = ReadVarint32FromArray(data, &value, data_end);
+							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
+							ZVAL_LONG(dz, (int32_t)zigzag_decode32(payload));
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -674,7 +675,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 			}
 
-			data += value;
+			data += payload;
 		break;
 		case WIRETYPE_FIXED32: {
 			if (s == NULL) {
