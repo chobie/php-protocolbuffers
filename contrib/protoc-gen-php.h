@@ -61,7 +61,7 @@ class PHPCodeGenerator : public CodeGenerator {
 
         // Maps names into PHP names
         template <class DescriptorType>
-        string ClassName(const DescriptorType & descriptor) const;
+        string ClassName(const DescriptorType & descriptor, const bool scoped) const;
 
         string VariableName(const FieldDescriptor & field) const;
 
