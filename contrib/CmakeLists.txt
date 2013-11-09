@@ -1,0 +1,15 @@
+cmake_minimum_required (VERSION 2.6)
+project (protoc-gen-php)
+
+find_package(Threads)
+
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+FILE(GLOB SRC_PHP_GEN *.cc)
+
+ADD_EXECUTABLE(protoc-gen-php ${SRC_PHP_GEN})
+TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_LIBRARIES})
+TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_PROTOC_LIBRARY})
