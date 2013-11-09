@@ -24,6 +24,7 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
 
 ## Install for developers
 
+````
     git clone https://github.com/chobie/php-protocolbuffers.git
     cd php-protocolbuffers
     phpize
@@ -32,6 +33,7 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
     make install
     # please add following line to your php.ini
     # extension=protocolbuffers.so
+````
 
 ## Building protoc-gen-php
 
