@@ -35,12 +35,15 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
 
 ## Building protoc-gen-php
 
-currently, `protoc-php-gen` does not set PATH. you have to put it on to PATH manually
+* you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
 
     cd php-protocolbuffers/contrib
+    mkdir build
+    cd build
+    cmake ..
     make
-
-* you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
+    # install protoc-gen-php to /usr/local/bin
+    sudo make install
 
 ### The Protocol Buffer API
 
