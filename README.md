@@ -39,6 +39,8 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
 
 * you need to install protocol buffers (https://code.google.com/p/protobuf/)  before make protoc-php-gen.
 
+
+````
     cd php-protocolbuffers/contrib
     mkdir build
     cd build
@@ -46,6 +48,8 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
     make
     # install protoc-gen-php to /usr/local/bin
     sudo make install
+````
+
 
 ### The Protocol Buffer API
 
