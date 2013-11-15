@@ -12,7 +12,6 @@ $u = new Tutorial_SInt64();
 $u->setValue(9223372036854775807);
 
 $data = ProtocolBuffers::encode($u);
-
 if ($data == $expect) {
     echo "OK" . PHP_EOL;
 } else {

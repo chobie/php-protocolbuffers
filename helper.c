@@ -380,6 +380,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
+			} else if (s->type == TYPE_SINT64) {
+				MAKE_STD_ZVAL(dz);
+				ZVAL_LONG(dz, (int64_t)zigzag_decode64(value));
+				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			} else {
 				MAKE_STD_ZVAL(dz);
 				ZVAL_LONG(dz, value);
@@ -409,7 +413,11 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				memcpy(&l, data, 8);
 
 				MAKE_STD_ZVAL(dz);
-				ZVAL_DOUBLE(dz, l);
+				if (kint64max < l) {
+					ZVAL_DOUBLE(dz, (double)l);
+				} else {
+					ZVAL_LONG(dz, l);
+				}
 				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 			}
 
@@ -952,12 +960,18 @@ void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	long v;
+	uint64_t v;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_DOUBLE) {
+			v = (uint64_t)Z_DVAL_PP(element);
+		} else {
+			convert_to_long(*element);
+			v = Z_LVAL_PP(element);
+		}
+	} else {
+		v = Z_LVAL_PP(element);
 	}
-	v = Z_LVAL_PP(element);
 
 #if SIZEOF_LONG == 4
 	if (v > 0x80000000 || v == 0x80000000) {
@@ -971,9 +985,9 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 
 	if (v < 0) {
-		pb_serializer_write64_le(ser, (int64_t)Z_LVAL_PP(element));
+		pb_serializer_write64_le(ser, (int64_t)v);
 	} else {
-		pb_serializer_write64_le(ser, (uint64_t)Z_LVAL_PP(element));
+		pb_serializer_write64_le(ser, (uint64_t)v);
 	}
 }
 
