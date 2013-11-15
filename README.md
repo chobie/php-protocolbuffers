@@ -119,6 +119,9 @@ evaluating protocol buffers serialization.
   <tr>
     <td>Service (RPC)</td><td>not supported yet</td>
   </tr>
+  <tr>
+    <td>64bit values</td><td>EXPERIMENTAL</td>
+  </tr>
 </table>
 
 Basically, php-protocolbuffers test cases were made by python generator.
