@@ -154,6 +154,7 @@ typedef struct pb_globals{
 	HashTable *messages;
 	HashTable *classes;
 	zval *extension_registry;
+	long strict_mode;
 } pb_globals;
 
 typedef struct pb_scheme

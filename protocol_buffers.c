@@ -253,6 +253,10 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 	php_info_print_table_end();
 }
 
+PHP_INI_BEGIN()
+  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, pb_globals)
+PHP_INI_END()
+
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
 
@@ -261,6 +265,8 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 #else
 	pb_globals_ctor(&php_pb_globals TSRMLS_CC);
 #endif
+
+	REGISTER_INI_ENTRIES();
 
 	php_protocolbuffers_init(TSRMLS_C);
 	return SUCCESS;
@@ -271,6 +277,7 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 	PBG(messages) = NULL;
 	PBG(classes) = NULL;
 	PBG(extension_registry) = NULL;
+	PBG(strict_mode) = 1;
 
 	if (!PBG(messages)) {
 		ALLOC_HASHTABLE(PBG(messages));
@@ -294,6 +301,7 @@ PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 		pb_globals_dtor(&php_pb_globals TSRMLS_CC);
 #endif
 
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
