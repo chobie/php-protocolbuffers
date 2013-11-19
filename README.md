@@ -187,3 +187,11 @@ my protoc-gen-php based on his work.
 
 Basically, protobuf doesn't provide API which arbitrarily remove an element from within a repeated field.
 You should define a helper method on helper class and use it. someday I'll add helper class for generic usage.
+
+
+#### can we implement business logic on message class?
+
+We strongly disagree with this opinion. the message class is just container. You should wrap the message class or
+add some business logic class which modify message from outside.
+
+first, please check [Google's tutorial](https://developers.google.com/protocol-buffers/docs/cpptutorial)
