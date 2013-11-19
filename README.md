@@ -179,3 +179,11 @@ pb is very interesting. thanks providing it!
 https://github.com/bramp/protoc-gen-php
 
 my protoc-gen-php based on his work.
+
+
+## FAQ
+
+#### how can i delete item with repeated field?
+
+Basically, protobuf doesn't provide API which arbitrarily remove an element from within a repeated field.
+You should define a helper method on helper class and use it. someday I'll add helper class for generic usage.
