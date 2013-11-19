@@ -97,6 +97,31 @@ PHP Protocol Buffers implementation also provides `ProtocolBuffers::encode(Proto
 you can serialize / deserialize any object which implements `ProtocolBuffers\Describable` or "public static getDescriptor()" method. this is very useful when
 evaluating protocol buffers serialization.
 
+### Scalar Value Types
+
+| .proto type | encoding       | php type     |
+|:------------|---------------:|:------------:|
+| double      |                | string       |
+| float       |                | string       |
+| int32       | varint         | string       |
+| int64       | varint         | string       |
+| uint32      | varint         | string       |
+| uint64      | varint         | string       |
+| sint32      | zigzag+varint  | string       |
+| sint64      | zigzag+varint  | string       |
+| fixed32     |                | string       |
+| fixed64     |                | string       |
+| sfixed32    |                | string       |
+| sfixed64    |                | string       |
+| bool        |                | bool         |
+| string      | utf8 string    | string       |
+| bytes       |                | string       |
+
+Note: PHP's numeric value is platform dependant. Unfortunately long is 32bit value on some 64bit platform.
+It's impossible to keep precision for many types with PHP. so we use string types. it's safe.
+Don't forget. You have to use GMP or BCMath for calculating values which exceeds PHP_INT_MAX.
+
+maybe I'll re-support long values for performance reason. but it can't handle big values correctly.
 
 ### Features
 
