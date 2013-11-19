@@ -15,7 +15,7 @@ if ($obj instanceof Tutorial_Integer32) {
         exit;
     }
     $values = $obj->getValue();
-    if ($values[0] === 1) {
+    if ($values[0] == 1) {
         echo "OK";
     } else {
         var_dump($obj);

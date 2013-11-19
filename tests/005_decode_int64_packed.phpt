@@ -20,7 +20,7 @@ if ($obj instanceof Tutorial_Integer64) {
         exit;
     }
     $values = $obj->getValue();
-    if ($values[0] === 0 && $values[1] === 1024) {
+    if ($values[0] == 0 && $values[1] == 1024) {
         echo "OK";
     } else {
         var_dump($obj);

@@ -22,7 +22,7 @@ class Time extends ProtocolBuffersMessage
     if (!isset($descriptor)) {
       $desc = new ProtocolBuffersDescriptorBuilder();
       $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
-        "type"     => \ProtocolBuffers::TYPE_UINT64,
+        "type"     => ProtocolBuffers::TYPE_UINT64,
         "name"     => "start",
         "required" => true,
         "optional" => false,

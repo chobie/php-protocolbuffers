@@ -21,7 +21,7 @@ if ($obj instanceof Tutorial_Fixed32) {
         exit;
     }
     $values = $obj->getValue();
-    if ($values[0] === 0 && $values[1] === 128 && $values[2] === 256 && $values[3] === 512 && $values[4] == 1024) {
+    if ($values[0] == 0 && $values[1] == 128 && $values[2] == 256 && $values[3] == 512 && $values[4] == 1024) {
         echo "OK";
     } else {
         var_dump($obj);

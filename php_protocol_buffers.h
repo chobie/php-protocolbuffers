@@ -24,6 +24,7 @@
 
 #include "is_utf8.h"
 
+#include <stdlib.h>
 #if defined(__osf__)
 #include <inttypes.h>
 #elif !defined(_MSC_VER)

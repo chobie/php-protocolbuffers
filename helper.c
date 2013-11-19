@@ -308,12 +308,226 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 	}
 }
 
+typedef struct {
+	int type;
+	union {
+		int32_t  int32;
+		uint32_t uint32;
+		int64_t  int64;
+		uint64_t uint64;
+		double d;
+	} value;
+} pbf;
+
+static void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
+{
+	char __buffer[64] = {0};
+	char *buffer = __buffer;
+	int free = 0;
+	size_t size = 0;
+
+	switch (payload->type) {
+		case TYPE_SINT32:
+		case TYPE_INT32:
+			size = snprintf(buffer, sizeof(__buffer), "%d", payload->value.int32);
+		break;
+		case TYPE_UINT32:
+			size = snprintf(buffer, sizeof(__buffer), "%u", payload->value.uint32);
+		break;
+		case TYPE_UINT64:
+			size = snprintf(buffer, sizeof(__buffer), "%llu" , payload->value.uint64);
+		break;
+		case TYPE_SINT64:
+		case TYPE_INT64:
+			size = snprintf(buffer, sizeof(__buffer), "%lld" , payload->value.int64);
+		break;
+		case TYPE_FLOAT:
+		case TYPE_DOUBLE:{
+			free = 1;
+ 			/* Note: this is safe */
+			buffer = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+			size = zend_sprintf(buffer, "%.*G", (int)EG(precision), payload->value.d);
+		}
+		break;
+		default:
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the type %d does not support. maybe this is bug", payload->type);
+			return;
+		break;
+	}
+
+	if (buffer != NULL) {
+		ZVAL_STRINGL(result, buffer, size, 1);
+	}
+	if (free) {
+		efree(buffer);
+	}
+}
+
+static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, uint64_t value, HashTable *hresult)
+{
+	pbf __payload = {0};
+	zval *dz;
+
+	if (scheme == NULL) {
+		if (container->process_unknown_fields > 0) {
+			MAKE_STD_ZVAL(dz);
+			process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+		} else {
+			/* skip unknown field */
+		}
+	} else {
+		MAKE_STD_ZVAL(dz);
+		switch (scheme->type) {
+			case TYPE_BOOL:
+				ZVAL_BOOL(dz, value);
+			break;
+			case TYPE_INT32:
+			case TYPE_ENUM:
+				__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)value;
+			break;
+			case TYPE_UINT32:
+				__payload.type = TYPE_UINT32;__payload.value.uint32 = (uint32_t)value;
+			break;
+			case TYPE_SINT32:
+				__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)zigzag_decode32(value);
+			break;
+			case TYPE_INT64:
+				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)value;
+			break;
+			case TYPE_SINT64:
+				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)zigzag_decode64(value);
+			break;
+			case TYPE_UINT64:
+				__payload.type = TYPE_UINT64;__payload.value.uint64 = (uint64_t)value;
+			break;
+			default:
+				zval_ptr_dtor(&dz);
+				return 0;
+		}
+		if (scheme->type != TYPE_BOOL) {
+			pb_format_string(dz, &__payload TSRMLS_CC);
+		}
+
+		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+	}
+
+	return 1;
+}
+
+static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
+{
+	pbf __payload = {0};
+	zval *dz;
+
+	if (scheme == NULL) {
+		if (container->process_unknown_fields > 0) {
+			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
+		} else {
+			/* skip unknown field */
+		}
+	} else {
+		MAKE_STD_ZVAL(dz);
+
+		switch (scheme->type) {
+			case TYPE_DOUBLE:
+			{
+				uint64_t v;
+				double d;
+
+				memcpy(&v, data, 8);
+				d = decode_double(v);
+
+				__payload.type = TYPE_DOUBLE;__payload.value.d = d;
+				pb_format_string(dz, &__payload TSRMLS_CC);
+			}
+			break;
+			case TYPE_FIXED64:
+			{
+				uint64_t v;
+
+				memcpy(&v, data, 8);
+				__payload.type = TYPE_UINT64;__payload.value.uint64 = v;
+				pb_format_string(dz, &__payload TSRMLS_CC);
+			}
+			break;
+			case TYPE_SFIXED64:
+			{
+				int64_t l;
+				memcpy(&l, data, 8);
+
+				__payload.type = TYPE_INT64;__payload.value.int64 = l;
+				pb_format_string(dz, &__payload TSRMLS_CC);
+			}
+			break;
+			default:
+				zval_ptr_dtor(&dz);
+				return 0;
+		}
+		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+	}
+
+	return 1;
+}
+
+static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
+{
+	pbf __payload = {0};
+	zval *dz;
+
+	if (scheme == NULL) {
+		if (container->process_unknown_fields > 0) {
+			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
+		} else {
+			/* skip unknown field */
+		}
+	} else {
+		MAKE_STD_ZVAL(dz);
+
+		switch(scheme->type) {
+			case TYPE_FLOAT:
+			{
+				uint32_t _v;
+				float a = 0;
+
+				memcpy(&_v, data, 4);
+				a = decode_float(_v);
+				__payload.type = TYPE_DOUBLE;__payload.value.d = (double)a;
+			}
+			break;
+			case TYPE_SFIXED32:
+			{
+				int32_t l = 0;
+
+				memcpy(&l, data, 4);
+				__payload.type = TYPE_SINT32;__payload.value.int32 = l;
+			}
+			break;
+			case TYPE_FIXED32:
+			{
+				uint32_t l = 0;
+				memcpy(&l, data, 4);
+
+				__payload.type = TYPE_UINT32;__payload.value.uint32 = l;
+			}
+			break;
+			default:
+				zval_ptr_dtor(&dz);
+				return 0;
+		}
+		pb_format_string(dz, &__payload TSRMLS_CC);
+		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+	}
+
+	return 1;
+}
+
 const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
 	uint32_t payload = 0, tag = 0, wiretype = 0;
 	uint64_t value = 0;
 	zval *dz;
 	HashTable *hresult;
+	pbf __payload = {0};
 
 	if (container->use_single_property > 0) {
 		zval **tmp = NULL;
@@ -344,13 +558,14 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			return NULL;
 		}
 
-		tag	  = (payload >> 0x03);
+		tag      = (payload >> 0x03);
 		wiretype = (payload & 0x07);
 
 		if (tag < 1 || tag > ktagmax) {
 			return NULL;
 		}
-		if (wiretype > 5) {
+
+		if (wiretype > WIRETYPE_FIXED32) {
 			return NULL;
 		}
 
@@ -360,67 +575,15 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 		case WIRETYPE_VARINT:
 		{
 			data = ReadVarint64FromArray(data, &value, data_end);
-
-			if (s == NULL) {
-				if (container->process_unknown_fields > 0) {
-					MAKE_STD_ZVAL(dz);
-					process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
-				} else {
-					/* skip unknown field */
-				}
-			} else if (s->type == TYPE_BOOL) {
-				MAKE_STD_ZVAL(dz);
-				ZVAL_BOOL(dz, value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			} else if (s->type == TYPE_INT32) {
-				MAKE_STD_ZVAL(dz);
-				ZVAL_LONG(dz, (int32_t)value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			} else if (s->type == TYPE_SINT32) {
-				MAKE_STD_ZVAL(dz);
-				ZVAL_LONG(dz, (int32_t)zigzag_decode32(value));
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			} else if (s->type == TYPE_SINT64) {
-				MAKE_STD_ZVAL(dz);
-				ZVAL_LONG(dz, (int64_t)zigzag_decode64(value));
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			} else {
-				MAKE_STD_ZVAL(dz);
-				ZVAL_LONG(dz, value);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
+			if (!pb_process_varint(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, value, hresult)) {
+				return NULL;
 			}
 		}
 		break;
 		case WIRETYPE_FIXED64:
-			if (s == NULL) {
-				if (container->process_unknown_fields > 0) {
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
-				} else {
-					/* skip unknown field */
-				}
-			} else if (s->type == TYPE_DOUBLE) {
-				uint64_t _v;
-				double d;
-
-				memcpy(&_v, data, 8);
-				d = decode_double(_v);
-
-				MAKE_STD_ZVAL(dz);
-				ZVAL_DOUBLE(dz, d);
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			} else {
-				uint64_t l;
-				memcpy(&l, data, 8);
-
-				MAKE_STD_ZVAL(dz);
-				if (kint64max < l) {
-					ZVAL_DOUBLE(dz, (double)l);
-				} else {
-					ZVAL_LONG(dz, l);
-				}
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
+			if (!pb_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
+            	return NULL;
 			}
-
 			data += 8;
 		break;
 		case WIRETYPE_LENGTH_DELIMITED:
@@ -518,7 +681,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 							d = decode_double(_v);
 							MAKE_STD_ZVAL(dz);
-							ZVAL_DOUBLE(dz, d);
+
+							__payload.type = TYPE_DOUBLE;__payload.value.d = d;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 8;
@@ -533,7 +698,10 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							a = decode_float(_v);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_DOUBLE(dz, a);
+
+							__payload.type = TYPE_DOUBLE;__payload.value.d = a;
+							pb_format_string(dz, &__payload TSRMLS_CC);
+
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 4;
@@ -545,7 +713,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint64FromArray(data, &v2, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int64_t)v2);
+
+							__payload.type = TYPE_INT64;__payload.value.int64 = v2;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -556,7 +726,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint64FromArray(data, &v2, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, v2);
+
+							__payload.type = TYPE_UINT64;__payload.value.uint64 = v2;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -566,17 +738,20 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)payload);
+
+							__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)payload;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
 						case TYPE_FIXED64:
 						{
-							int64_t l;
+							uint64_t l;
 							memcpy(&l, data, 8);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, l);
+							__payload.type = TYPE_UINT64;__payload.value.uint64 = l;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 8;
@@ -588,16 +763,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							memcpy(&l, data, 4);
 
 							MAKE_STD_ZVAL(dz);
-#if SIZEOF_LONG == 4
-							if (l > 0x7fffffff) {
-								/* PHP_INT_MAX is 0x7fffffff on this platform. cast to double. */
-								ZVAL_DOUBLE(dz, l);
-							} else {
-								ZVAL_LONG(dz, (unsigned long)l);
-							}
-#else
-							ZVAL_LONG(dz, (unsigned long)l);
-#endif
+							__payload.type = TYPE_UINT32;__payload.value.uint32 = l;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
@@ -616,7 +783,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)payload);
+							__payload.type = TYPE_UINT32;__payload.value.uint32 = (uint32_t)payload;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -635,7 +803,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							memcpy(&l, data, 4);
 							MAKE_STD_ZVAL(dz);
 
-							ZVAL_LONG(dz, (int32_t)l);
+							__payload.type = TYPE_INT32;__payload.value.int32 = l;
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 4;
@@ -647,7 +816,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							memcpy(&l, data, 8);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_DOUBLE(dz, l);
+							__payload.type = TYPE_INT64;__payload.value.int64 = l;
+							pb_format_string(dz, &__payload TSRMLS_CC);
+
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 8;
@@ -657,7 +828,8 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint32FromArray(data, &payload, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int32_t)zigzag_decode32(payload));
+							__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)zigzag_decode32(payload);
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -667,7 +839,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 							data = ReadVarint64FromArray(data, &v2, data_end);
 
 							MAKE_STD_ZVAL(dz);
-							ZVAL_LONG(dz, (int64_t)zigzag_decode64(v2));
+
+							__payload.type = TYPE_SINT64;__payload.value.int64 = (int64_t)zigzag_decode64(v2);
+							pb_format_string(dz, &__payload TSRMLS_CC);
 
 							php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -686,56 +860,9 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			data += payload;
 		break;
 		case WIRETYPE_FIXED32: {
-			if (s == NULL) {
-				if (container->process_unknown_fields > 0) {
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
-				} else {
-					/* skip unknown field */
-				}
-			} else if (s->type == TYPE_FLOAT) {
-				uint32_t _v;
-				float a = 0;
-
-				memcpy(&_v, data, 4);
-				a = decode_float(_v);
-
-				MAKE_STD_ZVAL(dz);
-				ZVAL_DOUBLE(dz, a);
-			} else if (s->type == TYPE_SFIXED32) {
-				int32_t l = 0;
-
-				memcpy(&l, data, 4);
-				MAKE_STD_ZVAL(dz);
-
-				ZVAL_LONG(dz, (int32_t)l);
-			} else if (s->type == TYPE_FIXED32) {
-				uint32_t l = 0;
-				memcpy(&l, data, 4);
-
-				MAKE_STD_ZVAL(dz);
-#if SIZEOF_LONG == 4
-				if (l > 0x7fffffff) {
-					/* PHP_INT_MAX is 0x7fffffff on this platform. cast to double. */
-					ZVAL_DOUBLE(dz, l);
-				} else {
-					ZVAL_LONG(dz, (unsigned long)l);
-				}
-#else
-				ZVAL_LONG(dz, (unsigned long)l);
-#endif
-			} else {
-				int32_t l = 0;
-
-				memcpy(&l, data, 4);
-
-				MAKE_STD_ZVAL(dz);
-				ZVAL_LONG(dz, l);
+			if (!pb_process_fixed32(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
+				return NULL;
 			}
-
-			if (s != NULL) {
-				php_pb_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
-			}
-
 			data += 4;
 		}
 		break;
@@ -947,23 +1074,39 @@ void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
+	uint32_t v = 0;
+
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED32);
 	}
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (uint32_t)atol(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (uint32_t)Z_LVAL_PP(element);
+		}
+	} else {
+		v = (uint32_t)Z_LVAL_PP(element);
 	}
 
-	pb_serializer_write32_le(ser, Z_LVAL_PP(element));
+	pb_serializer_write32_le(ser, v);
 }
 
 void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	uint64_t v;
+	uint64_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		if (Z_TYPE_PP(element) == IS_DOUBLE) {
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			char *endptr = NULL;
+			v = (uint64_t)strtoull(Z_STRVAL_PP(element), &endptr, 0);
+			if  (errno == ERANGE) {
+				zend_error(E_WARNING, "pb_encode_element_fixed64: strtoull failed to decode string");
+				return;
+			}
+		} else if (Z_TYPE_PP(element) == IS_DOUBLE) {
 			v = (uint64_t)Z_DVAL_PP(element);
 		} else {
 			convert_to_long(*element);
@@ -984,11 +1127,7 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
 	}
 
-	if (v < 0) {
-		pb_serializer_write64_le(ser, (int64_t)v);
-	} else {
-		pb_serializer_write64_le(ser, (uint64_t)v);
-	}
+	pb_serializer_write64_le(ser, (uint64_t)v);
 }
 
 void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
@@ -1005,12 +1144,18 @@ void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	long v;
+	int64_t v;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (int64_t)atoll(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (int64_t)Z_LVAL_PP(element);
+		}
+	} else {
+		v = (int64_t)Z_LVAL_PP(element);
 	}
-	v = Z_LVAL_PP(element);
 
 #if SIZEOF_LONG == 4
 	if (v > 0x80000000 || v == 0x80000000) {
@@ -1027,12 +1172,18 @@ void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	long v;
+	uint64_t v;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (uint64_t)atoll(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (uint64_t)Z_LVAL_PP(element);
+		}
+	} else {
+		v = (uint64_t)Z_LVAL_PP(element);
 	}
-	v = Z_LVAL_PP(element);
 
 #if SIZEOF_LONG == 4
 	if (v > 0x80000000 || v == 0x80000000) {
@@ -1049,20 +1200,24 @@ void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
+	int32_t v = 0;
+
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
 	}
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
-	}
-
-
-	if (Z_LVAL_PP(element) < 0) {
-		pb_serializer_write_varint64(ser, (uint64_t)Z_LVAL_PP(element));
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (int32_t)atol(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (int32_t)Z_LVAL_PP(element);
+		}
 	} else {
-		pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+		v = (int32_t)Z_LVAL_PP(element);
 	}
+
+	pb_serializer_write_varint32(ser,(uint32_t)v);
 }
 
 void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
@@ -1120,15 +1275,24 @@ void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
+	uint32_t v;
+
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (int32_t)atol(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (int32_t)Z_LVAL_PP(element);
+		}
+	} else {
+		v = (int32_t)Z_LVAL_PP(element);
 	}
 
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
 	}
 
-	pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
+	pb_serializer_write_varint32(ser, v);
 }
 
 void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
@@ -1157,7 +1321,7 @@ void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	uint64_t v;
+	int64_t v;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -1174,7 +1338,7 @@ void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
 	}
-	pb_serializer_write64_le(ser, (uint64_t)v);
+	pb_serializer_write64_le(ser, (int64_t)v);
 }
 
 void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
@@ -1191,12 +1355,18 @@ void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	long v;
+	int64_t v;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
-		convert_to_long(*element);
+		if (Z_TYPE_PP(element) == IS_STRING) {
+			v = (int64_t)atoll(Z_STRVAL_PP(element));
+		} else {
+			convert_to_long(*element);
+			v = (int64_t)Z_LVAL_PP(element);
+		}
+	} else {
+		v = (int64_t)Z_LVAL_PP(element);
 	}
-	v = Z_LVAL_PP(element);
 
 #if SIZEOF_LONG == 4
 	if (v > 0x80000000 || v == 0x80000000) {

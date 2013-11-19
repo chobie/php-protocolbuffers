@@ -254,7 +254,7 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 }
 
 PHP_INI_BEGIN()
-  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, pb_globals)
+  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, 	pb_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(protocolbuffers)

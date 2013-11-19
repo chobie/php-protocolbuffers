@@ -9,7 +9,7 @@ $bytes = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" 
 $obj = ProtocolBuffers::decode("Tutorial_Fixed32", $bytes);
 
 if ($obj instanceof Tutorial_Fixed32) {
-    if ($obj->getValue() === 0) {
+    if ($obj->getValue() == 0) {
         echo "OK";
     } else {
         var_dump($obj);

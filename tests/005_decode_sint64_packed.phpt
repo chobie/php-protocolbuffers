@@ -16,7 +16,7 @@ if ($obj instanceof Tutorial_SInt64) {
         exit;
     }
     $values = $obj->getValue();
-    if ($values[0] === -1024 && $values[1] === 0 && $values[2] === 1024) {
+    if ($values[0] == -1024 && $values[1] == 0 && $values[2] == 1024) {
         echo "OK";
     } else {
         var_dump($obj);
