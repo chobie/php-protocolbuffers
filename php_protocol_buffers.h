@@ -210,8 +210,8 @@ typedef struct {
 } pb_scheme_container;
 
 #ifdef ZTS
-#define PBG(v) TSRMG(pb_globals_id, pb_globals *, v)
-PHPAPI extern int pb_globals_id;
+#define PBG(v) TSRMG(php_pb_globals_id, pb_globals *, v)
+PHPAPI extern int php_pb_globals_id;
 #else
 #define PBG(v) (php_pb_globals.v)
 PHPAPI extern pb_globals php_pb_globals;

@@ -44,7 +44,7 @@
 #include "extension_registry.h"
 
 #ifdef ZTS
-PHPAPI int pb_globals_id;
+PHPAPI int php_pb_globals_id;
 #else
 PHPAPI pb_globals php_pb_globals;
 #endif
@@ -254,14 +254,14 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 }
 
 PHP_INI_BEGIN()
-  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, 	pb_globals)
+  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, php_pb_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
 
 #ifdef ZTS
-	ts_allocate_id(&pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
+	ts_allocate_id(&php_pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
 #else
 	pb_globals_ctor(&php_pb_globals TSRMLS_CC);
 #endif
@@ -296,7 +296,7 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 {
 #ifdef ZTS
-		ts_free_id(pb_globals_id);
+		ts_free_id(php_pb_globals_id);
 #else
 		pb_globals_dtor(&php_pb_globals TSRMLS_CC);
 #endif
