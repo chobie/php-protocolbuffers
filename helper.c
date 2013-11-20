@@ -1101,6 +1101,8 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
 			char *endptr = NULL;
+
+			errno = 0;
 			v = (uint64_t)strtoull(Z_STRVAL_PP(element), &endptr, 0);
 			if  (errno == ERANGE) {
 				zend_error(E_WARNING, "pb_encode_element_fixed64: strtoull failed to decode string");
