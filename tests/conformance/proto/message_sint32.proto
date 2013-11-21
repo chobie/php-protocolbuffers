@@ -1,0 +1,5 @@
+package chobie.github.io;
+
+message Message_Sint32 {
+	required sint32 sint32 = 1;
+}
