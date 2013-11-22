@@ -1,8 +1,16 @@
 #include "php_protocol_buffers.h"
 #include "field_descriptor.h"
 
+#if PHP_VERSION_ID < 50300
+static int php_protocolbuffers_field_descriptor_process_params(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+#else
 static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+#endif
 {
+#if PHP_VERSION_ID < 50300
+	TSRMLS_FETCH();
+#endif
+
 	if (hash_key->nKeyLength == 0) {
 		return 0;
 	} else {
@@ -144,7 +152,11 @@ PHP_METHOD(protocolbuffers_field_descriptor, __construct)
 	}
 
 	if (params) {
+#if PHP_VERSION_ID < 50300
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(params), (apply_func_args_t)php_protocolbuffers_field_descriptor_process_params, 1, &instance);
+#else
 		zend_hash_apply_with_arguments(Z_ARRVAL_P(params) TSRMLS_CC, (apply_func_args_t)php_protocolbuffers_field_descriptor_process_params, 1, &instance);
+#endif
 		if (EG(exception)) {
 			return;
 		}
