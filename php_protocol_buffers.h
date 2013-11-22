@@ -339,6 +339,12 @@ typedef struct{
 # ifndef Z_SET_REFCOUNT_P
 #  define Z_SET_REFCOUNT_P(pz,rc) (pz)->refcount = (rc)
 # endif
+# ifndef Z_REFCOUNT_P
+#  define Z_REFCOUNT_P(pz) ((pz)->refcount)
+# endif
+# ifndef Z_REFCOUNT_PP
+#  define Z_REFCOUNT_PP(pz) ((*pz)->refcount)
+# endif
 #endif
 
 
