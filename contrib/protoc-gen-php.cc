@@ -186,25 +186,25 @@ string getTypeName(const FieldDescriptor & field){
 
     switch (field.type()) {
         case FieldDescriptorProto_Type_TYPE_DOUBLE:
-            return "double";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_FLOAT:
-            return "float";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_INT64:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_UINT64:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_INT32:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_FIXED64:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_FIXED32:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_BOOL:
             return "bool";
@@ -228,22 +228,22 @@ string getTypeName(const FieldDescriptor & field){
             return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_UINT32:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_ENUM:
             return "int";
             break;
         case FieldDescriptorProto_Type_TYPE_SFIXED32:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_SFIXED64:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_SINT32:
-            return "int";
+            return "string";
             break;
         case FieldDescriptorProto_Type_TYPE_SINT64:
-            return "int";
+            return "string";
             break;
     }
     return "";
@@ -396,15 +396,40 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
              );
     printer.Print(" *\n");
 
+    // Start printing magic methods
+    printer.Print(" * -*- magic methods -*-\n");
+    printer.Print(" *\n");
+    for (int i = 0; i < message.field_count(); ++i) {
+        const FieldDescriptor &field ( *message.field(i) );
+        printer.Print(" * @method `type` get`variable`()\n",
+                "type", getTypeName(field),
+                "variable", UnderscoresToCapitalizedCamelCase(field)
+                );
+        if (field.is_repeated()) {
+            printer.Print(" * @method void append`variable`()\n",
+                    "type", getTypeName(field),
+                    "variable", UnderscoresToCapitalizedCamelCase(field)
+                    );
+        } else {
+            printer.Print(" * @method void set`variable`()\n",
+                    "variable", UnderscoresToCapitalizedCamelCase(field)
+                    );
+        }
+    }
+    printer.Print(" *\n");
     if (moptions.use_single_property()) {
         printer.Print(" * -*- magic properties -*-\n");
         printer.Print(" *\n");
         for (int i = 0; i < message.field_count(); ++i) {
             const FieldDescriptor &field ( *message.field(i) );
-            printer.Print(" * @property `type` $`variable`\n",
-                    "type", getTypeName(field),
-                    "variable", VariableName(field)
-                     );
+            printer.Print(" * @property `return_type` $`variable`  tag:`tag`",
+                    "return_type", getTypeName(field),
+                    "variable", VariableName(field),
+                    "tag", SimpleItoa(field.number())
+            );
+            printer.Print(" type:`type`\n",
+                    "type", (string)field_type_to_str(field.type())
+            );
         }
     }
 
@@ -437,6 +462,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     // Print fields map
 
     if (moptions.use_single_property()) {
+        printer.Print("/** @var array $`var` */\n", "var", moptions.single_property_name());
         printer.Print("protected $`var` = array();\n",
             "var",
             moptions.single_property_name()
@@ -446,10 +472,30 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             const FieldDescriptor &field(*message.field(i));
 
             if (field.is_repeated()) {
+                printer.Print("/** @var `type` $`var` tag:`tag` ",
+                    "type", getTypeName(field),
+                    "var", field.name(),
+                    "tag", SimpleItoa(field.number())
+                );
+                printer.Print(" `required` `field` */\n",
+                    "required", (field.is_required() ? "required" : "optional"),
+                    "field", (string)field_type_to_str(field.type())
+                );
+
                 printer.Print("protected $`var` = array();\n",
                     "var", field.name()
                 );
             } else {
+                printer.Print("/** @var `type` $`var` tag:`tag` ",
+                    "type", getTypeName(field),
+                    "var", field.name(),
+                    "tag", SimpleItoa(field.number())
+                );
+                printer.Print(" `required` `field` */\n",
+                    "required", (field.is_required() ? "required" : "optional"),
+                    "field", (string)field_type_to_str(field.type())
+                );
+
                 printer.Print("protected $`var`;\n",
                     "var", field.name()
                 );
@@ -614,7 +660,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("/**\n");
     printer.Print(" * get descriptor for protocol buffers\n");
     printer.Print(" * \n");
-    printer.Print(" * @return array\n");
+    printer.Print(" * @return ProtocolBuffersDescriptor\n");
     printer.Print(" */\n");
     printer.Print("public static function getDescriptor()\n");
     printer.Print("{\n");
