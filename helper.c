@@ -3,9 +3,9 @@
 #include "unknown_field.h"
 
 static char *single_property_name_default = "_properties";
-static int single_property_name_default_len = sizeof(single_property_name_default);
+static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
-static int unknown_property_name_default_len = sizeof(unknown_property_name_default);
+static int unknown_property_name_default_len = sizeof("_unknown");
 
 char *pb_get_default_single_property_name()
 {
@@ -224,7 +224,7 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 	}
 
-	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&un) == SUCCESS) {
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&un) == SUCCESS) {
 		if (php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, &p)) {
 			val = (unknown_value*)emalloc(sizeof(val));
 			val->varint = value;
@@ -268,7 +268,7 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
 	}
 
-	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len+1, (void **)&unknown_fieldset) == SUCCESS) {
+	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
 		if (Z_OBJCE_PP(unknown_fieldset) != protocol_buffers_unknown_field_set_class_entry) {
 			return;
 		}

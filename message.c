@@ -1451,7 +1451,7 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 			free = 1;
 		}
 
-		if (zend_hash_find(target, (char*)unknown_name, unknown_name_len+1, (void **)&unknown_fieldset) == SUCCESS) {
+		if (zend_hash_find(target, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
 			RETVAL_ZVAL(*unknown_fieldset, 1, 0);
 		}
 
