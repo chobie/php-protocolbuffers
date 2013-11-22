@@ -76,7 +76,7 @@
 #endif
 
 #if PHP_VERSION_ID < 50300
-#define PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(exception) zend_exception_error(exception TSRMLS_DC)
+#define PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(exception) zend_exception_error(exception TSRMLS_CC)
 #else
 #define PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(exception) zend_exception_error(exception, E_ERROR TSRMLS_CC)
 #endif
