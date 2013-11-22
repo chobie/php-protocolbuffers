@@ -348,7 +348,7 @@ static void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
 
  			/* Note: this is safe */
 			buffer = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			size = zend_sprintf(buffer, "%f", (int)EG(precision), payload->value.f);
+			size = zend_sprintf(buffer, "%f", payload->value.f);
 
 			// remove trailing zeros
 			p = strchr(buffer,'.');
