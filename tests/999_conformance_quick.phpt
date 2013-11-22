@@ -5,7 +5,7 @@ Check for protocol buffers decode implementations
 require dirname(__FILE__) . DIRECTORY_SEPARATOR . "messages" . DIRECTORY_SEPARATOR . "field.proto.php";
 $expect = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "999_conformance_quick.bin");
 
-$m = chobie_github_io_Field::parseFromString($expect);
+$m = ProtocolBuffers::decode("chobie_github_io_Field", $expect);
 
 echo "double: " . $m->get("v_double") . PHP_EOL;
 echo "float: " . $m->get("v_float") . PHP_EOL;
