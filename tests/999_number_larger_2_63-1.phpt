@@ -1,8 +1,9 @@
 --TEST--
 Problems with numbers larger than 2^63-1
+--SKIPIF--
+<?php if (8 !== PHP_INT_SIZE) { die('skip Only for 64-bit platform'); } ?>
 --FILE--
 <?php
-if (8 !== PHP_INT_SIZE) { die('Only for 64-bit platform'); }
 class TestCase
 {
   protected static $descriptor;

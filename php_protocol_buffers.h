@@ -10,6 +10,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "zend.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"

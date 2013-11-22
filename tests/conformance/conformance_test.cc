@@ -33,6 +33,13 @@ TEST(AddTest, Test1)
     message.set_v_sint64(0x7FFFFFFFFFFFFFFF);
     message.set_v_string("Hello World");
 
+    message.set_v_int64_min(0x8000000000000000);
+    message.set_v_int32_min(0x80000000);
+    message.set_v_sfixed32_min(0x80000000);
+    message.set_v_sfixed64_min(0x8000000000000000);
+    message.set_v_sint32_min(0x80000000);
+    message.set_v_sint64_min(0x8000000000000000);
+
     string result;
 
     message.SerializeToString(&result);
@@ -55,6 +62,13 @@ TEST(AddTest, Test1)
     cout << "sint32: " << r.v_sint32() << endl;
     cout << "sint64: " << r.v_sint64() << endl;
     cout << "string: " << r.v_string() << endl;
+
+    cout << "int64_min: " << r.v_int64_min() << endl;
+    cout << "int32_min: " << r.v_int32_min() << endl;
+    cout << "sfixed32_min: " << r.v_sfixed32_min() << endl;
+    cout << "sfixed64_min: " << r.v_sfixed64_min() << endl;
+    cout << "sint32_min: " << r.v_sint32_min() << endl;
+    cout << "sint64_min: " << r.v_sint64_min() << endl;
 
     fstream output("test.bin", ios::out | ios::trunc | ios::binary);
 

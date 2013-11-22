@@ -33,7 +33,7 @@ class Person extends ProtocolBuffersMessage
         return $descriptor;
     }
 }
-$registry = ProtocolBuffers\ExtensionRegistry::getInstance();
+$registry = ProtocolBuffersExtensionRegistry::getInstance();
 
 // You can extend Person message like this. (normally we generate these code from .proto. adding by hand is bad idea.)
 $registry->add("Person", 256, new ProtocolBuffersFieldDescriptor(array(
@@ -45,10 +45,9 @@ $registry->add("Person", 256, new ProtocolBuffersFieldDescriptor(array(
     "packable" => false,
     "default"  => null,
 )));
-exit;
 
 $p = new Person();
 $p->setExtension("address", 256);
-$p2 = Person::parseFromString($p->serializeToString());
+$p2 = ProtocolBuffers::decode("Person", $p->serializeToString());
 
 var_dump($p2);

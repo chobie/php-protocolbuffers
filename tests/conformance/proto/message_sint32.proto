@@ -16,4 +16,12 @@ message Field {
 	optional sfixed64 v_sfixed64 = 16;
 	optional sint32 v_sint32 = 17;
 	optional sint64 v_sint64 = 18;
+
+	optional int64 v_int64_min = 20;
+	optional int32 v_int32_min = 21;
+	optional sfixed32 v_sfixed32_min = 22;
+	optional sfixed64 v_sfixed64_min = 23;
+	optional sint32 v_sint32_min = 24;
+	optional sint64 v_sint64_min = 25;
+
 }
