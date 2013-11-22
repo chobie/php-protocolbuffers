@@ -1142,13 +1142,6 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 		v = Z_LVAL_PP(element);
 	}
 
-#if SIZEOF_LONG == 4
-	if (v > 0x80000000 || v == 0x80000000) {
-		zend_error(E_WARNING, "pb_encode_element_fixed64: 64bit long on 32bit platform. ignore this key");
-		return;
-	}
-#endif
-
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
 	}
@@ -1183,13 +1176,6 @@ void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 		v = (int64_t)Z_LVAL_PP(element);
 	}
 
-#if SIZEOF_LONG == 4
-	if (v > 0x80000000 || v == 0x80000000) {
-		zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
-		return;
-	}
-#endif
-
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
 	}
@@ -1212,13 +1198,6 @@ void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	} else {
 		v = (uint64_t)Z_LVAL_PP(element);
 	}
-
-#if SIZEOF_LONG == 4
-	if (v > 0x80000000 || v == 0x80000000) {
-		zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
-		return;
-	}
-#endif
 
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
@@ -1356,13 +1335,6 @@ void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 	v = Z_LVAL_PP(element);
 
-#if SIZEOF_LONG == 4
-	if (v > 0x80000000 || v == 0x80000000) {
-		zend_error(E_WARNING, "pb_encode_element_int64: 64bit long on 32bit platform. ignore this key");
-		return;
-	}
-#endif
-
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_FIXED64);
 	}
@@ -1395,13 +1367,6 @@ void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	} else {
 		v = (int64_t)Z_LVAL_PP(element);
 	}
-
-#if SIZEOF_LONG == 4
-	if (v > 0x80000000 || v == 0x80000000) {
-		zend_error(E_WARNING, "pb_encode_element_sint64: 64bit long on 32bit platform. ignore this key");
-		return;
-	}
-#endif
 
 	if (is_packed == 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_VARINT);
