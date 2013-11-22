@@ -1,5 +1,7 @@
 --TEST--
 #15 varint should read 64bit integer
+--SKIPIF--
+<?php if (8 !== PHP_INT_SIZE) { die('skip Only for 64-bit platform'); } ?>
 --FILE--
 <?php
 // https://github.com/chobie/php-protocolbuffers/issues/15
