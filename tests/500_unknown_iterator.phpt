@@ -38,7 +38,7 @@ $u->addValues("a");
 $u->addValues("a");
 $expect = ProtocolBuffers::encode($u);
 
-$d = UnknownFields::parseFromString($expect);
+$d = ProtocolBuffers::decode("UnknownFields", $expect);
 foreach($d->getUnknownFieldSet() as $field) {
     if ($field->isLengthDelimited()) {
         foreach ($field->getAsLengthDelimitedList() as $l) {

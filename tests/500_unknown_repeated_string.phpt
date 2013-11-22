@@ -38,7 +38,7 @@ $u->addValues("a");
 $u->addValues("a");
 $expect = ProtocolBuffers::encode($u);
 
-$d = UnknownFields::parseFromString($expect);
+$d = ProtocolBuffers::decode("UnknownFields", $expect);
 $field_set = $d->getUnknownFieldSet();
 $field = $field_set->getField(1);
 
