@@ -1,6 +1,18 @@
 #ifndef PHP_PROTOCOLBUFFERS_HELPER_H
 #define PHP_PROTOCOLBUFFERS_HELPER_H
 
+typedef struct {
+	int type;
+	union {
+		int32_t  int32;
+		uint32_t uint32;
+		int64_t  int64;
+		uint64_t uint64;
+		double d;
+		float f;
+	} value;
+} pbf;
+
 static inline uint32_t zigzag_encode32(int32_t n) {
   // Note:  the right-shift must be arithmetic
   return (n << 1) ^ (n >> 31);
@@ -291,4 +303,6 @@ int pb_get_default_unknown_property_name_len();
 void pb_scheme_container_init(pb_scheme_container *container);
 
 void php_pb_helper_debug_zval(zval **value TSRMLS_DC);
+
+void pb_format_string(zval *result, pbf *payload TSRMLS_DC);
 #endif

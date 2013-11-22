@@ -236,6 +236,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 
 	if (field->type != WIRETYPE_VARINT) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+		return;
 	}
 
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
@@ -243,9 +244,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
 		zval *tmp;
-		MAKE_STD_ZVAL(tmp);
+		pbf __payload;
 
-		ZVAL_LONG(tmp, (*element)->varint);
+		MAKE_STD_ZVAL(tmp);
+		__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)(*element)->varint;
+		pb_format_string(tmp, &__payload TSRMLS_CC);
+
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 
@@ -310,10 +314,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 		) {
 		uint32_t fixed;
 		zval *tmp;
+		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
-		ZVAL_LONG(tmp, fixed);
+		__payload.type = TYPE_FIXED32;__payload.value.uint32 = (uint32_t)(*element)->varint;
+		pb_format_string(tmp, &__payload TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 
@@ -344,10 +350,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 		) {
 		uint64_t fixed;
 		zval *tmp;
+		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
-		ZVAL_LONG(tmp, fixed);
+		__payload.type = TYPE_FIXED64;__payload.value.uint64 = (uint64_t)(*element)->varint;
+		pb_format_string(tmp, &__payload TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 
@@ -380,12 +388,14 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 			uint32_t v;
 			float f;
 		} u;
-
 		zval *tmp;
+		pbf __payload;
+
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&u.v, (*element)->buffer.val, sizeof(float));
 
-		ZVAL_DOUBLE(tmp, u.f);
+		__payload.type = TYPE_FLOAT;__payload.value.f = (float)u.f;
+		pb_format_string(tmp, &__payload TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 
@@ -420,10 +430,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 		} u;
 
 		zval *tmp;
+		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&u.v, (*element)->buffer.val, sizeof(double));
 
-		ZVAL_DOUBLE(tmp, u.d);
+		__payload.type = TYPE_DOUBLE;__payload.value.d = (double)u.d;
+		pb_format_string(tmp, &__payload TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
 

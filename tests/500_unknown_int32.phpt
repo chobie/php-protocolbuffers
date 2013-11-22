@@ -73,14 +73,14 @@ $u = ProtocolBuffers::decode("Unknown", $expected);
 $set = $u->getUnknownFieldSet();
 $field = $set->getField(1);
 
-if ($field->getNumber() === 1) {
+if ($field->getNumber() == 1) {
 	echo "OK" . PHP_EOL;
 } else {
 	echo "NUMBER FAILED" . PHP_EOL;
 }
 
 foreach ($field->getAsVarintList() as $val) {
-	if ($val === 0) {
+	if ($val == 0) {
 		echo "OK" . PHP_EOL;
 	} else {
 		echo "getAsVarint FAILED" . PHP_EOL;
@@ -88,7 +88,7 @@ foreach ($field->getAsVarintList() as $val) {
 }
 
 $bytes = $u->serializeToString();
-if ($bytes === $expected) {
+if ($bytes == $expected) {
 	echo "OK" . PHP_EOL;
 } else {
 	echo "SERIALIZE FAILED" . PHP_EOL;

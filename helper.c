@@ -308,19 +308,7 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 	}
 }
 
-typedef struct {
-	int type;
-	union {
-		int32_t  int32;
-		uint32_t uint32;
-		int64_t  int64;
-		uint64_t uint64;
-		double d;
-		float f;
-	} value;
-} pbf;
-
-static void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
+void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
 {
 	char __buffer[64] = {0};
 	char *buffer = __buffer;
