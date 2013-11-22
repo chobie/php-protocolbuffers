@@ -1095,7 +1095,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 		}
 
 		if (name[i] >= 'A' && name[i] <= 'Z') {
-			if (buf.len > 1) {
+			if (buf.len > 0) {
 				smart_str_appendc(&buf, '_');
 			}
 			smart_str_appendc(&buf, name[i] + ('a' - 'A'));
