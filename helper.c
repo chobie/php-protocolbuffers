@@ -316,6 +316,7 @@ typedef struct {
 		int64_t  int64;
 		uint64_t uint64;
 		double d;
+		float f;
 	} value;
 } pbf;
 
@@ -341,7 +342,32 @@ static void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
 		case TYPE_INT64:
 			size = snprintf(buffer, sizeof(__buffer), "%lld" , payload->value.int64);
 		break;
-		case TYPE_FLOAT:
+		case TYPE_FLOAT:{
+			char *p = 0;
+			free = 1;
+
+ 			/* Note: this is safe */
+			buffer = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+			size = zend_sprintf(buffer, "%f", (int)EG(precision), payload->value.f);
+
+			// remove trailing zeros
+			p = strchr(buffer,'.');
+			if(p != NULL) {
+				while(*++p);
+
+				while('0' == *--p){
+					*p = '\0';
+					size--;
+				}
+
+				if(*p == '.'){
+					*p = '\0';
+					size--;
+				}
+				break;
+			}
+  		}
+		break;
 		case TYPE_DOUBLE:{
 			free = 1;
  			/* Note: this is safe */
@@ -486,12 +512,10 @@ static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 		switch(scheme->type) {
 			case TYPE_FLOAT:
 			{
-				uint32_t _v;
 				float a = 0;
 
-				memcpy(&_v, data, 4);
-				a = decode_float(_v);
-				__payload.type = TYPE_DOUBLE;__payload.value.d = (double)a;
+				memcpy(&a, data, 4);
+				__payload.type = TYPE_FLOAT;__payload.value.f = a;
 			}
 			break;
 			case TYPE_SFIXED32:
@@ -1103,7 +1127,7 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 			char *endptr = NULL;
 
 			errno = 0;
-			v = (uint64_t)strtoull(Z_STRVAL_PP(element), &endptr, 0);
+			v = strtoull(Z_STRVAL_PP(element), &endptr, 0);
 			if  (errno == ERANGE) {
 				zend_error(E_WARNING, "pb_encode_element_fixed64: strtoull failed to decode string");
 				return;
@@ -1178,7 +1202,9 @@ void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
-			v = (uint64_t)atoll(Z_STRVAL_PP(element));
+			char *bad;
+			// TODO: check portability
+			v = strtoull(Z_STRVAL_PP(element), &bad, 0);
 		} else {
 			convert_to_long(*element);
 			v = (uint64_t)Z_LVAL_PP(element);
