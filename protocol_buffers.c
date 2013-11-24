@@ -65,7 +65,6 @@ zend_class_entry *protocol_buffers_extension_registry_class_entry;
 
 zend_class_entry *protocol_buffers_php_message_options_class_entry;
 
-zend_class_entry *protocol_buffers_overflow_exception_class_entry;
 zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
@@ -136,16 +135,6 @@ static zend_function_entry php_protocolbuffers_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-static void php_protocol_buffers_overflow_exception(TSRMLS_D)
-{
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "ProtocolBuffersOverflowException", 0);
-	protocol_buffers_overflow_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
-
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "OverflowException", protocol_buffers_overflow_exception_class_entry);
-}
-
 static void php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
@@ -200,7 +189,6 @@ void php_protocolbuffers_init(TSRMLS_D)
 	protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 
-	php_protocol_buffers_overflow_exception(TSRMLS_C);
 	php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_C);
 	php_protocol_buffers_invalid_exception(TSRMLS_C);
 	php_uninitialized_message_exception(TSRMLS_C);
