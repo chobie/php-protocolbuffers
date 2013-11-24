@@ -7,6 +7,8 @@ include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+configure_file(php_options.proto php_options.proto COPYONLY)
+
 
 FILE(GLOB SRC_PHP_GEN *.cc)
 
@@ -14,3 +16,4 @@ ADD_EXECUTABLE(protoc-gen-php ${SRC_PHP_GEN})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_LIBRARIES})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_PROTOC_LIBRARY})
 INSTALL(TARGETS protoc-gen-php DESTINATION /usr/bin/)
+INSTALL(FILES php_options.proto DESTINATION /usr/local/include)

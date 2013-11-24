@@ -178,7 +178,7 @@ string PHPCodeGenerator::DefaultValueAsString(const FieldDescriptor & field, boo
     return "";
 }
 
-string getTypeName(const FieldDescriptor & field){
+string PHPCodeGenerator::getTypeName(const FieldDescriptor & field) const {
 
     if (field.is_repeated()) {
         return "array";
@@ -217,8 +217,7 @@ string getTypeName(const FieldDescriptor & field){
             break;
         case FieldDescriptorProto_Type_TYPE_MESSAGE:
             {
-                string name = (*field.message_type()).full_name();
-                replace(name.begin(), name.end(), '.', '_');
+                string name = ClassName(*field.message_type(), true);
 
                 return name;
 

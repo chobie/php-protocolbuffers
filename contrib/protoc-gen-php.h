@@ -65,6 +65,8 @@ class PHPCodeGenerator : public CodeGenerator {
 
         string VariableName(const FieldDescriptor & field) const;
 
+        string getTypeName(const FieldDescriptor & field) const;
+
     public:
 
         PHPCodeGenerator();
