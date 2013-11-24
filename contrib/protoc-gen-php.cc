@@ -33,6 +33,8 @@ namespace protobuf {
 namespace compiler {
 namespace php {
 
+static bool use_namespace = false;
+
 string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
     string result;
     // Note:  I distrust ctype.h due to locales.
@@ -279,6 +281,32 @@ static const char* field_type_to_str(int field_type)
     }
 }
 
+static string GetClassNameForFieldDescriptor()
+{
+	if (use_namespace) {
+		return "FieldDescriptor";
+	} else {
+		return "ProtocolBuffersFieldDescriptor";
+	}
+}
+static string GetClassNameForDescriptorBuilder()
+{
+	if (use_namespace) {
+		return "DescriptorBuilder";
+	} else {
+		return "ProtocolBuffersDescriptorBuilder";
+	}
+}
+static string GetClassNameForMessage()
+{
+	if (use_namespace) {
+		return "Message";
+	} else {
+		return "ProtocolBuffersMessage";
+	}
+}
+
+
 void PHPCodeGenerator::PrintMessageRead(io::Printer &printer, const Descriptor & message, vector<const FieldDescriptor *> & required_fields, const FieldDescriptor * parentField) const {
 }
 
@@ -438,7 +466,12 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "name", ClassName(message, false)
              );
 
-    printer.Print(" extends `base`", "base", options.base_class());
+
+	if (options.base_class().empty()) {
+		printer.Print(" extends `base`", "base", GetClassNameForMessage());
+	} else {
+		printer.Print(" extends `base`", "base", options.base_class());
+	}
 
     printer.Print("\n{\n");
     printer.Indent();
@@ -668,13 +701,18 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
     printer.Print("\n");
     printer.Print("if (!isset($descriptor)) {\n");
     printer.Indent();
-    printer.Print("$desc = new ProtocolBuffersDescriptorBuilder();\n");
+    printer.Print("$desc = new `class_name`();\n",
+		"class_name",
+		GetClassNameForDescriptorBuilder()
+    );
     for (int i = 0; i < message.field_count(); ++i) {
         const FieldDescriptor &field (*message.field(i));
 
-        printer.Print("$desc->addField(`tag`, new ProtocolBuffersFieldDescriptor(array(\n",
+        printer.Print("$desc->addField(`tag`, new `class_name`(array(\n",
             "tag",
-            SimpleItoa(field.number())
+            SimpleItoa(field.number()),
+            "class_name",
+            GetClassNameForFieldDescriptor()
         );
         printer.Indent();
         printer.Print("\"type\"     => `type`,\n",
@@ -705,6 +743,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
             "value",
             DefaultValueAsString(field, true)
         );
+
         if (field.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
             const Descriptor &desc(*field.message_type());
             string name = ClassName(desc, true);
@@ -884,6 +923,10 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
     const PHPFileOptions & options(file->options().GetExtension(::php));
     const string & namespace_ (options.namespace_());
 
+    if (options.generate_package()) {
+        use_namespace = true;
+    }
+
     // Generate main file.
     scoped_ptr<io::ZeroCopyOutputStream> output(
             output_directory->Open(php_filename)
@@ -895,6 +938,10 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
         printer.Print("<?php\n");
 
         if (!namespace_.empty() || options.generate_package()) {
+            if (file->package().empty()) {
+                error->assign("package name seems empty");
+                return false;
+            }
 
             if (options.generate_package() && !file->package().empty()) {
                 string package ( file->package() );
@@ -904,11 +951,11 @@ bool PHPCodeGenerator::Generate(const FileDescriptor* file,
                 printer.Print("namespace `ns`;\n\n", "ns", namespace_.c_str());
             }
 
-            printer.Print("use ProtocolBuffers;\n");
-            printer.Print("use ProtocolBuffersMessage;\n");
-            printer.Print("use ProtocolBuffersFieldDescriptor;\n");
-            printer.Print("use ProtocolBuffersDescriptorBuilder;\n");
-            printer.Print("use ProtocolBuffersExtensionRegistry;\n");
+            printer.Print("use \\ProtocolBuffers;\n");
+            printer.Print("use \\ProtocolBuffers\\Message;\n");
+            printer.Print("use \\ProtocolBuffers\\FieldDescriptor;\n");
+            printer.Print("use \\ProtocolBuffers\\DescriptorBuilder;\n");
+            printer.Print("use \\ProtocolBuffers\\ExtensionRegistry;\n");
             printer.Print("\n");
         }
 

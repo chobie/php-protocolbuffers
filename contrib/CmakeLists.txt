@@ -1,18 +1,20 @@
 cmake_minimum_required (VERSION 2.6)
-project (protoc-gen-php)
+PROJECT(protoc-gen-php)
 
-find_package(Threads)
+INCLUDE(FindProtobuf)
+FIND_PACKAGE(Protobuf REQUIRED)
+FIND_PACKAGE(Threads)
 
-include(FindProtobuf)
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-configure_file(php_options.proto php_options.proto COPYONLY)
-
+PROTOBUF_GENERATE_CPP(PHP_OPTIONS_SRCS PHP_OPTIONS_HDRS "php_options.proto")
+INCLUDE_DIRECTORIES(
+	${PROTOBUF_INCLUDE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+)
+CONFIGURE_FILE(php_options.proto php_options.proto COPYONLY)
 
 FILE(GLOB SRC_PHP_GEN *.cc)
 
-ADD_EXECUTABLE(protoc-gen-php ${SRC_PHP_GEN})
+ADD_EXECUTABLE(protoc-gen-php ${SRC_PHP_GEN} ${PHP_OPTIONS_SRCS})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_LIBRARIES})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_PROTOC_LIBRARY})
 INSTALL(TARGETS protoc-gen-php DESTINATION /usr/bin/)
