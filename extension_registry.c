@@ -48,6 +48,7 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_extension_registry, __construct)
 {
+	/* Currently, nothing to do. */
 }
 /* }}} */
 

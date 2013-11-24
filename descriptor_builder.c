@@ -113,7 +113,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 	}
 
 	if (index < 1 || index > ktagmax) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "index shoud be in %d - %d", 1, ktagmax);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "index should be in %d - %d", 1, ktagmax);
 		return;
 	}
 

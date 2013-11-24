@@ -26,7 +26,7 @@ static zend_object_handlers php_protocolbuffers_message_object_handlers;
 				return;\
 			} else {\
 				/* TODO: improve displaying error message */\
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", __ce->name);\
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", __ce->name);\
 				return;\
 			}\
 		}\
@@ -1459,7 +1459,7 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 			efree(unknown_name);
 		}
 	} else {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "process unknown fileds flag seems false");
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "process unknown fields flag seems false");
 	}
 }
 /* }}} */

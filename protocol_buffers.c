@@ -72,9 +72,9 @@ zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
-		return zend_exception_get_default();
+	return zend_exception_get_default();
 #else
-		return zend_exception_get_default(TSRMLS_C);
+	return zend_exception_get_default(TSRMLS_C);
 #endif
 }
 
