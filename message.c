@@ -279,20 +279,26 @@ static inline void php_pb_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
 			case TYPE_INT32:\
 			case TYPE_UINT32:\
 				if (Z_TYPE_P(vl) != IS_LONG) {\
-					convert_to_long(vl);\
+					if (Z_TYPE_P(vl) != IS_STRING) {\
+						convert_to_long(vl);\
+					}\
 				}\
 			break;\
 			case TYPE_SINT64:\
 			case TYPE_INT64:\
 			case TYPE_UINT64:\
 				if (Z_TYPE_P(vl) != IS_LONG) {\
-					convert_to_long(vl);\
+					if (Z_TYPE_P(vl) != IS_STRING) {\
+						convert_to_long(vl);\
+					}\
 				}\
 			break;\
 			case TYPE_DOUBLE:\
 			case TYPE_FLOAT:\
 				if (Z_TYPE_P(vl) != IS_DOUBLE) {\
-					convert_to_double(vl);\
+					if (Z_TYPE_P(vl) != IS_STRING) {\
+						convert_to_double(vl);\
+					}\
 				}\
 			break;\
 			case TYPE_BOOL:\
