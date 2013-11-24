@@ -9,7 +9,7 @@ Alpha
 
 ## License
 
-BSD License
+New BSD License
 
 ## Requirements
 
