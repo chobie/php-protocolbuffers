@@ -21,7 +21,7 @@ zend_object_value php_protocol_buffers_unknown_field_set_new(zend_class_entry *c
 
 void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 {
-	HashTable *properties;
+	HashTable *properties = NULL;
 	zval *pp = NULL;
 
 	ALLOC_HASHTABLE(properties);
@@ -35,9 +35,9 @@ void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 
 void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 {
-	char *name;
-	int name_len;
-	zval *val, **fields;
+	zval *val = NULL, **fields = NULL;
+	char *name = {0};
+	int name_len = 0;
 
 	MAKE_STD_ZVAL(val);
 	array_init(val);
@@ -57,7 +57,7 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 {
 	HashPosition pos;
 	HashTable *fieldht = NULL;
-	zval **element, **fields;
+	zval **element = NULL, **fields = NULL;
 	int found = 0;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
@@ -88,7 +88,7 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 
 void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, zval *field)
 {
-	zval **fields;
+	zval **fields = NULL;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
@@ -134,11 +134,10 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, count)
 {
-	char *name;
-	int name_len;
+	zval **fields = NULL, *instance = getThis();
+	char *name = {0};
+	int name_len = 0;
 	long num = 0;
-	zval *instance = getThis();
-	zval **fields;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
@@ -154,11 +153,10 @@ PHP_METHOD(protocolbuffers_unknown_field_set, count)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, getField)
 {
-	zval *instance = getThis();
-	zval **fields = NULL, *result = NULL;
-	long tag;
-	char *name;
-	int name_len;
+	zval **fields = NULL, *result = NULL, *instance = getThis();
+	long tag = 0;
+	char *name = {0};
+	int name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &tag) == FAILURE) {
@@ -168,8 +166,8 @@ PHP_METHOD(protocolbuffers_unknown_field_set, getField)
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 		HashPosition pos;
-		HashTable *fieldht;
-		zval **element;
+		HashTable *fieldht = NULL;
+		zval **element = NULL;
 
 		fieldht = Z_ARRVAL_PP(fields);
 
@@ -198,8 +196,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, getField)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 {
-	zval *instance = getThis();
-	zval *field = NULL;
+	zval *field = NULL, *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
 	php_protocolbuffers_unknown_field *a = NULL;
@@ -219,12 +216,11 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, current)
 {
-	zval *instance = getThis();
+	zval **fields = NULL, **d = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field_set *set;
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	long num = 0;
-	zval **fields, **d;
 
 	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
@@ -244,7 +240,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, current)
 PHP_METHOD(protocolbuffers_unknown_field_set, key)
 {
 	zval *instance = getThis();
-	php_protocolbuffers_unknown_field_set *set;
+	php_protocolbuffers_unknown_field_set *set = NULL;
 
 	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
 	RETURN_LONG(set->offset);
@@ -256,7 +252,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, key)
 PHP_METHOD(protocolbuffers_unknown_field_set, next)
 {
 	zval *instance = getThis();
-	php_protocolbuffers_unknown_field_set *set;
+	php_protocolbuffers_unknown_field_set *set = NULL;
 
 	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
 	set->offset++;
@@ -268,7 +264,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, next)
 PHP_METHOD(protocolbuffers_unknown_field_set, rewind)
 {
 	zval *instance = getThis();
-	php_protocolbuffers_unknown_field_set *set;
+	php_protocolbuffers_unknown_field_set *set = NULL;
 
 	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
 	set->offset = 0;
@@ -279,12 +275,11 @@ PHP_METHOD(protocolbuffers_unknown_field_set, rewind)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, valid)
 {
-	zval *instance = getThis();
-	php_protocolbuffers_unknown_field_set *set;
-	char *name;
-	int name_len;
+	zval **fields = NULL, *instance = getThis();
+	php_protocolbuffers_unknown_field_set *set = NULL;
+	char *name = {0};
+	int name_len = 0;
 	long num = 0;
-	zval **fields;
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {

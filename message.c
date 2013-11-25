@@ -44,6 +44,7 @@ static void php_protocolbuffers_message_free_storage(php_protocolbuffers_message
 zend_object_value php_protocolbuffers_message_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
+
 	PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(php_protocolbuffers_message);
 
 	object->max    = 0;
@@ -122,8 +123,8 @@ ZEND_END_ARG_INFO()
 
 static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_scheme *scheme, zval *object, char **name, int *name_len, HashTable **ht TSRMLS_DC)
 {
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 	HashTable *htt = NULL;
 
 	if (container->use_single_property > 0) {
@@ -156,8 +157,8 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 	int i = 0;
 	for (i = 0; i < container->size; i++) {
 		zval **tmp = NULL;
-		char *name;
-		int name_len;
+		char *name = {0};
+		int name_len = 0;
 
 		scheme = &(container->scheme[i]);
 
@@ -378,11 +379,11 @@ static void php_protocolbuffers_message_get_hash_table_by_container(pb_scheme_co
 
 static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 	HashTable *htt = NULL;
 	pb_scheme *scheme;
-	zval **e;
+	zval **e = NULL;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -405,10 +406,10 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	pb_scheme *scheme;
-	zval **e;
+	zval **e = NULL;
 	HashTable *htt;
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -431,7 +432,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		zval *vl;
+		zval *vl = NULL;
 
 		if (container->use_single_property > 0) {
 			MAKE_STD_ZVAL(vl);
@@ -455,10 +456,10 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	pb_scheme *scheme;
-	zval **e;
+	zval **e = NULL;
 	HashTable *htt;
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -473,7 +474,7 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		zval *vl;
+		zval *vl = NULL;
 
 		if (container->use_single_property > 0) {
 			MAKE_STD_ZVAL(vl);
@@ -504,10 +505,10 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	pb_scheme *scheme;
-	zval **e;
+	zval **e = NULL;
 	HashTable *htt;
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -566,11 +567,11 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 
 static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 	HashTable *htt = NULL;
 	pb_scheme *scheme;
-	zval **e;
+	zval **e = NULL;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -603,8 +604,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 */
 PHP_METHOD(protocolbuffers_message, __construct)
 {
-	zval *instance = getThis();
-	zval *params = NULL;
+	zval *params = NULL, *instance = getThis();
 	HashTable *proto = NULL;
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
@@ -758,12 +758,11 @@ PHP_METHOD(protocolbuffers_message, parseFromString)
 */
 PHP_METHOD(protocolbuffers_message, mergeFrom)
 {
-	zval *instance = getThis();
-	zval *object;
+	zval *object = NULL, *instance = getThis();
 	pb_scheme_container *container = NULL;
 	HashTable *proto = NULL;
-	char *n;
-	int n_len;
+	char *n = {0};
+	int n_len = 0;
 	HashTable *htt = NULL, *hts = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -794,13 +793,12 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 */
 PHP_METHOD(protocolbuffers_message, current)
 {
-	zval *instance = getThis();
+	zval **tmp = NULL, *instance = getThis();
 	pb_scheme_container *container;
 	HashTable *proto = NULL;
 	php_protocolbuffers_message *message;
 	const char *name;
 	int name_len = 0;
-	zval **tmp = NULL;
 	HashTable *hash;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
@@ -939,8 +937,8 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 PHP_METHOD(protocolbuffers_message, clear)
 {
 	zval *instance = getThis();
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 
@@ -959,10 +957,10 @@ PHP_METHOD(protocolbuffers_message, clear)
 PHP_METHOD(protocolbuffers_message, clearAll)
 {
 	zval *instance = getThis();
-	int i = 0;
 	HashTable *proto = NULL, *hash = NULL;
 	pb_scheme_container *container;
 	zend_bool clear_unknown_fields = 1;
+	int i = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|b", &clear_unknown_fields) == FAILURE) {
@@ -1044,14 +1042,11 @@ PHP_METHOD(protocolbuffers_message, clearAll)
 */
 PHP_METHOD(protocolbuffers_message, __call)
 {
-	zval *instance = getThis();
+	zval *params = NULL, *instance = getThis();
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
-	char *name;
-	int name_len;
-	zval *params;
-	int i = 0;
-	int flag = 0;
+	char *name = {0};
+	int flag = 0, i = 0, name_len = 0;
 	smart_str buf = {0};
 	smart_str buf2 = {0};
 
@@ -1159,8 +1154,8 @@ PHP_METHOD(protocolbuffers_message, __call)
 PHP_METHOD(protocolbuffers_message, has)
 {
 	zval *instance = getThis();
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 
@@ -1179,8 +1174,8 @@ PHP_METHOD(protocolbuffers_message, has)
 PHP_METHOD(protocolbuffers_message, get)
 {
 	zval *instance = getThis();
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 
@@ -1198,12 +1193,11 @@ PHP_METHOD(protocolbuffers_message, get)
 */
 PHP_METHOD(protocolbuffers_message, set)
 {
-	zval *instance = getThis();
-	zval *value;
-	char *name;
-	int name_len;
-	pb_scheme_container *container;
+	zval *value = NULL, *instance = getThis();
+	char *name = {0};
+	int name_len = 0;
 	HashTable *proto = NULL;
+	pb_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &value) == FAILURE) {
@@ -1219,12 +1213,11 @@ PHP_METHOD(protocolbuffers_message, set)
 */
 PHP_METHOD(protocolbuffers_message, append)
 {
-	zval *instance = getThis();
-	zval *value;
-	char *name;
-	int name_len;
-	pb_scheme_container *container;
+	zval *value = NULL, *instance = getThis();
+	char *name = {0};
+	int name_len = 0;
 	HashTable *proto = NULL;
+	pb_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &value) == FAILURE) {
@@ -1243,14 +1236,12 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 {
 	zval *instance = getThis();
 	zval *registry = php_protocolbuffers_extension_registry_get_instance(TSRMLS_C);
-	zval *extension_registry = NULL;
-	zval *field_descriptor = NULL;
+	zval **e = {0}, **b = {0}, *field_descriptor = NULL, *extension_registry = NULL;
 	zend_class_entry *ce;
 	HashTable *htt = NULL;
-	char *name, *n;
-	int name_len, n_len;
+	char *name = {0}, *n = {0};
+	int name_len = 0, n_len = 0;
 	pb_scheme_container *container;
-	zval **e, **b;
 	int is_mangled = 0;
 	HashTable *proto = NULL;
 
@@ -1304,14 +1295,12 @@ PHP_METHOD(protocolbuffers_message, hasExtension)
 {
 	zval *instance = getThis();
 	zval *registry = php_protocolbuffers_extension_registry_get_instance(TSRMLS_C);
-	zval *extension_registry = NULL;
-	zval *field_descriptor = NULL;
+	zval **e = NULL, **b = NULL, *field_descriptor = NULL, *extension_registry = NULL;
 	zend_class_entry *ce;
 	HashTable *htt = NULL;
-	char *name, *n;
-	int name_len, n_len;
+	char *name = {0}, *n = {0};
+	int name_len = 0, n_len = 0;
 	pb_scheme_container *container;
-	zval **e, **b;
 	int is_mangled = 0;
 	HashTable *proto = NULL;
 
@@ -1365,14 +1354,12 @@ PHP_METHOD(protocolbuffers_message, setExtension)
 {
 	zval *instance = getThis();
 	zval *registry = php_protocolbuffers_extension_registry_get_instance(TSRMLS_C);
-	zval *extension_registry = NULL;
-	zval *field_descriptor = NULL;
+	zval *field_descriptor = NULL, *extension_registry = NULL, *value = NULL, **b = NULL;
 	zend_class_entry *ce;
 	HashTable *proto = NULL, *htt = NULL;
-	char *name, *n;
-	int name_len, n_len;
+	char *name = {0}, *n = {0};
+	int name_len = 0, n_len = 0;
 	pb_scheme_container *container;
-	zval *value, **b;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1430,42 +1417,41 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 */
 PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 {
-	zval *instance = getThis();
+	zval **unknown_fieldset = NULL, *instance = getThis();
 	HashTable *target = NULL, *proto = NULL;
 	pb_scheme_container *container;
-	zval **unknown_fieldset;
+	char *unknown_name = {0};
+	int unknown_name_len = 0;
+	int free = 0;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 
-	if (container->process_unknown_fields > 0) {
-		char *unknown_name;
-		int unknown_name_len;
-		int free = 0;
-
-		if (container->use_single_property > 0) {
-			zval **b;
-			if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
-				return;
-			}
-
-			unknown_name     = pb_get_default_unknown_property_name();
-			unknown_name_len = pb_get_default_unknown_property_name_len();
-			target = Z_ARRVAL_PP(b);
-		} else {
-			zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
-			target = Z_OBJPROP_P(instance);
-			free = 1;
-		}
-
-		if (zend_hash_find(target, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
-			RETVAL_ZVAL(*unknown_fieldset, 1, 0);
-		}
-
-		if (free) {
-			efree(unknown_name);
-		}
-	} else {
+	if (container->process_unknown_fields < 1) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "process unknown fields flag seems false");
+		return;
+	}
+
+	if (container->use_single_property > 0) {
+		zval **b;
+		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
+			return;
+		}
+
+		unknown_name     = pb_get_default_unknown_property_name();
+		unknown_name_len = pb_get_default_unknown_property_name_len();
+		target = Z_ARRVAL_PP(b);
+	} else {
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
+		target = Z_OBJPROP_P(instance);
+		free = 1;
+	}
+
+	if (zend_hash_find(target, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
+		RETVAL_ZVAL(*unknown_fieldset, 1, 0);
+	}
+
+	if (free) {
+		efree(unknown_name);
 	}
 }
 /* }}} */

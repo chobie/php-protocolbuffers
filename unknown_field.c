@@ -74,8 +74,8 @@ void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
@@ -94,8 +94,8 @@ void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
-	char *name;
-	int name_len;
+	char *name = {0};
+	int name_len = 0;
 	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
@@ -224,11 +224,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getType)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 {
-	zval *instance = getThis();
+	zval *result = NULL, *tmp = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 	unknown_value **element;
 	HashPosition pos;
-	zval *result;
+	pbf __payload;
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
@@ -243,9 +243,6 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
-		zval *tmp;
-		pbf __payload;
-
 		MAKE_STD_ZVAL(tmp);
 		__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)(*element)->varint;
 		pb_format_string(tmp, &__payload TSRMLS_CC);
@@ -261,11 +258,10 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 {
-	zval *instance = getThis();
+	zval *result = NULL, *tmp = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 	unknown_value **element;
 	HashPosition pos;
-	zval *result;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	if (field->type == WIRETYPE_VARINT) {
@@ -275,13 +271,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 	MAKE_STD_ZVAL(result);
 	array_init(result);
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
-		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
-
 		ZVAL_STRINGL(tmp, (const char*)(*element)->buffer.val,  (*element)->buffer.len, 1);
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
 	}
@@ -294,12 +289,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
-	zval *instance = getThis();
+	zval *result = NULL, *tmp = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 	unknown_value **element;
 	HashPosition pos;
-	zval *result;
-
+	uint32_t fixed;
+	pbf __payload;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	if (field->type == WIRETYPE_VARINT) {
@@ -308,13 +303,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
-		uint32_t fixed;
-		zval *tmp;
-		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
@@ -331,11 +324,12 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
-	zval *instance = getThis();
+	zval *result = NULL, *tmp = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 	unknown_value **element;
 	HashPosition pos;
-	zval *result;
+	pbf __payload;
+	uint64_t fixed;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	if (field->type == WIRETYPE_VARINT) {
@@ -344,13 +338,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
 		) {
-		uint64_t fixed;
-		zval *tmp;
-		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
 
@@ -367,11 +359,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 {
-	zval *instance = getThis();
+	zval *result = NULL, *tmp = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
 	unknown_value **element;
 	HashPosition pos;
-	zval *result;
+	pbf __payload;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	if (field->type == WIRETYPE_VARINT) {
@@ -380,6 +372,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(field->ht, &pos)
@@ -388,8 +381,6 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 			uint32_t v;
 			float f;
 		} u;
-		zval *tmp;
-		pbf __payload;
 
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&u.v, (*element)->buffer.val, sizeof(float));
@@ -407,11 +398,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 {
-	zval *instance = getThis();
+	zval *tmp = NULL, *result = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
+	unknown_value **element = NULL;
+	pbf __payload;
 	HashPosition pos;
-	zval *result;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
 	if (field->type == WIRETYPE_VARINT) {
@@ -420,17 +411,15 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
+
 	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
 						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
+						zend_hash_move_forward_ex(field->ht, &pos)) {
 		union {
 			uint64_t v;
 			double d;
 		} u;
 
-		zval *tmp;
-		pbf __payload;
 		MAKE_STD_ZVAL(tmp);
 		memcpy(&u.v, (*element)->buffer.val, sizeof(double));
 

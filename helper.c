@@ -57,8 +57,8 @@ void pb_scheme_container_init(pb_scheme_container *container)
 
 void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
 {
-	int n, sz;
-	zval *element;
+	int n = 0, sz = 0;
+	zval *element = NULL;
 	HashPosition pos;
 	pb_scheme *ischeme;
 
@@ -81,7 +81,7 @@ void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_schem
 		ischeme[n].tag = ttag;
 
 		{
-			zval *tmp;
+			zval *tmp = NULL;
 			int tsize = 0;
 			char *mangle;
 			int mangle_len;
@@ -211,9 +211,9 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 
 void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value)
 {
-	char *unknown_name;
-	int unknown_name_len;
-	zval **un;
+	char *unknown_name = {0};
+	int unknown_name_len = 0;
+	zval **un = NULL;
 	unknown_value *val;
 	php_protocolbuffers_unknown_field *p = NULL;
 
@@ -253,13 +253,12 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 
 void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length)
 {
-	char *unknown_name;
-	int unknown_name_len;
-	zval **unknown_fieldset = NULL;
+	char *unknown_name = {0};
+	int unknown_name_len = 0;
+	zval *dz = NULL, **unknown_fieldset = NULL;
 	unknown_value *val = NULL;
 	php_protocolbuffers_unknown_field *p = NULL;
 	uint8_t *buffer = NULL;
-	zval *dz = NULL;
 
 	if (container->use_single_property > 0) {
 		unknown_name     = pb_get_default_unknown_property_name();
@@ -380,7 +379,7 @@ void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
 static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, uint64_t value, HashTable *hresult)
 {
 	pbf __payload = {0};
-	zval *dz;
+	zval *dz = NULL;
 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
@@ -431,7 +430,7 @@ static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, 
 static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
 {
 	pbf __payload = {0};
-	zval *dz;
+	zval *dz = NULL;
 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
@@ -486,7 +485,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
 {
 	pbf __payload = {0};
-	zval *dz;
+	zval *dz = NULL;
 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
@@ -537,7 +536,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 {
 	uint32_t payload = 0, tag = 0, wiretype = 0;
 	uint64_t value = 0;
-	zval *dz;
+	zval *dz = NULL;
 	HashTable *hresult;
 	pbf __payload = {0};
 
@@ -999,7 +998,7 @@ int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
 
 int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
 {
-	int i;
+	int i = 0;
 
 	if (pb_serializer_resize(serializer, len)) {
 		return 1;
@@ -1013,7 +1012,7 @@ int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *stri
 
 int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 {
-	uint8_t bytes[kMaxVarint32Bytes];
+	uint8_t bytes[kMaxVarint32Bytes] = {0};
 	int size = 0, i;
 
 	if (value > kint32max) {
@@ -1041,7 +1040,7 @@ int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 
 int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
 {
-	uint8_t bytes[kMaxVarintBytes];
+	uint8_t bytes[kMaxVarintBytes] = {0};
 	int size = 0, i;
 
 	if (pb_serializer_resize(serializer, 8)) {
@@ -1151,7 +1150,7 @@ void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	int64_t v;
+	int64_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
@@ -1172,7 +1171,7 @@ void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	uint64_t v;
+	uint64_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
@@ -1270,7 +1269,7 @@ void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	uint32_t v;
+	uint32_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
@@ -1316,7 +1315,7 @@ void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	int64_t v;
+	int64_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -1343,7 +1342,7 @@ void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 
 void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	int64_t v;
+	int64_t v = 0;
 
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
@@ -1546,9 +1545,9 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	}
 
 	if (container->process_unknown_fields > 0) {
-		char *uname;
-		int uname_len;
-		zval **unknown;
+		char *uname = {0};
+		int uname_len = 0;
+		zval **unknown = NULL;
 
 		if (container->use_single_property > 0) {
 			uname = "_unknown";
@@ -1644,7 +1643,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
 {
-	int err;
+	int err = 0;
 	pb_serializer *ser = NULL;
 	pb_scheme_container *container;
 
@@ -1724,10 +1723,9 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 		/* add unknown fields */
 		if (container->process_unknown_fields > 0) {
-			zval *unknown;
-			zval **un;
-			char *unknown_name;
-			int unknown_name_len;
+			zval **un = NULL, *unknown = NULL;
+			char *unknown_name = {0};
+			int unknown_name_len = 0;
 
 			MAKE_STD_ZVAL(unknown);
 
@@ -1805,7 +1803,7 @@ void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
 	}
 
 	if (retval_ptr) {
-		zval **entry;
+		zval **entry = NULL;
 		HashPosition pos;
 		pb_scheme *scheme;
 		int i;
@@ -1841,8 +1839,7 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	int j = 0;
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
-	HashTable *proto = NULL;
-	HashTable *properties = NULL;
+	HashTable *properties = NULL, *proto = NULL;
 
 	pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
 	ALLOC_HASHTABLE(properties);
@@ -1930,7 +1927,7 @@ void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
 */
 PHP_METHOD(protocolbuffers_helper, debugZval)
 {
-	zval *val;
+	zval *val = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"z", &val) == FAILURE) {
@@ -1944,12 +1941,12 @@ PHP_METHOD(protocolbuffers_helper, debugZval)
 */
 PHP_METHOD(protocolbuffers_helper, zigzagEncode32)
 {
-	long val;
+	long val = 0;
 	union {
 		long l;
 		uint32_t v;
 	} u;
-	uint32_t value;
+	uint32_t value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
@@ -1966,12 +1963,12 @@ PHP_METHOD(protocolbuffers_helper, zigzagEncode32)
 */
 PHP_METHOD(protocolbuffers_helper, zigzagDecode32)
 {
-	long val;
+	long val = 0;
 	union {
 		long l;
 		int32_t v;
 	} u;
-	int32_t value;
+	int32_t value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
@@ -1988,12 +1985,12 @@ PHP_METHOD(protocolbuffers_helper, zigzagDecode32)
 */
 PHP_METHOD(protocolbuffers_helper, zigzagEncode64)
 {
-	long val;
+	long val = 0;
 	union {
 		long l;
 		uint64_t v;
 	} u;
-	uint64_t value;
+	uint64_t value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
@@ -2010,12 +2007,12 @@ PHP_METHOD(protocolbuffers_helper, zigzagEncode64)
 */
 PHP_METHOD(protocolbuffers_helper, zigzagDecode64)
 {
-	long val;
+	long val = 0;
 	union {
 		long l;
 		int64_t v;
 	} u;
-	int64_t value;
+	int64_t value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
@@ -2033,9 +2030,9 @@ PHP_METHOD(protocolbuffers_helper, zigzagDecode64)
 */
 PHP_METHOD(protocolbuffers_helper, writeVarint32)
 {
-	long val;
-	int32_t value;
-	uint8_t bytes[kMaxVarint32Bytes];
+	long val = 0;
+	int32_t value = 0;
+	uint8_t bytes[kMaxVarint32Bytes] = {0};
 	int size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -2068,10 +2065,10 @@ PHP_METHOD(protocolbuffers_helper, writeVarint32)
 */
 PHP_METHOD(protocolbuffers_helper, writeVarint64)
 {
-	long val;
+	long val = 0;
 	int size = 0;
-	int64_t value;
-	uint8_t bytes[kMaxVarintBytes];
+	int64_t value = 0;
+	uint8_t bytes[kMaxVarintBytes] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {

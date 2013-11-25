@@ -26,9 +26,9 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_message_options, getExtension)
 {
-	zval **result, *options;
-	char *name;
-	long name_len;
+	zval **result = NULL, *options = NULL;
+	char *name = {0};
+	long name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {

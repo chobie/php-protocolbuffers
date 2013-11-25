@@ -22,9 +22,8 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(protocolbuffers_php_message_options, setUseWakeupAndSleep)
 {
 
-	zval *instance = getThis();
-	zval **target;
-	long value;
+	zval **target = NULL, *instance = getThis();
+	long value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &value) == FAILURE) {
@@ -43,9 +42,8 @@ PHP_METHOD(protocolbuffers_php_message_options, setUseWakeupAndSleep)
 PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 {
 
-	zval *instance = getThis();
-	zval **target;
-	long value;
+	zval **target = NULL, *instance = getThis();
+	long value = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &value) == FAILURE) {
@@ -62,10 +60,9 @@ PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 {
-	zval *instance = getThis();
-	zval **target;
-	char *value;
-	long value_len;
+	zval **target = NULL, *instance = getThis();
+	char *value = {0};
+	long value_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &value, &value_len) == FAILURE) {
@@ -88,8 +85,7 @@ PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setProcessUnknownFields)
 {
-	zval *instance = getThis();
-	zval **target;
+	zval **target = NULL, *instance = getThis();
 	long value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

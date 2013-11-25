@@ -171,6 +171,7 @@ typedef struct pb_scheme
 	int mangled_name_len;
 	ulong mangled_name_h;
 	int magic_type;
+	/* TODO: use flags */
 	int type;
 	int flags;
 	int required;

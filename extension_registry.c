@@ -5,7 +5,7 @@
 
 zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
 {
-	zval *extension_registry;
+	zval *extension_registry = NULL;
 
 	if (PBG(extension_registry) == NULL) {
 		MAKE_STD_ZVAL(extension_registry);
@@ -18,7 +18,7 @@ zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
 
 int php_protocolbuffers_extension_registry_get_registry(zval *instance, const char* message_class, size_t message_class_len, zval **result TSRMLS_DC)
 {
-	zval **bucket;
+	zval **bucket = NULL;
 	php_protocolbuffers_extension_registry *registry;
 	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
 
@@ -32,7 +32,7 @@ int php_protocolbuffers_extension_registry_get_registry(zval *instance, const ch
 
 int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, const char* name, size_t name_len, zval **result TSRMLS_DC)
 {
-	zval **bucket, **bucket2;
+	zval **bucket = NULL, **bucket2 = NULL;
 
 	if (zend_hash_find(Z_ARRVAL_P(hash), "map", sizeof("map"), (void **)&bucket) == SUCCESS) {
 		if (zend_hash_find(Z_ARRVAL_PP(bucket), name, name_len+1, (void **)&bucket2) == SUCCESS) {
@@ -47,9 +47,9 @@ int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, co
 static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuffers_extension_registry *object TSRMLS_DC)
 {
 	if (object->registry != NULL) {
-		HashPosition pos;
+		HashPosition pos = 0;
 		int n = 0;
-		zval **element;
+		zval **element = {0};
 
 		for(n = 0, zend_hash_internal_pointer_reset_ex(object->registry, &pos);
 			zend_hash_get_current_data_ex(object->registry, (void **)&element, &pos) == SUCCESS;
@@ -115,12 +115,12 @@ PHP_METHOD(protocolbuffers_extension_registry, getInstance)
 PHP_METHOD(protocolbuffers_extension_registry, add)
 {
 	zval *instance = getThis();
-	char *message_class_name;
-	long message_class_name_len;
+	char *message_class_name = {0};
+	long message_class_name_len = 0;
 	zval *descriptor, **bucket;
 	zend_class_entry **ce;
 	pb_scheme_container *container = NULL;
-	long extension;
+	long extension = 0;
 	php_protocolbuffers_extension_registry *registry;
 	HashTable *proto = NULL;
 
@@ -137,7 +137,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 
 	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
 	if (!zend_hash_exists(registry->registry, message_class_name, message_class_name_len)) {
-		zval *p, *p2, *p3, *p4 = NULL;
+		zval *p = NULL, *p2 = NULL, *p3 = NULL, *p4 = NULL;
 
 		MAKE_STD_ZVAL(p);
 		array_init(p);
@@ -163,7 +163,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	}
 
 	if (zend_hash_find(registry->registry, message_class_name, message_class_name_len, (void **)&bucket) == SUCCESS) {
-		zval **bucket2;
+		zval **bucket2 = NULL;
 		char *name = NULL;
 		int len = 0;
 
@@ -189,7 +189,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			zend_hash_update(Z_ARRVAL_PP(bucket2), name, len, (void **)&descriptor, sizeof(zval*), NULL);
 
 			if (zend_hash_find(Z_ARRVAL_PP(bucket), "emap", sizeof("emap"), (void **)&bucket2) == SUCCESS) {
-				zval *nm;
+				zval *nm = NULL;
 
 				MAKE_STD_ZVAL(nm);
 				ZVAL_LONG(nm, extension);
@@ -202,7 +202,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 
 		{
 			// TODO: Refactor this block
-			zval *tmp;
+			zval *tmp = NULL;
 
 			pb_get_scheme_container((*ce)->name, (*ce)->name_length, &container, proto TSRMLS_CC);
 			container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
@@ -217,20 +217,20 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 
 			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "name", sizeof("name"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
-				char *mangle;
-				int mangle_len;
-				size_t tsize;
+				char *mangle = {0};
+				int mangle_len = 0;
+				size_t tsize = 0;
 
-				tsize				  = Z_STRLEN_P(tmp)+1;
+				tsize = Z_STRLEN_P(tmp)+1;
 
-				container->scheme[container->size].original_name		= (char*)emalloc(sizeof(char*) * tsize);
-				container->scheme[container->size].original_name_len	= tsize;
+				container->scheme[container->size].original_name     = (char*)emalloc(sizeof(char*) * tsize);
+				container->scheme[container->size].original_name_len = tsize;
 
 				memcpy(container->scheme[container->size].original_name, Z_STRVAL_P(tmp), tsize);
 				container->scheme[container->size].original_name[tsize] = '\0';
 
-				container->scheme[container->size].name		= (char*)emalloc(sizeof(char*) * tsize);
-				container->scheme[container->size].name_len	= tsize;
+				container->scheme[container->size].name     = (char*)emalloc(sizeof(char*) * tsize);
+				container->scheme[container->size].name_len = tsize;
 
 				memcpy(container->scheme[container->size].name, Z_STRVAL_P(tmp), tsize);
 				container->scheme[container->size].name[tsize] = '\0';
