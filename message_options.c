@@ -1,6 +1,23 @@
 #include "php_protocol_buffers.h"
 #include "message_options.h"
 
+int php_protocolbuffers_message_options_init_properties(zval *object TSRMLS_DC)
+{
+	HashTable *properties = NULL;
+	zval *tmp = NULL;
+
+	ALLOC_HASHTABLE(properties);
+	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	MAKE_STD_ZVAL(tmp);
+	array_init(tmp);
+	zend_hash_update(properties, "extensions", sizeof("extensions"), (void **)&tmp, sizeof(zval), NULL);
+
+	zend_merge_properties(object, properties, 1 TSRMLS_CC);
+
+	return 0;
+}
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_options_get_options, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
@@ -38,24 +55,6 @@ PHP_METHOD(protocolbuffers_message_options, getExtension)
 	RETURN_ZVAL(*result, 1, 0);
 }
 /* }}} */
-
-
-int php_protocolbuffers_message_options_init_properties(zval *object TSRMLS_DC)
-{
-	HashTable *properties = NULL;
-	zval *tmp = NULL;
-
-	ALLOC_HASHTABLE(properties);
-	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-	MAKE_STD_ZVAL(tmp);
-	array_init(tmp);
-	zend_hash_update(properties, "extensions", sizeof("extensions"), (void **)&tmp, sizeof(zval), NULL);
-
-	zend_merge_properties(object, properties, 1 TSRMLS_CC);
-
-	return 0;
-}
 
 static zend_function_entry php_protocolbuffers_message_options_methods[] = {
 	PHP_ME(protocolbuffers_message_options, getExtension, arginfo_pb_message_options_get_options, ZEND_ACC_PUBLIC)

@@ -3,6 +3,47 @@
 #include "field_descriptor.h"
 #include "descriptor_builder.h"
 
+zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
+{
+	zval *extension_registry;
+
+	if (PBG(extension_registry) == NULL) {
+		MAKE_STD_ZVAL(extension_registry);
+		object_init_ex(extension_registry, protocol_buffers_extension_registry_class_entry);
+		PBG(extension_registry) = extension_registry;
+	}
+
+	return PBG(extension_registry);
+}
+
+int php_protocolbuffers_extension_registry_get_registry(zval *instance, const char* message_class, size_t message_class_len, zval **result TSRMLS_DC)
+{
+	zval **bucket;
+	php_protocolbuffers_extension_registry *registry;
+	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
+
+	if (zend_hash_find(registry->registry, message_class, message_class_len, (void **)&bucket) == SUCCESS) {
+		*result = *bucket;
+		return 1;
+	}
+
+	return 0;
+}
+
+int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, const char* name, size_t name_len, zval **result TSRMLS_DC)
+{
+	zval **bucket, **bucket2;
+
+	if (zend_hash_find(Z_ARRVAL_P(hash), "map", sizeof("map"), (void **)&bucket) == SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), name, name_len+1, (void **)&bucket2) == SUCCESS) {
+			*result = *bucket2;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuffers_extension_registry *object TSRMLS_DC)
 {
 	if (object->registry != NULL) {
@@ -25,6 +66,12 @@ static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuff
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);
 }
+
+static int sort_cb(const void *a, const void *b)
+{
+    return ((pb_scheme*)a)->tag - ((pb_scheme*)b)->tag;
+}
+
 
 zend_object_value php_protocolbuffers_extension_registry_new(zend_class_entry *ce TSRMLS_DC)
 {
@@ -52,19 +99,6 @@ PHP_METHOD(protocolbuffers_extension_registry, __construct)
 }
 /* }}} */
 
-zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
-{
-	zval *extension_registry;
-
-	if (PBG(extension_registry) == NULL) {
-		MAKE_STD_ZVAL(extension_registry);
-		object_init_ex(extension_registry, protocol_buffers_extension_registry_class_entry);
-		PBG(extension_registry) = extension_registry;
-	}
-
-	return PBG(extension_registry);
-}
-
 /* {{{ proto ProtocolBuffersExtensionRegistry ProtocolBuffersExtensionRegistry::getInstance()
 */
 PHP_METHOD(protocolbuffers_extension_registry, getInstance)
@@ -75,12 +109,6 @@ PHP_METHOD(protocolbuffers_extension_registry, getInstance)
 	RETURN_ZVAL(extension_registry, 1, 0);
 }
 /* }}} */
-
-static int sort_cb(const void *a, const void *b)
-{
-    return ((pb_scheme*)a)->tag - ((pb_scheme*)b)->tag;
-}
-
 
 /* {{{ proto void ProtocolBuffersExtensionRegistry::add(string $message_class_name, long $extension, ProtocolBuffersFieldDescriptor $descriptor)
 */
@@ -270,35 +298,6 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	}
 }
 /* }}} */
-
-int php_protocolbuffers_extension_registry_get_registry(zval *instance, const char* message_class, size_t message_class_len, zval **result TSRMLS_DC)
-{
-	zval **bucket;
-	php_protocolbuffers_extension_registry *registry;
-	registry = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_extension_registry, instance);
-
-	if (zend_hash_find(registry->registry, message_class, message_class_len, (void **)&bucket) == SUCCESS) {
-		*result = *bucket;
-		return 1;
-	}
-
-	return 0;
-}
-
-int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, const char* name, size_t name_len, zval **result TSRMLS_DC)
-{
-	zval **bucket, **bucket2;
-
-	if (zend_hash_find(Z_ARRVAL_P(hash), "map", sizeof("map"), (void **)&bucket) == SUCCESS) {
-		if (zend_hash_find(Z_ARRVAL_PP(bucket), name, name_len+1, (void **)&bucket2) == SUCCESS) {
-			*result = *bucket2;
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 
 static zend_function_entry php_protocolbuffers_extension_registry_methods[] = {
 	PHP_ME(protocolbuffers_extension_registry, __construct,  NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)

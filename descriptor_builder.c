@@ -3,6 +3,22 @@
 #include "message_options.h"
 #include "descriptor.h"
 
+int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
+{
+	char *key;
+	int key_len;
+	zval **resval;
+
+	zend_mangle_property_name(&key, &key_len, "*", 1, (char*)name, name_len, 0);
+	if (zend_hash_find(hash, key, key_len, (void **)&resval) == SUCCESS) {
+		*result = *resval;
+	}
+
+	efree(key);
+	return 0;
+}
+
+
 static void php_protocolbuffers_descriptor_builder_free_storage(zend_object *object TSRMLS_DC)
 {
 	zend_object_std_dtor(object TSRMLS_CC);
@@ -161,22 +177,6 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getName)
 	RETURN_STRINGL(Z_STRVAL_P(name), Z_STRLEN_P(name), 1);
 }
 /* }}} */
-
-
-int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
-{
-	char *key;
-	int key_len;
-	zval **resval;
-
-	zend_mangle_property_name(&key, &key_len, "*", 1, (char*)name, name_len, 0);
-	if (zend_hash_find(hash, key, key_len, (void **)&resval) == SUCCESS) {
-		*result = *resval;
-	}
-
-	efree(key);
-	return 0;
-}
 
 /* {{{ proto ProtocolBuffersDescriptor ProtocolBuffersDescriptorBuilder::build()
 */

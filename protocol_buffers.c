@@ -165,7 +165,6 @@ static void php_uninitialized_message_exception(TSRMLS_D)
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessageException", protocol_buffers_uninitialized_message_exception_class_entry);
 }
 
-
 static zend_function_entry php_protocolbuffers_describable_methods[] = {
 	ZEND_FENTRY(getDescriptor, NULL, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT)
 	{NULL, NULL, NULL}
