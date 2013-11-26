@@ -35,7 +35,7 @@ PHP_METHOD(protocolbuffers_message_options, getExtension)
 		return;
 	}
 
-	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), "extensions", sizeof("extensions")-1, 1 TSRMLS_CC);
+	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("extensions")-1, 1 TSRMLS_CC);
 
 	if (zend_hash_find(Z_ARRVAL_P(options), name, name_len, (void **)&result) != SUCCESS) {
 		if (strcmp(name, "php") == 0) {
@@ -67,7 +67,7 @@ void php_pb_message_options_class(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersMessageOptions", php_protocolbuffers_message_options_methods);
 	protocol_buffers_message_options_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_declare_property_null(protocol_buffers_message_options_class_entry, "extensions", sizeof("extensions")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(protocol_buffers_message_options_class_entry, ZEND_STRS("extensions")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "MessageOptions", protocol_buffers_message_options_class_entry);
 }
