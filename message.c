@@ -600,6 +600,40 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
+static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container, zval *instance TSRMLS_DC)
+{
+	zval **unknown_fieldset = NULL;
+	HashTable *target = NULL;
+	char *unknown_name = {0};
+	int free = 0, unknown_name_len = 0, result = 0;
+
+	if (container->use_single_property > 0) {
+		zval **unknown_property;
+		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&unknown_property) == FAILURE) {
+			return result;
+		}
+
+		unknown_name     = pb_get_default_unknown_property_name();
+		unknown_name_len = pb_get_default_unknown_property_name_len();
+		target = Z_ARRVAL_PP(unknown_property);
+	} else {
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
+		target = Z_OBJPROP_P(instance);
+		free = 1;
+	}
+
+	if (zend_hash_find(target, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
+		*retval = *unknown_fieldset;
+		result = 1;
+	}
+
+	if (free) {
+		efree(unknown_name);
+	}
+
+	return result;
+}
+
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
 PHP_METHOD(protocolbuffers_message, __construct)
@@ -902,31 +936,14 @@ PHP_METHOD(protocolbuffers_message, valid)
 */
 PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 {
-	zval *instance = getThis();
+	zval *unknown_fieldset, *instance = getThis();
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
-	int free = 0;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 	if (container->process_unknown_fields > 0) {
-		char *uname;
-		int uname_len;
-		zval **unknown;
-
-		if (container->use_single_property > 0) {
-			uname = pb_get_default_unknown_property_name();
-			uname_len = pb_get_default_unknown_property_name_len();
-		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
-			free = 1;
-		}
-
-		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len+1, (void**)&unknown) == SUCCESS) {
-			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown);
-		}
-
-		if (free) {
-			efree(uname);
+		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
 		}
 	}
 }
@@ -1412,17 +1429,13 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 }
 /* }}} */
 
-
 /* {{{ proto ProtocolBuffersUnknownFieldSet ProtocolBuffersMessage::getUnknownFieldSet()
 */
 PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 {
-	zval **unknown_fieldset = NULL, *instance = getThis();
-	HashTable *target = NULL, *proto = NULL;
+	zval *unknown_fieldset = NULL, *instance = getThis();
 	pb_scheme_container *container;
-	char *unknown_name = {0};
-	int unknown_name_len = 0;
-	int free = 0;
+	HashTable *proto = NULL;
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 
@@ -1431,27 +1444,10 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 		return;
 	}
 
-	if (container->use_single_property > 0) {
-		zval **b;
-		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
-			return;
-		}
-
-		unknown_name     = pb_get_default_unknown_property_name();
-		unknown_name_len = pb_get_default_unknown_property_name_len();
-		target = Z_ARRVAL_PP(b);
+	if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+		RETVAL_ZVAL(unknown_fieldset, 1, 0);
 	} else {
-		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
-		target = Z_OBJPROP_P(instance);
-		free = 1;
-	}
-
-	if (zend_hash_find(target, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
-		RETVAL_ZVAL(*unknown_fieldset, 1, 0);
-	}
-
-	if (free) {
-		efree(unknown_name);
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "unknown field property does not find");
 	}
 }
 /* }}} */
