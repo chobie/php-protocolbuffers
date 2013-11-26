@@ -203,40 +203,40 @@ void php_protocolbuffers_init(TSRMLS_D)
 	php_pb_helper_class(TSRMLS_C);
 	php_pb_extension_registry_class(TSRMLS_C);
 
-#define PB_DECLARE_CONST_STRING(name, size, value) \
-	zend_declare_class_constant_string(protocol_buffers_class_entry, name, size, "php" TSRMLS_CC);
+#define PB_DECLARE_CONST_STRING(name, value) \
+	zend_declare_class_constant_string(protocol_buffers_class_entry, ZEND_STRS(#name)-1, "php" TSRMLS_CC);
 
-#define PB_DECLARE_CONST_LONG(name, size, value) \
-	zend_declare_class_constant_long(protocol_buffers_class_entry, name, size, value TSRMLS_CC);
+#define PB_DECLARE_CONST_LONG(name, value) \
+	zend_declare_class_constant_long(protocol_buffers_class_entry, ZEND_STRS(#name)-1, value TSRMLS_CC);
 
-	PB_DECLARE_CONST_LONG("WIRETYPE_VARINT",		   sizeof("WIRETYPE_VARINT")-1,		   0);
-	PB_DECLARE_CONST_LONG("WIRETYPE_FIXED64",		  sizeof("WIRETYPE_FIXED64")-1,		  1);
-	PB_DECLARE_CONST_LONG("WIRETYPE_LENGTH_DELIMITED", sizeof("WIRETYPE_LENGTH_DELIMITED")-1, 2);
-	PB_DECLARE_CONST_LONG("WIRETYPE_START_GROUP",	  sizeof("WIRETYPE_START_GROUP")-1,	  3);
-	PB_DECLARE_CONST_LONG("WIRETYPE_END_GROUP",		sizeof("WIRETYPE_END_GROUP")-1,		4);
-	PB_DECLARE_CONST_LONG("WIRETYPE_FIXED32",		  sizeof("WIRETYPE_FIXED32")-1,		  5);
+	PB_DECLARE_CONST_LONG(WIRETYPE_VARINT,           0);
+	PB_DECLARE_CONST_LONG(WIRETYPE_FIXED64,          1);
+	PB_DECLARE_CONST_LONG(WIRETYPE_LENGTH_DELIMITED, 2);
+	PB_DECLARE_CONST_LONG(WIRETYPE_START_GROUP,      3);
+	PB_DECLARE_CONST_LONG(WIRETYPE_END_GROUP,        4);
+	PB_DECLARE_CONST_LONG(WIRETYPE_FIXED32,          5);
 
-	PB_DECLARE_CONST_LONG("TYPE_DOUBLE",			   sizeof("TYPE_DOUBLE")-1,			   1);
-	PB_DECLARE_CONST_LONG("TYPE_FLOAT",				sizeof("TYPE_FLOAT")-1,				2);
-	PB_DECLARE_CONST_LONG("TYPE_INT64",				sizeof("TYPE_INT64")-1,				3);
-	PB_DECLARE_CONST_LONG("TYPE_UINT64",			   sizeof("TYPE_UINT64")-1,			   4);
-	PB_DECLARE_CONST_LONG("TYPE_INT32",				sizeof("TYPE_INT32")-1,				5);
-	PB_DECLARE_CONST_LONG("TYPE_FIXED64",			  sizeof("TYPE_FIXED64")-1,			  6);
-	PB_DECLARE_CONST_LONG("TYPE_FIXED32",			  sizeof("TYPE_FIXED32")-1,			  7);
-	PB_DECLARE_CONST_LONG("TYPE_BOOL",				 sizeof("TYPE_BOOL")-1,				 8);
-	PB_DECLARE_CONST_LONG("TYPE_STRING",			   sizeof("TYPE_STRING")-1,			   9);
-	PB_DECLARE_CONST_LONG("TYPE_GROUP",				sizeof("TYPE_GROUP")-1,			   10);
-	PB_DECLARE_CONST_LONG("TYPE_MESSAGE",			  sizeof("TYPE_MESSAGE")-1,			 11);
-	PB_DECLARE_CONST_LONG("TYPE_BYTES",				sizeof("TYPE_BYTES")-1,			   12);
-	PB_DECLARE_CONST_LONG("TYPE_UINT32",			   sizeof("TYPE_UINT32")-1,			  13);
-	PB_DECLARE_CONST_LONG("TYPE_ENUM",				 sizeof("TYPE_ENUM")-1,				14);
-	PB_DECLARE_CONST_LONG("TYPE_SFIXED32",			 sizeof("TYPE_SFIXED32")-1,			15);
-	PB_DECLARE_CONST_LONG("TYPE_SFIXED64",			 sizeof("TYPE_SFIXED64")-1,			16);
-	PB_DECLARE_CONST_LONG("TYPE_SINT32",			   sizeof("TYPE_SINT32")-1,			  17);
-	PB_DECLARE_CONST_LONG("TYPE_SINT64",			   sizeof("TYPE_SINT64")-1,			  18);
-	PB_DECLARE_CONST_LONG("MAX_FIELD_TYPE",			sizeof("MAX_FIELD_TYPE")-1,		   19);
+	PB_DECLARE_CONST_LONG(TYPE_DOUBLE,               1);
+	PB_DECLARE_CONST_LONG(TYPE_FLOAT,                2);
+	PB_DECLARE_CONST_LONG(TYPE_INT64,                3);
+	PB_DECLARE_CONST_LONG(TYPE_UINT64,               4);
+	PB_DECLARE_CONST_LONG(TYPE_INT32,                5);
+	PB_DECLARE_CONST_LONG(TYPE_FIXED64,              6);
+	PB_DECLARE_CONST_LONG(TYPE_FIXED32,              7);
+	PB_DECLARE_CONST_LONG(TYPE_BOOL,                 8);
+	PB_DECLARE_CONST_LONG(TYPE_STRING,               9);
+	PB_DECLARE_CONST_LONG(TYPE_GROUP,               10);
+	PB_DECLARE_CONST_LONG(TYPE_MESSAGE,             11);
+	PB_DECLARE_CONST_LONG(TYPE_BYTES,               12);
+	PB_DECLARE_CONST_LONG(TYPE_UINT32,              13);
+	PB_DECLARE_CONST_LONG(TYPE_ENUM,                14);
+	PB_DECLARE_CONST_LONG(TYPE_SFIXED32,            15);
+	PB_DECLARE_CONST_LONG(TYPE_SFIXED64,            16);
+	PB_DECLARE_CONST_LONG(TYPE_SINT32,              17);
+	PB_DECLARE_CONST_LONG(TYPE_SINT64,              18);
+	PB_DECLARE_CONST_LONG(MAX_FIELD_TYPE,           19);
 
-	PB_DECLARE_CONST_STRING("PHP_MESSAGE_OPTION",		   sizeof("PHP_MESSAGE_OPTION")-1,		   "php");
+	PB_DECLARE_CONST_STRING(PHP_MESSAGE_OPTION, "php");
 
 #undef PB_DECLARE_CONST_LONG
 
@@ -295,9 +295,9 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 {
 #ifdef ZTS
-		ts_free_id(php_pb_globals_id);
+	ts_free_id(php_pb_globals_id);
 #else
-		pb_globals_dtor(&php_pb_globals TSRMLS_CC);
+	pb_globals_dtor(&php_pb_globals TSRMLS_CC);
 #endif
 
 	UNREGISTER_INI_ENTRIES();
