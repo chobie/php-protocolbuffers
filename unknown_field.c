@@ -245,14 +245,6 @@ zend_object_value php_protocolbuffers_unknown_field_new(zend_class_entry *ce TSR
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_set_number, 0, 0, 1)
-	ZEND_ARG_INFO(0, number)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_set_type, 0, 0, 1)
-	ZEND_ARG_INFO(0, wiretype)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_number, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
