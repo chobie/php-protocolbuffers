@@ -161,6 +161,77 @@ static void php_pb_check_type_return(INTERNAL_FUNCTION_PARAMETERS, enum WireType
 
 }
 
+static void php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAMETERS, enum WireType type, enum FieldType field_type)
+{
+	zval *tmp = NULL, *result = NULL, *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+	unknown_value **element = NULL;
+	pbf __payload;
+	HashPosition pos;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+
+	if (type != WIRETYPE_LENGTH_DELIMITED) {
+		if (field->type != type) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected %d. but %d", type, field->type);
+			return;
+		}
+	}
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
+						zend_hash_move_forward_ex(field->ht, &pos)) {
+		MAKE_STD_ZVAL(tmp);
+
+		if (type == WIRETYPE_LENGTH_DELIMITED) {
+			ZVAL_STRINGL(tmp, (const char*)(*element)->buffer.val,  (*element)->buffer.len, 1);
+		} else {
+			if (field_type == TYPE_DOUBLE) {
+				union {
+					uint64_t v;
+					double d;
+				} u;
+				memcpy(&u.v, (*element)->buffer.val, sizeof(double));
+				__payload.type = TYPE_DOUBLE;__payload.value.d = (double)u.d;
+			} else if (field_type == TYPE_FLOAT) {
+				union {
+					uint32_t v;
+					float f;
+				} u;
+				memcpy(&u.v, (*element)->buffer.val, sizeof(float));
+				__payload.type = TYPE_FLOAT;__payload.value.f = (float)u.f;
+			} else if (type == WIRETYPE_FIXED64) {
+				/* NOTE: this block check WIRETYPE! */
+				uint64_t fixed64 = 0;
+
+				memcpy(&fixed64, (*element)->buffer.val, (*element)->buffer.len);
+				__payload.type = TYPE_FIXED64;__payload.value.uint64 = fixed64;
+			} else if (type == WIRETYPE_FIXED32) {
+				/* NOTE: this block check WIRETYPE! */
+				uint32_t fixed32 = 0;
+
+				memcpy(&fixed32, (*element)->buffer.val, (*element)->buffer.len);
+				__payload.type = TYPE_FIXED32;__payload.value.uint32 = fixed32;
+			} else if (type == WIRETYPE_VARINT) {
+				/* NOTE: this block check WIRETYPE! */
+				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)(*element)->varint;
+			} else {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "passed unhandled type wire_type:%d field_type:%d. this is bug", type, field_type);
+				return;
+			}
+
+			pb_format_string(tmp, &__payload TSRMLS_CC);
+		}
+
+		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
+	}
+
+	RETURN_ZVAL(result, 0, 1);
+}
+
 zend_object_value php_protocolbuffers_unknown_field_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -238,33 +309,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getType)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 {
-	zval *result = NULL, *tmp = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
-	HashPosition pos;
-	pbf __payload;
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-
-	if (field->type != WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
-		return;
-	}
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
-		MAKE_STD_ZVAL(tmp);
-		__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)(*element)->varint;
-		pb_format_string(tmp, &__payload TSRMLS_CC);
-
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT, -1);
 }
 /* }}} */
 
@@ -272,27 +317,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 {
-	zval *result = NULL, *tmp = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
-	HashPosition pos;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
-		MAKE_STD_ZVAL(tmp);
-		ZVAL_STRINGL(tmp, (const char*)(*element)->buffer.val,  (*element)->buffer.len, 1);
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED, -1);
 }
 /* }}} */
 
@@ -300,34 +325,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
-	zval *result = NULL, *tmp = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
-	HashPosition pos;
-	uint32_t fixed;
-	pbf __payload;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type != WIRETYPE_FIXED32) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed32. but %d", field->type);
-	}
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
-		MAKE_STD_ZVAL(tmp);
-		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
-
-		__payload.type = TYPE_FIXED32;__payload.value.uint32 = (uint32_t)(*element)->varint;
-		pb_format_string(tmp, &__payload TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, -1);
 }
 /* }}} */
 
@@ -335,34 +333,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
-	zval *result = NULL, *tmp = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
-	HashPosition pos;
-	pbf __payload;
-	uint64_t fixed;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type != WIRETYPE_FIXED64) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed64. but %d", field->type);
-	}
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
-		MAKE_STD_ZVAL(tmp);
-		memcpy(&fixed, (*element)->buffer.val, (*element)->buffer.len);
-
-		__payload.type = TYPE_FIXED64;__payload.value.uint64 = (uint64_t)(*element)->varint;
-		pb_format_string(tmp, &__payload TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, -1);
 }
 /* }}} */
 
@@ -370,38 +341,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 {
-	zval *result = NULL, *tmp = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element;
-	HashPosition pos;
-	pbf __payload;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type != WIRETYPE_FIXED32) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed32. but %d", field->type);
-	}
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)
-		) {
-		union {
-			uint32_t v;
-			float f;
-		} u;
-
-		MAKE_STD_ZVAL(tmp);
-		memcpy(&u.v, (*element)->buffer.val, sizeof(float));
-
-		__payload.type = TYPE_FLOAT;__payload.value.f = (float)u.f;
-		pb_format_string(tmp, &__payload TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, TYPE_FLOAT);
 }
 /* }}} */
 
@@ -409,37 +349,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 {
-	zval *tmp = NULL, *result = NULL, *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-	unknown_value **element = NULL;
-	pbf __payload;
-	HashPosition pos;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type != WIRETYPE_FIXED64) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed64. but %d", field->type);
-	}
-
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-
-	for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-						zend_hash_get_current_data_ex(field->ht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(field->ht, &pos)) {
-		union {
-			uint64_t v;
-			double d;
-		} u;
-
-		MAKE_STD_ZVAL(tmp);
-		memcpy(&u.v, (*element)->buffer.val, sizeof(double));
-
-		__payload.type = TYPE_DOUBLE;__payload.value.d = (double)u.d;
-		pb_format_string(tmp, &__payload TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);
-	}
-
-	RETURN_ZVAL(result, 0, 1);
+	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, TYPE_DOUBLE);
 }
 /* }}} */
 
