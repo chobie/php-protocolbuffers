@@ -634,6 +634,69 @@ static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container
 	return result;
 }
 
+static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *name, size_t name_len, smart_str *buf, smart_str *buf2)
+{
+	int i = 0;
+	enum ProtocolBuffers_MagicMethod flag = 0;
+
+	for (i = 0; i < name_len; i++) {
+		if (flag == 0) {
+			if (i+2 < name_len && name[i] == 'g' && name[i+1] == 'e' && name[i+2] == 't') {
+				i += 2;
+				flag = MAGICMETHOD_GET;
+				continue;
+			} else if (i+2 < name_len && name[i] == 's' && name[i+1] == 'e' && name[i+2] == 't') {
+				i += 2;
+				flag = MAGICMETHOD_SET;
+				continue;
+			} else if (i+6 < name_len &&
+				name[i] == 'a' &&
+				name[i+1] == 'p' &&
+				name[i+2] == 'p' &&
+				name[i+3] == 'e' &&
+				name[i+4] == 'n' &&
+				name[i+5] == 'd'
+			) {
+				i += 6;
+				flag = MAGICMETHOD_APPEND;
+			} else if (i+5 < name_len &&
+				name[i] == 'c' &&
+				name[i+1] == 'l' &&
+				name[i+2] == 'e' &&
+				name[i+3] == 'a' &&
+				name[i+4] == 'r') {
+				i += 5;
+				flag = MAGICMETHOD_CLEAR;
+			} else if (i+3 < name_len &&
+				name[i] == 'h' &&
+				name[i+1] == 'a' &&
+				name[i+2] == 's'
+			) {
+				i += 3;
+				flag = MAGICMETHOD_HAS;
+			} else {
+				break;
+			}
+		}
+
+		if (name[i] >= 'A' && name[i] <= 'Z') {
+			if (buf->len > 0) {
+				smart_str_appendc(buf, '_');
+			}
+			smart_str_appendc(buf, name[i] + ('a' - 'A'));
+			smart_str_appendc(buf2, name[i]);
+		} else {
+			smart_str_appendc(buf, name[i]);
+			smart_str_appendc(buf2, name[i]);
+		}
+	}
+
+	smart_str_0(buf);
+	smart_str_0(buf2);
+
+	return flag;
+}
+
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
 */
 PHP_METHOD(protocolbuffers_message, __construct)
@@ -932,23 +995,6 @@ PHP_METHOD(protocolbuffers_message, valid)
 }
 /* }}} */
 
-/* {{{ proto void ProtocolBuffersMessage::discardUnknownFields()
-*/
-PHP_METHOD(protocolbuffers_message, discardUnknownFields)
-{
-	zval *unknown_fieldset, *instance = getThis();
-	HashTable *proto = NULL;
-	pb_scheme_container *container;
-
-	PHP_PB_MESSAGE_CHECK_SCHEME
-	if (container->process_unknown_fields > 0) {
-		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
-			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
-		}
-	}
-}
-/* }}} */
-
 /* {{{ proto void ProtocolBuffersMessage::clear(string $name)
 */
 PHP_METHOD(protocolbuffers_message, clear)
@@ -974,7 +1020,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 PHP_METHOD(protocolbuffers_message, clearAll)
 {
 	zval *instance = getThis();
-	HashTable *proto = NULL, *hash = NULL;
+	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	zend_bool clear_unknown_fields = 1;
 	int i = 0;
@@ -986,70 +1032,15 @@ PHP_METHOD(protocolbuffers_message, clearAll)
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
 
-	if (container->use_single_property < 1) {
-		hash = Z_OBJPROP_P(instance);
-	} else {
-		zval **c;
-		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
-			hash = Z_ARRVAL_PP(c);
-		} else {
-			return;
-		}
-	}
-
 	for (i = 0; i < container->size; i++) {
-		char *name;
-		int name_len;
-		zval **tmp = NULL;
-		zval *val = NULL;
-
-		if (container->use_single_property < 1) {
-			name = container->scheme[i].mangled_name;
-			name_len = container->scheme[i].mangled_name_len;
-		} else {
-			name = container->scheme[i].name;
-			name_len = container->scheme[i].name_len;
-		}
-
-		if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
-			switch (Z_TYPE_PP(tmp)) {
-			case IS_ARRAY:
-				MAKE_STD_ZVAL(val);
-				array_init(val);
-
-				Z_ADDREF_P(val);
-				zend_hash_update(hash, name, name_len, (void **)&val, sizeof(zval *), NULL);
-				zval_ptr_dtor(&val);
-				break;
-			case IS_STRING:
-			case IS_LONG:
-			case IS_DOUBLE:
-			case IS_OBJECT:
-				MAKE_STD_ZVAL(val);
-				ZVAL_NULL(val);
-
-				Z_ADDREF_P(val);
-				zend_hash_update(hash, name, name_len, (void **)&val, sizeof(zval *), NULL);
-				zval_ptr_dtor(&val);
-				break;
-			}
-		}
+		php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, container->scheme[i].name, container->scheme[i].name_len, NULL, 0);
 	}
 
 	if (clear_unknown_fields > 0 && container->process_unknown_fields > 0) {
-		char *uname;
-		int uname_len;
-		zval **unknown;
+		zval *unknown_fieldset = NULL;
 
-		if (container->use_single_property > 0) {
-			uname = pb_get_default_unknown_property_name();
-			uname_len = pb_get_default_unknown_property_name_len();
-		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
-		}
-
-		if (zend_hash_find(Z_OBJPROP_P(instance), uname, uname_len, (void**)&unknown) == SUCCESS) {
-			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown);
+		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
 		}
 	}
 }
@@ -1072,59 +1063,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 		return;
 	}
 
-	for (i = 0; i < name_len; i++) {
-		if (flag == 0) {
-			if (i+2 < name_len && name[i] == 'g' && name[i+1] == 'e' && name[i+2] == 't') {
-				i += 2;
-				flag = MAGICMETHOD_GET;
-				continue;
-			} else if (i+2 < name_len && name[i] == 's' && name[i+1] == 'e' && name[i+2] == 't') {
-				i += 2;
-				flag = MAGICMETHOD_SET;
-				continue;
-			} else if (i+6 < name_len &&
-				name[i] == 'a' &&
-				name[i+1] == 'p' &&
-				name[i+2] == 'p' &&
-				name[i+3] == 'e' &&
-				name[i+4] == 'n' &&
-				name[i+5] == 'd'
-			) {
-				i += 6;
-				flag = MAGICMETHOD_APPEND;
-			} else if (i+5 < name_len &&
-				name[i] == 'c' &&
-				name[i+1] == 'l' &&
-				name[i+2] == 'e' &&
-				name[i+3] == 'a' &&
-				name[i+4] == 'r') {
-				i += 5;
-				flag = MAGICMETHOD_CLEAR;
-			} else if (i+3 < name_len &&
-				name[i] == 'h' &&
-				name[i+1] == 'a' &&
-				name[i+2] == 's'
-			) {
-				i += 3;
-				flag = MAGICMETHOD_HAS;
-			} else {
-				break;
-			}
-		}
-
-		if (name[i] >= 'A' && name[i] <= 'Z') {
-			if (buf.len > 0) {
-				smart_str_appendc(&buf, '_');
-			}
-			smart_str_appendc(&buf, name[i] + ('a' - 'A'));
-			smart_str_appendc(&buf2, name[i]);
-		} else {
-			smart_str_appendc(&buf, name[i]);
-			smart_str_appendc(&buf2, name[i]);
-		}
-	}
-	smart_str_0(&buf);
-	smart_str_0(&buf2);
+	flag = php_pb_parse_magic_method(name, name_len, &buf, &buf2);
 
 	if (flag == 0) {
 		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
@@ -1429,6 +1368,23 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 }
 /* }}} */
 
+/* {{{ proto void ProtocolBuffersMessage::discardUnknownFields()
+*/
+PHP_METHOD(protocolbuffers_message, discardUnknownFields)
+{
+	zval *unknown_fieldset, *instance = getThis();
+	HashTable *proto = NULL;
+	pb_scheme_container *container;
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	if (container->process_unknown_fields > 0) {
+		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto ProtocolBuffersUnknownFieldSet ProtocolBuffersMessage::getUnknownFieldSet()
 */
 PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
@@ -1458,7 +1414,6 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, parseFromString,      arginfo_pb_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_message, mergeFrom,            arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clear,                arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearAll,             NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, has,                  arginfo_pb_message_has, ZEND_ACC_PUBLIC)
@@ -1469,6 +1424,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, getExtension,         arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setExtension,         arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
