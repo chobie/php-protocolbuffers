@@ -147,6 +147,20 @@ static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_u
 	efree(object);
 }
 
+static void php_pb_check_type_return(INTERNAL_FUNCTION_PARAMETERS, enum WireType type)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_unknown_field *field = NULL;
+
+	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
+	if (field->type == type) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+
+}
+
 zend_object_value php_protocolbuffers_unknown_field_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -264,9 +278,6 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 	HashPosition pos;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
-	}
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
@@ -297,8 +308,8 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 	pbf __payload;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	if (field->type != WIRETYPE_FIXED32) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed32. but %d", field->type);
 	}
 
 	MAKE_STD_ZVAL(result);
@@ -332,8 +343,8 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 	uint64_t fixed;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	if (field->type != WIRETYPE_FIXED64) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed64. but %d", field->type);
 	}
 
 	MAKE_STD_ZVAL(result);
@@ -366,8 +377,8 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 	pbf __payload;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	if (field->type != WIRETYPE_FIXED32) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed32. but %d", field->type);
 	}
 
 	MAKE_STD_ZVAL(result);
@@ -405,8 +416,8 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 	HashPosition pos;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected varint. but %d", field->type);
+	if (field->type != WIRETYPE_FIXED64) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "wiretype mismatched. expected fixed64. but %d", field->type);
 	}
 
 	MAKE_STD_ZVAL(result);
@@ -432,21 +443,11 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 }
 /* }}} */
 
-
-
 /* {{{ proto bool ProtocolBuffersUnknownField::isVarint()
 */
 PHP_METHOD(protocolbuffers_unknown_field, isVarint)
 {
-	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_VARINT) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT);
 }
 /* }}} */
 
@@ -454,15 +455,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isVarint)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isFixed64)
 {
-	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_FIXED64) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64);
 }
 /* }}} */
 
@@ -470,15 +463,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isFixed64)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isLengthDelimited)
 {
-	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_LENGTH_DELIMITED) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED);
 }
 /* }}} */
 
@@ -486,15 +471,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isLengthDelimited)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isFixed32)
 {
-	zval *instance = getThis();
-	php_protocolbuffers_unknown_field *field = NULL;
-
-	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	if (field->type == WIRETYPE_FIXED32) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32);
 }
 /* }}} */
 
