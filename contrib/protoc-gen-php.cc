@@ -406,7 +406,7 @@ void PHPCodeGenerator::PrintMessage(io::Printer &printer, const Descriptor &mess
                 break;
             }
         }
-        if (parentField->type() == FieldDescriptor::TYPE_GROUP) {
+        if (parentField != NULL && parentField->type() == FieldDescriptor::TYPE_GROUP) {
             type = "group";
         }
     }
