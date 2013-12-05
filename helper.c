@@ -865,7 +865,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 					}
 					last_data_offset = data;
 				} while(data < packed_data_end);
-
+				break;
 			}
 
 			data += payload;
