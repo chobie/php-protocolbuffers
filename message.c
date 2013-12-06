@@ -637,6 +637,7 @@ static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container
 static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *name, size_t name_len, smart_str *buf, smart_str *buf2)
 {
 	int i = 0;
+	int last_is_capital = 0;
 	enum ProtocolBuffers_MagicMethod flag = 0;
 
 	for (i = 0; i < name_len; i++) {
@@ -681,13 +682,19 @@ static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *na
 
 		if (name[i] >= 'A' && name[i] <= 'Z') {
 			if (buf->len > 0) {
-				smart_str_appendc(buf, '_');
+				if (last_is_capital == 0
+					&& i+1 >= name_len
+					|| (i+1 < name_len && name[i+1] >= 'a' && name[i+1] <= 'z')) {
+					smart_str_appendc(buf, '_');
+				}
 			}
 			smart_str_appendc(buf, name[i] + ('a' - 'A'));
 			smart_str_appendc(buf2, name[i]);
+			last_is_capital = 1;
 		} else {
 			smart_str_appendc(buf, name[i]);
 			smart_str_appendc(buf2, name[i]);
+			last_is_capital = 0;
 		}
 	}
 
