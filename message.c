@@ -413,17 +413,20 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
+		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
 	}
 
 	if (scheme->is_extension) {
+		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't use for extension value", name);
 		return;
 	}
 
 	if (scheme->ce != NULL) {
 		if (scheme->ce != Z_OBJCE_P(value)) {
+			zval_ptr_dtor(&value);
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
 			return;
 		}
@@ -512,22 +515,26 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
+		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
 		return;
 	}
 
 	if (scheme->is_extension) {
+		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't use for extension value", name);
 		return;
 	}
 
 	if (scheme->repeated < 1) {
+		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "append method can't use for non repeated value", name);
 		return;
 	}
 
 	if (scheme->ce != NULL) {
 		if (scheme->ce != Z_OBJCE_P(value)) {
+			zval_ptr_dtor(&value);
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
 			return;
 		}
@@ -536,6 +543,7 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
 	if (container->use_single_property > 0 && zend_hash_exists(htt, n, n_len) == 0) {
+		zval_ptr_dtor(&value);
 		zend_error(E_ERROR, "not initialized");
 		return;
 	}
