@@ -424,6 +424,12 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 		return;
 	}
 
+	if (Z_TYPE_P(value) == IS_NULL) {
+		zval_ptr_dtor(&value);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "set method can't pass null value", name);
+		return;
+	}
+
 	if (scheme->ce != NULL) {
 		if (scheme->ce != Z_OBJCE_P(value)) {
 			zval_ptr_dtor(&value);
@@ -529,6 +535,12 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 	if (scheme->repeated < 1) {
 		zval_ptr_dtor(&value);
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "append method can't use for non repeated value", name);
+		return;
+	}
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		zval_ptr_dtor(&value);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "append method can't pass null value", name);
 		return;
 	}
 
