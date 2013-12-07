@@ -4,7 +4,6 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, arra
 $db = "addressbook.db";
 
 $addressbook = load($db);
-
 $person = new Tutorial_Person();
 $person->setId(1);
 $person->setName("John Doe");
@@ -21,6 +20,8 @@ $phone->setNumber("1234 5 67 79");
 $phone->setType(Tutorial_Person_PhoneType::HOME);
 $person->appendPhone($phone);
 
+echo $person;
+exit;
 echo "____________________\n";
 
 $addressbook->appendPerson($person);

@@ -702,8 +702,8 @@ static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *na
 
 		if (name[i] >= 'A' && name[i] <= 'Z') {
 			if (buf->len > 0) {
-				if (last_is_capital == 0
-					&& i+1 >= name_len
+				if ((last_is_capital == 0
+					&& i+1 >= name_len)
 					|| (i+1 < name_len && name[i+1] >= 'a' && name[i+1] <= 'z')) {
 					smart_str_appendc(buf, '_');
 				}
@@ -1436,93 +1436,6 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 /* }}} */
 
 
-static void php_pb_message_to_string(pb_scheme_container *container, smart_str *buffer, zval *instance TSRMLS_DC)
-{
-    int i;
-    pb_scheme *scheme;
-    pb_scheme_container *children;
-    HashTable *htt;
-    char *n;
-    int n_len;
-    zval **e, *copy;
-
-    return;
-    if (container->size > 0) {
-        for (i = 0; i < container->size; i++) {
-            scheme = &container->scheme[i];
-
-            php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
-            if (n == NULL) {
-                continue;
-            }
-
-            if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-                if (Z_TYPE_PP(e) == IS_NULL) {
-                    continue;
-                }
-
-                MAKE_STD_ZVAL(copy);
-                ZVAL_ZVAL(copy, *e, 1, 0);
-
-                smart_str_appends(buffer, scheme->original_name);
-                smart_str_appends(buffer, ": ");
-
-                if (scheme->repeated) {
-                    smart_str_appends(buffer, "[");
-                    smart_str_appends(buffer, "\n");
-                    smart_str_appends(buffer, "]");
-                    smart_str_appends(buffer, "\n");
-                    zval_ptr_dtor(&copy);
-                    continue;
-                }
-                if (scheme->ce != NULL) {
-                    smart_str_appends(buffer, "{");
-                    smart_str_appends(buffer, "\n");
-
-                    pb_get_scheme_container(scheme->ce->name, scheme->ce->name_length, &children, NULL TSRMLS_CC);
-                    php_pb_message_to_string(children, &buffer, *e TSRMLS_CC);
-
-                    smart_str_appends(buffer, "}");
-                    smart_str_appends(buffer, "\n");
-                    zval_ptr_dtor(&copy);
-                    continue;
-                }
-
-                if (scheme->ce == NULL) {
-                    if (Z_TYPE_P(copy) != IS_STRING) {
-                        convert_to_string(copy);
-                    }
-                    smart_str_appends(buffer, "\"");
-                    smart_str_appends(buffer, Z_STRVAL_P(copy));
-                    smart_str_appends(buffer, "\"");
-                }
-                smart_str_appends(buffer, "\n");
-                zval_ptr_dtor(&copy);
-            }
-
-
-        }
-    }
-}
-
-/* {{{ proto string ProtocolBuffersMessage::__toString()
-*/
-PHP_METHOD(protocolbuffers_message, __toString)
-{
-	zval *unknown_fieldset = NULL, *instance = getThis();
-	pb_scheme_container *container;
-	HashTable *proto = NULL;
-	smart_str buffer = {0};
-
-	PHP_PB_MESSAGE_CHECK_SCHEME
-    php_pb_message_to_string(container, &buffer, instance TSRMLS_CC);
-	smart_str_0(&buffer);
-	RETVAL_STRINGL(buffer.c, buffer.len, 1);
-	smart_str_free(&buffer);
-}
-/* }}} */
-
-
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_pb_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
@@ -1540,7 +1453,6 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, __toString,           NULL, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
