@@ -3,14 +3,17 @@
 #include <string>
 #include <gtest/gtest.h>
 
+#include "../protoc-gen-php.h"
+#include "php_options.pb.h"
+
 using namespace std;
+using namespace google::protobuf::compiler::php;
 
-int add(int x, int y)
+TEST(UnderscoresToCamelCaseImplTest, UnderscoresToCamelCaseImpl)
 {
-    return x + y;
-}
+    string result = UnderscoresToCamelCaseImpl("helo_world", true);
+    ASSERT_EQ("HeloWorld", result);
 
-TEST(AddTest, Test1)
-{
-    ASSERT_EQ(2, add(1, 1));
+    result = UnderscoresToCamelCaseImpl("helo_world", false);
+    ASSERT_EQ("heloWorld", result);
 }

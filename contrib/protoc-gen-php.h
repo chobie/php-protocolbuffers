@@ -33,6 +33,8 @@ namespace protobuf {
 namespace compiler {
 namespace php {
 
+string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter);
+
 class PHPCodeGenerator : public CodeGenerator {
     private:
 
