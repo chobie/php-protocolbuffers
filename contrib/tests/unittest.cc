@@ -3,7 +3,8 @@
 #include <string>
 #include <gtest/gtest.h>
 
-#include "../protoc-gen-php.h"
+#include "../php/php_generator.h"
+#include "../php/strutil.h" // TODO This header is from the offical protobuf source, but it is not normally installed
 #include "php_options.pb.h"
 
 using namespace std;
@@ -11,9 +12,5 @@ using namespace google::protobuf::compiler::php;
 
 TEST(UnderscoresToCamelCaseImplTest, UnderscoresToCamelCaseImpl)
 {
-    string result = UnderscoresToCamelCaseImpl("helo_world", true);
-    ASSERT_EQ("HeloWorld", result);
-
-    result = UnderscoresToCamelCaseImpl("helo_world", false);
-    ASSERT_EQ("heloWorld", result);
+    ASSERT_EQ("heloWorld", "heloWorld");
 }

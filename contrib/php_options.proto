@@ -9,6 +9,7 @@ message PHPFileOptions {
     optional bool   generate_setter = 6 [default = false];
     optional bool   generate_has    = 7 [default = false];
     optional bool   generate_package = 8 [default = false];
+    optional bool   multiple_files = 9 [default = true];
 }
 
 message PHPMessageOptions {
