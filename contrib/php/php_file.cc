@@ -11,8 +11,9 @@ namespace protobuf {
 namespace compiler {
 namespace php {
 
-FileGenerator::FileGenerator(const FileDescriptor* file)
-    : file_(file)
+FileGenerator::FileGenerator(const FileDescriptor* file, GeneratorContext *context)
+    : file_(file),
+      context_(context)
 {
 
 }
@@ -24,10 +25,6 @@ FileGenerator::~FileGenerator()
 
 bool FileGenerator::Validate(string* error) {
     return true;
-}
-
-void FileGenerator::Generate(io::Printer* printer)
-{
 }
 
 template<typename GeneratorClass, typename DescriptorClass>
@@ -58,6 +55,28 @@ static void GenerateSibling(const string& package_dir,
 }
 
 
+void FileGenerator::Generate(io::Printer* printer)
+{
+  if (!file_->options().GetExtension(::php).multiple_files()) {
+    vector<string> *file_list;
+
+    for (int i = 0; i < file_->enum_type_count(); i++) {
+        GenerateSibling<EnumGenerator>("", "",
+            file_->enum_type(i),
+            context_, file_list, "",
+            &EnumGenerator::Generate);
+    }
+
+    for (int i = 0; i < file_->message_type_count(); i++) {
+        GenerateSibling<MessageGenerator>("", "",
+            file_->message_type(i),
+            context_, file_list, "",
+            &MessageGenerator::Generate);
+    }
+  }
+}
+
+
 void FileGenerator::GenerateSiblings(const string& package_dir,
                                      GeneratorContext* context,
                                      vector<string>* file_list)
@@ -76,6 +95,7 @@ void FileGenerator::GenerateSiblings(const string& package_dir,
             context, file_list, "",
             &MessageGenerator::Generate);
     }
+// TODO:
 //    if (HasGenericServices(file_)) {
 //      for (int i = 0; i < file_->service_count(); i++) {
 //        GenerateSibling<ServiceGenerator>(package_dir, java_package_,

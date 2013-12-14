@@ -22,7 +22,7 @@ namespace php {
 
 class FileGenerator {
     public:
-    explicit FileGenerator(const FileDescriptor* file);
+    explicit FileGenerator(const FileDescriptor* file, GeneratorContext *context);
     ~FileGenerator();
 
     bool Validate(string* error);
@@ -38,6 +38,7 @@ class FileGenerator {
 
     private:
         const FileDescriptor *file_;
+        GeneratorContext *context_;
 };
 
 }  // namespace php

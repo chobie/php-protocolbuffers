@@ -27,6 +27,7 @@ class MessageGenerator {
         string ClassName(const Descriptor &descriptor) const;
         string ClassName(const EnumDescriptor &descriptor) const;
         string NameSpace();
+        bool HasNameSpace();
         string FileName();
         void PrintUseNameSpaceIfNeeded(io::Printer* printer);
         void PrintMemberProperties(io::Printer* printer);

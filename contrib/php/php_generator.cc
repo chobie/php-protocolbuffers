@@ -31,10 +31,16 @@ bool PHPGenerator::Generate(const FileDescriptor* file,
         }
     }
 
-    FileGenerator file_generator(file);
+    FileGenerator file_generator(file, context);
     if (!file_generator.Validate(error)) {
         return false;
     }
+
+// TODO: Generate php main file.
+    scoped_ptr<io::ZeroCopyOutputStream> output(
+        context->Open("autoload.php"));
+    io::Printer printer(output.get(), '`');
+    file_generator.Generate(&printer);
 
     file_generator.GenerateSiblings("", context, &all_files);
     if (!output_list_file.empty()) {

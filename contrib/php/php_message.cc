@@ -41,6 +41,17 @@ string MessageGenerator::NameSpace()
     return output;
 }
 
+bool MessageGenerator::HasNameSpace()
+{
+    string name = NameSpace();
+
+    if (!name.empty()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 string MessageGenerator::ClassName()
 {
@@ -186,11 +197,13 @@ string MessageGenerator::getTypeName(const FieldDescriptor & field) const {
 
 void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
 {
-    printer->Print(
-        "namespace `namespace`;\n\n",
-        "namespace",
-        NameSpace()
-    );
+    if (HasNameSpace()) {
+        printer->Print(
+            "namespace `namespace`;\n\n",
+            "namespace",
+            NameSpace()
+        );
+    }
 
     printer->Print("use \\ProtocolBuffers;\n");
     printer->Print("use \\ProtocolBuffers\\Message;\n");
