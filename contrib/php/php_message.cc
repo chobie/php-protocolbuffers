@@ -405,9 +405,13 @@ void MessageGenerator::Generate(io::Printer* printer)
 {
     for (int i = 0; i < descriptor_->enum_type_count(); i++) {
       EnumGenerator enumGenerator(descriptor_->enum_type(i), context_);
+      string child_name = enumGenerator.FileName();
 
-      enumGenerator.Generate(printer);
+      scoped_ptr<io::ZeroCopyOutputStream> output(context_->Open(child_name));
+      io::Printer child_printer(output.get(), '`');
+      enumGenerator.Generate(&child_printer);
     }
+
     for (int i = 0; i < descriptor_->nested_type_count(); i++) {
 
       MessageGenerator messageGenerator(descriptor_->nested_type(i), context_);

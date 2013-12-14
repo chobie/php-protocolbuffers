@@ -22,8 +22,14 @@ class EnumGenerator {
     ~EnumGenerator();
 
     void Generate(io::Printer* printer);
+    string FileName();
+    void PrintUseNameSpaceIfNeeded(io::Printer* printer);
+    string NameSpace();
 
     private:
+        string ClassName();
+
+
         const EnumDescriptor *descriptor_;
         GeneratorContext* context_;
 };
