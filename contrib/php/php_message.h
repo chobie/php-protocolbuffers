@@ -24,6 +24,8 @@ class MessageGenerator {
     void Generate(io::Printer* printer);
     private:
         string ClassName();
+        string ClassName(const Descriptor &descriptor) const;
+        string ClassName(const EnumDescriptor &descriptor) const;
         string NameSpace();
         string FileName();
         void PrintUseNameSpaceIfNeeded(io::Printer* printer);

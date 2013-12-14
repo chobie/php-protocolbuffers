@@ -2,6 +2,7 @@
 #include "php_message.h"
 #include "php_enum.h"
 #include "strutil.h"
+#include <google/protobuf/descriptor.h>
 
 #include <map>
 #include <string>
@@ -49,6 +50,27 @@ string MessageGenerator::ClassName()
 
     return result.back();
 }
+
+string MessageGenerator::ClassName(const Descriptor &descriptor) const
+{
+    string result = "\\";
+    result.append(descriptor.full_name());
+
+    replace(result.begin(), result.end(), '.', '\\');
+
+    return result;
+}
+
+string MessageGenerator::ClassName(const EnumDescriptor &descriptor) const
+{
+    string result = "\\";
+    result.append(descriptor.full_name());
+
+    replace(result.begin(), result.end(), '.', '\\');
+
+    return result;
+}
+
 
 string MessageGenerator::FileName()
 {
@@ -131,7 +153,8 @@ string MessageGenerator::getTypeName(const FieldDescriptor & field) const {
             break;
         case FieldDescriptorProto_Type_TYPE_MESSAGE:
             {
-                string name = "TODO";//ClassName(*field.message_type(), true);
+                const Descriptor &desc(*field.message_type());
+                string name = ClassName(desc);
                 return name;
             }
             break;
@@ -174,6 +197,10 @@ void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
     printer->Print("use \\ProtocolBuffers\\FieldDescriptor;\n");
     printer->Print("use \\ProtocolBuffers\\DescriptorBuilder;\n");
     printer->Print("use \\ProtocolBuffers\\ExtensionRegistry;\n");
+
+    // TODO: add Message and Enum class here.
+
+
     printer->Print("\n");
 }
 
@@ -230,8 +257,13 @@ string MessageGenerator::DefaultValueAsString(const FieldDescriptor & field, boo
             return field.default_value_string();
 
         case FieldDescriptor::CPPTYPE_ENUM:
-            return "TODO";//;ClassName(*field.enum_type(),true) + "::" + field.default_value_enum()->name();
+        {
+            const EnumDescriptor &desc(*field.enum_type());
+            string value = ClassName(desc);
 
+            value = value + "::" + field.default_value_enum()->name();
+            return value;
+        }
         case FieldDescriptor::CPPTYPE_MESSAGE:
             return "null";
 
@@ -300,9 +332,10 @@ void MessageGenerator::PrintGetDescriptor(io::Printer* printer)
             DefaultValueAsString(field, true)
         );
 
-        if (field.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
+        if (field.type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE) {
             const Descriptor &desc(*field.message_type());
-            string name = "TODO";//ClassName(desc, true);
+
+            string name = ClassName(desc);
             string escapedName;
             size_t pos = 0;
             size_t found = 0;
