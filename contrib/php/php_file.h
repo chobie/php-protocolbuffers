@@ -1,8 +1,13 @@
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #ifndef GOOGLE_PROTOBUF_COMPILER_PHP_FILE_H__
 #define GOOGLE_PROTOBUF_COMPILER_PHP_FILE_H__
 
 #include <string>
 #include <vector>
+
 #include <google/protobuf/stubs/common.h>
 
 namespace google {
@@ -22,7 +27,7 @@ namespace php {
 
 class FileGenerator {
     public:
-    explicit FileGenerator(const FileDescriptor* file, GeneratorContext *context);
+    FileGenerator(const FileDescriptor* file, GeneratorContext *context);
     ~FileGenerator();
 
     bool Validate(string* error);
@@ -44,16 +49,15 @@ class FileGenerator {
     void GenerateAutoloader(io::Printer *printer);
 
     private:
-        const FileDescriptor *file_;
-        string php_package_;
-        GeneratorContext *context_;
-
         template<typename DescriptorClass>
         string NameSpace(const DescriptorClass* descriptor) const;
 
         template<typename DescriptorClass>
         bool HasNameSpace(const DescriptorClass* descriptor) const;
 
+        const FileDescriptor *file_;
+        string php_package_;
+        GeneratorContext *context_;
 };
 
 }  // namespace php

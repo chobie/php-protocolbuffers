@@ -1,34 +1,35 @@
-#include "php_generator.h"
-#include "php_message.h"
-#include "php_enum.h"
-#include "php_helpers.h"
-#include "strutil.h"
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+#include "./php_generator.h"
+#include "./php_message.h"
+#include "./php_enum.h"
+#include "./php_helpers.h"
+
 #include <google/protobuf/descriptor.h>
 
 #include <map>
 #include <string>
 #include <algorithm>
 
-
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace php {
 
-MessageGenerator::MessageGenerator(const Descriptor* descriptor, GeneratorContext* context)
+MessageGenerator::MessageGenerator(const Descriptor* descriptor,
+    GeneratorContext* context)
     : descriptor_(descriptor),
-      context_(context)
-{
+      context_(context) {
     use_namespace_ = true;
     enclose_namespace_ = false;
 }
 
-MessageGenerator::~MessageGenerator()
-{
+MessageGenerator::~MessageGenerator() {
 }
 
-string MessageGenerator::NameSpace()
-{
+string MessageGenerator::NameSpace() {
     vector<string> result;
     string output;
 
@@ -42,8 +43,7 @@ string MessageGenerator::NameSpace()
     return output;
 }
 
-bool MessageGenerator::HasNameSpace()
-{
+bool MessageGenerator::HasNameSpace() {
     string name = NameSpace();
 
     if (!name.empty()) {
@@ -54,8 +54,7 @@ bool MessageGenerator::HasNameSpace()
 }
 
 
-string MessageGenerator::ClassName()
-{
+string MessageGenerator::ClassName() {
     vector<string> result;
 
     SplitStringUsing(descriptor_->full_name(), ".", &result);
@@ -63,8 +62,7 @@ string MessageGenerator::ClassName()
     return result.back();
 }
 
-string MessageGenerator::ClassName(const Descriptor &descriptor) const
-{
+string MessageGenerator::ClassName(const Descriptor &descriptor) const {
     string result = "\\";
     result.append(descriptor.full_name());
 
@@ -73,8 +71,7 @@ string MessageGenerator::ClassName(const Descriptor &descriptor) const
     return result;
 }
 
-string MessageGenerator::ClassName(const EnumDescriptor &descriptor) const
-{
+string MessageGenerator::ClassName(const EnumDescriptor &descriptor) const {
     string result = "\\";
     result.append(descriptor.full_name());
 
@@ -84,8 +81,7 @@ string MessageGenerator::ClassName(const EnumDescriptor &descriptor) const
 }
 
 
-string MessageGenerator::FileName()
-{
+string MessageGenerator::FileName() {
     string name = descriptor_->full_name();
     replace(name.begin(), name.end(), '.', '/');
     name.append(".php");
@@ -116,8 +112,7 @@ static const char *fields_map[] = {
     "ProtocolBuffers::TYPE_SINT64",
 };
 
-static const char* field_type_to_str(int field_type)
-{
+static const char* field_type_to_str(int field_type) {
     if (field_type > 0 && field_type <= 18) {
         return fields_map[field_type];
     } else {
@@ -126,7 +121,6 @@ static const char* field_type_to_str(int field_type)
 }
 
 string MessageGenerator::getTypeName(const FieldDescriptor & field) const {
-
     if (field.is_repeated()) {
         return "array";
     }
@@ -195,46 +189,38 @@ string MessageGenerator::getTypeName(const FieldDescriptor & field) const {
     return "";
 }
 
-void MessageGenerator::PrintMagicMethod(io::Printer* printer)
-{
+void MessageGenerator::PrintMagicMethod(io::Printer* printer) {
     printer->Print(" * -*- magic methods -*-\n");
     printer->Print(" *\n");
     for (int i = 0; i < descriptor_->field_count(); ++i) {
-        const FieldDescriptor &field ( *descriptor_->field(i) );
+        const FieldDescriptor &field(*descriptor_->field(i));
         printer->Print(" * @method `type` get`variable`()\n",
                 "type", getTypeName(field),
-                "variable", UnderscoresToCapitalizedCamelCase(field)
-                );
+                "variable", UnderscoresToCapitalizedCamelCase(field));
         if (field.is_repeated()) {
             printer->Print(" * @method void append`variable`()\n",
                     "type", getTypeName(field),
-                    "variable", UnderscoresToCapitalizedCamelCase(field)
-                    );
+                    "variable", UnderscoresToCapitalizedCamelCase(field));
         } else {
             printer->Print(" * @method void set`variable`()\n",
-                    "variable", UnderscoresToCapitalizedCamelCase(field)
-                    );
+                    "variable", UnderscoresToCapitalizedCamelCase(field));
         }
     }
     printer->Print(" *\n");
-
 }
 
-void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
-{
+void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer) {
     if (HasNameSpace()) {
         if (enclose_namespace_) {
             printer->Print(
                 "namespace `namespace`\n{\n\n",
                 "namespace",
-                NameSpace()
-            );
+                NameSpace());
         } else {
             printer->Print(
                 "namespace `namespace`;\n\n",
                 "namespace",
-                NameSpace()
-            );
+                NameSpace());
         }
     }
 
@@ -244,22 +230,20 @@ void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
     printer->Print("use \\ProtocolBuffers\\DescriptorBuilder;\n");
     printer->Print("use \\ProtocolBuffers\\ExtensionRegistry;\n");
 
-    // TODO: add Message and Enum class here.
-
+    // TODO(chobie): add Message and Enum class here.
 
     printer->Print("\n");
 }
 
-string MessageGenerator::GetClassNameForFieldDescriptor()
-{
+string MessageGenerator::GetClassNameForFieldDescriptor() {
     if (use_namespace_) {
         return "FieldDescriptor";
     } else {
         return "ProtocolBuffersFieldDescriptor";
     }
 }
-string MessageGenerator::GetClassNameForDescriptorBuilder()
-{
+
+string MessageGenerator::GetClassNameForDescriptorBuilder() {
     if (use_namespace_) {
         return "DescriptorBuilder";
     } else {
@@ -271,7 +255,8 @@ string MessageGenerator::VariableName(const FieldDescriptor & field) const {
     return field.name();
 }
 
-string MessageGenerator::DefaultValueAsString(const FieldDescriptor & field, bool quote_string_type) const {
+string MessageGenerator::DefaultValueAsString(const FieldDescriptor & field,
+    bool quote_string_type) const {
     switch (field.cpp_type()) {
         case FieldDescriptor::CPPTYPE_INT32:
             return SimpleItoa(field.default_value_int32());
@@ -312,15 +297,14 @@ string MessageGenerator::DefaultValueAsString(const FieldDescriptor & field, boo
         }
         case FieldDescriptor::CPPTYPE_MESSAGE:
             return "null";
-
     }
     return "";
 }
 
 
-void MessageGenerator::PrintGetDescriptor(io::Printer* printer)
-{
-    const PHPMessageOptions& moptions = descriptor_->options().GetExtension(::php_option);
+void MessageGenerator::PrintGetDescriptor(io::Printer* printer) {
+    const PHPMessageOptions& moptions =
+        descriptor_->options().GetExtension(::php_option);
 
     printer->Print("/**\n");
     printer->Print(" * get descriptor for protocol buffers\n");
@@ -336,47 +320,38 @@ void MessageGenerator::PrintGetDescriptor(io::Printer* printer)
     printer->Indent();
     printer->Print("$desc = new `class_name`();\n",
         "class_name",
-        GetClassNameForDescriptorBuilder()
-    );
+        GetClassNameForDescriptorBuilder());
 
     for (int i = 0; i < descriptor_->field_count(); ++i) {
-        const FieldDescriptor &field (*descriptor_->field(i));
+        const FieldDescriptor &field(*descriptor_->field(i));
 
         printer->Print("$desc->addField(`tag`, new `class_name`(array(\n",
             "tag",
             SimpleItoa(field.number()),
             "class_name",
-            GetClassNameForFieldDescriptor()
-        );
+            GetClassNameForFieldDescriptor());
         printer->Indent();
         printer->Print("\"type\"     => `type`,\n",
             "type",
-            field_type_to_str(field.type())
-        );
+            field_type_to_str(field.type()));
         printer->Print("\"name\"     => \"`name`\",\n",
             "name",
-            VariableName(field)
-        );
+            VariableName(field));
         printer->Print("\"required\" => `required`,\n",
             "required",
-            (field.is_required()) ? "true" : "false"
-        );
+            (field.is_required()) ? "true" : "false");
         printer->Print("\"optional\" => `optional`,\n",
             "optional",
-            (field.is_optional()) ? "true" : "false"
-        );
+            (field.is_optional()) ? "true" : "false");
         printer->Print("\"repeated\" => `repeated`,\n",
             "repeated",
-            (field.is_repeated()) ? "true" : "false"
-        );
+            (field.is_repeated()) ? "true" : "false");
         printer->Print("\"packable\" => `packable`,\n",
             "packable",
-            (field.is_packed()) ? "true" : "false"
-        );
+            (field.is_packed()) ? "true" : "false");
         printer->Print("\"default\"  => `value`,\n",
             "value",
-            DefaultValueAsString(field, true)
-        );
+            DefaultValueAsString(field, true));
 
         if (field.type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE) {
             const Descriptor &desc(*field.message_type());
@@ -388,35 +363,41 @@ void MessageGenerator::PrintGetDescriptor(io::Printer* printer)
 
             escapedName.reserve(name.length()*2);
 
-            while ((found = name.find('\\',pos)) != string::npos) {
-                if ((found-pos)>0) escapedName.append(name.substr(pos,found-pos));
+            while ((found = name.find('\\', pos)) != string::npos) {
+                if (found-pos > 0) {
+                    escapedName.append(name.substr(pos, found-pos));
+                }
                 escapedName.append("\\\\");
                 pos = found+1;
             }
-            escapedName.append(name.substr(pos,found-pos));
+
+            escapedName.append(name.substr(pos, found-pos));
             printer->Print("\"message\"  => \"`message`\",\n",
                 "message",
-                escapedName
-            );
+                escapedName);
         }
+
         printer->Outdent();
         printer->Print(")));\n");
     }
 
     if (moptions.use_single_property()) {
-        printer->Print("$phpoptions = $desc->getOptions()->getExtension(ProtocolBuffers::PHP_MESSAGE_OPTION);\n");
+        printer->Print("$phpoptions = $desc->getOptions()->getExtension");
+        printer->Print("(ProtocolBuffers::PHP_MESSAGE_OPTION);\n");
         printer->Print("$phpoptions->setUseSingleProperty(true);\n");
         printer->Print("$phpoptions->setSinglePropertyName(\"`name`\");\n",
             "name",
-            moptions.single_property_name()
-        );
+            moptions.single_property_name());
 
         printer->Print("\n");
     }
 
     for (int i = 0; i < descriptor_->extension_range_count(); ++i) {
         const Descriptor::ExtensionRange &er(*descriptor_->extension_range(i));
-        printer->Print("$desc->addExtensionRange(`start`, `end`);\n", "start", SimpleItoa(er.start), "end", SimpleItoa(er.end));
+        printer->Print("$desc->addExtensionRange(`start`, `end`);\n",
+            "start",
+            SimpleItoa(er.start),
+            "end", SimpleItoa(er.end));
     }
 
 
@@ -429,18 +410,18 @@ void MessageGenerator::PrintGetDescriptor(io::Printer* printer)
     printer->Outdent();
     printer->Print("}\n");
     printer->Print("\n");
-
 }
-void MessageGenerator::PrintMemberProperties(io::Printer* printer)
-{
-    const PHPMessageOptions& moptions = descriptor_->options().GetExtension(::php_option);
+
+void MessageGenerator::PrintMemberProperties(io::Printer* printer) {
+    const PHPMessageOptions& moptions =
+        descriptor_->options().GetExtension(::php_option);
 
     if (moptions.use_single_property()) {
-        printer->Print("/** @var array $`var` */\n", "var", moptions.single_property_name());
+        printer->Print("/** @var array $`var` */\n", "var",
+            moptions.single_property_name());
         printer->Print("protected $`var` = array();\n",
             "var",
-            moptions.single_property_name()
-        );
+            moptions.single_property_name());
     } else {
         for (int i = 0; i < descriptor_->field_count(); ++i) {
             const FieldDescriptor &field(*descriptor_->field(i));
@@ -449,30 +430,24 @@ void MessageGenerator::PrintMemberProperties(io::Printer* printer)
                 printer->Print("/** @var `type` $`var` tag:`tag` ",
                     "type", getTypeName(field),
                     "var", field.name(),
-                    "tag", SimpleItoa(field.number())
-                );
+                    "tag", SimpleItoa(field.number()));
                 printer->Print(" `required` `field` */\n",
                     "required", (field.is_required() ? "required" : "optional"),
-                    "field", (string)field_type_to_str(field.type())
-                );
+                    "field", (string)field_type_to_str(field.type()));
 
                 printer->Print("protected $`var` = array();\n",
-                    "var", field.name()
-                );
+                    "var", field.name());
             } else {
                 printer->Print("/** @var `type` $`var` tag:`tag` ",
                     "type", getTypeName(field),
                     "var", field.name(),
-                    "tag", SimpleItoa(field.number())
-                );
+                    "tag", SimpleItoa(field.number()));
                 printer->Print(" `required` `field` */\n",
                     "required", (field.is_required() ? "required" : "optional"),
-                    "field", (string)field_type_to_str(field.type())
-                );
+                    "field", (string)field_type_to_str(field.type()));
 
                 printer->Print("protected $`var`;\n",
-                    "var", field.name()
-                );
+                    "var", field.name());
             }
 
             printer->Print("\n");
@@ -480,8 +455,7 @@ void MessageGenerator::PrintMemberProperties(io::Printer* printer)
     }
 }
 
-void MessageGenerator::Generate(io::Printer* printer)
-{
+void MessageGenerator::Generate(io::Printer* printer) {
     for (int i = 0; i < descriptor_->enum_type_count(); i++) {
       EnumGenerator enumGenerator(descriptor_->enum_type(i), context_);
       string child_name = enumGenerator.FileName();
@@ -500,9 +474,7 @@ void MessageGenerator::Generate(io::Printer* printer)
       messageGenerator.Generate(&child_printer);
     }
 
-    printer->Print(
-        "<?php\n"
-    );
+    printer->Print("<?php\n");
 
     PrintUseNameSpaceIfNeeded(printer);
 
@@ -520,16 +492,13 @@ void MessageGenerator::Generate(io::Printer* printer)
 
     PrintMagicMethod(printer);
 
-    printer->Print(
-        " */\n"
-    );
+    printer->Print(" */\n");
 
     printer->Print(
         "class `class_name` extends Message\n"
         "{\n"
         ,
-        "class_name", ClassName()
-    );
+        "class_name", ClassName());
 
     printer->Indent();
     PrintMemberProperties(printer);
@@ -537,17 +506,12 @@ void MessageGenerator::Generate(io::Printer* printer)
     PrintGetDescriptor(printer);
 
     printer->Outdent();
-    printer->Print(
-        "}\n\n"
-    );
+    printer->Print("}\n\n");
 
     if (enclose_namespace_) {
         printer->Outdent();
-        printer->Print(
-            "}\n\n"
-        );
+        printer->Print("}\n\n");
     }
-
 }
 
 }  // namespace php

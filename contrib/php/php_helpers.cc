@@ -1,18 +1,20 @@
-#include "php_helpers.h"
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-#include <limits>
-#include <vector>
+#include "./php_helpers.h"
 
 #include <google/protobuf/descriptor.pb.h>
 
-#include "strutil.h"
+#include <limits>
+#include <vector>
 
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace php {
 
-string kDefaultPackage = "";
+char *kDefaultPackage = "";
 
 string FilePhpPackage(const FileDescriptor* file) {
   string result;
@@ -42,7 +44,7 @@ string PhpPackageToDir(string package_name) {
 string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
     string result;
     // Note:  I distrust ctype.h due to locales.
-    for (int i = 0; i < (int)input.size(); i++) {
+    for (int i = 0; i < static_cast<int>(input.size()); i++) {
         if ('a' <= input[i] && input[i] <= 'z') {
             if (cap_next_letter) {
                 result += input[i] + ('A' - 'a');
@@ -86,7 +88,7 @@ string LowerString(const string & s) {
 }
 
 string UpperString(const string & s) {
-    string newS (s);
+    string newS(s);
 
     google::protobuf::UpperString(&newS);
     return newS;

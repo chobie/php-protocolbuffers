@@ -1,18 +1,21 @@
-#include "php_generator.h"
-#include "strutil.h"
-#include "php_helpers.h"
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-#include <iostream>
+#include "./php_generator.h"
+#include "./php_helpers.h"
+
+#include <utility>
 
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace php {
 
-PHPGenerator::PHPGenerator(){
+PHPGenerator::PHPGenerator() {
 }
 
-PHPGenerator::~PHPGenerator(){
+PHPGenerator::~PHPGenerator() {
 }
 
 bool PHPGenerator::Generate(const FileDescriptor* file,
@@ -41,7 +44,7 @@ bool PHPGenerator::Generate(const FileDescriptor* file,
 
     string package_name = PhpPackageToDir(file_generator.php_package());
 
-    // TODO: Generate php main file.
+    // TODO(chobie): Generate php main file.
     scoped_ptr<io::ZeroCopyOutputStream> output(
         context->Open("autoload.php"));
     io::Printer printer(output.get(), '`');
@@ -49,7 +52,7 @@ bool PHPGenerator::Generate(const FileDescriptor* file,
 
     file_generator.GenerateSiblings(package_name, context, &all_files);
     if (!output_list_file.empty()) {
-        // TODO: Outputs file
+        // TODO(chobie): Outputs file
     }
 
     return result;

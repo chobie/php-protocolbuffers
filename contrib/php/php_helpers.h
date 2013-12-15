@@ -1,9 +1,15 @@
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #ifndef GOOGLE_PROTOBUF_COMPILER_PHP_HELPERS_H__
 #define GOOGLE_PROTOBUF_COMPILER_PHP_HELPERS_H__
 
 #include <string>
+
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/descriptor.h>
+
 #include "strutil.h"
 
 namespace google {

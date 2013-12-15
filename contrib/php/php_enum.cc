@@ -1,26 +1,27 @@
-#include "php_generator.h"
-#include "php_enum.h"
-#include "php_helpers.h"
-#include "strutil.h"
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+#include "./php_generator.h"
+#include "./php_enum.h"
+#include "./php_helpers.h"
 
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace php {
 
-EnumGenerator::EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context)
+EnumGenerator::EnumGenerator(const EnumDescriptor* descriptor,
+    GeneratorContext* context)
     : descriptor_(descriptor),
-      context_(context)
-{
+      context_(context) {
     enclose_namespace_ = false;
 }
 
-EnumGenerator::~EnumGenerator()
-{
+EnumGenerator::~EnumGenerator() {
 }
 
-string EnumGenerator::ClassName()
-{
+string EnumGenerator::ClassName() {
     vector<string> result;
 
     SplitStringUsing(descriptor_->full_name(), ".", &result);
@@ -28,8 +29,7 @@ string EnumGenerator::ClassName()
     return result.back();
 }
 
-string EnumGenerator::NameSpace()
-{
+string EnumGenerator::NameSpace() {
     vector<string> result;
     string output;
 
@@ -43,27 +43,23 @@ string EnumGenerator::NameSpace()
     return output;
 }
 
-void EnumGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
-{
+void EnumGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer) {
     if (enclose_namespace_) {
         printer->Print(
             "namespace `namespace`\n{\n",
             "namespace",
-            NameSpace()
-        );
+            NameSpace());
     } else {
         printer->Print(
             "namespace `namespace`;\n\n",
             "namespace",
-            NameSpace()
-        );
+            NameSpace());
     }
 
     printer->Print("\n");
 }
 
-string EnumGenerator::FileName()
-{
+string EnumGenerator::FileName() {
     string name = descriptor_->full_name();
     replace(name.begin(), name.end(), '.', '/');
     name.append(".php");
@@ -72,11 +68,8 @@ string EnumGenerator::FileName()
 }
 
 
-void EnumGenerator::Generate(io::Printer* printer)
-{
-    printer->Print(
-        "<?php\n"
-    );
+void EnumGenerator::Generate(io::Printer* printer) {
+    printer->Print("<?php\n");
 
     PrintUseNameSpaceIfNeeded(printer);
     if (enclose_namespace_) {
@@ -95,33 +88,26 @@ void EnumGenerator::Generate(io::Printer* printer)
         "class `class_name`\n"
         "{\n"
         ,
-        "class_name", ClassName()
-    );
+        "class_name", ClassName());
 
     printer->Indent();
 
     for (int j = 0; j < descriptor_->value_count(); ++j) {
-        const EnumValueDescriptor &value ( *descriptor_->value(j) );
+        const EnumValueDescriptor &value(*descriptor_->value(j));
 
         printer->Print(
                 "const `name` = `number`;\n",
                 "name",   UpperString(value.name()),
-                "number", SimpleItoa(value.number())
-                 );
+                "number", SimpleItoa(value.number()));
     }
 
     printer->Outdent();
-    printer->Print(
-        "}\n\n"
-    );
+    printer->Print("}\n\n");
 
     if (enclose_namespace_) {
         printer->Outdent();
-        printer->Print(
-            "}\n"
-        );
+        printer->Print("}\n");
     }
-
 }
 
 }  // namespace php

@@ -1,3 +1,7 @@
+// Copyright 2013 Shuhei Tanuma.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #ifndef PHP_PROTOC_GEN_INCLUDED
 #define PHP_PROTOC_GEN_INCLUDED
 
@@ -28,9 +32,6 @@ namespace compiler {
 namespace php {
 
 class LIBPROTOC_EXPORT PHPGenerator : public CodeGenerator{
-
-    private:
-
     public:
         PHPGenerator();
         ~PHPGenerator();
@@ -41,6 +42,7 @@ class LIBPROTOC_EXPORT PHPGenerator : public CodeGenerator{
                     GeneratorContext* context,
                     string* error) const;
 
+    private:
 };
 
 }  // namespace php
