@@ -1,5 +1,6 @@
 #include "php_generator.h"
 #include "php_enum.h"
+#include "php_helpers.h"
 #include "strutil.h"
 
 namespace google {
@@ -7,18 +8,11 @@ namespace protobuf {
 namespace compiler {
 namespace php {
 
-string UpperString(const string & s) {
-    string newS (s);
-
-    google::protobuf::UpperString(&newS);
-    return newS;
-}
-
-
 EnumGenerator::EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context)
     : descriptor_(descriptor),
       context_(context)
 {
+    enclose_namespace_ = false;
 }
 
 EnumGenerator::~EnumGenerator()
@@ -51,11 +45,19 @@ string EnumGenerator::NameSpace()
 
 void EnumGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer)
 {
-    printer->Print(
-        "namespace `namespace`;\n\n",
-        "namespace",
-        NameSpace()
-    );
+    if (enclose_namespace_) {
+        printer->Print(
+            "namespace `namespace`\n{\n",
+            "namespace",
+            NameSpace()
+        );
+    } else {
+        printer->Print(
+            "namespace `namespace`;\n\n",
+            "namespace",
+            NameSpace()
+        );
+    }
 
     printer->Print("\n");
 }
@@ -77,6 +79,9 @@ void EnumGenerator::Generate(io::Printer* printer)
     );
 
     PrintUseNameSpaceIfNeeded(printer);
+    if (enclose_namespace_) {
+        printer->Indent();
+    }
 
     printer->Print(
         "/**\n"
@@ -109,6 +114,13 @@ void EnumGenerator::Generate(io::Printer* printer)
     printer->Print(
         "}\n\n"
     );
+
+    if (enclose_namespace_) {
+        printer->Outdent();
+        printer->Print(
+            "}\n"
+        );
+    }
 
 }
 

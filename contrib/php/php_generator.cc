@@ -1,5 +1,8 @@
 #include "php_generator.h"
-#include "strutil.h" // TODO This header is from the offical protobuf source, but it is not normally installed
+#include "strutil.h"
+#include "php_helpers.h"
+
+#include <iostream>
 
 namespace google {
 namespace protobuf {
@@ -36,13 +39,15 @@ bool PHPGenerator::Generate(const FileDescriptor* file,
         return false;
     }
 
-// TODO: Generate php main file.
+    string package_name = PhpPackageToDir(file_generator.php_package());
+
+    // TODO: Generate php main file.
     scoped_ptr<io::ZeroCopyOutputStream> output(
         context->Open("autoload.php"));
     io::Printer printer(output.get(), '`');
     file_generator.Generate(&printer);
 
-    file_generator.GenerateSiblings("", context, &all_files);
+    file_generator.GenerateSiblings(package_name, context, &all_files);
     if (!output_list_file.empty()) {
         // TODO: Outputs file
     }

@@ -30,14 +30,20 @@ class MessageGenerator {
         bool HasNameSpace();
         string FileName();
         void PrintUseNameSpaceIfNeeded(io::Printer* printer);
+        void PrintMagicMethod(io::Printer* printer);
         void PrintMemberProperties(io::Printer* printer);
         string getTypeName(const FieldDescriptor & field) const;
         void PrintGetDescriptor(io::Printer* printer);
         string VariableName(const FieldDescriptor & field) const;
         string DefaultValueAsString(const FieldDescriptor & field, bool quote_string_type) const;
+        string GetClassNameForFieldDescriptor();
+        string GetClassNameForDescriptorBuilder();
 
         const Descriptor *descriptor_;
         GeneratorContext* context_;
+
+        bool use_namespace_;
+        bool enclose_namespace_;
 };
 
 }  // namespace java

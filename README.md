@@ -168,19 +168,6 @@ these method will call when `parseFromString` and `serializeToString` (also supp
 
 NOTE: We do not support Serializable interface.
 
-## Thanks
-
-- Google Protocol Buffers team.
-
-pb is very interesting. thanks providing it!
-
-- bramp's protoc-gen-php
-
-https://github.com/bramp/protoc-gen-php
-
-my protoc-gen-php based on his work.
-
-
 ## FAQ
 
 #### how can i delete item with repeated field?

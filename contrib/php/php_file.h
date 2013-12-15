@@ -36,9 +36,24 @@ class FileGenerator {
                         GeneratorContext* generator_context,
                         vector<string>* file_list);
 
+    string php_package()
+    {
+        return php_package_;
+    }
+
+    void GenerateAutoloader(io::Printer *printer);
+
     private:
         const FileDescriptor *file_;
+        string php_package_;
         GeneratorContext *context_;
+
+        template<typename DescriptorClass>
+        string NameSpace(const DescriptorClass* descriptor) const;
+
+        template<typename DescriptorClass>
+        bool HasNameSpace(const DescriptorClass* descriptor) const;
+
 };
 
 }  // namespace php

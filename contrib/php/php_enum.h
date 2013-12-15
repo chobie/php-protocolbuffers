@@ -28,7 +28,8 @@ class EnumGenerator {
 
     private:
         string ClassName();
-
+        bool use_namespace_;
+        bool enclose_namespace_;
 
         const EnumDescriptor *descriptor_;
         GeneratorContext* context_;
