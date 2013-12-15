@@ -30,7 +30,7 @@
 
 // from google3/strings/strutil.cc
 
-#include "strutil.h"
+#include <google/protobuf/stubs/strutil.h>
 #include <errno.h>
 #include <float.h>    // FLT_DIG and DBL_DIG
 #include <limits>

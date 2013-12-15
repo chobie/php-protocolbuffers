@@ -15,16 +15,22 @@ PROJECT(protoc-gen-php)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+
+FIND_PACKAGE(CPPLINT)
 FIND_PACKAGE(GTEST)
 
 CONFIGURE_FILE(php_options.proto php_options.proto COPYONLY)
-FILE(GLOB SRC_PHP_GEN google/protobuf/compiler/php/*.cc)
+FILE(GLOB SRC_PHP_LINT google/protobuf/compiler/php/*.cc google/protobuf/compiler/php/*.h)
+FILE(GLOB SRC_PHP_GEN google/protobuf/compiler/php/*.cc google/protobuf/stubs/*.cc)
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${GTEST_ROOT}/include)
 
+CPPLINT(lint "${SRC_PHP_LINT}" protoc-gen-php)
 ADD_EXECUTABLE(protoc-gen-php main.cc ${SRC_PHP_GEN} ${PHP_OPTIONS_SRCS})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_LIBRARIES})
 TARGET_LINK_LIBRARIES(protoc-gen-php ${PROTOBUF_PROTOC_LIBRARY})
+
 
 ADD_EXECUTABLE(unittest
 	tests/unittest.cc ${SRC_PHP_GEN} ${PHP_OPTIONS_SRCS}

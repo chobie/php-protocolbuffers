@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "./php_helpers.h"
+#include <google/protobuf/compiler/php/php_helpers.h>
 
 #include <google/protobuf/descriptor.pb.h>
 

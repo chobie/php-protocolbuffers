@@ -5,12 +5,12 @@
 #ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_HELPERS_H_
 #define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_HELPERS_H_
 
-#include "strutil.h"
+#include <google/protobuf/stubs/strutil.h>
+#include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/descriptor.h>
 
 #include <string>
 
-#include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/descriptor.h>
 
 namespace google {
 namespace protobuf {

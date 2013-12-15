@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "./php_generator.h"
-#include "./php_file.h"
-#include "./php_enum.h"
-#include "./php_message.h"
-#include "./php_helpers.h"
+#include <google/protobuf/compiler/php/php_generator.h>
+#include <google/protobuf/compiler/php/php_file.h>
+#include <google/protobuf/compiler/php/php_enum.h>
+#include <google/protobuf/compiler/php/php_message.h>
+#include <google/protobuf/compiler/php/php_helpers.h>
 
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>

@@ -5,8 +5,9 @@
 #ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_GENERATOR_H_
 #define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_GENERATOR_H_
 
-#include "php_file.h"
-#include "php_options.pb.h"
+#include "./php_options.pb.h"
+
+#include <google/protobuf/compiler/php/php_file.h>
 
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/wire_format.h>
@@ -29,17 +30,17 @@ namespace compiler {
 namespace php {
 
 class LIBPROTOC_EXPORT PHPGenerator : public CodeGenerator{
-    public:
-        PHPGenerator();
-        ~PHPGenerator();
+ public:
+  PHPGenerator();
+  ~PHPGenerator();
 
-        // implements CodeGenerator ----------------------------------------
-        bool Generate(const FileDescriptor* file,
-                    const string& parameter,
-                    GeneratorContext* context,
-                    string* error) const;
+  // implements CodeGenerator ----------------------------------------
+  bool Generate(const FileDescriptor* file,
+              const string& parameter,
+              GeneratorContext* context,
+              string* error) const;
 
-    private:
+ private:
 };
 
 }  // namespace php

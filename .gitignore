@@ -1,6 +1,7 @@
 *.o
 .idea
 *.iml
+contrib/cmake/modules/__init__.py
 
 .Rakefile
 
@@ -26,7 +27,7 @@ run-tests.php
 .libs
 libtool
 Makefile*
-modules
+modules/*
 ltmain.sh
 *.la
 tmp-php.ini
