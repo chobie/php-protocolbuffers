@@ -3,8 +3,7 @@
 #include <string>
 #include <gtest/gtest.h>
 
-#include "../php/php_generator.h"
-#include "../php/strutil.h" // TODO This header is from the offical protobuf source, but it is not normally installed
+#include "../google/protobuf/compiler/php/php_generator.h"
 #include "php_options.pb.h"
 
 using namespace std;

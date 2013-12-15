@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_MESSAGE_H__
-#define GOOGLE_PROTOBUF_COMPILER_PHP_MESSAGE_H__
+#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_MESSAGE_H_
+#define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_MESSAGE_H_
 
 #include <string>
 #include <vector>
@@ -50,9 +50,9 @@ class MessageGenerator {
         bool enclose_namespace_;
 };
 
-}  // namespace java
+}  // namespace php
 }  // namespace compiler
 }  // namespace protobuf
 
 }  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_MESSAGE_H__
+#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_PHP_MESSAGE_H_

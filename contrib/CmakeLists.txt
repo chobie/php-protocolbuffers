@@ -18,7 +18,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 FIND_PACKAGE(GTEST)
 
 CONFIGURE_FILE(php_options.proto php_options.proto COPYONLY)
-FILE(GLOB SRC_PHP_GEN php/*.cc)
+FILE(GLOB SRC_PHP_GEN google/protobuf/compiler/php/*.cc)
 
 INCLUDE_DIRECTORIES(${GTEST_ROOT}/include)
 

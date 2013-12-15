@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_HELPERS_H__
-#define GOOGLE_PROTOBUF_COMPILER_PHP_HELPERS_H__
+#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_HELPERS_H_
+#define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_HELPERS_H_
+
+#include "strutil.h"
 
 #include <string>
 
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/descriptor.h>
-
-#include "strutil.h"
 
 namespace google {
 namespace protobuf {
@@ -34,6 +34,7 @@ string UpperString(const string & s);
 }  // namespace php
 }  // namespace compiler
 }  // namespace protobuf
-
 }  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_HELPERS_H__
+
+#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_PHP_HELPERS_H_
+

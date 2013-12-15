@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_ENUM_H__
-#define GOOGLE_PROTOBUF_COMPILER_PHP_ENUM_H__
+#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_ENUM_H_
+#define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_ENUM_H_
+
+#include <google/protobuf/descriptor.h>
 
 #include <string>
 #include <vector>
-#include <google/protobuf/descriptor.h>
 
 namespace google {
 namespace protobuf {
@@ -22,13 +23,13 @@ namespace php {
 
 class EnumGenerator {
     public:
-    EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context);
-    ~EnumGenerator();
+        EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context);
+        ~EnumGenerator();
 
-    void Generate(io::Printer* printer);
-    string FileName();
-    void PrintUseNameSpaceIfNeeded(io::Printer* printer);
-    string NameSpace();
+        void Generate(io::Printer* printer);
+        string FileName();
+        void PrintUseNameSpaceIfNeeded(io::Printer* printer);
+        string NameSpace();
 
     private:
         string ClassName();
@@ -39,9 +40,9 @@ class EnumGenerator {
         GeneratorContext* context_;
 };
 
-}  // namespace java
+}  // namespace php
 }  // namespace compiler
 }  // namespace protobuf
 
 }  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_ENUM_H__
+#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_PHP_ENUM_H_

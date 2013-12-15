@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_FILE_H__
-#define GOOGLE_PROTOBUF_COMPILER_PHP_FILE_H__
+#ifndef GOOGLE_PROTOBUF_COMPILER_PHP_PHP_FILE_H_
+#define GOOGLE_PROTOBUF_COMPILER_PHP_PHP_FILE_H_
+
+#include <google/protobuf/stubs/common.h>
 
 #include <string>
 #include <vector>
-
-#include <google/protobuf/stubs/common.h>
 
 namespace google {
 namespace protobuf {
@@ -41,8 +41,7 @@ class FileGenerator {
                         GeneratorContext* generator_context,
                         vector<string>* file_list);
 
-    string php_package()
-    {
+    string php_package() {
         return php_package_;
     }
 
@@ -65,4 +64,4 @@ class FileGenerator {
 }  // namespace protobuf
 
 }  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_FILE_H__
+#endif  // GOOGLE_PROTOBUF_COMPILER_PHP_PHP_FILE_H_
