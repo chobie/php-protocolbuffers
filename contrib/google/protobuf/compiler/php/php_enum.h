@@ -30,6 +30,7 @@ class EnumGenerator {
   string FileName();
   void PrintUseNameSpaceIfNeeded(io::Printer* printer);
   string NameSpace();
+  static string GetEnumValueAsString(const EnumValueDescriptor &value);
 
  private:
   string ClassName();

@@ -63,6 +63,9 @@ string EnumGenerator::FileName() {
   return name;
 }
 
+string EnumGenerator::GetEnumValueAsString(const EnumValueDescriptor &value) {
+  return value.name();
+}
 
 void EnumGenerator::Generate(io::Printer* printer) {
   printer->Print("<?php\n");
@@ -93,7 +96,7 @@ void EnumGenerator::Generate(io::Printer* printer) {
 
     printer->Print(
     "const `name` = `number`;\n",
-    "name",   UpperString(value.name()),
+    "name",   EnumGenerator::GetEnumValueAsString(value),
     "number", SimpleItoa(value.number()));
   }
 
