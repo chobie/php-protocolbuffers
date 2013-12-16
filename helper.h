@@ -1,6 +1,11 @@
 #ifndef PHP_PROTOCOLBUFFERS_HELPER_H
 #define PHP_PROTOCOLBUFFERS_HELPER_H
 
+#ifdef _MSC_VER
+#define strtoull _strtoui64
+#define atoll _atoi64
+#endif
+
 typedef struct {
 	int type;
 	union {
@@ -140,7 +145,8 @@ static inline const char* ReadVarint32FromArray(const char* buffer, uint* value,
 	 * If the input is larger than 32 bits, we still need to read it all
 	 * and discard the high-order bits.
 	 */
-	for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
+	//for (i = 0; i < kMaxVarintBytes - kMaxVarint32Bytes; i++) {
+	for (i = 0; i < 10 - 5; i++) {
 		b = *(ptr++); if (!(b & 0x80)) goto done;
 	}
 

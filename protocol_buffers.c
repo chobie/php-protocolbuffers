@@ -43,12 +43,6 @@
 #include "unknown_field_set.h"
 #include "extension_registry.h"
 
-#ifdef ZTS
-PHPAPI int php_pb_globals_id;
-#else
-PHPAPI pb_globals php_pb_globals;
-#endif
-
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_descriptor_class_entry;
 zend_class_entry *protocol_buffers_field_descriptor_class_entry;
@@ -76,14 +70,6 @@ static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 #else
 	return zend_exception_get_default(TSRMLS_C);
 #endif
-}
-
-static void pb_globals_ctor(pb_globals *pb_globals_p TSRMLS_DC)
-{
-}
-
-static void pb_globals_dtor(pb_globals *pb_globals_p TSRMLS_DC)
-{
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)
@@ -253,18 +239,37 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 }
 
 PHP_INI_BEGIN()
-  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, pb_globals, php_pb_globals)
+  STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, zend_protocolbuffers_globals, protocolbuffers_globals)
 PHP_INI_END()
+
+ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers)
+
+
+static PHP_GINIT_FUNCTION(protocolbuffers)
+{
+	protocolbuffers_globals->messages = NULL;
+	protocolbuffers_globals->classes = NULL;
+	protocolbuffers_globals->extension_registry = NULL;
+	protocolbuffers_globals->strict_mode = 1;
+
+	if (!protocolbuffers_globals->messages) {
+		ALLOC_HASHTABLE(protocolbuffers_globals->messages);
+		zend_hash_init(protocolbuffers_globals->messages, 0, NULL, NULL, 0);
+	}
+
+	if (!protocolbuffers_globals->classes) {
+		ALLOC_HASHTABLE(protocolbuffers_globals->classes);
+		zend_hash_init(protocolbuffers_globals->classes, 0, NULL, NULL, 0);
+	}
+}
+
+static PHP_GSHUTDOWN_FUNCTION(protocolbuffers)
+{
+
+}
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
-
-#ifdef ZTS
-	ts_allocate_id(&php_pb_globals_id, sizeof(pb_globals), (ts_allocate_ctor) pb_globals_ctor, (ts_allocate_dtor) pb_globals_dtor);
-#else
-	pb_globals_ctor(&php_pb_globals TSRMLS_CC);
-#endif
-
 	REGISTER_INI_ENTRIES();
 
 	php_protocolbuffers_init(TSRMLS_C);
@@ -273,33 +278,12 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
-	PBG(messages) = NULL;
-	PBG(classes) = NULL;
-	PBG(extension_registry) = NULL;
-	PBG(strict_mode) = 1;
-
-	if (!PBG(messages)) {
-		ALLOC_HASHTABLE(PBG(messages));
-		zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
-	}
-
-	if (!PBG(classes)) {
-		ALLOC_HASHTABLE(PBG(classes));
-		zend_hash_init(PBG(classes), 0, NULL, NULL, 0);
-	}
-
 	return SUCCESS;
 }
 
 
 PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 {
-#ifdef ZTS
-	ts_free_id(php_pb_globals_id);
-#else
-	pb_globals_dtor(&php_pb_globals TSRMLS_CC);
-#endif
-
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -387,7 +371,11 @@ zend_module_entry protocolbuffers_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_PROTOCOLBUFFERS_EXTVER,
 #endif
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(protocolbuffers),
+	PHP_GINIT(protocolbuffers),
+	PHP_GSHUTDOWN(protocolbuffers),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 

@@ -152,12 +152,12 @@ extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_
 #endif
 #endif
 
-typedef struct pb_globals{
+ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
 	HashTable *messages;
 	HashTable *classes;
 	zval *extension_registry;
 	long strict_mode;
-} pb_globals;
+ZEND_END_MODULE_GLOBALS(protocolbuffers)
 
 typedef struct pb_scheme
 {
@@ -211,13 +211,14 @@ typedef struct {
 	pb_extension_range *extensions;
 } pb_scheme_container;
 
+ZEND_EXTERN_MODULE_GLOBALS(protocolbuffers)
+
 #ifdef ZTS
-#define PBG(v) TSRMG(php_pb_globals_id, pb_globals *, v)
-PHPAPI extern int php_pb_globals_id;
+#define PBG(v) TSRMG(protocolbuffers_globals_id, zend_protocolbuffers_globals *, v)
 #else
-#define PBG(v) (php_pb_globals.v)
-PHPAPI extern pb_globals php_pb_globals;
+#define PBG(v) (protocolbuffers_globals.v)
 #endif
+
 
 enum WireType {
 	WIRETYPE_VARINT           = 0,

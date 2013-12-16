@@ -1012,7 +1012,8 @@ int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *stri
 
 int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 {
-	uint8_t bytes[kMaxVarint32Bytes];
+	//uint8_t bytes[kMaxVarint32Bytes];
+	uint8_t bytes[5];
 	int size = 0, i;
 
 	if (value > kint32max) {
@@ -1040,7 +1041,8 @@ int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 
 int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
 {
-	uint8_t bytes[kMaxVarintBytes];
+	//uint8_t bytes[kMaxVarintBytes];
+	uint8_t bytes[10];
 	int size = 0, i;
 
 	if (pb_serializer_resize(serializer, 8)) {
@@ -2032,7 +2034,8 @@ PHP_METHOD(protocolbuffers_helper, writeVarint32)
 {
 	long val = 0;
 	int32_t value = 0;
-	uint8_t bytes[kMaxVarint32Bytes];
+	//uint8_t bytes[kMaxVarint32Bytes];
+	uint8_t bytes[5];
 	int size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -2068,7 +2071,8 @@ PHP_METHOD(protocolbuffers_helper, writeVarint64)
 	long val = 0;
 	int size = 0;
 	int64_t value = 0;
-	uint8_t bytes[kMaxVarintBytes];
+	//uint8_t bytes[kMaxVarintBytes];
+	uint8_t bytes[10];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &val) == FAILURE) {
