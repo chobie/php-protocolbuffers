@@ -871,7 +871,7 @@ void PHPCodeGenerator::PrintEnum(io::Printer &printer, const EnumDescriptor & e)
 
         printer.Print(
                 "const `name` = `number`;\n",
-                "name",   UpperString(value.name()),
+                "name",   value.name(),
                 "number", SimpleItoa(value.number())
                  );
     }
