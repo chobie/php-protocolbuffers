@@ -36,6 +36,7 @@ class MessageGenerator {
   string FileName();
   void PrintUseNameSpaceIfNeeded(io::Printer* printer);
   void PrintMagicMethod(io::Printer* printer);
+  void PrintTraits(io::Printer* printer);
   void PrintMemberProperties(io::Printer* printer);
   string getTypeName(const FieldDescriptor & field) const;
   void PrintGetDescriptor(io::Printer* printer);

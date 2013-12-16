@@ -402,6 +402,24 @@ void MessageGenerator::PrintGetDescriptor(io::Printer* printer) {
   printer->Print("\n");
 }
 
+void MessageGenerator::PrintTraits(io::Printer* printer) {
+  if (descriptor_->options().HasExtension(php_option)) {
+    vector<string> traits;
+    vector<string>::iterator it;
+
+    SplitStringUsing(descriptor_->options().GetExtension(php_option).trait(), " ", &traits);
+
+    it = traits.begin();
+    while (it != traits.end()) {
+
+      printer->Print("use `trait`;\n", "trait", *it);
+      ++it;
+    }
+
+    printer->Print("\n");
+  }
+}
+
 void MessageGenerator::PrintMemberProperties(io::Printer* printer) {
   const PHPMessageOptions& moptions =
     descriptor_->options().GetExtension(::php_option);
@@ -490,6 +508,7 @@ void MessageGenerator::Generate(io::Printer* printer) {
     "class_name", ClassName());
 
   printer->Indent();
+  PrintTraits(printer);
   PrintMemberProperties(printer);
 
   PrintGetDescriptor(printer);
