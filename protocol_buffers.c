@@ -63,6 +63,8 @@ zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
 zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
 
+ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers);
+
 static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
@@ -242,30 +244,12 @@ PHP_INI_BEGIN()
   STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, zend_protocolbuffers_globals, protocolbuffers_globals)
 PHP_INI_END()
 
-ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers)
-
-
 static PHP_GINIT_FUNCTION(protocolbuffers)
 {
-	protocolbuffers_globals->messages = NULL;
-	protocolbuffers_globals->classes = NULL;
-	protocolbuffers_globals->extension_registry = NULL;
-	protocolbuffers_globals->strict_mode = 1;
-
-	if (!protocolbuffers_globals->messages) {
-		ALLOC_HASHTABLE(protocolbuffers_globals->messages);
-		zend_hash_init(protocolbuffers_globals->messages, 0, NULL, NULL, 0);
-	}
-
-	if (!protocolbuffers_globals->classes) {
-		ALLOC_HASHTABLE(protocolbuffers_globals->classes);
-		zend_hash_init(protocolbuffers_globals->classes, 0, NULL, NULL, 0);
-	}
 }
 
 static PHP_GSHUTDOWN_FUNCTION(protocolbuffers)
 {
-
 }
 
 PHP_MINIT_FUNCTION(protocolbuffers)
@@ -278,6 +262,21 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
+	PBG(messages) = NULL;
+	PBG(classes) = NULL;
+	PBG(extension_registry) = NULL;
+	PBG(strict_mode) = 1;
+
+	if (!PBG(messages)) {
+		ALLOC_HASHTABLE(PBG(messages));
+		zend_hash_init(PBG(messages), 0, NULL, NULL, 0);
+	}
+
+	if (!PBG(classes)) {
+		ALLOC_HASHTABLE(PBG(classes));
+		zend_hash_init(PBG(classes), 0, NULL, NULL, 0);
+	}
+
 	return SUCCESS;
 }
 
@@ -290,8 +289,8 @@ PHP_MSHUTDOWN_FUNCTION(protocolbuffers)
 
 PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 {
-	if (PBG(messages)) {
-		zend_try {
+		if (PBG(messages)) {
+			zend_try {
 			int i = 0;
 			HashPosition pos;
 			pb_scheme_container **element;
@@ -300,7 +299,6 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 							zend_hash_get_current_data_ex(PBG(messages), (void **)&element, &pos) == SUCCESS;
 							zend_hash_move_forward_ex(PBG(messages), &pos)
 			) {
-
 				for (i = 0; i < (*element)->size; i++) {
 					if ((*element)->scheme[i].original_name != NULL) {
 						efree((*element)->scheme[i].original_name);
@@ -318,7 +316,7 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 				}
 
 				if ((*element)->orig_single_property_name != NULL &&
-				memcmp((*element)->orig_single_property_name, pb_get_default_single_property_name(), pb_get_default_single_property_name_len()) != 0) {
+					memcmp((*element)->orig_single_property_name, pb_get_default_single_property_name(), pb_get_default_single_property_name_len()) != 0) {
 					efree((*element)->orig_single_property_name);
 				}
 
@@ -350,8 +348,9 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 	}
 
 	if (PBG(extension_registry)) {
-        zval_ptr_dtor(&(PBG(extension_registry)));
+		zval_ptr_dtor(&PBG(extension_registry));
 	}
+
 
 	return SUCCESS;
 }

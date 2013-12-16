@@ -152,13 +152,6 @@ extern zend_class_entry *protocol_buffers_uninitialized_message_exception_class_
 #endif
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
-	HashTable *messages;
-	HashTable *classes;
-	zval *extension_registry;
-	long strict_mode;
-ZEND_END_MODULE_GLOBALS(protocolbuffers)
-
 typedef struct pb_scheme
 {
 	int tag;
@@ -210,6 +203,13 @@ typedef struct {
 	int extension_cnt;
 	pb_extension_range *extensions;
 } pb_scheme_container;
+
+ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
+	HashTable *messages;
+	HashTable *classes;
+	zval *extension_registry;
+	long strict_mode;
+ZEND_END_MODULE_GLOBALS(protocolbuffers)
 
 ZEND_EXTERN_MODULE_GLOBALS(protocolbuffers)
 
