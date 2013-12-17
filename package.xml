@@ -269,6 +269,7 @@
    <file role="src" name="unknown_field.h"/>
    <file role="src" name="unknown_field_set.c"/>
    <file role="src" name="unknown_field_set.h"/>
+   <file role="doc" name="LICENSE"/>
   </dir>
  </contents>
  <dependencies>
