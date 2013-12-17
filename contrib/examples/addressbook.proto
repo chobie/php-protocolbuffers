@@ -3,12 +3,8 @@ package Tutorial;
 import "php_options.proto";
 
 //option (php).base_class = "Base";
-//option (php).generate_getter = true;
-//option (php).generate_setter = true;
-//option (php).generate_has = true;
 
 message Person {
-  //option (php_option).trait = "Hoge Fuga";
   //option (php_option).use_single_property  = true;
   //option (php_option).single_property_name = "_properties";
 

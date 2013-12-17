@@ -40,7 +40,7 @@ PHPMessageOptions
 
 | Option                   |  Type       |  Default   | Description                   |
 |:------------------------ |:-----------:|:----------:|:------------------------------|
-| `use_single_property`    | boolean     |  `false`   | bundle each fileds to single property |
+| `use_single_property`    | boolean     |  `false`   | bundle each fileds to single property.  |
 | `single_property_name`   | string      |  `false`   | single property name |
 | `use_wakeup_and_sleep`   | boolean     |  `false`   | enable `__wakeup` and `__sleep` serialization hooks |
 
