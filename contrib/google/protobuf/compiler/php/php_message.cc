@@ -19,11 +19,17 @@ namespace compiler {
 namespace php {
 
 MessageGenerator::MessageGenerator(const Descriptor* descriptor,
-    GeneratorContext* context)
+    GeneratorContext* context, vector<string>* file_list)
     : descriptor_(descriptor),
-      context_(context) {
+      context_(context),
+      file_list_(file_list) {
   use_namespace_ = true;
-  enclose_namespace_ = false;
+
+  if (!descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+    enclose_namespace_ = true;
+  } else {
+    enclose_namespace_ = false;
+  }
 }
 
 MessageGenerator::~MessageGenerator() {
@@ -222,13 +228,18 @@ void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer) {
       "namespace",
       NameSpace());
     }
+  } else {
+    if (enclose_namespace_) {
+      printer->Print("namespace {\n\n");
+    }
   }
 
-  printer->Print("use \\ProtocolBuffers;\n");
-  printer->Print("use \\ProtocolBuffers\\Message;\n");
-  printer->Print("use \\ProtocolBuffers\\FieldDescriptor;\n");
-  printer->Print("use \\ProtocolBuffers\\DescriptorBuilder;\n");
-  printer->Print("use \\ProtocolBuffers\\ExtensionRegistry;\n");
+//  NOTE: Printing use statement is troublesome in writing single file.
+//  printer->Print("use \\ProtocolBuffers;\n");
+//  printer->Print("use \\ProtocolBuffers\\Message;\n");
+//  printer->Print("use \\ProtocolBuffers\\FieldDescriptor;\n");
+//  printer->Print("use \\ProtocolBuffers\\DescriptorBuilder;\n");
+//  printer->Print("use \\ProtocolBuffers\\ExtensionRegistry;\n");
 
   // TODO(chobie): add Message and Enum class here.
 
@@ -239,19 +250,11 @@ void MessageGenerator::PrintUseNameSpaceIfNeeded(io::Printer* printer) {
 }
 
 string MessageGenerator::GetClassNameForFieldDescriptor() {
-  if (use_namespace_) {
-    return "FieldDescriptor";
-  } else {
-    return "ProtocolBuffersFieldDescriptor";
-  }
+  return "\\ProtocolBuffers\\FieldDescriptor";
 }
 
 string MessageGenerator::GetClassNameForDescriptorBuilder() {
-  if (use_namespace_) {
-    return "DescriptorBuilder";
-  } else {
-    return "ProtocolBuffersDescriptorBuilder";
-  }
+  return "\\ProtocolBuffers\\DescriptorBuilder";
 }
 
 string MessageGenerator::VariableName(const FieldDescriptor & field) const {
@@ -461,7 +464,7 @@ void MessageGenerator::PrintMemberProperties(io::Printer* printer) {
 
 void MessageGenerator::PrintExtension(io::Printer* printer, const FieldDescriptor & e) const {
     //const Descriptor &message(*e->)
-    printer->Print("$__extension_registry->add('`message`', `extension`, new ProtocolBuffersFieldDescriptor(array(\n", "message",
+    printer->Print("$__extension_registry->add('`message`', `extension`, new \\ProtocolBuffers\\FieldDescriptor(array(\n", "message",
       ClassName(*e.containing_type()), "extension", SimpleItoa(e.number()));
     printer->Indent();
     printer->Print("\"type\"     => `type`,\n",
@@ -500,7 +503,7 @@ void MessageGenerator::PrintExtension(io::Printer* printer, const FieldDescripto
 
 void MessageGenerator::PrintExtensions(io::Printer* printer) {
     if (descriptor_->extension_count() > 0) {
-        printer->Print("$__extension_registry = ProtocolBuffersExtensionRegistry::getInstance();\n");
+        printer->Print("$__extension_registry = \\ProtocolBuffers\\ExtensionRegistry::getInstance();\n");
     }
 
     for (int i = 0; i < descriptor_->extension_count(); ++i) {
@@ -515,25 +518,44 @@ void MessageGenerator::PrintExtensions(io::Printer* printer) {
 
 
 void MessageGenerator::Generate(io::Printer* printer) {
+
+  // print nested enum first
   for (int i = 0; i < descriptor_->enum_type_count(); i++) {
-    EnumGenerator enumGenerator(descriptor_->enum_type(i), context_);
-    string child_name = enumGenerator.FileName();
+    EnumGenerator enumGenerator(descriptor_->enum_type(i), context_, file_list_);
 
-    scoped_ptr<io::ZeroCopyOutputStream> output(context_->Open(child_name));
-    io::Printer child_printer(output.get(), '`');
-    enumGenerator.Generate(&child_printer);
+    if (descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+      string child_name = enumGenerator.FileName();
+
+      file_list_->push_back(child_name);
+      scoped_ptr<io::ZeroCopyOutputStream> output(context_->Open(child_name));
+      io::Printer child_printer(output.get(), '`');
+      enumGenerator.Generate(&child_printer);
+    } else {
+      enumGenerator.Generate(printer);
+    }
   }
 
+  // print nested message first
   for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-    MessageGenerator messageGenerator(descriptor_->nested_type(i), context_);
-    string child_name = messageGenerator.FileName();
+    MessageGenerator messageGenerator(descriptor_->nested_type(i), context_, file_list_);
 
-    scoped_ptr<io::ZeroCopyOutputStream> output(context_->Open(child_name));
-    io::Printer child_printer(output.get(), '`');
-    messageGenerator.Generate(&child_printer);
+    if (descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+      string child_name = messageGenerator.FileName();
+
+      file_list_->push_back(child_name);
+      scoped_ptr<io::ZeroCopyOutputStream> output(context_->Open(child_name));
+      io::Printer child_printer(output.get(), '`');
+      messageGenerator.Generate(&child_printer);
+    } else {
+      messageGenerator.Generate(printer);
+    }
   }
 
-  printer->Print("<?php\n");
+  // okay print current message
+  if (descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+    printer->Print("<?php\n");
+  }
+
   PrintUseNameSpaceIfNeeded(printer);
 
   if (enclose_namespace_) {
@@ -553,7 +575,7 @@ void MessageGenerator::Generate(io::Printer* printer) {
   printer->Print(" */\n");
 
   printer->Print(
-    "class `class_name` extends Message\n"
+    "class `class_name` extends \\ProtocolBuffers\\Message\n"
     "{\n"
     ,
     "class_name", ClassName());

@@ -12,10 +12,16 @@ namespace compiler {
 namespace php {
 
 EnumGenerator::EnumGenerator(const EnumDescriptor* descriptor,
-  GeneratorContext* context)
+  GeneratorContext* context, vector<string>* file_list)
   : descriptor_(descriptor),
-    context_(context) {
-  enclose_namespace_ = false;
+    context_(context),
+    file_list_(file_list) {
+
+  if (!descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+    enclose_namespace_ = true;
+  } else {
+    enclose_namespace_ = false;
+  }
 }
 
 EnumGenerator::~EnumGenerator() {
@@ -68,7 +74,10 @@ string EnumGenerator::GetEnumValueAsString(const EnumValueDescriptor &value) {
 }
 
 void EnumGenerator::Generate(io::Printer* printer) {
-  printer->Print("<?php\n");
+
+  if (descriptor_->file()->options().GetExtension(::php).multiple_files()) {
+    printer->Print("<?php\n");
+  }
 
   PrintUseNameSpaceIfNeeded(printer);
   if (enclose_namespace_) {

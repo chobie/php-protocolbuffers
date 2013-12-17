@@ -17,6 +17,8 @@ namespace protobuf {
 namespace compiler {
 namespace php {
 
+string getEnv(const string key);
+
 string FilePhpPackage(const FileDescriptor* file);
 
 string PhpPackageToDir(string package_name);

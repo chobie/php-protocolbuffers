@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <stdlib.h>
+
 #include <google/protobuf/compiler/php/php_helpers.h>
 
 #include <google/protobuf/descriptor.pb.h>
@@ -16,6 +18,12 @@ namespace php {
 
 char *kDefaultPackage = "";
 
+string getEnv(const string key)
+{
+  string value(getenv(key.c_str()));
+  return value;
+}
+
 string FilePhpPackage(const FileDescriptor* file) {
   string result;
 
@@ -28,7 +36,6 @@ string FilePhpPackage(const FileDescriptor* file) {
       result += file->package();
     }
   }
-
 
   return result;
 }

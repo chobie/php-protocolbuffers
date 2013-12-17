@@ -45,7 +45,7 @@ class FileGenerator {
     return php_package_;
   }
 
-  void GenerateAutoloader(io::Printer *printer);
+  void GenerateAutoloader(io::Printer *printer, vector<string> *file_list);
 
  private:
   template<typename DescriptorClass>

@@ -23,7 +23,7 @@ namespace php {
 
 class MessageGenerator {
  public:
-  MessageGenerator(const Descriptor* descriptor, GeneratorContext* context);
+  MessageGenerator(const Descriptor* descriptor, GeneratorContext* context, vector<string>* file_list);
   ~MessageGenerator();
   void Generate(io::Printer* printer);
 
@@ -53,6 +53,7 @@ class MessageGenerator {
 
   bool use_namespace_;
   bool enclose_namespace_;
+  vector<string>* file_list_;
 };
 
 }  // namespace php

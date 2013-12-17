@@ -43,16 +43,17 @@ bool PHPGenerator::Generate(const FileDescriptor* file,
   }
 
   string package_name = PhpPackageToDir(file_generator.php_package());
-
-  // TODO(chobie): Generate php main file.
-  scoped_ptr<io::ZeroCopyOutputStream> output(
-  context->Open("autoload.php"));
+  scoped_ptr<io::ZeroCopyOutputStream> output(context->Open(file->name() + ".php"));
   io::Printer printer(output.get(), '`');
   file_generator.Generate(&printer);
 
   file_generator.GenerateSiblings(package_name, context, &all_files);
-  if (!output_list_file.empty()) {
-    // TODO(chobie): Outputs file
+  if (file->options().GetExtension(::php).multiple_files()) {
+    scoped_ptr<io::ZeroCopyOutputStream> output(
+    context->Open("autoload.php"));
+    io::Printer printer(output.get(), '`');
+
+    file_generator.GenerateAutoloader(&printer, &all_files);
   }
 
   return result;

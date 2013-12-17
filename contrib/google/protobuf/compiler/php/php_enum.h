@@ -23,7 +23,7 @@ namespace php {
 
 class EnumGenerator {
  public:
-  EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context);
+  EnumGenerator(const EnumDescriptor* descriptor, GeneratorContext* context, vector<string>* file_list);
   ~EnumGenerator();
 
   void Generate(io::Printer* printer);
@@ -39,6 +39,7 @@ class EnumGenerator {
   bool enclose_namespace_;
   const EnumDescriptor *descriptor_;
   GeneratorContext* context_;
+  vector<string>* file_list_;
 };
 
 }  // namespace php

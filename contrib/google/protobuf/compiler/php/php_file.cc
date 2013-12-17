@@ -77,109 +77,75 @@ static void GenerateSibling(const string& package_dir,
   scoped_ptr<io::ZeroCopyOutputStream> output(context->Open(filename));
   io::Printer printer(output.get(), '`');
 
-  GeneratorClass generator(descriptor, context);
+  GeneratorClass generator(descriptor, context, file_list);
   (generator.*pfn)(&printer);
+}
+
+template<typename GeneratorClass, typename DescriptorClass>
+static void GenerateSibling(const string& package_dir,
+                            const string& java_package,
+                            const DescriptorClass* descriptor,
+                            io::Printer *printer,
+                            GeneratorContext* context,
+                            vector<string>* file_list,
+                            const string& name_suffix,
+                            void (GeneratorClass::*pfn)(io::Printer* printer)) {
+
+  GeneratorClass generator(descriptor, context, file_list);
+  (generator.*pfn)(printer);
 }
 
 
 void FileGenerator::Generate(io::Printer* printer) {
+  printer->Print("<?php\n");
+
   if (!file_->options().GetExtension(::php).multiple_files()) {
-    vector<string> *file_list;
+    vector<string> file_list;
 
     for (int i = 0; i < file_->enum_type_count(); i++) {
       GenerateSibling<EnumGenerator>("", "",
       file_->enum_type(i),
-      context_, file_list, "",
+      printer, context_, &file_list, "",
       &EnumGenerator::Generate);
     }
 
     for (int i = 0; i < file_->message_type_count(); i++) {
       GenerateSibling<MessageGenerator>("", "",
       file_->message_type(i),
-      context_, file_list, "",
+      printer, context_, &file_list, "",
       &MessageGenerator::Generate);
     }
   } else {
-    GenerateAutoloader(printer);
+    printer->Print("require __DIR__ . DIRECTORY_SEPARATOR . 'autoload.php';\n");
   }
 }
 
-void FileGenerator::GenerateAutoloader(io::Printer *printer) {
+void FileGenerator::GenerateAutoloader(io::Printer *printer, vector<string> *file_list) {
   printer->Print("<?php\n");
+  vector<string>::iterator x = file_list->begin();
 
-  if (HasNameSpace(file_)) {
-    printer->Print("namespace `namespace`;\n\n",
-    "namespace",
-    NameSpace(file_));
+  printer->Print("spl_autoload_register(function($name){\n"
+    "    static $classmap;\n"
+    "    if (!$classmap) {\n"
+    "        $classmap = array(\n");
+  while (x != file_list->end()) {
+    string tmp(*x);
+    replace(tmp.begin(), tmp.end(), '/', '\\');
+    tmp = tmp.substr(0, tmp.find_last_of("."));
+
+    printer->Print("            '`key`' => '`path`',\n",
+      "key", tmp.c_str(),
+      "path", (*x).c_str());
+    ++x;
   }
 
-  printer->Print(
-    "/**\n"
-    " * Example autoloader\n"
-    " * \n"
-    " * you should replace your own autoloader or composer's autoloader\n"
-    " */\n");
-  printer->Print(
-    "class Autoloader\n"
-    "{\n");
-    printer->Indent();
+  printer->Print("        );\n    }\n"
+    "    if (isset($classmap[$name])) {\n"
+    "        require __DIR__ . DIRECTORY_SEPARATOR . $classmap[$name];\n"
+    "    }\n"
+    "});\n");
 
-  if (HasNameSpace(file_)) {
-    printer->Print(
-    "const NAME_SPACE = \"`namespace`\";\n"
-    "\n"
-    "protected static $base_dir;\n"
-    "\n",
-    "namespace",
-    NameSpace(file_));
-  } else {
-    printer->Print(
-    "const NAME_SPACE = \"\";\n"
-    "\n"
-    "protected static $base_dir;\n"
-    "\n");
-  }
 
-  printer->Print(
-    "public static function register($dirname = null)\n"
-    "{\n");
-  printer->Indent();
-  printer->Print("if (is_null($dirname)) {\n");
-  printer->Indent();
-  printer->Print("$dirname = dirname(__FILE__);\n");
-  printer->Outdent();
-  printer->Print(
-    "}\n"
-    "self::$base_dir = $dirname;\n"
-    "spl_autoload_register(array(__CLASS__, \"autoload\"));\n");
-  printer->Outdent();
-  printer->Print("}\n\n");
-  printer->Print(
-    "public static function autoload($name)\n"
-    "{\n");
-  printer->Indent();
-  printer->Print("if (strpos($name, self::NAME_SPACE) === 0) {\n");
-  printer->Indent();
-  printer->Print(
-    "$parts = explode(\"\\\\\", $name);\n"
-    "$expected_path = join(DIRECTORY_SEPARATOR, "
-    "array(self::$base_dir, "
-    "join(DIRECTORY_SEPARATOR, $parts) . \".php\"));\n"
-    "if (is_file($expected_path) && is_readable($expected_path)) {\n");
-  printer->Indent();
-  printer->Print(
-    "require $expected_path;\n"
-    "$retval = true;\n");
-  printer->Outdent();
-  printer->Print("}\n");
-  printer->Print("return $retval;\n");
-  printer->Outdent();
-  printer->Print("}\n");
-  printer->Outdent();
-  printer->Print("}\n");
-  printer->Outdent();
-  printer->Print("}\n");
-  printer->Print("Autoloader::register();\n");
 }
 
 
