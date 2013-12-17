@@ -1,5 +1,5 @@
 /*
- * Protocol Buffers for PHP - Google's data interchange format
+ * Protocol Buffers for PHP
  * Copyright 2013 Shuhei Tanuma.  All rights reserved.
  *
  * https://github.com/chobie/php-protocolbuffers
@@ -8,15 +8,12 @@
  * modification, are permitted provided that the following conditions are
  * met:
  *
- *   * Redistributions of source code must retain the above copyright
+ *   1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
+ *   2. Redistributions in binary form must reproduce the above
  * copyright notice, this list of conditions and the following disclaimer
  * in the documentation and/or other materials provided with the
  * distribution.
- *   * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
