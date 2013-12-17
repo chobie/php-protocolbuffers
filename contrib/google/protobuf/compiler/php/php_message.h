@@ -38,6 +38,8 @@ class MessageGenerator {
   void PrintMagicMethod(io::Printer* printer);
   void PrintTraitsInsertionPoint(io::Printer* printer);
   void PrintMemberProperties(io::Printer* printer);
+  void PrintExtension(io::Printer* printer, const FieldDescriptor & e) const;
+  void PrintExtensions(io::Printer* printer);
   string getTypeName(const FieldDescriptor & field) const;
   void PrintGetDescriptor(io::Printer* printer);
   string VariableName(const FieldDescriptor & field) const;

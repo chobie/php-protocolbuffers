@@ -459,6 +459,61 @@ void MessageGenerator::PrintMemberProperties(io::Printer* printer) {
     "name", descriptor_->full_name());
 }
 
+void MessageGenerator::PrintExtension(io::Printer* printer, const FieldDescriptor & e) const {
+    //const Descriptor &message(*e->)
+    printer->Print("$__extension_registry->add('`message`', `extension`, new ProtocolBuffersFieldDescriptor(array(\n", "message",
+      ClassName(*e.containing_type()), "extension", SimpleItoa(e.number()));
+    printer->Indent();
+    printer->Print("\"type\"     => `type`,\n",
+        "type",
+        field_type_to_str(e.type()));
+    printer->Print("\"name\"     => \"`name`\",\n",
+        "name",
+        VariableName(e));
+    printer->Print("\"required\" => `required`,\n",
+        "required",
+        (e.is_required()) ? "true" : "false");
+    printer->Print("\"optional\" => `optional`,\n",
+        "optional",
+        (e.is_optional()) ? "true" : "false");
+    printer->Print("\"repeated\" => `repeated`,\n",
+        "repeated",
+        (e.is_repeated()) ? "true" : "false");
+    printer->Print("\"packable\" => `packable`,\n",
+        "packable",
+        (e.is_packed()) ? "true" : "false");
+    printer->Print("\"default\"  => `value`,\n",
+        "value",
+        DefaultValueAsString(e, true));
+
+    if (e.type() == FieldDescriptorProto_Type_TYPE_MESSAGE) {
+        const Descriptor &desc(*e.message_type());
+        printer->Print("\"message\"  => \"`message`\",\n",
+            "message",
+            ClassName(desc)
+        );
+    }
+    printer->Outdent();
+
+    printer->Print(")));\n");
+}
+
+void MessageGenerator::PrintExtensions(io::Printer* printer) {
+    if (descriptor_->extension_count() > 0) {
+        printer->Print("$__extension_registry = ProtocolBuffersExtensionRegistry::getInstance();\n");
+    }
+
+    for (int i = 0; i < descriptor_->extension_count(); ++i) {
+        PrintExtension(printer, *descriptor_->extension(i));
+    }
+
+    if (descriptor_->extension_count() > 0) {
+        printer->Print("unset($__extension_registry);\n");
+    }
+
+}
+
+
 void MessageGenerator::Generate(io::Printer* printer) {
   for (int i = 0; i < descriptor_->enum_type_count(); i++) {
     EnumGenerator enumGenerator(descriptor_->enum_type(i), context_);
