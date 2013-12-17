@@ -23,8 +23,6 @@
 #include "ext/standard/php_array.h"
 #include "limits.h"
 
-#include "is_utf8.h"
-
 #include <stdlib.h>
 #if defined(__osf__)
 #include <inttypes.h>

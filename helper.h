@@ -18,6 +18,114 @@ typedef struct {
 	} value;
 } pbf;
 
+static inline int is_utf8(const char *s, int len)
+{
+    int i;
+    const unsigned char *bytes = (const unsigned char *)s;
+
+    if (len < 1) {
+      /* NOTE: always return 1 when passed string is null */
+      return 1;
+    }
+
+    for (i = 0; i < len; i++) {
+      /* ASCII */
+      if (bytes[0] == 0x09 ||
+          bytes[0] == 0x0A ||
+          bytes[0] == 0x0D ||
+          (bytes[0] >= 0x20 && bytes[0] <= 0x7E)
+      ) {
+        bytes += 1;
+        continue;
+      }
+
+      /* non-overlong 2-byte */
+      if (((i+1) <= len) &&
+          (bytes[0] >= 0xC2 && bytes[0] <= 0xDF) &&
+          (bytes[1] >= 0x80 && bytes[1] <= 0xBF)) {
+        bytes += 2;
+        i+=1;
+        continue;
+      }
+
+      /* excluding overlongs */
+      if (((i+2) <= len) &&
+        bytes[0] == 0xE0 &&
+        (bytes[1] >= 0xA0 && bytes[1] <= 0xBF) &&
+        (bytes[2] >= 0x80 && bytes[2] <= 0xBF)
+      ) {
+        bytes += 3;
+        i+=2;
+        continue;
+      }
+
+      /* straight 3-byte */
+      if (((i+2) <= len) &&
+        ((bytes[0] >= 0xE1 && bytes[0] <= 0xEC) ||
+          bytes[0] == 0xEE ||
+          bytes[0] == 0xEF) &&
+          (bytes[1] >= 0x80 && bytes[1] <= 0xBF) &&
+          (bytes[2] >= 0x80 && bytes[2] <= 0xBF)
+          ) {
+            bytes += 3;
+            i+=2;
+            continue;
+      }
+
+      /* excluding surrogates */
+      if (((i+2) <= len) &&
+        bytes[0] == 0xED &&
+        (bytes[1] >= 0x80 && bytes[1] <= 0x9F) &&
+        (bytes[2] >= 0x80 && bytes[2] <= 0xBF)
+      ) {
+          bytes += 3;
+          i+=2;
+          continue;
+      }
+
+      /* planes 1-3 */
+      if (((i+3) <= len) &&
+        bytes[0] == 0xF0 &&
+        (bytes[1] >= 0x90 && bytes[1] <= 0xBF) &&
+        (bytes[2] >= 0x80 && bytes[2] <= 0xBF) &&
+        (bytes[3] >= 0x80 && bytes[3] <= 0xBF)
+      ) {
+          bytes += 4;
+          i+=3;
+          continue;
+      }
+
+      /* planes 4-15 */
+      if (((i+3) <= len) &&
+        bytes[0] >= 0xF1 && bytes[0] <= 0xF3 &&
+        bytes[1] >= 0x80 && bytes[1] <= 0xBF &&
+        bytes[2] >= 0x80 && bytes[2] <= 0xBF &&
+        bytes[3] >= 0x80 && bytes[3] <= 0xBF
+      ) {
+          bytes += 4;
+          i+=3;
+          continue;
+      }
+
+      /* plane 16 */
+      if (((i+3) <= len) &&
+        bytes[0] == 0xF4 &&
+        (bytes[1] >= 0x80 && bytes[1] <= 0x8F) &&
+        (bytes[2] >= 0x80 && bytes[2] <= 0xBF) &&
+        (bytes[3] >= 0x80 && bytes[3] <= 0xBF)
+      ) {
+          bytes += 4;
+          i+=3;
+          continue;
+      }
+
+      return 0;
+    }
+
+    return 1;
+}
+
+
 static inline uint32_t zigzag_encode32(int32_t n) {
   // Note:  the right-shift must be arithmetic
   return (n << 1) ^ (n >> 31);
