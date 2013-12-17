@@ -114,7 +114,7 @@ evaluating protocol buffers serialization.
 | sfixed32    |                | string       |
 | sfixed64    |                | string       |
 | bool        |                | bool         |
-| string      | utf8 string    | string       |
+| string      | `utf8` string  | string       |
 | bytes       |                | string       |
 
 Note: PHP's numeric value is platform dependant. Unfortunately long is 32bit value on some 64bit platform.
@@ -149,9 +149,6 @@ maybe I'll re-support long values for performance reason. but it can't handle bi
   </tr>
 </table>
 
-Basically, php-protocolbuffers test cases were made by python generator.
-at least it proves correct behavior in those test cases.
-
 ## PHP specific features
 
 * `__sleep` and `__wakeup` method support.
@@ -166,7 +163,7 @@ these method will call when `parseFromString` and `serializeToString` (also supp
             $descriptor = $descriptor_builder->build();
 ````
 
-NOTE: We do not support Serializable interface.
+NOTE: We do not support `Serializable` interface.
 
 ## Thanks
 

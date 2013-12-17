@@ -1220,7 +1220,7 @@ void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_NULL) {
 
-		if (is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
+		if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
 			zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 			return;
 		}
