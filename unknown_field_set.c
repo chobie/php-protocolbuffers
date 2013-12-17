@@ -72,7 +72,7 @@ void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 	MAKE_STD_ZVAL(fields);
 	array_init(fields);
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&prior_fields) == SUCCESS) {
 		zval_ptr_dtor(prior_fields);
 		prior_fields = NULL;
@@ -89,7 +89,7 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 	HashTable *fieldht = NULL;
 	int found = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 
 		fieldht = Z_ARRVAL_PP(fields);
@@ -119,7 +119,7 @@ void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *inst
 {
 	zval **fields = NULL;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 /* NOTE: we allow duplicate number here.
 		fieldht = Z_ARRVAL_PP(fields);
@@ -169,7 +169,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, count)
 	char *name = {0};
 	int num = 0, name_len = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
 	}
@@ -195,7 +195,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, getField)
 		return;
 	}
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 		fieldht = Z_ARRVAL_PP(fields);
 
@@ -250,7 +250,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, current)
 	int num = 0, name_len = 0;
 
 	unknown_field_set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
 	}
@@ -307,7 +307,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, valid)
 	char *name = {0};
 	int num = 0, name_len = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
 		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
 	}
@@ -344,7 +344,7 @@ void php_pb_unknown_field_set_class(TSRMLS_D)
 	zend_class_implements(protocol_buffers_unknown_field_set_class_entry TSRMLS_CC, 1, zend_ce_iterator);
 	protocol_buffers_unknown_field_set_class_entry->create_object = php_protocol_buffers_unknown_field_set_new;
 
-	zend_declare_property_null(protocol_buffers_unknown_field_set_class_entry, "fields", sizeof("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_null(protocol_buffers_unknown_field_set_class_entry, ZEND_STRS("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownFieldSet", protocol_buffers_unknown_field_set_class_entry);
 }

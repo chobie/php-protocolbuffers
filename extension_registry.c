@@ -64,7 +64,7 @@ int php_protocolbuffers_extension_registry_get_descriptor_by_name(zval *hash, co
 {
 	zval **bucket = NULL, **bucket2 = NULL;
 
-	if (zend_hash_find(Z_ARRVAL_P(hash), "map", sizeof("map"), (void **)&bucket) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_P(hash), ZEND_STRS("map"), (void **)&bucket) == SUCCESS) {
 		if (zend_hash_find(Z_ARRVAL_PP(bucket), name, name_len+1, (void **)&bucket2) == SUCCESS) {
 			*result = *bucket2;
 			return 1;
@@ -197,7 +197,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 		char *name = NULL;
 		int len = 0;
 
-		if (zend_hash_find(Z_ARRVAL_PP(bucket), "index", sizeof("index"), (void **)&bucket2) == SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), ZEND_STRS("index"), (void **)&bucket2) == SUCCESS) {
 			if (zend_hash_index_exists(Z_ARRVAL_PP(bucket), extension)) {
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't override specified extension number: already exists");
 				return;
@@ -207,7 +207,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			zend_hash_index_update(Z_ARRVAL_PP(bucket2), extension, (void **)&descriptor, sizeof(zval*), NULL);
 		}
 
-		if (zend_hash_find(Z_ARRVAL_PP(bucket), "map", sizeof("map"), (void **)&bucket2) == SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(bucket), ZEND_STRS("map"), (void **)&bucket2) == SUCCESS) {
 			php_pb_field_descriptor_get_name(descriptor, &name, &len TSRMLS_CC);
 
 			if (zend_hash_exists(Z_ARRVAL_PP(bucket), name, len)) {
@@ -218,7 +218,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			Z_ADDREF_P(descriptor);
 			zend_hash_update(Z_ARRVAL_PP(bucket2), name, len, (void **)&descriptor, sizeof(zval*), NULL);
 
-			if (zend_hash_find(Z_ARRVAL_PP(bucket), "emap", sizeof("emap"), (void **)&bucket2) == SUCCESS) {
+			if (zend_hash_find(Z_ARRVAL_PP(bucket), ZEND_STRS("emap"), (void **)&bucket2) == SUCCESS) {
 				zval *nm = NULL;
 
 				MAKE_STD_ZVAL(nm);
@@ -240,12 +240,12 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			container->scheme[container->size].is_extension = 1;
 			container->scheme[container->size].tag = extension;
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "type", sizeof("type"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("type"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_LONG) {
 				container->scheme[container->size].type = Z_LVAL_P(tmp);
 			}
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "name", sizeof("name"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("name"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				char *mangle = {0};
 				int mangle_len = 0;
@@ -281,25 +281,25 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 				container->scheme[container->size].skip = 0;
 			}
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "required", sizeof("required"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("required"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_BOOL) {
 				convert_to_long(tmp);
 				container->scheme[container->size].required = Z_LVAL_P(tmp);
 			}
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "optional", sizeof("optional"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("optional"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_BOOL) {
 				convert_to_long(tmp);
 				container->scheme[container->size].optional = Z_LVAL_P(tmp);
 			}
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "repeated", sizeof("repeated"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("repeated"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_BOOL) {
 				convert_to_long(tmp);
 				container->scheme[container->size].repeated = Z_LVAL_P(tmp);
 			}
 
-			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "packable", sizeof("packable"), &tmp TSRMLS_CC);
+			php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("packable"), &tmp TSRMLS_CC);
 			if (Z_TYPE_P(tmp) == IS_BOOL) {
 				convert_to_long(tmp);
 				container->scheme[container->size].packed = Z_LVAL_P(tmp);
@@ -308,7 +308,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			if (container->scheme[container->size].type == TYPE_MESSAGE) {
 				zend_class_entry **c;
 
-				php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), "message", sizeof("message"), &tmp TSRMLS_CC);
+				php_pb_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("message"), &tmp TSRMLS_CC);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
 					if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
 						zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));

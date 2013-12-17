@@ -44,10 +44,11 @@ void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
 
 	MAKE_STD_ZVAL(pp);
 	ZVAL_NULL(pp);
-	zend_hash_update(properties, "number", sizeof("number"), (void **)&pp, sizeof(zval), NULL);
+	zend_hash_update(properties, ZEND_STRS("number"), (void **)&pp, sizeof(zval), NULL);
+
 	MAKE_STD_ZVAL(pp);
 	ZVAL_NULL(pp);
-	zend_hash_update(properties, "type", sizeof("type"), (void **)&pp, sizeof(zval), NULL);
+	zend_hash_update(properties, ZEND_STRS("type"), (void **)&pp, sizeof(zval), NULL);
 
 	zend_merge_properties(object, properties, 1 TSRMLS_CC);
 #endif
@@ -109,7 +110,7 @@ void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"number", sizeof("number"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("number"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
 		zval *tmp;
 
@@ -129,7 +130,7 @@ void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 	zval **result = NULL;
 
 	field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)"type", sizeof("type"), 0);
+	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("type"), 0);
 	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
 		zval *tmp;
 
@@ -437,8 +438,8 @@ void php_pb_unknown_field_class(TSRMLS_D)
 	php_protocolbuffers_unknown_field_object_handlers.get_debug_info = php_protocolbuffers_unknown_field_get_debug_info;
 #else
 	/* for var_dump. */
-	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "number", sizeof("number")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
-	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, "type", sizeof("type")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, ZEND_STRS("number")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_long(protocol_buffers_unknown_field_class_entry, ZEND_STRS("type")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 #endif
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownField", protocol_buffers_unknown_field_class_entry);
