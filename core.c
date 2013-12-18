@@ -85,7 +85,7 @@ void pb_scheme_container_init(pb_scheme_container *container)
 }
 
 
-void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
+static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
 {
 	int n = 0, sz = 0;
 	zval *element = NULL;
