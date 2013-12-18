@@ -18,6 +18,8 @@ typedef struct {
 	} value;
 } pbf;
 
+int php_protocolbuffers_read_protected_property(zval *instance, char *name, size_t name_len, zval **result TSRMLS_DC);
+
 static inline int is_utf8(const char *s, int len)
 {
     int i;

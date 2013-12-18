@@ -38,17 +38,18 @@ void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
 	HashTable *properties;
-	zval *pp = NULL;
+	zval *number = NULL, type = NULL;
+
 	ALLOC_HASHTABLE(properties);
 	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	MAKE_STD_ZVAL(pp);
-	ZVAL_NULL(pp);
-	zend_hash_update(properties, "number", sizeof("number"), (void **)&pp, sizeof(zval), NULL);
+	MAKE_STD_ZVAL(number);
+	ZVAL_NULL(number);
+	zend_hash_update(properties, "number", sizeof("number"), (void **)&number, sizeof(zval), NULL);
 
-	MAKE_STD_ZVAL(pp);
-	ZVAL_NULL(pp);
-	zend_hash_update(properties, "type", sizeof("type"), (void **)&pp, sizeof(zval), NULL);
+	MAKE_STD_ZVAL(type);
+	ZVAL_NULL(type);
+	zend_hash_update(properties, "type", sizeof("type"), (void **)&type, sizeof(zval), NULL);
 
 	zend_merge_properties(object, properties, 1 TSRMLS_CC);
 #endif

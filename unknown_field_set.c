@@ -30,6 +30,7 @@
 
 #include "php_protocol_buffers.h"
 #include "unknown_field_set.h"
+#include "helper.h"
 
 static void php_protocolbuffers_unknown_field_set_free_storage(php_protocolbuffers_unknown_field_set *object TSRMLS_DC)
 {
@@ -165,15 +166,12 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, count)
 {
-	zval **fields = NULL, *instance = getThis();
-	char *name = {0};
-	int num = 0, name_len = 0;
+	zval *fields = NULL, *instance = getThis();
+	int num = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		num = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	}
-	efree(name);
 
 	RETURN_LONG(num);
 }
@@ -183,36 +181,32 @@ PHP_METHOD(protocolbuffers_unknown_field_set, count)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, getField)
 {
-	zval **element = NULL, **fields = NULL, *result = NULL, *instance = getThis();
+	zval **element = NULL, *fields = NULL, *result = NULL, *instance = getThis();
 	HashTable *fieldht = NULL;
 	HashPosition pos;
-	char *name = {0};
 	long tag = 0;
-	int name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &tag) == FAILURE) {
 		return;
 	}
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-		fieldht = Z_ARRVAL_PP(fields);
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		fieldht = Z_ARRVAL_P(fields);
 
 		for(zend_hash_internal_pointer_reset_ex(fieldht, &pos);
 						zend_hash_get_current_data_ex(fieldht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(fieldht, &pos)
 		) {
 			php_protocolbuffers_unknown_field *t = NULL;
-			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
 
+			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
 			if (t->number == tag) {
 				result = *element;
 				break;
 			}
 		}
 	}
-	efree(name);
 
 	if (result != NULL) {
 		RETURN_ZVAL(result, 1, 0);
@@ -244,19 +238,17 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, current)
 {
-	zval **fields = NULL, **d = NULL, *instance = getThis();
+	zval *fields = NULL, **d = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field_set *unknown_field_set;
-	char *name = {0};
-	int num = 0, name_len = 0;
+	int num = 0;
 
 	unknown_field_set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
-	}
-	efree(name);
 
-	if (zend_hash_index_find(Z_ARRVAL_PP(fields), unknown_field_set->offset, (void **)&d) == SUCCESS) {
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		num = zend_hash_num_elements(Z_ARRVAL_P(fields));
+	}
+
+	if (zend_hash_index_find(Z_ARRVAL_P(fields), unknown_field_set->offset, (void **)&d) == SUCCESS) {
 		RETURN_ZVAL(*d, 1, 0);
 	}
 }
@@ -302,16 +294,13 @@ PHP_METHOD(protocolbuffers_unknown_field_set, rewind)
 */
 PHP_METHOD(protocolbuffers_unknown_field_set, valid)
 {
-	zval **fields = NULL, *instance = getThis();
+	zval *fields = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field_set *set = NULL;
-	char *name = {0};
-	int num = 0, name_len = 0;
+	int num = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-		num = zend_hash_num_elements(Z_ARRVAL_PP(fields));
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		num = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	}
-	efree(name);
 
 	set = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field_set, instance);
 	if (-1 < set->offset && set->offset < num) {

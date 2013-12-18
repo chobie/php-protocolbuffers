@@ -7,6 +7,24 @@ static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
 static int unknown_property_name_default_len = sizeof("_unknown");
 
+int php_protocolbuffers_read_protected_property(zval *instance, char *name, size_t name_len, zval **result TSRMLS_DC)
+{
+	zval **tmp;
+	char *prop_name;
+	int prop_name_len = 0;
+	int retval = 0;
+
+	zend_mangle_property_name(&prop_name, &prop_name_len, (char*)"*", 1, name, name_len, 0);
+	if (zend_hash_find(Z_OBJPROP_P(instance), prop_name, prop_name_len, (void **)&tmp) == SUCCESS) {
+		*result = *tmp;
+		retval = 1;
+	}
+	efree(prop_name);
+
+	return retval;
+}
+
+
 char *pb_get_default_single_property_name()
 {
 	return single_property_name_default;
