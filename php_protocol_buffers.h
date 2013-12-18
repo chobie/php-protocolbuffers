@@ -67,10 +67,13 @@
 #define strncasecmp strnicmp
 #endif
 
-#ifndef PHP_PROTOCOLBUFFERS_DEBUG
-#define PHP_PROTOCOLBUFFERS_DEBUG 0
+#if defined(_MSC_VER) && !defined(strtoull)
+#define strtoull _strtoui64
 #endif
 
+#if defined(_MSC_VER) && !defined(atoll)
+#define atoll _atoi64
+#endif
 
 #ifdef _MSC_VER
   #if defined(_M_IX86) && \
@@ -90,6 +93,9 @@
   #endif
 #endif
 
+#ifndef PHP_PROTOCOLBUFFERS_DEBUG
+#define PHP_PROTOCOLBUFFERS_DEBUG 0
+#endif
 
 #define PHP_PROTOCOLBUFFERS_NAMESPACE "ProtocolBuffers"
 
@@ -133,14 +139,14 @@ static const uint32_t kuint32max = 0xFFFFFFFFu;
 static const uint64_t kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 
 #ifdef _MSC_VER
-#define kMaxVarintBytes = 10
-#define kMaxVarint32Bytes = 5
+#define kMaxVarintBytes 10
+#define kMaxVarint32Bytes 5
 #else
 static const int kMaxVarintBytes = 10;
 static const int kMaxVarint32Bytes = 5;
 #endif
-static const int64_t kLongMax = LONG_MAX;
 
+static const int64_t kLongMax = LONG_MAX;
 
 /* Define the entry point symbol
  * Zend will use when loading this module
@@ -377,8 +383,6 @@ typedef struct{
 # endif
 #endif
 
-
-#include "helper.h"
-
+#include "core.h"
 
 #endif /* PHP_PROTOCOLBUFFERS_H */

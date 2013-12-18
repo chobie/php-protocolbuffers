@@ -28,8 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOCOLBUFFERS_H
-#define __PROTOCOLBUFFERS_H
+#ifndef PHP_PROTOCOLBUFFERS_PROTOCOL_BUFFERS_H
+#define PHP_PROTOCOLBUFFERS_PROTOCOL_BUFFERS_H
+
 void php_protocolbuffers_init(TSRMLS_D);
 void messages_dtor(pb_scheme *entry);
 

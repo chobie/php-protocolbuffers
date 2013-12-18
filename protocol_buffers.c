@@ -39,6 +39,7 @@
 #include "unknown_field.h"
 #include "unknown_field_set.h"
 #include "extension_registry.h"
+#include "helper.h"
 
 zend_class_entry *protocol_buffers_class_entry;
 zend_class_entry *protocol_buffers_descriptor_class_entry;
