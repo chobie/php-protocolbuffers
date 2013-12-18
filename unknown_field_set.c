@@ -85,15 +85,14 @@ void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 
 int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, php_protocolbuffers_unknown_field **f)
 {
-	zval **element = NULL, **fields = NULL;
+	zval **element = NULL, *fields = NULL;
 	HashPosition pos;
 	HashTable *fieldht = NULL;
 	int found = 0;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		fieldht = Z_ARRVAL_P(fields);
 
-		fieldht = Z_ARRVAL_PP(fields);
 		for(zend_hash_internal_pointer_reset_ex(fieldht, &pos);
 						zend_hash_get_current_data_ex(fieldht, (void **)&element, &pos) == SUCCESS;
 						zend_hash_move_forward_ex(fieldht, &pos)
@@ -111,40 +110,17 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 		}
 	}
 
-	efree(name);
 	return found;
 }
 
 
-void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, zval *field)
+void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, zval *field)
 {
-	zval **fields = NULL;
+	zval *fields = NULL;
 
-	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&fields) == SUCCESS) {
-/* NOTE: we allow duplicate number here.
-		fieldht = Z_ARRVAL_PP(fields);
-
-		for(zend_hash_internal_pointer_reset_ex(fieldht, &pos);
-						zend_hash_get_current_data_ex(fieldht, (void **)&element, &pos) == SUCCESS;
-						zend_hash_move_forward_ex(fieldht, &pos)
-		) {
-			php_protocolbuffers_unknown_field *s = NULL, *t = NULL;
-
-			s = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
-			t = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
-
-			if (t->number == number) {
-				//efree(name);
-				//zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "number %d has already added", number);
-				return;
-			}
-		}
-*/
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &fields TSRMLS_CC)) {
+		zend_hash_next_index_insert(Z_ARRVAL_P(fields), (void *)&field, sizeof(zval *), NULL);
 	}
-
-	zend_hash_next_index_insert(Z_ARRVAL_PP(fields), (void *)&field, sizeof(zval *), NULL);
-	efree(name);
 }
 
 
@@ -229,7 +205,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 	}
 
 	unknown_field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
-	php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, unknown_field->number, name, name_len, field);
+	php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, unknown_field->number, field);
 }
 /* }}} */
 

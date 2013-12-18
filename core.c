@@ -268,7 +268,7 @@ void process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *co
 			val->varint = value;
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(unknown_value), NULL);
 
-			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, unknown_name, unknown_name_len, dz);
+			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *un, tag, dz);
 		}
 	}
 
@@ -323,7 +323,7 @@ void process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_contain
 			val->buffer.len = length;
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(val), NULL);
 
-			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown_fieldset, tag, unknown_name, unknown_name_len, dz);
+			php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, *unknown_fieldset, tag, dz);
 		}
 	}
 

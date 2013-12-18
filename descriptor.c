@@ -180,9 +180,7 @@ PHP_METHOD(protocolbuffers_descriptor, getName)
 PHP_METHOD(protocolbuffers_descriptor, getField)
 {
 	zval *instance = getThis();
-	zval **result;
-	char *property;
-	int property_len;
+	zval *result;
 	long tag = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -190,14 +188,12 @@ PHP_METHOD(protocolbuffers_descriptor, getField)
 		return;
 	}
 
-	zend_mangle_property_name(&property, &property_len, (char*)"*", 1, ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), property, property_len, (void **)&result) == SUCCESS) {
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &result TSRMLS_CC)) {
 		zval **entry;
-		if (zend_hash_index_find(Z_ARRVAL_PP(result), tag, (void **)&entry) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_P(result), tag, (void **)&entry) == SUCCESS) {
 			RETVAL_ZVAL(*entry, 0, 1);
 		}
 	}
-	efree(property);
 }
 /* }}} */
 
@@ -206,15 +202,11 @@ PHP_METHOD(protocolbuffers_descriptor, getField)
 PHP_METHOD(protocolbuffers_descriptor, getFields)
 {
 	zval *instance = getThis();
-	zval **result;
-	char *property;
-	int property_len;
+	zval *result;
 
-	zend_mangle_property_name(&property, &property_len, (char*)"*", 1, ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), property, property_len, (void **)&result) == SUCCESS) {
-		RETVAL_ZVAL(*result, 0, 1);
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &result TSRMLS_CC)) {
+		RETVAL_ZVAL(result, 0, 1);
 	}
-	efree(property);
 }
 /* }}} */
 

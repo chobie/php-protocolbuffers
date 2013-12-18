@@ -132,15 +132,11 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
 
 int php_pb_field_descriptor_get_name(zval *instance, char **retval, int *len TSRMLS_DC)
 {
-	zval **result = NULL;
-	char *name = {0};
-	int name_len = 0;
+	zval *result = NULL;
 
-	zend_mangle_property_name(&name, &name_len, "*", 1, "name", sizeof("name"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
-		*retval = Z_STRVAL_PP(result);
-		*len    = Z_STRLEN_PP(result)+1;
-		efree(name);
+	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("name"), &result TSRMLS_CC)) {
+		*retval = Z_STRVAL_P(result);
+		*len    = Z_STRLEN_P(result)+1;
 		return 1;
 	} else {
 		return 0;
@@ -151,25 +147,21 @@ int php_pb_field_descriptor_get_name(zval *instance, char **retval, int *len TSR
 
 static void php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAMETERS, char *property, size_t property_length, int retval_type)
 {
-	zval **result = NULL, *instance = getThis();
-	char *name = {0};
-	int name_len = 0;
+	zval *result = NULL, *instance = getThis();
 
-	zend_mangle_property_name(&name, &name_len, "*", 1, property, property_length, 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&result) == SUCCESS) {
+	if (php_protocolbuffers_read_protected_property(instance, property, property_length, &result TSRMLS_CC)) {
 		if (retval_type == IS_STRING) {
-			RETVAL_STRING(Z_STRVAL_PP(result), 1);
+			RETVAL_STRING(Z_STRVAL_P(result), 1);
 		} else if (retval_type == IS_LONG) {
-			RETVAL_LONG(Z_LVAL_PP(result));
+			RETVAL_LONG(Z_LVAL_P(result));
 		} else if (retval_type == IS_BOOL) {
-			RETVAL_BOOL(Z_BVAL_PP(result));
+			RETVAL_BOOL(Z_BVAL_P(result));
 		} else {
-			RETVAL_ZVAL(*result, 1, 0);
+			RETVAL_ZVAL(result, 1, 0);
 		}
 	} else {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not have values", property);
 	}
-	efree(name);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor___construct, 0, 0, 1)
