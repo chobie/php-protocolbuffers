@@ -33,6 +33,8 @@
 #include "message_options.h"
 #include "descriptor.h"
 
+#define PHP_PROTOCOLBUFFERS_MAX_EXTENSION_RANGE 536870912
+
 int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
 {
 	char *key;
@@ -507,8 +509,8 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addExtensionRange)
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be bigger than range begin.");
 		return;
 	}
-	if (end > 536870912) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", 536870912);
+	if (end > PHP_PROTOCOLBUFFERS_MAX_EXTENSION_RANGE) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "range end must be smaller than %d", PHP_PROTOCOLBUFFERS_MAX_EXTENSION_RANGE);
 		return;
 	}
 	if (begin < 1 || end < 1) {
