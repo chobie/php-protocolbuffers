@@ -167,7 +167,7 @@ static void php_protocol_buffers_serializable(TSRMLS_D)
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Describable", protocol_buffers_serializable_class_entry);
 }
 
-void php_protocolbuffers_init(TSRMLS_D)
+static void php_protocolbuffers_init(TSRMLS_D)
 {
 	zend_class_entry ce;
 
