@@ -44,11 +44,11 @@ void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
 
 	MAKE_STD_ZVAL(pp);
 	ZVAL_NULL(pp);
-	zend_hash_update(properties, ZEND_STRS("number"), (void **)&pp, sizeof(zval), NULL);
+	zend_hash_update(properties, "number", sizeof("number"), (void **)&pp, sizeof(zval), NULL);
 
 	MAKE_STD_ZVAL(pp);
 	ZVAL_NULL(pp);
-	zend_hash_update(properties, ZEND_STRS("type"), (void **)&pp, sizeof(zval), NULL);
+	zend_hash_update(properties, "type", sizeof("type"), (void **)&pp, sizeof(zval), NULL);
 
 	zend_merge_properties(object, properties, 1 TSRMLS_CC);
 #endif
