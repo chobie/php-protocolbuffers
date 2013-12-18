@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocol_buffers.h"
+#include "php_protocolbuffers.h"
 #include "field_descriptor.h"
 
 #if PHP_VERSION_ID < 50300

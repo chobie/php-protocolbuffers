@@ -1,4 +1,4 @@
-#include "php_protocol_buffers.h"
+#include "php_protocolbuffers.h"
 #include "unknown_field_set.h"
 #include "unknown_field.h"
 

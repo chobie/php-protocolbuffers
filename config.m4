@@ -9,8 +9,7 @@ if test $PHP_PROTOCOLBUFFERS != "no"; then
         CFLAGS="$CFLAGS -Wall -g -ggdb -O0 -DPHP_PROTOCOLBUFFERS_DEBUG=1"
         AC_DEFINE(PHP_PROTOCOLBUFFERS_DEBUG, 1, [Enable protocolbuffers debug support])
     else
-        # ignore strings warnings
-        CXXFLAGS="-Wno-write-strings"
+        //CFLAGS="$CFLAGS -Wunused-variable -Wpointer-sign -Wimplicit-function-declaration -Winline -Wunused-macros -Wredundant-decls -Wstrict-aliasing=2 -Wswitch-enum -Wdeclaration-after-statement"
     fi
 
     PHP_PROTOBUF_SRCS="protocol_buffers.c descriptor.c descriptor_builder.c field_descriptor.c message.c message_options.c php_message_options.c unknown_field.c unknown_field_set.c helper.c extension_registry.c core.c"

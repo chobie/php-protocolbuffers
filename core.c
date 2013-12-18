@@ -1,4 +1,4 @@
-#include "php_protocol_buffers.h"
+#include "php_protocolbuffers.h"
 
 #include "core.h"
 #include "unknown_field.h"
@@ -396,162 +396,6 @@ void pb_format_string(zval *result, pbf *payload TSRMLS_DC)
 	}
 }
 
-static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, uint64_t value, HashTable *hresult)
-{
-	pbf __payload = {0};
-	zval *dz = NULL;
-
-	if (scheme == NULL) {
-		if (container->process_unknown_fields > 0) {
-			MAKE_STD_ZVAL(dz);
-			process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
-		} else {
-			/* skip unknown field */
-		}
-	} else {
-		MAKE_STD_ZVAL(dz);
-		switch (scheme->type) {
-			case TYPE_BOOL:
-				ZVAL_BOOL(dz, value);
-			break;
-			case TYPE_INT32:
-			case TYPE_ENUM:
-				__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)value;
-			break;
-			case TYPE_UINT32:
-				__payload.type = TYPE_UINT32;__payload.value.uint32 = (uint32_t)value;
-			break;
-			case TYPE_SINT32:
-				__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)zigzag_decode32(value);
-			break;
-			case TYPE_INT64:
-				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)value;
-			break;
-			case TYPE_SINT64:
-				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)zigzag_decode64(value);
-			break;
-			case TYPE_UINT64:
-				__payload.type = TYPE_UINT64;__payload.value.uint64 = (uint64_t)value;
-			break;
-			default:
-				zval_ptr_dtor(&dz);
-				return 0;
-		}
-		if (scheme->type != TYPE_BOOL) {
-			pb_format_string(dz, &__payload TSRMLS_CC);
-		}
-
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
-	}
-
-	return 1;
-}
-
-static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
-{
-	pbf __payload = {0};
-	zval *dz = NULL;
-
-	if (scheme == NULL) {
-		if (container->process_unknown_fields > 0) {
-			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
-		} else {
-			/* skip unknown field */
-		}
-	} else {
-		MAKE_STD_ZVAL(dz);
-
-		switch (scheme->type) {
-			case TYPE_DOUBLE:
-			{
-				uint64_t v;
-				double d;
-
-				memcpy(&v, data, 8);
-				d = decode_double(v);
-
-				__payload.type = TYPE_DOUBLE;__payload.value.d = d;
-				pb_format_string(dz, &__payload TSRMLS_CC);
-			}
-			break;
-			case TYPE_FIXED64:
-			{
-				uint64_t v;
-
-				memcpy(&v, data, 8);
-				__payload.type = TYPE_UINT64;__payload.value.uint64 = v;
-				pb_format_string(dz, &__payload TSRMLS_CC);
-			}
-			break;
-			case TYPE_SFIXED64:
-			{
-				int64_t l;
-				memcpy(&l, data, 8);
-
-				__payload.type = TYPE_INT64;__payload.value.int64 = l;
-				pb_format_string(dz, &__payload TSRMLS_CC);
-			}
-			break;
-			default:
-				zval_ptr_dtor(&dz);
-				return 0;
-		}
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
-	}
-
-	return 1;
-}
-
-static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
-{
-	pbf __payload = {0};
-	zval *dz = NULL;
-
-	if (scheme == NULL) {
-		if (container->process_unknown_fields > 0) {
-			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
-		} else {
-			/* skip unknown field */
-		}
-	} else {
-		MAKE_STD_ZVAL(dz);
-
-		switch(scheme->type) {
-			case TYPE_FLOAT:
-			{
-				float a = 0;
-
-				memcpy(&a, data, 4);
-				__payload.type = TYPE_FLOAT;__payload.value.f = a;
-			}
-			break;
-			case TYPE_SFIXED32:
-			{
-				int32_t l = 0;
-
-				memcpy(&l, data, 4);
-				__payload.type = TYPE_SINT32;__payload.value.int32 = l;
-			}
-			break;
-			case TYPE_FIXED32:
-			{
-				uint32_t l = 0;
-				memcpy(&l, data, 4);
-
-				__payload.type = TYPE_UINT32;__payload.value.uint32 = l;
-			}
-			break;
-			default:
-				zval_ptr_dtor(&dz);
-				return 0;
-		}
-		pb_format_string(dz, &__payload TSRMLS_CC);
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
-	}
-
-	return 1;
-}
-
 const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
 {
 	uint32_t payload = 0, tag = 0, wiretype = 0;
@@ -903,8 +747,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	return data;
 }
 
-
-
 void pb_serializer_destroy(pb_serializer *serializer)
 {
 	if (serializer != NULL) {
@@ -919,7 +761,6 @@ void pb_serializer_destroy(pb_serializer *serializer)
 		serializer = NULL;
 	}
 }
-
 
 void pb_serializer_init(pb_serializer **serializer)
 {

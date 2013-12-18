@@ -31,8 +31,6 @@
 #ifndef PHP_PROTOCOLBUFFERS_CORE_H
 #define PHP_PROTOCOLBUFFERS_CORE_H
 
-#include "core_inl.h"
-
 typedef struct {
 	int type;
 	union {
@@ -101,5 +99,7 @@ int pb_get_default_unknown_property_name_len();
 void pb_scheme_container_init(pb_scheme_container *container);
 
 void pb_format_string(zval *result, pbf *payload TSRMLS_DC);
+
+#include "core_inl.h"
 
 #endif

@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocol_buffers.h"
+#include "php_protocolbuffers.h"
 #include "message.h"
 #include "ext/standard/php_smart_str.h"
 #include "unknown_field_set.h"
@@ -1111,7 +1111,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 	HashTable *proto = NULL;
 	pb_scheme_container *container;
 	char *name = {0};
-	int flag = 0, i = 0, name_len = 0;
+	int flag = 0, name_len = 0;
 	smart_str buf = {0};
 	smart_str buf2 = {0};
 

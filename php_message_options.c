@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocol_buffers.h"
+#include "php_protocolbuffers.h"
 #include "php_message_options.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_use_single_property, 0, 0, 1)
