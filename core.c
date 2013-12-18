@@ -11,10 +11,6 @@ static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
 static int unknown_property_name_default_len = sizeof("_unknown");
 
-static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
-
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
-
 static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC);
 
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result);
@@ -170,7 +166,7 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 				return 1;
 			}
 
-			if (zend_call_method(NULL, *ce, NULL, "getdescriptor", strlen("getdescriptor"), &ret, 0, NULL, NULL  TSRMLS_CC)) {
+			if (zend_call_method(NULL, *ce, NULL, ZEND_STRS("getdescriptor")-1, &ret, 0, NULL, NULL  TSRMLS_CC)) {
 				if (Z_TYPE_P(ret) == IS_ARRAY) {
 					proto = Z_ARRVAL_P(ret);
 				} else if (Z_TYPE_P(ret) == IS_OBJECT) {
@@ -758,206 +754,6 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 }
 
 
-int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
-{
-	int i = 0;
-	pb_serializer *ser;
-	zval **c = NULL;
-	HashTable *hash = NULL;
-	pb_scheme *scheme;
-
-	pb_serializer_init(&ser);
-
-	if (container->use_wakeup_and_sleep > 0) {
-		pb_execute_sleep(klass, container TSRMLS_CC);
-	}
-
-	if (container->use_single_property < 1) {
-		hash = Z_OBJPROP_P(klass);
-	} else {
-		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
-			hash = Z_ARRVAL_PP(c);
-		} else {
-			pb_serializer_destroy(ser);
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
-			return -1;
-		}
-	}
-
-	if (container->size < 1 && container->process_unknown_fields < 1) {
-		pb_serializer_destroy(ser);
-		return -1;
-	}
-
-	for (i = 0; i < container->size; i++) {
-		scheme = &(container->scheme[i]);
-
-		if (container->use_wakeup_and_sleep > 0) {
-			if (scheme->skip > 0) {
-				continue;
-			}
-		}
-
-		switch (scheme->type) {
-			case TYPE_DOUBLE:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
-			break;
-			case TYPE_FLOAT:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
-			break;
-			case TYPE_INT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
-			break;
-			case TYPE_UINT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
-			break;
-			case TYPE_INT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
-			break;
-			case TYPE_FIXED64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
-			break;
-			case TYPE_FIXED32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
-			break;
-			case TYPE_BOOL:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
-			break;
-			case TYPE_STRING:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_string, 0);
-			break;
-			case TYPE_GROUP:
-			break;
-			case TYPE_MESSAGE:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_msg, 0);
-			break;
-			case TYPE_BYTES:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bytes, 0);
-			break;
-			case TYPE_UINT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
-			break;
-			case TYPE_ENUM:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
-			break;
-			case TYPE_SFIXED32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
-			break;
-			case TYPE_SFIXED64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
-			break;
-			case TYPE_SINT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
-			break;
-			case TYPE_SINT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
-			break;
-			default:
-			break;
-		}
-
-		if (EG(exception)) {
-			pb_serializer_destroy(ser);
-			return 1;
-		}
-	}
-
-	if (container->process_unknown_fields > 0) {
-		char *uname = {0};
-		int uname_len = 0;
-		zval **unknown = NULL;
-
-		if (container->use_single_property > 0) {
-			uname = "_unknown";
-			uname_len = sizeof("_unknown");
-		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
-		}
-
-		if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
-			if (Z_TYPE_PP(unknown) == IS_OBJECT
-			 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
-				HashTable *unkht;
-				zval **element, **elmh;
-				char *uuname;
-				int uuname_len;
-
-				unkht = Z_OBJPROP_PP(unknown);
-
-				zend_mangle_property_name(&uuname, &uuname_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
-				if (zend_hash_find(unkht, uuname, uuname_len, (void**)&elmh) == SUCCESS) {
-					HashPosition pos2;
-
-					for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(elmh), &pos2);
-									zend_hash_get_current_data_ex(Z_ARRVAL_PP(elmh), (void **)&element, &pos2) == SUCCESS;
-									zend_hash_move_forward_ex(Z_ARRVAL_PP(elmh), &pos2)
-					) {
-						HashPosition pos;
-						php_protocolbuffers_unknown_field *field = NULL;
-						unknown_value **unknown;
-						field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
-
-						switch (field->type) {
-							case WIRETYPE_VARINT:
-							{
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_varint32(ser, (*unknown)->varint);
-								}
-							}
-							break;
-							case WIRETYPE_FIXED64:
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							break;
-							case WIRETYPE_LENGTH_DELIMITED:
-							{
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_varint32(ser, (*unknown)->buffer.len);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							}
-							break;
-							case WIRETYPE_START_GROUP:
-							break;
-							case WIRETYPE_END_GROUP:
-							break;
-							case WIRETYPE_FIXED32:
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							break;
-						}
-					}
-				}
-				efree(uuname);
-			}
-		}
-
-		if (container->use_single_property < 1) {
-			efree(uname);
-		}
-	}
-
-	*serializer = ser;
-	return 0;
-}
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
 {
@@ -1079,7 +875,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 	return 0;
 }
 
-static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
@@ -1097,7 +893,7 @@ static void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_D
 	}
 }
 
-static void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 

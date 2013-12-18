@@ -1,36 +1,55 @@
 #include "php_protocolbuffers.h"
 #include "serializer.h"
 
-void pb_serializer_destroy(pb_serializer *serializer)
-{
-	if (serializer != NULL) {
-		if (serializer->buffer != NULL) {
-			efree(serializer->buffer);
-		}
+static int pb_serializer_resize(pb_serializer *serializer, size_t size);
 
-		serializer->buffer = NULL;
-		serializer->buffer_offset = 0;
-		serializer->buffer_size = 0;
-		efree(serializer);
-		serializer = NULL;
-	}
-}
+static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value);
 
-void pb_serializer_init(pb_serializer **serializer)
-{
-	pb_serializer *ser;
-	ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
+static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value);
 
-	ser->buffer_size = 0;
-	ser->buffer_capacity = 256;
-	ser->buffer_offset = 0;
-	ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
-	memset(ser->buffer, '\0', ser->buffer_capacity);
+static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len);
 
-	*serializer = ser;
-}
+static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value);
 
-int pb_serializer_resize(pb_serializer *serializer, size_t size)
+static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value);
+
+static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS);
+
+static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed);
+
+static int pb_serializer_resize(pb_serializer *serializer, size_t size)
 {
 	if (serializer->buffer_size + size < serializer->buffer_capacity) {
 		return 0;
@@ -48,7 +67,7 @@ int pb_serializer_resize(pb_serializer *serializer, size_t size)
 	return 0;
 }
 
-int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
+static int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
 {
 	uint8_t target[4] = {0};
 
@@ -73,7 +92,7 @@ int pb_serializer_write32_le(pb_serializer *serializer, unsigned int value)
 	return 0;
 }
 
-int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
+static int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
 {
 	uint8_t target[8] = {0};
 
@@ -111,7 +130,7 @@ int pb_serializer_write64_le(pb_serializer *serializer, uint64_t value)
 	return 0;
 }
 
-int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
+static int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *string, size_t len)
 {
 	int i = 0;
 
@@ -125,7 +144,7 @@ int pb_serializer_write_chararray(pb_serializer *serializer, unsigned char *stri
 	return 0;
 }
 
-int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
+static int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 {
 	uint8_t bytes[kMaxVarint32Bytes];
 	int size = 0, i;
@@ -153,7 +172,7 @@ int pb_serializer_write_varint32(pb_serializer *serializer, uint32_t value)
 	return 0;
 }
 
-int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
+static int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
 {
 	uint8_t bytes[kMaxVarintBytes];
 	int size = 0, i;
@@ -174,7 +193,7 @@ int pb_serializer_write_varint64(pb_serializer *serializer, uint64_t value)
 	return 0;
 }
 
-void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_DOUBLE) {
 		convert_to_double(*element);
@@ -186,7 +205,7 @@ void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write32_le(ser, encode_float(Z_DVAL_PP(element)));
 }
 
-void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_DOUBLE) {
 		convert_to_double(*element);
@@ -198,7 +217,7 @@ void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write64_le(ser, encode_double(Z_DVAL_PP(element)));
 }
 
-void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint32_t v = 0;
 
@@ -220,7 +239,7 @@ void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write32_le(ser, v);
 }
 
-void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint64_t v = 0;
 
@@ -251,7 +270,7 @@ void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write64_le(ser, (uint64_t)v);
 }
 
-void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -263,7 +282,7 @@ void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
-void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -284,7 +303,7 @@ void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint64(ser, v);
 }
 
-void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint64_t v = 0;
 
@@ -307,7 +326,7 @@ void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint64(ser, v);
 }
 
-void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int32_t v = 0;
 
@@ -329,7 +348,7 @@ void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser,(uint32_t)v);
 }
 
-void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_NULL) {
 
@@ -345,7 +364,7 @@ void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 }
 
-void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	zend_class_entry *ce = NULL;
 	pb_scheme_container *n_container = NULL;
@@ -373,7 +392,7 @@ void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_destroy(n_ser);
 }
 
-void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_STRLEN_PP(element) > 0) {
 		pb_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
@@ -382,7 +401,7 @@ void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 }
 
-void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint32_t v = 0;
 
@@ -404,7 +423,7 @@ void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, v);
 }
 
-void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -416,7 +435,7 @@ void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
-void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -428,7 +447,7 @@ void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write32_le(ser, Z_LVAL_PP(element));
 }
 
-void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -443,7 +462,7 @@ void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write64_le(ser, (int64_t)v);
 }
 
-void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -455,7 +474,7 @@ void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
 }
 
-void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -477,7 +496,7 @@ void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint64(ser, zigzag_encode64(v));
 }
 
-void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
+static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed)
 {
 	zval **tmp = NULL;
 	char *name = {0};
@@ -552,4 +571,234 @@ void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *contai
 			return;
 		}
 	}
+}
+
+void pb_serializer_destroy(pb_serializer *serializer)
+{
+	if (serializer != NULL) {
+		if (serializer->buffer != NULL) {
+			efree(serializer->buffer);
+		}
+
+		serializer->buffer = NULL;
+		serializer->buffer_offset = 0;
+		serializer->buffer_size = 0;
+		efree(serializer);
+		serializer = NULL;
+	}
+}
+
+void pb_serializer_init(pb_serializer **serializer)
+{
+	pb_serializer *ser;
+	ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
+
+	ser->buffer_size = 0;
+	ser->buffer_capacity = 256;
+	ser->buffer_offset = 0;
+	ser->buffer = (uint8_t*)emalloc(sizeof(uint8_t) * ser->buffer_capacity);
+	memset(ser->buffer, '\0', ser->buffer_capacity);
+
+	*serializer = ser;
+}
+
+int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
+{
+	int i = 0;
+	pb_serializer *ser;
+	zval **c = NULL;
+	HashTable *hash = NULL;
+	pb_scheme *scheme;
+
+	pb_serializer_init(&ser);
+
+	if (container->use_wakeup_and_sleep > 0) {
+		pb_execute_sleep(klass, container TSRMLS_CC);
+	}
+
+	if (container->use_single_property < 1) {
+		hash = Z_OBJPROP_P(klass);
+	} else {
+		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
+			hash = Z_ARRVAL_PP(c);
+		} else {
+			pb_serializer_destroy(ser);
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
+			return -1;
+		}
+	}
+
+	if (container->size < 1 && container->process_unknown_fields < 1) {
+		pb_serializer_destroy(ser);
+		return -1;
+	}
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &(container->scheme[i]);
+
+		if (container->use_wakeup_and_sleep > 0) {
+			if (scheme->skip > 0) {
+				continue;
+			}
+		}
+
+		switch (scheme->type) {
+			case TYPE_DOUBLE:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
+			break;
+			case TYPE_FLOAT:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
+			break;
+			case TYPE_INT64:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
+			break;
+			case TYPE_UINT64:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
+			break;
+			case TYPE_INT32:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
+			break;
+			case TYPE_FIXED64:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
+			break;
+			case TYPE_FIXED32:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
+			break;
+			case TYPE_BOOL:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
+			break;
+			case TYPE_STRING:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_string, 0);
+			break;
+			case TYPE_GROUP:
+			break;
+			case TYPE_MESSAGE:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_msg, 0);
+			break;
+			case TYPE_BYTES:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bytes, 0);
+			break;
+			case TYPE_UINT32:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
+			break;
+			case TYPE_ENUM:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
+			break;
+			case TYPE_SFIXED32:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
+			break;
+			case TYPE_SFIXED64:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
+			break;
+			case TYPE_SINT32:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
+			break;
+			case TYPE_SINT64:
+				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
+			break;
+			default:
+			break;
+		}
+
+		if (EG(exception)) {
+			pb_serializer_destroy(ser);
+			return 1;
+		}
+	}
+
+	if (container->process_unknown_fields > 0) {
+		char *uname = {0};
+		int uname_len = 0;
+		zval **unknown = NULL;
+
+		if (container->use_single_property > 0) {
+			uname = "_unknown";
+			uname_len = sizeof("_unknown");
+		} else {
+			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+		}
+
+		if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
+			if (Z_TYPE_PP(unknown) == IS_OBJECT
+			 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
+				HashTable *unkht;
+				zval **element, **elmh;
+				char *uuname;
+				int uuname_len;
+
+				unkht = Z_OBJPROP_PP(unknown);
+
+				zend_mangle_property_name(&uuname, &uuname_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+				if (zend_hash_find(unkht, uuname, uuname_len, (void**)&elmh) == SUCCESS) {
+					HashPosition pos2;
+
+					for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(elmh), &pos2);
+									zend_hash_get_current_data_ex(Z_ARRVAL_PP(elmh), (void **)&element, &pos2) == SUCCESS;
+									zend_hash_move_forward_ex(Z_ARRVAL_PP(elmh), &pos2)
+					) {
+						HashPosition pos;
+						php_protocolbuffers_unknown_field *field = NULL;
+						unknown_value **unknown;
+						field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
+
+						switch (field->type) {
+							case WIRETYPE_VARINT:
+							{
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write_varint32(ser, (*unknown)->varint);
+								}
+							}
+							break;
+							case WIRETYPE_FIXED64:
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+								}
+							break;
+							case WIRETYPE_LENGTH_DELIMITED:
+							{
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write_varint32(ser, (*unknown)->buffer.len);
+									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+								}
+							}
+							break;
+							case WIRETYPE_START_GROUP:
+							break;
+							case WIRETYPE_END_GROUP:
+							break;
+							case WIRETYPE_FIXED32:
+								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+													zend_hash_move_forward_ex(field->ht, &pos)
+									) {
+									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+								}
+							break;
+						}
+					}
+				}
+				efree(uuname);
+			}
+		}
+
+		if (container->use_single_property < 1) {
+			efree(uname);
+		}
+	}
+
+	*serializer = ser;
+	return 0;
 }

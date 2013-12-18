@@ -71,6 +71,12 @@ int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_conta
 
 void pb_format_string(zval *result, pbf *payload TSRMLS_DC);
 
+void pb_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
+
+void pb_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
+
+
+
 #include "core_inl.h"
 
 #endif
