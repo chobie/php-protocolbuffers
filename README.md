@@ -178,6 +178,17 @@ https://github.com/bramp/protoc-gen-php
 my protoc-gen-php based on his work.
 
 
+## Windows Support
+
+You need to build your self. please check https://wiki.php.net/internals/windows/stepbystepbuild
+
+````
+phpize
+configure --with-protocolbuffers
+nmake
+phpunit
+````
+
 ## FAQ
 
 #### how can i delete item with repeated field?
