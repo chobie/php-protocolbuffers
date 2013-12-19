@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 #include "descriptor.h"
 
 static const char *fields_map[] = {

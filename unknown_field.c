@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 #include "unknown_field.h"
 
 static zend_object_handlers php_protocolbuffers_unknown_field_object_handlers;

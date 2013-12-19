@@ -1,4 +1,4 @@
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 #include "serializer.h"
 
 static int pb_serializer_resize(pb_serializer *serializer, size_t size);
@@ -310,7 +310,6 @@ static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		if (Z_TYPE_PP(element) == IS_STRING) {
 			char *bad;
-			// TODO: check portability
 			v = strtoull(Z_STRVAL_PP(element), &bad, 0);
 		} else {
 			convert_to_long(*element);
@@ -375,7 +374,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 
 	pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
 	if (err) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", ce->name);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
 		return;
 	}
 	/* TODO: add error handling */

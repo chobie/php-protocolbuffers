@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocolbuffers.h"
-#include "protocol_buffers.h"
+
+#include "protocolbuffers.h"
 
 #include "descriptor.h"
 #include "field_descriptor.h"

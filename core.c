@@ -1,4 +1,4 @@
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 
 #include "core.h"
 #include "serializer.h"

@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 #include "unknown_field_set.h"
 #include "helper.h"
 

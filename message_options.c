@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "php_protocolbuffers.h"
+#include "protocolbuffers.h"
 #include "message_options.h"
 
 int php_protocolbuffers_message_options_init_properties(zval *object TSRMLS_DC)
