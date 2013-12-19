@@ -89,6 +89,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set_from, 0, 0, 1)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_serialize_to_string, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -754,16 +758,117 @@ static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *na
 	return flag;
 }
 
-/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
-*/
-PHP_METHOD(protocolbuffers_message, __construct)
+static void php_protocolbuffers_set_from(zval *instance, zval *params TSRMLS_DC)
 {
-	zval *params = NULL, *instance = getThis();
 	HashTable *proto = NULL;
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
 	HashTable *htt = NULL;
 	php_protocolbuffers_message *message;
+	int i = 0;
+
+	PHP_PB_MESSAGE_CHECK_SCHEME
+	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	if (container->use_single_property > 0) {
+		zval *z = NULL;
+
+		MAKE_STD_ZVAL(z);
+		array_init(z);
+
+		Z_ADDREF_P(z);
+		zend_hash_update(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void **)&z, sizeof(zval), NULL);
+		htt = Z_ARRVAL_P(z);
+	}
+
+	for (i = 0; i < container->size; i++) {
+		zval **tmp = NULL;
+		zval **e = NULL;
+		zval *value = NULL;
+
+		scheme = &container->scheme[i];
+
+		if (zend_hash_find(Z_ARRVAL_P(params), scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
+			if (container->use_single_property > 0) {
+				if (scheme->type == TYPE_MESSAGE) {
+					if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+						zval *p;
+						MAKE_STD_ZVAL(value);
+						MAKE_STD_ZVAL(p);
+
+						ZVAL_ZVAL(p, *tmp, 1, 0);
+
+						object_init_ex(value, scheme->ce);
+						php_pb_properties_init(value, scheme->ce TSRMLS_CC);
+						zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
+					} else {
+						if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
+							MAKE_STD_ZVAL(value);
+							ZVAL_ZVAL(value, *tmp, 0, 1);
+						} else {
+							zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
+							return;
+						}
+					}
+				} else {
+					MAKE_STD_ZVAL(value);
+					ZVAL_ZVAL(value, *tmp, 0, 1);
+					php_pb_typeconvert(scheme, value TSRMLS_CC);
+
+					Z_ADDREF_P(value);
+				}
+				zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
+			} else {
+				if (zend_hash_find(Z_OBJPROP_P(instance), scheme->mangled_name, scheme->mangled_name_len, (void **)&e) == SUCCESS) {
+					zval *garvage = NULL;
+
+					garvage = *e;
+					if (scheme->type == TYPE_MESSAGE) {
+						if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+							zval *p = NULL;
+
+							MAKE_STD_ZVAL(value);
+							MAKE_STD_ZVAL(p);
+							ZVAL_ZVAL(p, *tmp, 1, 0);
+							Z_SET_REFCOUNT_P(p, 1);
+
+							object_init_ex(value, scheme->ce);
+							php_pb_properties_init(value, scheme->ce TSRMLS_CC);
+
+							zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, *tmp);
+							zval_ptr_dtor(&p);
+						} else {
+							if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
+								MAKE_STD_ZVAL(value);
+								ZVAL_ZVAL(value, *tmp, 0, 1);
+							} else {
+								MAKE_STD_ZVAL(value); // probably missed something
+								zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
+								return;
+							}
+						}
+					} else {
+						MAKE_STD_ZVAL(value);
+						ZVAL_ZVAL(value, *tmp, 1, 0);
+
+						Z_SET_REFCOUNT_P(value, 1);
+						php_pb_typeconvert(scheme, value TSRMLS_CC);
+					}
+
+					*e = value;
+					zval_ptr_dtor(&garvage);
+				}
+			}
+		}
+
+	}
+}
+
+/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
+*/
+PHP_METHOD(protocolbuffers_message, __construct)
+{
+	zval *params = NULL, *instance = getThis();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|a", &params) == FAILURE) {
@@ -771,106 +876,26 @@ PHP_METHOD(protocolbuffers_message, __construct)
 	}
 
 	if (params != NULL) {
-		int i = 0;
-
-		PHP_PB_MESSAGE_CHECK_SCHEME
-		message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
-
-		if (container->use_single_property > 0) {
-			zval *z = NULL;
-
-			MAKE_STD_ZVAL(z);
-			array_init(z);
-
-			Z_ADDREF_P(z);
-			zend_hash_update(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void **)&z, sizeof(zval), NULL);
-			htt = Z_ARRVAL_P(z);
-		}
-
-		for (i = 0; i < container->size; i++) {
-			zval **tmp = NULL;
-			zval **e = NULL;
-			zval *value = NULL;
-
-			scheme = &container->scheme[i];
-
-			if (zend_hash_find(Z_ARRVAL_P(params), scheme->name, scheme->name_len, (void **)&tmp) == SUCCESS) {
-				if (container->use_single_property > 0) {
-					if (scheme->type == TYPE_MESSAGE) {
-						if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-							zval *p;
-							MAKE_STD_ZVAL(value);
-							MAKE_STD_ZVAL(p);
-
-							ZVAL_ZVAL(p, *tmp, 1, 0);
-
-							object_init_ex(value, scheme->ce);
-							php_pb_properties_init(value, scheme->ce TSRMLS_CC);
-							zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, p);
-						} else {
-							if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
-								MAKE_STD_ZVAL(value);
-								ZVAL_ZVAL(value, *tmp, 0, 1);
-							} else {
-								zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
-								return;
-							}
-						}
-					} else {
-						MAKE_STD_ZVAL(value);
-						ZVAL_ZVAL(value, *tmp, 0, 1);
-						php_pb_typeconvert(scheme, value TSRMLS_CC);
-
-						Z_ADDREF_P(value);
-					}
-					zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&value, sizeof(zval *), NULL);
-				} else {
-					if (zend_hash_find(Z_OBJPROP_P(instance), scheme->mangled_name, scheme->mangled_name_len, (void **)&e) == SUCCESS) {
-						zval *garvage = NULL;
-
-						garvage = *e;
-						if (scheme->type == TYPE_MESSAGE) {
-							if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-								zval *p = NULL;
-
-								MAKE_STD_ZVAL(value);
-								MAKE_STD_ZVAL(p);
-								ZVAL_ZVAL(p, *tmp, 1, 0);
-								Z_SET_REFCOUNT_P(p, 1);
-
-								object_init_ex(value, scheme->ce);
-								php_pb_properties_init(value, scheme->ce TSRMLS_CC);
-
-								zend_call_method_with_1_params(&value, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, *tmp);
-								zval_ptr_dtor(&p);
-							} else {
-								if (Z_TYPE_PP(tmp) == IS_OBJECT && Z_OBJCE_PP(tmp) == scheme->ce) {
-									MAKE_STD_ZVAL(value);
-									ZVAL_ZVAL(value, *tmp, 0, 1);
-								} else {
-									MAKE_STD_ZVAL(value); // probably missed something
-									zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "passed variable is not expected message class. expected %s, but %s given", scheme->ce->name, Z_OBJCE_PP(tmp)->name);
-									return;
-								}
-							}
-						} else {
-							MAKE_STD_ZVAL(value);
-							ZVAL_ZVAL(value, *tmp, 1, 0);
-
-							Z_SET_REFCOUNT_P(value, 1);
-							php_pb_typeconvert(scheme, value TSRMLS_CC);
-						}
-
-						*e = value;
-						zval_ptr_dtor(&garvage);
-					}
-				}
-			}
-
-		}
+		php_protocolbuffers_set_from(instance, params TSRMLS_CC);
 	}
 }
 /* }}} */
+
+/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::setFrom(array $params)
+*/
+PHP_METHOD(protocolbuffers_message, setFrom)
+{
+	zval *params = NULL, *instance = getThis();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"a", &params) == FAILURE) {
+		return;
+	}
+
+	php_protocolbuffers_set_from(instance, params TSRMLS_CC);
+}
+/* }}} */
+
 
 /* {{{ proto mixed ProtocolBuffersMessage::serializeToString()
 */
@@ -1476,6 +1501,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, has,                  arginfo_pb_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get,                  arginfo_pb_message_get, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, set,                  arginfo_pb_message_set, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, setFrom,              arginfo_pb_message_set_from, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, append,               arginfo_pb_message_append, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, hasExtension,         arginfo_pb_message_has_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getExtension,         arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
