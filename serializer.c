@@ -372,7 +372,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 
 	ce = Z_OBJCE_PP(element);
 
-	pb_get_scheme_container(ce->name, ce->name_length, &n_container, NULL TSRMLS_CC);
+	pb_get_scheme_container(ce->name, ce->name_length, &n_container TSRMLS_CC);
 	if (err) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
 		return;

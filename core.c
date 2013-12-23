@@ -11,8 +11,6 @@ static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
 static int unknown_property_name_default_len = sizeof("_unknown");
 
-static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC);
-
 static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result);
 
 
@@ -93,150 +91,62 @@ void pb_scheme_container_init(pb_scheme_container *container)
 }
 
 
-static void pb_convert_msg(HashTable *proto, const char *klass, int klass_len, pb_scheme **scheme, int *size TSRMLS_DC)
-{
-	int n = 0, sz = 0;
-	zval *element = NULL;
-	HashPosition pos;
-	pb_scheme *ischeme;
-
-	sz = zend_hash_num_elements(proto);
-	ischeme = (pb_scheme*)emalloc(sizeof(pb_scheme) * sz);
-
-	for(n = 0, zend_hash_internal_pointer_reset_ex(proto, &pos);
-					zend_hash_get_current_data_ex(proto, (void **)&element, &pos) == SUCCESS;
-					zend_hash_move_forward_ex(proto, &pos), n++
-	) {
-		char *key = {0};
-		uint  key_len = 0;
-		unsigned long index= 0;
-		long ttag = 0;
-		zend_class_entry **c;
-
-		zend_hash_get_current_key_ex(proto, &key, &key_len, &index, 0, &pos);
-		ttag = index;
-
-		ischeme[n].tag = ttag;
-
-		{
-			zval *tmp = NULL;
-			int tsize = 0;
-			char *mangle;
-			int mangle_len;
-
-			ischeme[n].type = pb_get_lval_from_hash_by_tag(proto, ttag, "type", sizeof("type") TSRMLS_CC);
-
-			pb_get_zval_from_hash_by_tag(proto, ttag, "name", sizeof("name"), &tmp TSRMLS_CC);
-
-			tsize				  = Z_STRLEN_P(tmp)+1;
-			ischeme[n].name		= (char*)emalloc(sizeof(char*) * tsize);
-			ischeme[n].name_len	= tsize;
-
-			memcpy(ischeme[n].name, Z_STRVAL_P(tmp), tsize);
-			ischeme[n].name[tsize] = '\0';
-
-			zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)ischeme[n].name, ischeme[n].name_len, 0);
-			ischeme[n].mangled_name	 = mangle;
-			ischeme[n].mangled_name_len = mangle_len;
-
-			ischeme[n].repeated = pb_get_lval_from_hash_by_tag(proto, ttag, "repeated", sizeof("repeated") TSRMLS_CC);
-			ischeme[n].packed   = pb_get_lval_from_hash_by_tag(proto, ttag, "packable", sizeof("packable") TSRMLS_CC);
-
-			if (ischeme[n].type == TYPE_MESSAGE) {
-
-				pb_get_zval_from_hash_by_tag(proto, ttag, "message", sizeof("message"), &tmp TSRMLS_CC);
-
-				if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
-					zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
-					return;
-				}
-				ischeme[n].ce = *c;
-			}
-		}
-	}
-
-	*scheme = ischeme;
-	*size = sz;
-}
-
-int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result, HashTable *descriptor TSRMLS_DC)
+int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC)
 {
 	pb_scheme_container *container, **cn;
-	pb_scheme *ischeme;
-	int scheme_size = 0;
 
 	if (zend_hash_find(PBG(messages), (char*)klass, klass_len, (void **)&cn) != SUCCESS) {
 		zval *ret = NULL;
-		HashTable *proto = NULL;
+		zend_class_entry **ce = NULL;
 
+		if (zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does find", klass);
+			return 1;
+		}
 
-		if (descriptor == NULL) {
-			zend_class_entry **ce = NULL;
-
-			if (zend_lookup_class((char*)klass, klass_len, &ce TSRMLS_CC) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does find", klass);
+		if (zend_call_method(NULL, *ce, NULL, ZEND_STRS("getdescriptor")-1, &ret, 0, NULL, NULL  TSRMLS_CC)) {
+			if (Z_TYPE_P(ret) == IS_ARRAY) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer no longger support array based descriptor");
 				return 1;
-			}
+			} else if (Z_TYPE_P(ret) == IS_OBJECT) {
+				/* TODO: needs refactoring. */
+				zend_class_entry *entry;
+				php_protocolbuffers_descriptor *desc;
 
-			if (zend_call_method(NULL, *ce, NULL, ZEND_STRS("getdescriptor")-1, &ret, 0, NULL, NULL  TSRMLS_CC)) {
-				if (Z_TYPE_P(ret) == IS_ARRAY) {
-					proto = Z_ARRVAL_P(ret);
-				} else if (Z_TYPE_P(ret) == IS_OBJECT) {
-					/* TODO: needs refactoring. */
-					zend_class_entry *entry;
-					php_protocolbuffers_descriptor *desc;
-
-					entry = Z_OBJCE_P(ret);
-					if (entry == protocol_buffers_descriptor_class_entry) {
-						desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
-						desc->free_container = 1;
-						zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
-					} else {
-						zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
-						if (ret != NULL) {
-							zval_ptr_dtor(&ret);
-						}
-						return 1;
-					}
-
-					if (ret != NULL) {
-						zval_ptr_dtor(&ret);
-					}
-
-					*result = desc->container;
-
-					return 0;
+				entry = Z_OBJCE_P(ret);
+				if (entry == protocol_buffers_descriptor_class_entry) {
+					desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
+					desc->free_container = 1;
+					zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
 				} else {
+					zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
 					if (ret != NULL) {
 						zval_ptr_dtor(&ret);
 					}
-					zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 					return 1;
 				}
-			} else {
-				if (EG(exception)) {
-					PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(EG(exception));
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
+
+				if (ret != NULL) {
+					zval_ptr_dtor(&ret);
 				}
+
+				*result = desc->container;
+
+				return 0;
+			} else {
+				if (ret != NULL) {
+					zval_ptr_dtor(&ret);
+				}
+				zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 				return 1;
 			}
 		} else {
-			proto = descriptor;
-		}
-
-		pb_convert_msg(proto, klass, klass_len, &ischeme, &scheme_size TSRMLS_CC);
-		scheme_size = zend_hash_num_elements(proto);
-
-		container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
-		pb_scheme_container_init(container);
-		container->scheme = ischeme;
-		container->size = scheme_size;
-
-		zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&container, sizeof(pb_scheme_container*), NULL);
-
-		if (ret != NULL) {
-			zval_ptr_dtor(&ret);
+			if (EG(exception)) {
+				PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(EG(exception));
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_cointainer failed. %s does not have getDescriptor method", klass);
+			}
+			return 1;
 		}
 	} else {
 		container = *cn;
@@ -511,7 +421,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				int name_length = 0;
 				ulong name_hash = 0;
 
-				pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container, NULL TSRMLS_CC);
+				pb_get_scheme_container(s->ce->name, s->ce->name_length, &c_container TSRMLS_CC);
 
 				MAKE_STD_ZVAL(z_obj);
 				object_init_ex(z_obj, s->ce);
@@ -773,7 +683,7 @@ int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	pb_serializer *ser = NULL;
 	pb_scheme_container *container;
 
-	err = pb_get_scheme_container(ce->name, ce->name_length, &container, NULL TSRMLS_CC);
+	err = pb_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);
 	if (err) {
 		if (EG(exception)) {
 			return 1;
@@ -815,7 +725,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		return 1;
 	}
 
-	err = pb_get_scheme_container(klass, klass_len, &container, NULL TSRMLS_CC);
+	err = pb_get_scheme_container(klass, klass_len, &container TSRMLS_CC);
 	if (err) {
 		if (EG(exception)) {
 			// do nothing
@@ -965,9 +875,9 @@ int php_pb_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC)
 	int j = 0;
 	pb_scheme_container *container = NULL;
 	pb_scheme *scheme = NULL;
-	HashTable *properties = NULL, *proto = NULL;
+	HashTable *properties = NULL;
 
-	pb_get_scheme_container(ce->name, ce->name_length, &container, proto TSRMLS_CC);
+	pb_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);
 	ALLOC_HASHTABLE(properties);
 	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 

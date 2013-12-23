@@ -70,7 +70,7 @@ int pb_get_default_unknown_property_name_len();
 
 void pb_scheme_container_init(pb_scheme_container *container);
 
-int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result, HashTable *descriptor TSRMLS_DC);
+int pb_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC);
 
 void pb_format_string(zval *result, pbf *payload TSRMLS_DC);
 

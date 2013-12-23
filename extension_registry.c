@@ -152,7 +152,6 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	pb_scheme_container *container = NULL;
 	long extension = 0;
 	php_protocolbuffers_extension_registry *registry;
-	HashTable *proto = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"slO", &message_class_name, &message_class_name_len, &extension, &descriptor, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
@@ -234,7 +233,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			// TODO: Refactor this block
 			zval *tmp = NULL;
 
-			pb_get_scheme_container((*ce)->name, (*ce)->name_length, &container, proto TSRMLS_CC);
+			pb_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
 			container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
 
 			container->scheme[container->size].is_extension = 1;
