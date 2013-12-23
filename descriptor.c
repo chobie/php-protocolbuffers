@@ -146,10 +146,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_fields, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_option, 0, 0, 1)
-	ZEND_ARG_INFO(0, option)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_dump, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -207,14 +203,6 @@ PHP_METHOD(protocolbuffers_descriptor, getFields)
 	if (php_protocolbuffers_read_protected_property(instance, ZEND_STRS("fields"), &result TSRMLS_CC)) {
 		RETVAL_ZVAL(result, 0, 1);
 	}
-}
-/* }}} */
-
-/* {{{ proto mixed ProtocolBuffersDescriptor::getOption(int $option)
-*/
-PHP_METHOD(protocolbuffers_descriptor, getOption)
-{
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersDescriptor::getOption does not implement yet");
 }
 /* }}} */
 
@@ -290,7 +278,6 @@ static zend_function_entry php_protocolbuffers_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_descriptor, getName,     arginfo_pb_descriptor_get_name,    ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, getField,    arginfo_pb_descriptor_get_field,   ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, getFields,   arginfo_pb_descriptor_get_fields,  ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getOption,   arginfo_pb_descriptor_get_option,  ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor, dump,        arginfo_pb_descriptor_dump,        ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
