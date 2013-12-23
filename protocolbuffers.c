@@ -64,7 +64,7 @@ zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers);
 
-static zend_class_entry *php_pb_get_exception_base(TSRMLS_D)
+static zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
 	return zend_exception_get_default();
@@ -127,7 +127,7 @@ static void php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidByteSequenceException", 0);
-	protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidByteSequenceException", protocol_buffers_invalid_byte_sequence_class_entry);
 }
@@ -137,17 +137,17 @@ static void php_protocol_buffers_invalid_exception(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidProtocolBufferException", 0);
-	protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidProtocolBufferException", protocol_buffers_invalid_protocolbuffers_exception_class_entry);
 }
 
-static void php_uninitialized_message_exception(TSRMLS_D)
+static void php_protocolbuffers_uninitialized_message_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUninitializedMessageException", 0);
-	protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_pb_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessageException", protocol_buffers_uninitialized_message_exception_class_entry);
 }
@@ -177,18 +177,18 @@ static void php_protocolbuffers_init(TSRMLS_D)
 
 	php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_C);
 	php_protocol_buffers_invalid_exception(TSRMLS_C);
-	php_uninitialized_message_exception(TSRMLS_C);
-	php_pb_descriptor_class(TSRMLS_C);
-	php_pb_filed_descriptor_class(TSRMLS_C);
+	php_protocolbuffers_uninitialized_message_exception(TSRMLS_C);
+	php_protocolbuffers_descriptor_class(TSRMLS_C);
+	php_protocolbuffers_filed_descriptor_class(TSRMLS_C);
 	php_protocol_buffers_serializable(TSRMLS_C);
-	php_pb_message_class(TSRMLS_C);
-	php_pb_message_options_class(TSRMLS_C);
-	php_pb_php_message_options_class(TSRMLS_C);
-	php_pb_descriptor_builder_class(TSRMLS_C);
-	php_pb_unknown_field_class(TSRMLS_C);
-	php_pb_unknown_field_set_class(TSRMLS_C);
-	php_pb_helper_class(TSRMLS_C);
-	php_pb_extension_registry_class(TSRMLS_C);
+	php_protocolbuffers_message_class(TSRMLS_C);
+	php_protocolbuffers_message_options_class(TSRMLS_C);
+	php_protocolbuffers_php_message_options_class(TSRMLS_C);
+	php_protocolbuffers_descriptor_builder_class(TSRMLS_C);
+	php_protocolbuffers_unknown_field_class(TSRMLS_C);
+	php_protocolbuffers_unknown_field_set_class(TSRMLS_C);
+	php_protocolbuffers_helper_class(TSRMLS_C);
+	php_protocolbuffers_extension_registry_class(TSRMLS_C);
 
 #define PB_DECLARE_CONST_STRING(name, value) \
 	zend_declare_class_constant_string(protocol_buffers_class_entry, ZEND_STRS(#name)-1, "php" TSRMLS_CC);

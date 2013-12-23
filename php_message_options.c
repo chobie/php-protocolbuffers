@@ -47,7 +47,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_use_wakeup_and_sleep, 
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static void php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAMETERS, char *name, size_t length, int type)
+static void php_protocolbuffers_message_options_set_value(INTERNAL_FUNCTION_PARAMETERS, char *name, size_t length, int type)
 {
 	zval *value = NULL, **target = NULL, *instance = getThis();
 
@@ -77,7 +77,7 @@ static void php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAMETERS, char 
 */
 PHP_METHOD(protocolbuffers_php_message_options, setUseWakeupAndSleep)
 {
-	php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("use_wakeup_and_sleep"), IS_BOOL);
+	php_protocolbuffers_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("use_wakeup_and_sleep"), IS_BOOL);
 }
 /* }}} */
 
@@ -85,7 +85,7 @@ PHP_METHOD(protocolbuffers_php_message_options, setUseWakeupAndSleep)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 {
-	php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("use_single_property"), IS_BOOL);
+	php_protocolbuffers_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("use_single_property"), IS_BOOL);
 }
 /* }}} */
 
@@ -93,7 +93,7 @@ PHP_METHOD(protocolbuffers_php_message_options, setUseSingleProperty)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 {
-	php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("single_property_name"), IS_STRING);
+	php_protocolbuffers_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("single_property_name"), IS_STRING);
 }
 /* }}} */
 
@@ -101,7 +101,7 @@ PHP_METHOD(protocolbuffers_php_message_options, setSinglePropertyName)
 */
 PHP_METHOD(protocolbuffers_php_message_options, setProcessUnknownFields)
 {
-	php_pb_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("process_unknown_fields"), IS_BOOL);
+	php_protocolbuffers_message_options_set_value(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("process_unknown_fields"), IS_BOOL);
 }
 /* }}} */
 
@@ -113,7 +113,7 @@ static zend_function_entry php_protocolbuffers_php_message_options_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_php_message_options_class(TSRMLS_D)
+void php_protocolbuffers_php_message_options_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

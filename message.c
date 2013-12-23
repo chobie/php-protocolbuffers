@@ -44,7 +44,7 @@ enum ProtocolBuffers_MagicMethod {
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
 
-#define PHP_PB_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
+#define php_protocolbuffers_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
 	{\
 		zend_class_entry *__ce;\
 		int __err;\
@@ -63,7 +63,7 @@ static zend_object_handlers php_protocolbuffers_message_object_handlers;
 	}
 
 
-#define PHP_PB_MESSAGE_CHECK_SCHEME PHP_PB_MESSAGE_CHECK_SCHEME2(instance, &container, proto)
+#define php_protocolbuffers_MESSAGE_CHECK_SCHEME php_protocolbuffers_MESSAGE_CHECK_SCHEME2(instance, &container, proto)
 
 static void php_protocolbuffers_message_free_storage(php_protocolbuffers_message *object TSRMLS_DC)
 {
@@ -245,7 +245,7 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 						pb_scheme_container *c;
 						HashTable *_htt = NULL, *_hts = NULL;
 
-						PHP_PB_MESSAGE_CHECK_SCHEME2(*tmp, &c, p)
+						php_protocolbuffers_MESSAGE_CHECK_SCHEME2(*tmp, &c, p)
 						php_protocolbuffers_get_hash(c, c->scheme, *tmp, &n, &n_len, &_htt TSRMLS_CC);
 						php_protocolbuffers_get_hash(c, c->scheme, *tmp2, &n, &n_len, &_hts TSRMLS_CC);
 
@@ -300,7 +300,7 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 	}
 }
 
-static inline void php_pb_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
+static inline void php_protocolbuffers_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
 {
 	// TODO: check message
 #define TYPE_CONVERT(vl) \
@@ -497,7 +497,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 		if (container->use_single_property > 0) {
 			MAKE_STD_ZVAL(vl);
 			ZVAL_ZVAL(vl, *e, 1, 1);
-			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+			php_protocolbuffers_typeconvert(scheme, vl TSRMLS_CC);
 
 			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
 		} else {
@@ -506,7 +506,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 			MAKE_STD_ZVAL(vl);
 			ZVAL_ZVAL(vl, value, 1, 1);
 
-			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+			php_protocolbuffers_typeconvert(scheme, vl TSRMLS_CC);
 			*e = vl;
 			zval_ptr_dtor(&garvage);
 		}
@@ -543,7 +543,7 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 			} else {
 				ZVAL_NULL(vl);
 			}
-			php_pb_typeconvert(scheme, vl TSRMLS_CC);
+			php_protocolbuffers_typeconvert(scheme, vl TSRMLS_CC);
 
 			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
 		} else {
@@ -671,7 +671,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container, zval *instance TSRMLS_DC)
+static int php_protocolbuffers_get_unknown_zval(zval **retval, pb_scheme_container *container, zval *instance TSRMLS_DC)
 {
 	zval **unknown_fieldset = NULL;
 	HashTable *target = NULL;
@@ -705,7 +705,7 @@ static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container
 	return result;
 }
 
-static enum ProtocolBuffers_MagicMethod php_pb_parse_magic_method(const char *name, size_t name_len, smart_str *buf, smart_str *buf2)
+static enum ProtocolBuffers_MagicMethod php_protocolbuffers_parse_magic_method(const char *name, size_t name_len, smart_str *buf, smart_str *buf2)
 {
 	int i = 0;
 	int last_is_capital = 0;
@@ -784,7 +784,7 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 	uint key_len;
 	unsigned long index= 0;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(params), &pos);
@@ -892,7 +892,7 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 
 	php_protocolbuffers_get_hash(container, container->scheme, instance, &n, &n_len, &htt TSRMLS_CC);
 	php_protocolbuffers_get_hash(container, container->scheme, object, &n, &n_len, &hts TSRMLS_CC);
@@ -912,7 +912,7 @@ PHP_METHOD(protocolbuffers_message, current)
 	int name_len = 0;
 	HashTable *hash;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	if (container->use_single_property < 1) {
@@ -947,7 +947,7 @@ PHP_METHOD(protocolbuffers_message, key)
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	RETURN_STRING(container->scheme[message->offset].name, 1);
@@ -962,7 +962,7 @@ PHP_METHOD(protocolbuffers_message, next)
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 	message->offset++;
 }
@@ -976,7 +976,7 @@ PHP_METHOD(protocolbuffers_message, rewind)
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	if (message->max == 0) {
@@ -994,7 +994,7 @@ PHP_METHOD(protocolbuffers_message, valid)
 	pb_scheme_container *container;
 	php_protocolbuffers_message *message;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	message = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
 
 	if (-1 < message->offset && message->offset < message->max) {
@@ -1019,7 +1019,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len);
 }
 /* }}} */
@@ -1038,7 +1038,7 @@ PHP_METHOD(protocolbuffers_message, clearAll)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 
 	for (i = 0; i < container->size; i++) {
 		php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, container->scheme[i].name, container->scheme[i].name_len, NULL, 0);
@@ -1047,8 +1047,8 @@ PHP_METHOD(protocolbuffers_message, clearAll)
 	if (clear_unknown_fields > 0 && container->process_unknown_fields > 0) {
 		zval *unknown_fieldset = NULL;
 
-		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
-			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
+		if (php_protocolbuffers_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+			php_protocolbuffers_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
 		}
 	}
 }
@@ -1070,14 +1070,14 @@ PHP_METHOD(protocolbuffers_message, __call)
 		return;
 	}
 
-	flag = php_pb_parse_magic_method(name, name_len, &buf, &buf2);
+	flag = php_protocolbuffers_parse_magic_method(name, name_len, &buf, &buf2);
 
 	if (flag == 0) {
 		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	switch (flag) {
 		case MAGICMETHOD_GET:
 			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
@@ -1126,7 +1126,7 @@ PHP_METHOD(protocolbuffers_message, has)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len);
 }
 /* }}} */
@@ -1145,7 +1145,7 @@ PHP_METHOD(protocolbuffers_message, get)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len);
 }
 /* }}} */
@@ -1164,7 +1164,7 @@ PHP_METHOD(protocolbuffers_message, set)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value);
 }
 
@@ -1183,7 +1183,7 @@ PHP_METHOD(protocolbuffers_message, append)
 		return;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value);
 }
 
@@ -1218,7 +1218,7 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 		goto err;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	if (container->use_single_property > 0) {
 		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
 			return;
@@ -1276,7 +1276,7 @@ PHP_METHOD(protocolbuffers_message, hasExtension)
 		goto err;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	if (container->use_single_property > 0) {
 		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
 			return;
@@ -1334,7 +1334,7 @@ PHP_METHOD(protocolbuffers_message, setExtension)
 		goto err;
 	}
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	if (container->use_single_property > 0) {
 		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len+1, (void **)&b) == FAILURE) {
 			return;
@@ -1376,10 +1376,10 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 	zval *unknown_fieldset, *instance = getThis();
 	pb_scheme_container *container;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 	if (container->process_unknown_fields > 0) {
-		if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
-			php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
+		if (php_protocolbuffers_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+			php_protocolbuffers_unknown_field_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, unknown_fieldset);
 		}
 	}
 }
@@ -1392,14 +1392,14 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 	zval *unknown_fieldset = NULL, *instance = getThis();
 	pb_scheme_container *container;
 
-	PHP_PB_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_MESSAGE_CHECK_SCHEME
 
 	if (container->process_unknown_fields < 1) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "process unknown fields flag seems false");
 		return;
 	}
 
-	if (php_pb_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
+	if (php_protocolbuffers_get_unknown_zval(&unknown_fieldset, container, instance TSRMLS_CC)) {
 		RETVAL_ZVAL(unknown_fieldset, 1, 0);
 	} else {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "unknown field property does not find");
@@ -1437,7 +1437,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_message_class(TSRMLS_D)
+void php_protocolbuffers_message_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

@@ -53,7 +53,7 @@ static const char *fields_map[] = {
 	"TYPE_SINT64",
 };
 
-int php_pb_descriptor_properties_init(zval *object TSRMLS_DC)
+int php_protocolbuffers_descriptor_properties_init(zval *object TSRMLS_DC)
 {
 	zval *pp = NULL;
 	HashTable *properties = NULL;
@@ -282,7 +282,7 @@ static zend_function_entry php_protocolbuffers_descriptor_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_descriptor_class(TSRMLS_D)
+void php_protocolbuffers_descriptor_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

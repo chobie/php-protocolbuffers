@@ -31,6 +31,6 @@
 #ifndef PHP_PROTOCOLBUFFERS_PHP_MESSAGE_OPTIONS_H
 #define PHP_PROTOCOLBUFFERS_PHP_MESSAGE_OPTIONS_H
 
-void php_pb_php_message_options_class(TSRMLS_D);
+void php_protocolbuffers_php_message_options_class(TSRMLS_D);
 
 #endif

@@ -50,7 +50,7 @@ zend_object_value php_protocol_buffers_unknown_field_set_new(zend_class_entry *c
 }
 
 
-void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
+void php_protocolbuffers_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 {
 	HashTable *properties = NULL;
 	zval *fields = NULL;
@@ -64,7 +64,7 @@ void php_pb_unknown_field_set_properties_init(zval *object TSRMLS_DC)
 	zend_merge_properties(object, properties, 1 TSRMLS_CC);
 }
 
-void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
+void php_protocolbuffers_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 {
 	zval *fields = NULL, **prior_fields = NULL;
 	char *name = {0};
@@ -83,7 +83,7 @@ void php_pb_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 	efree(name);
 }
 
-int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, php_protocolbuffers_unknown_field **f)
+int php_protocolbuffers_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, char *name, int name_len, php_protocolbuffers_unknown_field **f)
 {
 	zval **element = NULL, *fields = NULL;
 	HashPosition pos;
@@ -114,7 +114,7 @@ int php_pb_unknown_field_get_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance,
 }
 
 
-void php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, zval *field)
+void php_protocolbuffers_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETERS, zval *instance, int number, zval *field)
 {
 	zval *fields = NULL;
 
@@ -203,7 +203,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 	}
 
 	unknown_field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, field);
-	php_pb_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, unknown_field->number, field);
+	php_protocolbuffers_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, unknown_field->number, field);
 }
 /* }}} */
 
@@ -298,7 +298,7 @@ static zend_function_entry php_protocolbuffers_unknown_field_set_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_unknown_field_set_class(TSRMLS_D)
+void php_protocolbuffers_unknown_field_set_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

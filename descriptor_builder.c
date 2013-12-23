@@ -35,7 +35,7 @@
 
 #define PHP_PROTOCOLBUFFERS_MAX_EXTENSION_RANGE 536870912
 
-int php_pb_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
+int php_protocolbuffers_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC)
 {
 	char *key;
 	int key_len;
@@ -216,13 +216,13 @@ static int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag,
 	scheme->is_extension = 0;
 	scheme->tag = tag;
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("type"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("type"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
 	}
 	scheme->type = Z_LVAL_P(tmp);
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("name"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("name"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_STRING) {
 		convert_to_string(tmp);
 	}
@@ -252,25 +252,25 @@ static int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag,
 	scheme->mangled_name_h   = zend_inline_hash_func(mangle, mangle_len);
 	scheme->skip = 0;
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("required"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("required"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
 	}
 	scheme->required = Z_LVAL_P(tmp);
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("optional"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("optional"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
 	}
 	scheme->optional = Z_LVAL_P(tmp);
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("repeated"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("repeated"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
 	}
 	scheme->repeated = Z_LVAL_P(tmp);
 
-	php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("packable"), &tmp TSRMLS_CC);
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("packable"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
 	}
@@ -279,7 +279,7 @@ static int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag,
 	if (scheme->type == TYPE_MESSAGE) {
 		zend_class_entry **c;
 
-		php_pb_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("message"), &tmp TSRMLS_CC);
+		php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("message"), &tmp TSRMLS_CC);
 
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
@@ -474,7 +474,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 	MAKE_STD_ZVAL(result);
 	object_init_ex(result, protocol_buffers_descriptor_class_entry);
-	php_pb_descriptor_properties_init(result TSRMLS_CC);
+	php_protocolbuffers_descriptor_properties_init(result TSRMLS_CC);
 	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, result);
 
 	name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("name")-1, 0 TSRMLS_CC);
@@ -591,7 +591,7 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_descriptor_builder_class(TSRMLS_D)
+void php_protocolbuffers_descriptor_builder_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

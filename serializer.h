@@ -31,10 +31,10 @@
 #ifndef PHP_PROTOCOLBUFFERS_SERIALIZER_H
 #define PHP_PROTOCOLBUFFERS_SERIALIZER_H
 
-void pb_serializer_destroy(pb_serializer *serializer);
+void php_protocolbuffers_serializer_destroy(pb_serializer *serializer);
 
-void pb_serializer_init(pb_serializer **serializer);
+void php_protocolbuffers_serializer_init(pb_serializer **serializer);
 
-int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer);
+int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer);
 
 #endif

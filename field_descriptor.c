@@ -130,7 +130,7 @@ static int php_protocolbuffers_field_descriptor_process_params(zval **zv TSRMLS_
 	return 0;
 }
 
-int php_pb_field_descriptor_get_name(zval *instance, char **retval, int *len TSRMLS_DC)
+int php_protocolbuffers_field_descriptor_get_name(zval *instance, char **retval, int *len TSRMLS_DC)
 {
 	zval *result = NULL;
 
@@ -145,7 +145,7 @@ int php_pb_field_descriptor_get_name(zval *instance, char **retval, int *len TSR
 	 return 0;
 }
 
-static void php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAMETERS, char *property, size_t property_length, int retval_type)
+static void php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_PARAMETERS, char *property, size_t property_length, int retval_type)
 {
 	zval *result = NULL, *instance = getThis();
 
@@ -211,7 +211,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, __construct)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, getType)
 {
-	php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("type"), IS_LONG);
+	php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("type"), IS_LONG);
 }
 /* }}} */
 
@@ -219,7 +219,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, getType)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, getDefault)
 {
-	php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("default"), 0);
+	php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("default"), 0);
 }
 /* }}} */
 
@@ -227,7 +227,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, getDefault)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, getName)
 {
-	php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("name"), IS_STRING);
+	php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("name"), IS_STRING);
 }
 /* }}} */
 
@@ -235,7 +235,7 @@ PHP_METHOD(protocolbuffers_field_descriptor, getName)
 */
 PHP_METHOD(protocolbuffers_field_descriptor, isExtension)
 {
-	php_pb_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("extension"), IS_BOOL);
+	php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_STRS("extension"), IS_BOOL);
 }
 /* }}} */
 
@@ -248,7 +248,7 @@ static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_filed_descriptor_class(TSRMLS_D)
+void php_protocolbuffers_filed_descriptor_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

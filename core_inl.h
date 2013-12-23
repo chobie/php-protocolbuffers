@@ -297,7 +297,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
 	return NULL;
 }
 
-static inline void php_pb_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
+static inline void php_protocolbuffers_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
 {
 	char *name;
 	int name_len;
@@ -389,7 +389,7 @@ static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, 
 			php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 		}
 
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+		php_protocolbuffers_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
 	}
 
 	return 1;
@@ -444,7 +444,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 				zval_ptr_dtor(&dz);
 				return 0;
 		}
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+		php_protocolbuffers_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
 	}
 
 	return 1;
@@ -494,7 +494,7 @@ static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 				return 0;
 		}
 		php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
-		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
+		php_protocolbuffers_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
 	}
 
 	return 1;

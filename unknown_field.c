@@ -34,7 +34,7 @@
 static zend_object_handlers php_protocolbuffers_unknown_field_object_handlers;
 
 
-void php_pb_unknown_field_properties_init(zval *object TSRMLS_DC)
+void php_protocolbuffers_unknown_field_properties_init(zval *object TSRMLS_DC)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
 	HashTable *properties;
@@ -85,7 +85,7 @@ static HashTable *php_protocolbuffers_unknown_field_get_debug_info(zval *obj, in
 	return ht;
 }
 
-void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
+void php_protocolbuffers_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
 
@@ -93,7 +93,7 @@ void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 	field->number = number;
 }
 
-void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
+void php_protocolbuffers_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
 
@@ -103,7 +103,7 @@ void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 
 #else
 
-void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
+void php_protocolbuffers_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
 	char *name = {0};
@@ -123,7 +123,7 @@ void php_pb_unknown_field_set_number(zval *instance, int number TSRMLS_DC)
 	efree(name);
 }
 
-void php_pb_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
+void php_protocolbuffers_unknown_field_set_type(zval *instance, int type TSRMLS_DC)
 {
 	php_protocolbuffers_unknown_field *field = NULL;
 	char *name = {0};
@@ -179,7 +179,7 @@ static void php_protocolbuffers_unknown_field_free_storage(php_protocolbuffers_u
 	efree(object);
 }
 
-static void php_pb_check_type_return(INTERNAL_FUNCTION_PARAMETERS, enum WireType type)
+static void php_protocolbuffers_check_type_return(INTERNAL_FUNCTION_PARAMETERS, enum WireType type)
 {
 	zval *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
@@ -193,7 +193,7 @@ static void php_pb_check_type_return(INTERNAL_FUNCTION_PARAMETERS, enum WireType
 
 }
 
-static void php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAMETERS, enum WireType type, enum FieldType field_type)
+static void php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAMETERS, enum WireType type, enum FieldType field_type)
 {
 	zval *tmp = NULL, *result = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *field = NULL;
@@ -333,7 +333,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getType)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT, -1);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT, -1);
 }
 /* }}} */
 
@@ -341,7 +341,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED, -1);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED, -1);
 }
 /* }}} */
 
@@ -349,7 +349,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, -1);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, -1);
 }
 /* }}} */
 
@@ -357,7 +357,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, -1);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, -1);
 }
 /* }}} */
 
@@ -365,7 +365,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, TYPE_FLOAT);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, TYPE_FLOAT);
 }
 /* }}} */
 
@@ -373,7 +373,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 {
-	php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, TYPE_DOUBLE);
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, TYPE_DOUBLE);
 }
 /* }}} */
 
@@ -381,7 +381,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isVarint)
 {
-	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT);
+	php_protocolbuffers_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT);
 }
 /* }}} */
 
@@ -389,7 +389,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isVarint)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isFixed64)
 {
-	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64);
+	php_protocolbuffers_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64);
 }
 /* }}} */
 
@@ -397,7 +397,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isFixed64)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isLengthDelimited)
 {
-	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED);
+	php_protocolbuffers_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED);
 }
 /* }}} */
 
@@ -405,7 +405,7 @@ PHP_METHOD(protocolbuffers_unknown_field, isLengthDelimited)
 */
 PHP_METHOD(protocolbuffers_unknown_field, isFixed32)
 {
-	php_pb_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32);
+	php_protocolbuffers_check_type_return(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32);
 }
 /* }}} */
 
@@ -426,7 +426,7 @@ static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_unknown_field_class(TSRMLS_D)
+void php_protocolbuffers_unknown_field_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

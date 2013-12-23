@@ -379,7 +379,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 	/* TODO: add error handling */
 
-	pb_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
+	php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, *element, n_container, &n_ser);
 	if (EG(exception)) {
 		return;
 	}
@@ -388,7 +388,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	pb_serializer_write_varint32(ser, n_ser->buffer_size);
 	pb_serializer_write_chararray(ser, n_ser->buffer, n_ser->buffer_size);
 
-	pb_serializer_destroy(n_ser);
+	php_protocolbuffers_serializer_destroy(n_ser);
 }
 
 static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
@@ -517,7 +517,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 			zval **element;
 
 			if (is_packed == 1) {
-				pb_serializer_init(&n_ser);
+				php_protocolbuffers_serializer_init(&n_ser);
 			} else {
 				n_ser = ser;
 			}
@@ -542,7 +542,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 				pb_serializer_write_varint32(ser, n_ser->buffer_size);
 				pb_serializer_write_chararray(ser, (unsigned char*)n_ser->buffer, n_ser->buffer_size);
 
-				pb_serializer_destroy(n_ser);
+				php_protocolbuffers_serializer_destroy(n_ser);
 			}
 
 		} else {
@@ -572,7 +572,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 	}
 }
 
-void pb_serializer_destroy(pb_serializer *serializer)
+void php_protocolbuffers_serializer_destroy(pb_serializer *serializer)
 {
 	if (serializer != NULL) {
 		if (serializer->buffer != NULL) {
@@ -587,7 +587,7 @@ void pb_serializer_destroy(pb_serializer *serializer)
 	}
 }
 
-void pb_serializer_init(pb_serializer **serializer)
+void php_protocolbuffers_serializer_init(pb_serializer **serializer)
 {
 	pb_serializer *ser;
 	ser = (pb_serializer*)emalloc(sizeof(pb_serializer));
@@ -601,7 +601,7 @@ void pb_serializer_init(pb_serializer **serializer)
 	*serializer = ser;
 }
 
-int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
+int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
 	int i = 0;
 	pb_serializer *ser;
@@ -609,7 +609,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	HashTable *hash = NULL;
 	pb_scheme *scheme;
 
-	pb_serializer_init(&ser);
+	php_protocolbuffers_serializer_init(&ser);
 
 	if (container->use_wakeup_and_sleep > 0) {
 		php_protocolbuffers_execute_sleep(klass, container TSRMLS_CC);
@@ -621,14 +621,14 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
 			hash = Z_ARRVAL_PP(c);
 		} else {
-			pb_serializer_destroy(ser);
+			php_protocolbuffers_serializer_destroy(ser);
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
 			return -1;
 		}
 	}
 
 	if (container->size < 1 && container->process_unknown_fields < 1) {
-		pb_serializer_destroy(ser);
+		php_protocolbuffers_serializer_destroy(ser);
 		return -1;
 	}
 
@@ -700,7 +700,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 		}
 
 		if (EG(exception)) {
-			pb_serializer_destroy(ser);
+			php_protocolbuffers_serializer_destroy(ser);
 			return 1;
 		}
 	}

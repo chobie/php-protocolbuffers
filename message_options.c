@@ -91,7 +91,7 @@ static zend_function_entry php_protocolbuffers_message_options_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_message_options_class(TSRMLS_D)
+void php_protocolbuffers_message_options_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 

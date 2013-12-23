@@ -30,7 +30,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_decode64, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static void php_pb_helper_debug_zval(zval **value TSRMLS_DC)
+static void php_protocolbuffers_helper_debug_zval(zval **value TSRMLS_DC)
 {
 	zval *val = *value;
 
@@ -67,7 +67,7 @@ PHP_METHOD(protocolbuffers_helper, debugZval)
 		"z", &val) == FAILURE) {
 		return;
 	}
-	php_pb_helper_debug_zval(&val TSRMLS_CC);
+	php_protocolbuffers_helper_debug_zval(&val TSRMLS_CC);
 }
 /* }}} */
 
@@ -229,7 +229,7 @@ static zend_function_entry protocolbuffers_helper_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-void php_pb_helper_class(TSRMLS_D)
+void php_protocolbuffers_helper_class(TSRMLS_D)
 {
 	zend_class_entry ce;
 
