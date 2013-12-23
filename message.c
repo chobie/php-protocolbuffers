@@ -1028,7 +1028,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 	}
 
 	PHP_PB_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, NULL, 0);
+	php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len);
 }
 /* }}} */
 

@@ -121,9 +121,23 @@ if ($t->get("TagId") == array(1, 2)) {
 } else {
 	echo "FAULT" . PHP_EOL;
 }
+$t->clear("from_box_id");
+if ($t->getFromBoxId() == null) {
+	echo "OK" . PHP_EOL;
+} else {
+	echo "FAULT" . PHP_EOL;
+}
+$t->clear("IsDraft");
+if ($t->getIsDraft() == null) {
+	echo "OK" . PHP_EOL;
+} else {
+	echo "FAULT" . PHP_EOL;
+}
 
 
 --EXPECT--
+OK
+OK
 OK
 OK
 OK
