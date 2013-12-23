@@ -233,7 +233,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 			// TODO: Refactor this block
 			zval *tmp = NULL;
 
-			pb_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
+			php_protocolbuffers_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
 			container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
 
 			container->scheme[container->size].is_extension = 1;

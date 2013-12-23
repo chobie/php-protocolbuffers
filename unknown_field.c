@@ -255,7 +255,7 @@ static void php_pb_unknown_field_get_as(INTERNAL_FUNCTION_PARAMETERS, enum WireT
 				return;
 			}
 
-			pb_format_string(tmp, &__payload TSRMLS_CC);
+			php_protocolbuffers_format_string(tmp, &__payload TSRMLS_CC);
 		}
 
 		zend_hash_next_index_insert(Z_ARRVAL_P(result), &tmp, sizeof(zval *), NULL);

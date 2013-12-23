@@ -50,13 +50,13 @@ static zend_object_handlers php_protocolbuffers_message_object_handlers;
 		int __err;\
 		\
 		__ce  = Z_OBJCE_P(instance);\
-		__err = pb_get_scheme_container(__ce->name, __ce->name_length, container TSRMLS_CC);\
+		__err = php_protocolbuffers_get_scheme_container(__ce->name, __ce->name_length, container TSRMLS_CC);\
 		if (__err) {\
 			if (EG(exception)) {\
 				return;\
 			} else {\
 				/* TODO: improve displaying error message */\
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", __ce->name);\
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_get_scheme_container failed. %s does not have getDescriptor method", __ce->name);\
 				return;\
 			}\
 		}\
@@ -475,7 +475,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 			ZVAL_ZVAL(param, value, 1, 1);
 
 			object_init_ex(tmp, scheme->ce);
-			php_pb_properties_init(tmp, scheme->ce TSRMLS_CC);
+			php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
 			zend_call_method_with_1_params(&tmp, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
 			zval_ptr_dtor(&param);
 
@@ -684,11 +684,11 @@ static int php_pb_get_unknown_zval(zval **retval, pb_scheme_container *container
 			return result;
 		}
 
-		unknown_name     = pb_get_default_unknown_property_name();
-		unknown_name_len = pb_get_default_unknown_property_name_len();
+		unknown_name     = php_protocolbuffers_get_default_unknown_property_name();
+		unknown_name_len = php_protocolbuffers_get_default_unknown_property_name_len();
 		target = Z_ARRVAL_PP(unknown_property);
 	} else {
-		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)pb_get_default_unknown_property_name(), pb_get_default_unknown_property_name_len(), 0);
+		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)php_protocolbuffers_get_default_unknown_property_name(), php_protocolbuffers_get_default_unknown_property_name_len(), 0);
 		target = Z_OBJPROP_P(instance);
 		free = 1;
 	}

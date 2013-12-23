@@ -352,7 +352,7 @@ static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
 			MAKE_STD_ZVAL(dz);
-			process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
+			php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
 		} else {
 			/* skip unknown field */
 		}
@@ -386,7 +386,7 @@ static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, 
 				return 0;
 		}
 		if (scheme->type != TYPE_BOOL) {
-			pb_format_string(dz, &__payload TSRMLS_CC);
+			php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 		}
 
 		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
@@ -402,7 +402,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
-			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
+			php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t *)data, 8);
 		} else {
 			/* skip unknown field */
 		}
@@ -419,7 +419,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 				d = decode_double(v);
 
 				__payload.type = TYPE_DOUBLE;__payload.value.d = d;
-				pb_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 			}
 			break;
 			case TYPE_FIXED64:
@@ -428,7 +428,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 
 				memcpy(&v, data, 8);
 				__payload.type = TYPE_UINT64;__payload.value.uint64 = v;
-				pb_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 			}
 			break;
 			case TYPE_SFIXED64:
@@ -437,7 +437,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 				memcpy(&l, data, 8);
 
 				__payload.type = TYPE_INT64;__payload.value.int64 = l;
-				pb_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 			}
 			break;
 			default:
@@ -457,7 +457,7 @@ static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 
 	if (scheme == NULL) {
 		if (container->process_unknown_fields > 0) {
-			process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
+			php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, 4);
 		} else {
 			/* skip unknown field */
 		}
@@ -493,7 +493,7 @@ static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 				zval_ptr_dtor(&dz);
 				return 0;
 		}
-		pb_format_string(dz, &__payload TSRMLS_CC);
+		php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
 		php_pb_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
 	}
 

@@ -128,7 +128,7 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->name_len = 0;
 	object->free_container = 0;
 	object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
-	pb_scheme_container_init(object->container);
+	php_protocolbuffers_scheme_container_init(object->container);
 
 	return retval;
 }

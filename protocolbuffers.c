@@ -317,7 +317,7 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 				}
 
 				if ((*element)->orig_single_property_name != NULL &&
-					memcmp((*element)->orig_single_property_name, pb_get_default_single_property_name(), pb_get_default_single_property_name_len()) != 0) {
+					memcmp((*element)->orig_single_property_name, php_protocolbuffers_get_default_single_property_name(), php_protocolbuffers_get_default_single_property_name_len()) != 0) {
 					efree((*element)->orig_single_property_name);
 				}
 

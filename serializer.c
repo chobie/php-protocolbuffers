@@ -372,9 +372,9 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 
 	ce = Z_OBJCE_PP(element);
 
-	pb_get_scheme_container(ce->name, ce->name_length, &n_container TSRMLS_CC);
+	php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &n_container TSRMLS_CC);
 	if (err) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
 		return;
 	}
 	/* TODO: add error handling */
@@ -612,7 +612,7 @@ int pb_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_conta
 	pb_serializer_init(&ser);
 
 	if (container->use_wakeup_and_sleep > 0) {
-		pb_execute_sleep(klass, container TSRMLS_CC);
+		php_protocolbuffers_execute_sleep(klass, container TSRMLS_CC);
 	}
 
 	if (container->use_single_property < 1) {
