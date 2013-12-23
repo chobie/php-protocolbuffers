@@ -33,6 +33,19 @@ int php_protocolbuffers_read_protected_property(zval *instance, char *name, size
 	return retval;
 }
 
+int php_protocolbuffers_set_protected_property(zval *instance, char *name, size_t name_len, zval *value TSRMLS_DC)
+{
+	zval **tmp;
+	char *prop_name;
+	int prop_name_len = 0;
+
+	zend_mangle_property_name(&prop_name, &prop_name_len, (char*)"*", 1, name, name_len, 0);
+	zend_hash_update(Z_OBJPROP_P(instance), prop_name, prop_name_len, (void **)&value, sizeof(zval*), NULL);
+	efree(prop_name);
+
+	return 1;
+}
+
 char *pb_get_default_single_property_name()
 {
 	return single_property_name_default;
