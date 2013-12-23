@@ -476,7 +476,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 
 			if (s == NULL) {
 				if (container->process_unknown_fields > 0) {
-					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, data, payload);
+					process_unknown_field_bytes(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, tag, wiretype, (uint8_t*)data, payload);
 				} else {
 					/* skip unknown field */
 				}

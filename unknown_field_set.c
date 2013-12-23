@@ -196,8 +196,6 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 {
 	zval *field = NULL, *instance = getThis();
 	php_protocolbuffers_unknown_field *unknown_field = NULL;
-	char *name = {0};
-	int name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"O", &field, protocol_buffers_unknown_field_class_entry) == FAILURE) {
