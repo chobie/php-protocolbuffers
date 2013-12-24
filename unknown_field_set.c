@@ -295,7 +295,7 @@ static zend_function_entry php_protocolbuffers_unknown_field_set_methods[] = {
 	PHP_ME(protocolbuffers_unknown_field_set, next,    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field_set, rewind,  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field_set, valid,   NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_unknown_field_set_class(TSRMLS_D)

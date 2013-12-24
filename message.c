@@ -1434,7 +1434,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, valid,     NULL, ZEND_ACC_PUBLIC)
 	/* magic method */
 	PHP_ME(protocolbuffers_message, __call,   arginfo_pb_message___call, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_message_class(TSRMLS_D)

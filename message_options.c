@@ -88,7 +88,7 @@ PHP_METHOD(protocolbuffers_message_options, getExtension)
 
 static zend_function_entry php_protocolbuffers_message_options_methods[] = {
 	PHP_ME(protocolbuffers_message_options, getExtension, arginfo_pb_message_options_get_options, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_message_options_class(TSRMLS_D)

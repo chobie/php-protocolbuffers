@@ -94,6 +94,10 @@
 #define PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(exception) zend_exception_error(exception, E_ERROR TSRMLS_CC)
 #endif
 
+#if PHP_VERSION_ID < 50300
+#define PHP_FE_END            { NULL, NULL, NULL, 0, 0 }
+#endif
+
 // long long macros to be used because gcc and vc++ use different suffixes,
 // and different size specifiers in format strings
 #undef GOOGLE_LONGLONG

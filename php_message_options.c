@@ -110,7 +110,7 @@ static zend_function_entry php_protocolbuffers_php_message_options_methods[] = {
 	PHP_ME(protocolbuffers_php_message_options, setUseWakeupAndSleep, arginfo_pb_php_message_options_set_use_wakeup_and_sleep, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_php_message_options, setSinglePropertyName, arginfo_pb_php_message_options_set_single_property_name, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_php_message_options, setProcessUnknownFields, arginfo_pb_php_message_options_set_process_unkown_fields, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_php_message_options_class(TSRMLS_D)

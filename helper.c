@@ -226,7 +226,7 @@ static zend_function_entry protocolbuffers_helper_methods[] = {
 	PHP_ME(protocolbuffers_helper, zigzagEncode64, arginfo_pb_helper_zigzag_encode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_helper, zigzagDecode64, arginfo_pb_helper_zigzag_decode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(protocolbuffers_helper, debugZval, arginfo_pb_helper_debug_zval, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_helper_class(TSRMLS_D)

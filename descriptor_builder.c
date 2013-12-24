@@ -588,7 +588,7 @@ static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, addExtensionRange, arginfo_pb_descriptor_builder_add_extension_range, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_pb_descriptor_builder_get_options, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_descriptor_builder_class(TSRMLS_D)

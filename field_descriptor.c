@@ -245,7 +245,7 @@ static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
 	PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_pb_field_descriptor_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_pb_field_descriptor_get_default, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, isExtension, NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_protocolbuffers_filed_descriptor_class(TSRMLS_D)

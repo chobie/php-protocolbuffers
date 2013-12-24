@@ -119,7 +119,7 @@ PHP_METHOD(protocolbuffers, encode)
 static zend_function_entry php_protocolbuffers_methods[] = {
 	PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers, encode, NULL, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static void php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_D)
@@ -154,7 +154,7 @@ static void php_protocolbuffers_uninitialized_message_exception(TSRMLS_D)
 
 static zend_function_entry php_protocolbuffers_describable_methods[] = {
 	ZEND_FENTRY(getDescriptor, NULL, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static void php_protocol_buffers_serializable(TSRMLS_D)
