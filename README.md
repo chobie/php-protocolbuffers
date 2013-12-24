@@ -1,5 +1,4 @@
-Protocol Buffers Extension for PHP
-==================================
+![php-protocolbuffers](https://raw.github.com/chobie/php-protocolbuffers/contents/php-protocolbuffers.png)
 
 [![Build Status](https://secure.travis-ci.org/chobie/php-protocolbuffers.png)](http://travis-ci.org/chobie/php-protocolbuffers)
 
