@@ -115,12 +115,12 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 				php_protocolbuffers_descriptor *desc;
 
 				entry = Z_OBJCE_P(ret);
-				if (entry == protocol_buffers_descriptor_class_entry) {
+				if (entry == php_protocol_buffers_descriptor_class_entry) {
 					desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
 					desc->free_container = 1;
 					zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
 				} else {
-					zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
+					zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
 					if (ret != NULL) {
 						zval_ptr_dtor(&ret);
 					}
@@ -134,7 +134,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 				if (ret != NULL) {
 					zval_ptr_dtor(&ret);
 				}
-				zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+				zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 				return 1;
 			}
 		} else {
@@ -176,7 +176,7 @@ void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_
 
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(unknown_value), NULL);
 		} else {
-			object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
+			object_init_ex(dz, php_protocol_buffers_unknown_field_class_entry);
 			php_protocolbuffers_unknown_field_properties_init(dz TSRMLS_CC);
 			php_protocolbuffers_unknown_field_set_number(dz, tag TSRMLS_CC);
 			php_protocolbuffers_unknown_field_set_type(dz, wiretype TSRMLS_CC);
@@ -213,7 +213,7 @@ void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETER
 	}
 
 	if (zend_hash_find(hresult, (char*)unknown_name, unknown_name_len, (void **)&unknown_fieldset) == SUCCESS) {
-		if (Z_OBJCE_PP(unknown_fieldset) != protocol_buffers_unknown_field_set_class_entry) {
+		if (Z_OBJCE_PP(unknown_fieldset) != php_protocol_buffers_unknown_field_set_class_entry) {
 			return;
 		}
 
@@ -228,7 +228,7 @@ void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETER
 			zend_hash_next_index_insert(p->ht, (void *)&val, sizeof(val), NULL);
 		} else {
 			MAKE_STD_ZVAL(dz);
-			object_init_ex(dz, protocol_buffers_unknown_field_class_entry);
+			object_init_ex(dz, php_protocol_buffers_unknown_field_class_entry);
 			php_protocolbuffers_unknown_field_properties_init(dz TSRMLS_CC);
 			php_protocolbuffers_unknown_field_set_number(dz, tag TSRMLS_CC);
 			php_protocolbuffers_unknown_field_set_type(dz, wiretype TSRMLS_CC);
@@ -715,7 +715,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 	zend_class_entry **ce = NULL;
 
 	if (data_len < 1) {
-		zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable seems null");
+		zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable seems null");
 		return 1;
 	}
 
@@ -756,7 +756,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 		MAKE_STD_ZVAL(unknown);
 
-		object_init_ex(unknown, protocol_buffers_unknown_field_set_class_entry);
+		object_init_ex(unknown, php_protocol_buffers_unknown_field_set_class_entry);
 		php_protocolbuffers_unknown_field_set_properties_init(unknown TSRMLS_CC);
 
 		zend_mangle_property_name(&unknown_name, &unknown_name_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
@@ -775,7 +775,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 	res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
 	if (res == NULL) {
 		zval_ptr_dtor(&obj);
-		zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
+		zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
 		return 0;
 	}
 

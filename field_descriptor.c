@@ -253,6 +253,6 @@ void php_protocolbuffers_filed_descriptor_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersFieldDescriptor", php_protocolbuffers_field_descriptor_methods);
-	protocol_buffers_field_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "FieldDescriptor", protocol_buffers_field_descriptor_class_entry);
+	php_protocol_buffers_field_descriptor_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "FieldDescriptor", php_protocol_buffers_field_descriptor_class_entry);
 }

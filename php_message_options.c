@@ -118,12 +118,12 @@ void php_protocolbuffers_php_message_options_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersPHPMessageOptions", php_protocolbuffers_php_message_options_methods);
-	protocol_buffers_php_message_options_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_protocol_buffers_php_message_options_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, ZEND_STRS("use_single_property")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(protocol_buffers_php_message_options_class_entry, ZEND_STRS("single_property_name")-1, "_properties", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, ZEND_STRS("process_unknown_fields")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_bool(protocol_buffers_php_message_options_class_entry, ZEND_STRS("use_wakeup_and_sleep")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_bool(php_protocol_buffers_php_message_options_class_entry, ZEND_STRS("use_single_property")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_string(php_protocol_buffers_php_message_options_class_entry, ZEND_STRS("single_property_name")-1, "_properties", ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_bool(php_protocol_buffers_php_message_options_class_entry, ZEND_STRS("process_unknown_fields")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_bool(php_protocol_buffers_php_message_options_class_entry, ZEND_STRS("use_wakeup_and_sleep")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "PHPMessageOptions", protocol_buffers_php_message_options_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "PHPMessageOptions", php_protocol_buffers_php_message_options_class_entry);
 }

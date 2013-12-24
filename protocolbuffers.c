@@ -43,24 +43,24 @@
 #include "helper.h"
 
 zend_class_entry *protocol_buffers_class_entry;
-zend_class_entry *protocol_buffers_descriptor_class_entry;
-zend_class_entry *protocol_buffers_field_descriptor_class_entry;
+zend_class_entry *php_protocol_buffers_descriptor_class_entry;
+zend_class_entry *php_protocol_buffers_field_descriptor_class_entry;
 
-zend_class_entry *protocol_buffers_serializable_class_entry;
+zend_class_entry *php_protocol_buffers_serializable_class_entry;
 
-zend_class_entry *protocol_buffers_message_class_entry;
-zend_class_entry *protocol_buffers_message_options_class_entry;
-zend_class_entry *protocol_buffers_descriptor_builder_class_entry;
-zend_class_entry *protocol_buffers_unknown_field_class_entry;
-zend_class_entry *protocol_buffers_unknown_field_set_class_entry;
-zend_class_entry *protocol_buffers_helper_class_entry;
-zend_class_entry *protocol_buffers_extension_registry_class_entry;
+zend_class_entry *php_protocol_buffers_message_class_entry;
+zend_class_entry *php_protocol_buffers_message_options_class_entry;
+zend_class_entry *php_protocol_buffers_descriptor_builder_class_entry;
+zend_class_entry *php_protocol_buffers_unknown_field_class_entry;
+zend_class_entry *php_protocol_buffers_unknown_field_set_class_entry;
+zend_class_entry *php_protocol_buffers_helper_class_entry;
+zend_class_entry *php_protocol_buffers_extension_registry_class_entry;
 
-zend_class_entry *protocol_buffers_php_message_options_class_entry;
+zend_class_entry *php_protocol_buffers_php_message_options_class_entry;
 
-zend_class_entry *protocol_buffers_invalid_byte_sequence_class_entry;
-zend_class_entry *protocol_buffers_invalid_protocolbuffers_exception_class_entry;
-zend_class_entry *protocol_buffers_uninitialized_message_exception_class_entry;
+zend_class_entry *php_protocol_buffers_invalid_byte_sequence_class_entry;
+zend_class_entry *php_protocol_buffers_invalid_protocolbuffers_exception_class_entry;
+zend_class_entry *php_protocol_buffers_uninitialized_message_exception_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers);
 
@@ -127,9 +127,9 @@ static void php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidByteSequenceException", 0);
-	protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	php_protocol_buffers_invalid_byte_sequence_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidByteSequenceException", protocol_buffers_invalid_byte_sequence_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidByteSequenceException", php_protocol_buffers_invalid_byte_sequence_class_entry);
 }
 
 static void php_protocol_buffers_invalid_exception(TSRMLS_D)
@@ -137,9 +137,9 @@ static void php_protocol_buffers_invalid_exception(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersInvalidProtocolBufferException", 0);
-	protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	php_protocol_buffers_invalid_protocolbuffers_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidProtocolBufferException", protocol_buffers_invalid_protocolbuffers_exception_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "InvalidProtocolBufferException", php_protocol_buffers_invalid_protocolbuffers_exception_class_entry);
 }
 
 static void php_protocolbuffers_uninitialized_message_exception(TSRMLS_D)
@@ -147,9 +147,9 @@ static void php_protocolbuffers_uninitialized_message_exception(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUninitializedMessageException", 0);
-	protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
+	php_protocol_buffers_uninitialized_message_exception_class_entry = zend_register_internal_class_ex(&ce, php_protocolbuffers_get_exception_base(TSRMLS_C), NULL TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessageException", protocol_buffers_uninitialized_message_exception_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UninitializedMessageException", php_protocol_buffers_uninitialized_message_exception_class_entry);
 }
 
 static zend_function_entry php_protocolbuffers_describable_methods[] = {
@@ -162,9 +162,9 @@ static void php_protocol_buffers_serializable(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescribable", php_protocolbuffers_describable_methods);
-	protocol_buffers_serializable_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
+	php_protocol_buffers_serializable_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Describable", protocol_buffers_serializable_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Describable", php_protocol_buffers_serializable_class_entry);
 }
 
 static void php_protocolbuffers_init(TSRMLS_D)

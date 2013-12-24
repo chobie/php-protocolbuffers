@@ -154,12 +154,12 @@ static void php_protocolbuffers_build_options(zval *instance, php_protocolbuffer
 	HashPosition pos;
 	zval **element;
 
-	tmp  = zend_read_property(protocol_buffers_descriptor_builder_class_entry, instance, ZEND_STRS("options")-1, 0 TSRMLS_CC);
+	tmp  = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, instance, ZEND_STRS("options")-1, 0 TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_OBJECT) {
 		return;
 	}
 
-	ext = zend_read_property(protocol_buffers_descriptor_builder_class_entry, tmp, ZEND_STRS("extensions")-1, 0 TSRMLS_CC);
+	ext = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, tmp, ZEND_STRS("extensions")-1, 0 TSRMLS_CC);
 	if (Z_TYPE_P(ext) != IS_ARRAY) {
 		return;
 	}
@@ -168,24 +168,24 @@ static void php_protocolbuffers_build_options(zval *instance, php_protocolbuffer
 					zend_hash_get_current_data_ex(Z_ARRVAL_P(ext), (void **)&element, &pos) == SUCCESS;
 					zend_hash_move_forward_ex(Z_ARRVAL_P(ext), &pos)
 	) {
-		if (Z_OBJCE_PP(element) != protocol_buffers_php_message_options_class_entry) {
+		if (Z_OBJCE_PP(element) != php_protocol_buffers_php_message_options_class_entry) {
 			continue;
 		}
 
-		val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("use_single_property")-1, 0 TSRMLS_CC);
+		val = zend_read_property(php_protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("use_single_property")-1, 0 TSRMLS_CC);
 		if (Z_TYPE_P(val) != IS_LONG) {
 			convert_to_long(val);
 		}
 		descriptor->container->use_single_property = Z_LVAL_P(val);
 
-		val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("use_wakeup_and_sleep")-1, 0 TSRMLS_CC);
+		val = zend_read_property(php_protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("use_wakeup_and_sleep")-1, 0 TSRMLS_CC);
 		if (Z_TYPE_P(val) != IS_LONG) {
 			convert_to_long(val);
 		}
 		descriptor->container->use_wakeup_and_sleep = Z_LVAL_P(val);
 
 		if (descriptor->container->use_single_property > 0) {
-			val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("single_property_name")-1, 0 TSRMLS_CC);
+			val = zend_read_property(php_protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("single_property_name")-1, 0 TSRMLS_CC);
 			efree(descriptor->container->single_property_name);
 
 			zend_mangle_property_name(&(descriptor->container->single_property_name), &(descriptor->container->single_property_name_len), (char*)"*", 1, (char*)Z_STRVAL_P(val), Z_STRLEN_P(val), 0);
@@ -199,7 +199,7 @@ static void php_protocolbuffers_build_options(zval *instance, php_protocolbuffer
 			}
 		}
 
-		val = zend_read_property(protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("process_unknown_fields")-1, 0 TSRMLS_CC);
+		val = zend_read_property(php_protocol_buffers_php_message_options_class_entry, *element, ZEND_STRS("process_unknown_fields")-1, 0 TSRMLS_CC);
 		if (Z_TYPE_P(val) == IS_BOOL) {
 			descriptor->container->process_unknown_fields = Z_LVAL_P(val);
 		}
@@ -347,7 +347,7 @@ static void php_protocolbuffers_build_field_descriptor(php_protocolbuffers_descr
 		ischeme = &(descriptor->container->scheme[n]);
 
 		MAKE_STD_ZVAL(tmp);
-		object_init_ex(tmp, protocol_buffers_field_descriptor_class_entry);
+		object_init_ex(tmp, php_protocol_buffers_field_descriptor_class_entry);
 
 		MAKE_STD_ZVAL(value);
 		ZVAL_STRING(value, ischeme->name, 1);
@@ -387,7 +387,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, __construct)
 	zend_hash_update(properties, "fields", sizeof("fields"), (void **)&tmp, sizeof(zval), NULL);
 
 	MAKE_STD_ZVAL(tmp);
-	object_init_ex(tmp, protocol_buffers_message_options_class_entry);
+	object_init_ex(tmp, php_protocol_buffers_message_options_class_entry);
 	php_protocolbuffers_message_options_init_properties(tmp TSRMLS_CC);
 	zend_hash_update(properties, "options", sizeof("options"), (void **)&tmp, sizeof(zval), NULL);
 
@@ -410,7 +410,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addField)
 	zend_bool force_add = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"lO|b", &index, &field, protocol_buffers_field_descriptor_class_entry, &force_add) == FAILURE) {
+		"lO|b", &index, &field, php_protocol_buffers_field_descriptor_class_entry, &force_add) == FAILURE) {
 		return;
 	}
 
@@ -459,7 +459,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, getName)
 {
 	zval *name;
 
-	name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("name")-1, 0 TSRMLS_CC);
+	name = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("name")-1, 0 TSRMLS_CC);
 	RETURN_STRINGL(Z_STRVAL_P(name), Z_STRLEN_P(name), 1);
 }
 /* }}} */
@@ -473,11 +473,11 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 	php_protocolbuffers_descriptor *descriptor;
 
 	MAKE_STD_ZVAL(result);
-	object_init_ex(result, protocol_buffers_descriptor_class_entry);
+	object_init_ex(result, php_protocol_buffers_descriptor_class_entry);
 	php_protocolbuffers_descriptor_properties_init(result TSRMLS_CC);
 	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, result);
 
-	name = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("name")-1, 0 TSRMLS_CC);
+	name = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("name")-1, 0 TSRMLS_CC);
 	if (Z_TYPE_P(name) == IS_STRING) {
 		descriptor->name_len = Z_STRLEN_P(name);
 		if (descriptor->name_len > 0) {
@@ -487,7 +487,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 		}
 	}
 
-	fields = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("fields")-1, 0 TSRMLS_CC);
+	fields = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("fields")-1, 0 TSRMLS_CC);
 	if (!php_protocolbuffers_build_fields(fields, descriptor, result TSRMLS_CC)) {
 		efree(result);
 		RETURN_NULL();
@@ -505,7 +505,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 PHP_METHOD(protocolbuffers_descriptor_builder, getOptions)
 {
 	zval *options = NULL;
-	options = zend_read_property(protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("options")-1, 0 TSRMLS_CC);
+	options = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("options")-1, 0 TSRMLS_CC);
 	RETURN_ZVAL(options, 1, 0);
 }
 /* }}} */
@@ -596,13 +596,13 @@ void php_protocolbuffers_descriptor_builder_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersDescriptorBuilder", php_protocolbuffers_descriptor_builder_methods);
-	protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	protocol_buffers_descriptor_builder_class_entry->create_object = php_protocolbuffers_descriptor_builder_new;
+	php_protocol_buffers_descriptor_builder_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_protocol_buffers_descriptor_builder_class_entry->create_object = php_protocolbuffers_descriptor_builder_new;
 
-	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("options")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_null(protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("extension_ranges")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(php_protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(php_protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("fields")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(php_protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("options")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(php_protocol_buffers_descriptor_builder_class_entry, ZEND_STRS("extension_ranges")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "DescriptorBuilder", protocol_buffers_descriptor_builder_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "DescriptorBuilder", php_protocol_buffers_descriptor_builder_class_entry);
 }

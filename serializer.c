@@ -354,7 +354,7 @@ static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 	if (Z_TYPE_PP(element) != IS_NULL) {
 
 		if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
-			zend_throw_exception_ex(protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+			zend_throw_exception_ex(php_protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 			return;
 		}
 
@@ -552,7 +552,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
 			} else {
 				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-					zend_throw_exception_ex(protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
 					return;
 				}
 				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
@@ -568,7 +568,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 		}
 	} else {
 		if (scheme->required > 0) {
-			zend_throw_exception_ex(protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
 			return;
 		}
 	}
@@ -618,7 +618,7 @@ static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *conta
 
 	if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
 		if (Z_TYPE_PP(unknown) == IS_OBJECT
-		 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
+		 && Z_OBJCE_PP(unknown) == php_protocol_buffers_unknown_field_set_class_entry) {
 			HashTable *unkht;
 			zval **element, **elmh;
 			char *uuname;

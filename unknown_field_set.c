@@ -198,7 +198,7 @@ PHP_METHOD(protocolbuffers_unknown_field_set, addField)
 	php_protocolbuffers_unknown_field *unknown_field = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"O", &field, protocol_buffers_unknown_field_class_entry) == FAILURE) {
+		"O", &field, php_protocol_buffers_unknown_field_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -303,11 +303,11 @@ void php_protocolbuffers_unknown_field_set_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersUnknownFieldSet", php_protocolbuffers_unknown_field_set_methods);
-	protocol_buffers_unknown_field_set_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_class_implements(protocol_buffers_unknown_field_set_class_entry TSRMLS_CC, 1, zend_ce_iterator);
-	protocol_buffers_unknown_field_set_class_entry->create_object = php_protocol_buffers_unknown_field_set_new;
+	php_protocol_buffers_unknown_field_set_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	zend_class_implements(php_protocol_buffers_unknown_field_set_class_entry TSRMLS_CC, 1, zend_ce_iterator);
+	php_protocol_buffers_unknown_field_set_class_entry->create_object = php_protocol_buffers_unknown_field_set_new;
 
-	zend_declare_property_null(protocol_buffers_unknown_field_set_class_entry, ZEND_STRS("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_null(php_protocol_buffers_unknown_field_set_class_entry, ZEND_STRS("fields")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownFieldSet", protocol_buffers_unknown_field_set_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "UnknownFieldSet", php_protocol_buffers_unknown_field_set_class_entry);
 }

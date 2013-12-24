@@ -39,7 +39,7 @@ zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
 
 	if (PBG(extension_registry) == NULL) {
 		MAKE_STD_ZVAL(extension_registry);
-		object_init_ex(extension_registry, protocol_buffers_extension_registry_class_entry);
+		object_init_ex(extension_registry, php_protocol_buffers_extension_registry_class_entry);
 		PBG(extension_registry) = extension_registry;
 	}
 
@@ -154,7 +154,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	php_protocolbuffers_extension_registry *registry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"slO", &message_class_name, &message_class_name_len, &extension, &descriptor, protocol_buffers_field_descriptor_class_entry) == FAILURE) {
+		"slO", &message_class_name, &message_class_name_len, &extension, &descriptor, php_protocol_buffers_field_descriptor_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -251,9 +251,9 @@ void php_protocolbuffers_extension_registry_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffersExtensionRegistry", php_protocolbuffers_extension_registry_methods);
-	protocol_buffers_extension_registry_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	protocol_buffers_extension_registry_class_entry->create_object = php_protocolbuffers_extension_registry_new;
-	protocol_buffers_extension_registry_class_entry->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	php_protocol_buffers_extension_registry_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_protocol_buffers_extension_registry_class_entry->create_object = php_protocolbuffers_extension_registry_new;
+	php_protocol_buffers_extension_registry_class_entry->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
-	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "ExtensionRegistry", protocol_buffers_extension_registry_class_entry);
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "ExtensionRegistry", php_protocol_buffers_extension_registry_class_entry);
 }
