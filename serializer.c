@@ -49,6 +49,8 @@ static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS);
 
 static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, pb_serializer *ser, pb_encode_callback f, int is_packed);
 
+static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *container, HashTable *hash, pb_serializer *ser TSRMLS_DC);
+
 static int pb_serializer_resize(pb_serializer *serializer, size_t size)
 {
 	if (serializer->buffer_size + size < serializer->buffer_capacity) {
@@ -601,6 +603,100 @@ void php_protocolbuffers_serializer_init(pb_serializer **serializer)
 	*serializer = ser;
 }
 
+static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *container, HashTable *hash, pb_serializer *ser TSRMLS_DC)
+{
+	char *uname = {0};
+	int uname_len = 0;
+	zval **unknown = NULL;
+
+	if (container->use_single_property > 0) {
+		uname = "_unknown";
+		uname_len = sizeof("_unknown");
+	} else {
+		zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
+	}
+
+	if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
+		if (Z_TYPE_PP(unknown) == IS_OBJECT
+		 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
+			HashTable *unkht;
+			zval **element, **elmh;
+			char *uuname;
+			int uuname_len;
+
+			unkht = Z_OBJPROP_PP(unknown);
+
+			zend_mangle_property_name(&uuname, &uuname_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
+			if (zend_hash_find(unkht, uuname, uuname_len, (void**)&elmh) == SUCCESS) {
+				HashPosition pos2;
+
+				for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(elmh), &pos2);
+								zend_hash_get_current_data_ex(Z_ARRVAL_PP(elmh), (void **)&element, &pos2) == SUCCESS;
+								zend_hash_move_forward_ex(Z_ARRVAL_PP(elmh), &pos2)
+				) {
+					HashPosition pos;
+					php_protocolbuffers_unknown_field *field = NULL;
+					unknown_value **unknown;
+					field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
+
+					switch (field->type) {
+						case WIRETYPE_VARINT:
+						{
+							for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+												zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+												zend_hash_move_forward_ex(field->ht, &pos)
+								) {
+								pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+								pb_serializer_write_varint32(ser, (*unknown)->varint);
+							}
+						}
+						break;
+						case WIRETYPE_FIXED64:
+							for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+												zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+												zend_hash_move_forward_ex(field->ht, &pos)
+								) {
+								pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+								pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+							}
+						break;
+						case WIRETYPE_LENGTH_DELIMITED:
+						{
+							for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+												zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+												zend_hash_move_forward_ex(field->ht, &pos)
+								) {
+								pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+								pb_serializer_write_varint32(ser, (*unknown)->buffer.len);
+								pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+							}
+						}
+						break;
+						case WIRETYPE_START_GROUP:
+						break;
+						case WIRETYPE_END_GROUP:
+						break;
+						case WIRETYPE_FIXED32:
+							for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
+												zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
+												zend_hash_move_forward_ex(field->ht, &pos)
+								) {
+								pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
+								pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
+							}
+						break;
+					}
+				}
+			}
+			efree(uuname);
+		}
+	}
+
+	if (container->use_single_property < 1) {
+		efree(uname);
+	}
+}
+
 int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, pb_serializer **serializer)
 {
 	int i = 0;
@@ -706,96 +802,7 @@ int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass
 	}
 
 	if (container->process_unknown_fields > 0) {
-		char *uname = {0};
-		int uname_len = 0;
-		zval **unknown = NULL;
-
-		if (container->use_single_property > 0) {
-			uname = "_unknown";
-			uname_len = sizeof("_unknown");
-		} else {
-			zend_mangle_property_name(&uname, &uname_len, (char*)"*", 1, (char*)"_unknown", sizeof("_unknown"), 0);
-		}
-
-		if (zend_hash_find(hash, uname, uname_len, (void**)&unknown) == SUCCESS) {
-			if (Z_TYPE_PP(unknown) == IS_OBJECT
-			 && Z_OBJCE_PP(unknown) == protocol_buffers_unknown_field_set_class_entry) {
-				HashTable *unkht;
-				zval **element, **elmh;
-				char *uuname;
-				int uuname_len;
-
-				unkht = Z_OBJPROP_PP(unknown);
-
-				zend_mangle_property_name(&uuname, &uuname_len, (char*)"*", 1, (char*)"fields", sizeof("fields"), 0);
-				if (zend_hash_find(unkht, uuname, uuname_len, (void**)&elmh) == SUCCESS) {
-					HashPosition pos2;
-
-					for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(elmh), &pos2);
-									zend_hash_get_current_data_ex(Z_ARRVAL_PP(elmh), (void **)&element, &pos2) == SUCCESS;
-									zend_hash_move_forward_ex(Z_ARRVAL_PP(elmh), &pos2)
-					) {
-						HashPosition pos;
-						php_protocolbuffers_unknown_field *field = NULL;
-						unknown_value **unknown;
-						field = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_unknown_field, *element);
-
-						switch (field->type) {
-							case WIRETYPE_VARINT:
-							{
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_varint32(ser, (*unknown)->varint);
-								}
-							}
-							break;
-							case WIRETYPE_FIXED64:
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							break;
-							case WIRETYPE_LENGTH_DELIMITED:
-							{
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_varint32(ser, (*unknown)->buffer.len);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							}
-							break;
-							case WIRETYPE_START_GROUP:
-							break;
-							case WIRETYPE_END_GROUP:
-							break;
-							case WIRETYPE_FIXED32:
-								for(zend_hash_internal_pointer_reset_ex(field->ht, &pos);
-													zend_hash_get_current_data_ex(field->ht, (void **)&unknown, &pos) == SUCCESS;
-													zend_hash_move_forward_ex(field->ht, &pos)
-									) {
-									pb_serializer_write_varint32(ser, (field->number << 3) | field->type);
-									pb_serializer_write_chararray(ser, (*unknown)->buffer.val, (*unknown)->buffer.len);
-								}
-							break;
-						}
-					}
-				}
-				efree(uuname);
-			}
-		}
-
-		if (container->use_single_property < 1) {
-			efree(uname);
-		}
+		php_protocolbuffers_encode_unknown_fields(container, hash, ser TSRMLS_CC);
 	}
 
 	*serializer = ser;
