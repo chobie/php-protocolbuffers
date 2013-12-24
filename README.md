@@ -138,16 +138,16 @@ maybe I'll re-support long values for performance reason. but it can't handle bi
     <td>Packed attributes</td><td>supported</td>
   </tr>
   <tr>
-    <td>Extensions</td><td>alpha</td>
+    <td>Extensions</td><td>beta</td>
   </tr>
   <tr>
     <td>Unknown fields</td><td>beta</td>
   </tr>
   <tr>
-    <td>Service (RPC)</td><td>not supported yet</td>
+    <td>64bit values</td><td>beta</td>
   </tr>
   <tr>
-    <td>64bit values</td><td>EXPERIMENTAL</td>
+    <td>Service (RPC)</td><td>not supported yet</td>
   </tr>
 </table>
 
