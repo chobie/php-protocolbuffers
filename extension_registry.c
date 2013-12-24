@@ -148,7 +148,6 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	char *message_class_name = {0};
 	long message_class_name_len = 0;
 	zval *descriptor, **bucket;
-	zval *tmp = NULL;
 	zend_class_entry **ce;
 	pb_scheme_container *container = NULL;
 	long extension = 0;
