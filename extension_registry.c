@@ -148,6 +148,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	char *message_class_name = {0};
 	long message_class_name_len = 0;
 	zval *descriptor, **bucket;
+	zval *tmp = NULL;
 	zend_class_entry **ce;
 	pb_scheme_container *container = NULL;
 	long extension = 0;
@@ -159,7 +160,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	}
 
 	if (zend_lookup_class((char*)message_class_name, message_class_name_len, &ce TSRMLS_CC) == FAILURE) {
-		// TODO: check the class has getDescriptor method.
+		// TODO(chobie): check the class has getDescriptor method.
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "%s class does not find", message_class_name);
 		return;
 	}
@@ -228,99 +229,10 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 		}
 
 		zend_declare_property_null(*ce, name, len-1, ZEND_ACC_PROTECTED TSRMLS_CC);
-
-		{
-			// TODO: Refactor this block
-			zval *tmp = NULL;
-
-			php_protocolbuffers_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
-			container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
-
+		php_protocolbuffers_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
+		container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
+		if (php_protocolbuffers_init_scheme_with_zval(&container->scheme[container->size], extension, descriptor TSRMLS_CC)) {
 			container->scheme[container->size].is_extension = 1;
-			container->scheme[container->size].tag = extension;
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("type"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_LONG) {
-				container->scheme[container->size].type = Z_LVAL_P(tmp);
-			}
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("name"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_STRING) {
-				char *mangle = {0};
-				int mangle_len = 0;
-				size_t tsize = 0;
-
-				tsize = Z_STRLEN_P(tmp)+1;
-
-				container->scheme[container->size].original_name     = (char*)emalloc(sizeof(char*) * tsize);
-				container->scheme[container->size].original_name_len = tsize;
-
-				memcpy(container->scheme[container->size].original_name, Z_STRVAL_P(tmp), tsize);
-				container->scheme[container->size].original_name[tsize] = '\0';
-
-				container->scheme[container->size].name     = (char*)emalloc(sizeof(char*) * tsize);
-				container->scheme[container->size].name_len = tsize;
-
-				memcpy(container->scheme[container->size].name, Z_STRVAL_P(tmp), tsize);
-				container->scheme[container->size].name[tsize] = '\0';
-				php_strtolower(container->scheme[container->size].name, tsize);
-				container->scheme[container->size].name_h = zend_inline_hash_func(container->scheme[container->size].name, tsize);
-
-				if (strcmp(container->scheme[container->size].name, container->scheme[container->size].original_name) == 0) {
-					// use snake case?
-					container->scheme[container->size].magic_type = 0;
-				} else {
-					container->scheme[container->size].magic_type = 1;
-				}
-
-				zend_mangle_property_name(&mangle, &mangle_len, (char*)"*", 1, (char*)container->scheme[container->size].original_name, container->scheme[container->size].original_name_len, 0);
-				container->scheme[container->size].mangled_name	 = mangle;
-				container->scheme[container->size].mangled_name_len = mangle_len;
-				container->scheme[container->size].mangled_name_h = zend_inline_hash_func(mangle, mangle_len);
-				container->scheme[container->size].skip = 0;
-			}
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("required"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_BOOL) {
-				convert_to_long(tmp);
-				container->scheme[container->size].required = Z_LVAL_P(tmp);
-			}
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("optional"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_BOOL) {
-				convert_to_long(tmp);
-				container->scheme[container->size].optional = Z_LVAL_P(tmp);
-			}
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("repeated"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_BOOL) {
-				convert_to_long(tmp);
-				container->scheme[container->size].repeated = Z_LVAL_P(tmp);
-			}
-
-			php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("packable"), &tmp TSRMLS_CC);
-			if (Z_TYPE_P(tmp) == IS_BOOL) {
-				convert_to_long(tmp);
-				container->scheme[container->size].packed = Z_LVAL_P(tmp);
-			}
-
-			if (container->scheme[container->size].type == TYPE_MESSAGE) {
-				zend_class_entry **c;
-
-				php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(descriptor), ZEND_STRS("message"), &tmp TSRMLS_CC);
-				if (Z_TYPE_P(tmp) == IS_STRING) {
-					if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
-						zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
-						return;
-					}
-
-					container->scheme[container->size].ce = *c;
-				} else {
-					zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "message wiretype set. we need message parameter for referencing class entry.");
-					return;
-				}
-			}
-
 			container->size++;
 			qsort(container->scheme, container->size, sizeof(pb_scheme), sort_cb);
 		}

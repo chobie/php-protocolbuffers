@@ -35,4 +35,6 @@ void php_protocolbuffers_descriptor_builder_class(TSRMLS_D);
 
 int php_protocolbuffers_field_descriptor_get_property(HashTable *hash, const char *name, size_t name_len, zval **result TSRMLS_DC);
 
+int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag, zval *element TSRMLS_DC);
+
 #endif

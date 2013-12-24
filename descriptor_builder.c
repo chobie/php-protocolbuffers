@@ -206,7 +206,7 @@ static void php_protocolbuffers_build_options(zval *instance, php_protocolbuffer
 	}
 }
 
-static int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag, zval *element TSRMLS_DC)
+int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag, zval *element TSRMLS_DC)
 {
 	zval *tmp = NULL;
 	int tsize = 0;
