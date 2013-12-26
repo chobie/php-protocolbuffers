@@ -1295,8 +1295,11 @@ PHP_METHOD(protocolbuffers_message, hasExtension)
 		if (is_mangled) {
 			efree(n);
 		}
-
-		RETURN_TRUE;
+		if (Z_TYPE_PP(e) == IS_NULL) {
+			RETURN_FALSE;
+		} else {
+			RETURN_TRUE;
+		}
 	} else {
 		RETURN_FALSE;
 	}
@@ -1365,7 +1368,62 @@ err:
 */
 PHP_METHOD(protocolbuffers_message, clearExtension)
 {
-	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Not implemented yet");
+	zval *instance = getThis();
+	zval *registry = php_protocolbuffers_extension_registry_get_instance(TSRMLS_C);
+	zval **e = {0}, **b = {0}, *field_descriptor = NULL, *extension_registry = NULL;
+	zend_class_entry *ce;
+	HashTable *htt = NULL;
+	char *name = {0}, *n = {0};
+	int name_len = 0, n_len = 0;
+	pb_scheme_container *container;
+	int is_mangled = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	ce = Z_OBJCE_P(instance);
+
+	if (!php_protocolbuffers_extension_registry_get_registry(registry, ce->name, ce->name_length, &extension_registry TSRMLS_CC)) {
+		goto err;
+	}
+
+	if (!php_protocolbuffers_extension_registry_get_descriptor_by_name(extension_registry, name, name_len, &field_descriptor TSRMLS_CC)) {
+		goto err;
+	}
+
+	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
+	if (container->use_single_property > 0) {
+		if (zend_hash_find(Z_OBJPROP_P(instance), container->single_property_name, container->single_property_name_len, (void **)&b) == FAILURE) {
+			return;
+		}
+
+		n = name;
+		n_len = name_len;
+		htt = Z_ARRVAL_PP(b);
+	} else {
+		htt = Z_OBJPROP_P(instance);
+		zend_mangle_property_name(&n, &n_len, (char*)"*", 1, (char*)name, name_len+1, 0);
+		is_mangled = 1;
+	}
+
+	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
+		zval *tmp;
+		ulong hval;
+		if (is_mangled) {
+			efree(n);
+		}
+		zval_ptr_dtor(e);
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_NULL(tmp);
+		*e = tmp;
+		RETURN_NULL();
+	}
+
+	return;
+err:
+	zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "extension %s does not find", name);
 }
 /* }}} */
 
