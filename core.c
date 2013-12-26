@@ -677,7 +677,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
 {
 	int err = 0;
-	pb_serializer *ser = NULL;
+	php_protocolbuffers_serializer *ser = NULL;
 	pb_scheme_container *container;
 
 	err = php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);

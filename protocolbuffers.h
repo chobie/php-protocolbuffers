@@ -228,13 +228,13 @@ enum FieldType {
 	MAX_FIELD_TYPE      = 18,
 };
 
-typedef struct pb_serializer
+typedef struct php_protocolbuffers_serializer
 {
 	uint8_t *buffer;
 	size_t buffer_size;
 	size_t buffer_capacity;
 	size_t buffer_offset;
-} pb_serializer;
+} php_protocolbuffers_serializer;
 
 typedef struct{
 	zend_object zo;

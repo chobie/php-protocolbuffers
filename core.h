@@ -47,7 +47,7 @@ int php_protocolbuffers_read_protected_property(zval *instance, char *name, size
 
 int php_protocolbuffers_set_protected_property(zval *instance, char *name, size_t name_len, zval *value TSRMLS_DC);
 
-#define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, pb_serializer *ser, int is_packed
+#define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, php_protocolbuffers_serializer *ser, int is_packed
 typedef void (*pb_encode_callback)(PB_ENCODE_CALLBACK_PARAMETERS);
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass);

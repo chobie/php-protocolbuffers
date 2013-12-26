@@ -236,19 +236,16 @@ static void php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAMETER
 				memcpy(&u.v, (*element)->buffer.val, sizeof(float));
 				__payload.type = TYPE_FLOAT;__payload.value.f = (float)u.f;
 			} else if (type == WIRETYPE_FIXED64) {
-				/* NOTE: this block check WIRETYPE! */
 				uint64_t fixed64 = 0;
 
 				memcpy(&fixed64, (*element)->buffer.val, (*element)->buffer.len);
 				__payload.type = TYPE_FIXED64;__payload.value.uint64 = fixed64;
 			} else if (type == WIRETYPE_FIXED32) {
-				/* NOTE: this block check WIRETYPE! */
 				uint32_t fixed32 = 0;
 
 				memcpy(&fixed32, (*element)->buffer.val, (*element)->buffer.len);
 				__payload.type = TYPE_FIXED32;__payload.value.uint32 = fixed32;
 			} else if (type == WIRETYPE_VARINT) {
-				/* NOTE: this block check WIRETYPE! */
 				__payload.type = TYPE_INT64;__payload.value.int64 = (int64_t)(*element)->varint;
 			} else {
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "passed unhandled type wire_type:%d field_type:%d. this is bug", type, field_type);
