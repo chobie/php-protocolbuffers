@@ -2,31 +2,31 @@
 #include "unknown_field_set.h"
 #include "unknown_field.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_debug_zval, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_debug_zval, 0, 0, 1)
 	ZEND_ARG_INFO(0, zval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_write_varint32, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_write_varint32, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_write_varint64, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_write_varint64, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_encode32, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_zigzag_encode32, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_decode32, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_zigzag_decode32, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_encode64, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_zigzag_encode64, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_helper_zigzag_decode64, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_helper_zigzag_decode64, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
@@ -219,13 +219,13 @@ PHP_METHOD(protocolbuffers_helper, writeVarint64)
 /* }}} */
 
 static zend_function_entry protocolbuffers_helper_methods[] = {
-	PHP_ME(protocolbuffers_helper, writeVarint32, arginfo_pb_helper_write_varint32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, writeVarint64, arginfo_pb_helper_write_varint64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, zigzagEncode32, arginfo_pb_helper_zigzag_encode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, zigzagDecode32, arginfo_pb_helper_zigzag_decode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, zigzagEncode64, arginfo_pb_helper_zigzag_encode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, zigzagDecode64, arginfo_pb_helper_zigzag_decode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_helper, debugZval, arginfo_pb_helper_debug_zval, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, writeVarint32, arginfo_protocolbuffers_helper_write_varint32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, writeVarint64, arginfo_protocolbuffers_helper_write_varint64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagEncode32, arginfo_protocolbuffers_helper_zigzag_encode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagDecode32, arginfo_protocolbuffers_helper_zigzag_decode32, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagEncode64, arginfo_protocolbuffers_helper_zigzag_encode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, zigzagDecode64, arginfo_protocolbuffers_helper_zigzag_decode64, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_helper, debugZval, arginfo_protocolbuffers_helper_debug_zval, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 

@@ -31,19 +31,19 @@
 #include "protocolbuffers.h"
 #include "php_message_options.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_use_single_property, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_php_message_options_set_use_single_property, 0, 0, 1)
 	ZEND_ARG_INFO(0, use)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_single_property_name, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_php_message_options_set_single_property_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_process_unkown_fields, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_php_message_options_set_process_unkown_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, use)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_php_message_options_set_use_wakeup_and_sleep, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_php_message_options_set_use_wakeup_and_sleep, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
@@ -106,10 +106,10 @@ PHP_METHOD(protocolbuffers_php_message_options, setProcessUnknownFields)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_php_message_options_methods[] = {
-	PHP_ME(protocolbuffers_php_message_options, setUseSingleProperty, arginfo_pb_php_message_options_set_use_single_property, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_php_message_options, setUseWakeupAndSleep, arginfo_pb_php_message_options_set_use_wakeup_and_sleep, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_php_message_options, setSinglePropertyName, arginfo_pb_php_message_options_set_single_property_name, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_php_message_options, setProcessUnknownFields, arginfo_pb_php_message_options_set_process_unkown_fields, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_php_message_options, setUseSingleProperty, arginfo_protocolbuffers_php_message_options_set_use_single_property, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_php_message_options, setUseWakeupAndSleep, arginfo_protocolbuffers_php_message_options_set_use_wakeup_and_sleep, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_php_message_options, setSinglePropertyName, arginfo_protocolbuffers_php_message_options_set_single_property_name, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_php_message_options, setProcessUnknownFields, arginfo_protocolbuffers_php_message_options_set_process_unkown_fields, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

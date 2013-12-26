@@ -11,7 +11,7 @@ static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
 static int unknown_property_name_default_len = sizeof("_unknown");
 
-static const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result);
+static const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, zval **result);
 
 
 int php_protocolbuffers_read_protected_property(zval *instance, char *name, size_t name_len, zval **result TSRMLS_DC)
@@ -63,9 +63,9 @@ int php_protocolbuffers_get_default_unknown_property_name_len()
 	return unknown_property_name_default_len;
 }
 
-void php_protocolbuffers_scheme_container_init(pb_scheme_container *container)
+void php_protocolbuffers_scheme_container_init(php_protocolbuffers_scheme_container *container)
 {
-	memset(container, '\0', sizeof(pb_scheme_container));
+	memset(container, '\0', sizeof(php_protocolbuffers_scheme_container));
 
 	container->size = 0;
 	container->scheme = NULL;
@@ -91,9 +91,9 @@ void php_protocolbuffers_scheme_container_init(pb_scheme_container *container)
 }
 
 
-int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC)
+int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, php_protocolbuffers_scheme_container **result TSRMLS_DC)
 {
-	pb_scheme_container *container, **cn;
+	php_protocolbuffers_scheme_container *container, **cn;
 
 	if (zend_hash_find(PBG(messages), (char*)klass, klass_len, (void **)&cn) != SUCCESS) {
 		zval *ret = NULL;
@@ -118,7 +118,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 				if (entry == php_protocol_buffers_descriptor_class_entry) {
 					desc = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, ret);
 					desc->free_container = 1;
-					zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(pb_scheme_container*), NULL);
+					zend_hash_add(PBG(messages), (char*)klass, klass_len, (void**)&desc->container, sizeof(php_protocolbuffers_scheme_container*), NULL);
 				} else {
 					zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
 					if (ret != NULL) {
@@ -154,7 +154,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 	return 0;
 }
 
-void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value)
+void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value)
 {
 	char *unknown_name = {0};
 	int unknown_name_len = 0;
@@ -196,7 +196,7 @@ void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_
 	}
 }
 
-void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length)
+void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length)
 {
 	char *unknown_name = {0};
 	int unknown_name_len = 0;
@@ -321,7 +321,7 @@ void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC)
 	}
 }
 
-const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, pb_scheme_container *container, zval **result)
+const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, zval **result)
 {
 	uint32_t payload = 0, tag = 0, wiretype = 0;
 	uint64_t value = 0;
@@ -349,12 +349,12 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 	}
 
 	while (data < data_end) {
-		pb_scheme *s = NULL;
+		php_protocolbuffers_scheme *s = NULL;
 
 		data = ReadVarint32FromArray(data, &payload, data_end);
 
 		if (data == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message failed. ReadVarint32FromArray returns NULL.");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_decode_message failed. ReadVarint32FromArray returns NULL.");
 			return NULL;
 		}
 
@@ -369,19 +369,19 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			return NULL;
 		}
 
-		s = pb_search_scheme_by_tag(container->scheme, container->size, tag);
+		s = php_protocolbuffers_search_scheme_by_tag(container->scheme, container->size, tag);
 
 		switch (wiretype) {
 		case WIRETYPE_VARINT:
 		{
 			data = ReadVarint64FromArray(data, &value, data_end);
-			if (!pb_process_varint(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, value, hresult)) {
+			if (!php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, value, hresult)) {
 				return NULL;
 			}
 		}
 		break;
 		case WIRETYPE_FIXED64:
-			if (!pb_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
+			if (!php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
             	return NULL;
 			}
 			data += 8;
@@ -413,7 +413,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			} else if (s->type == TYPE_MESSAGE) {
 				const char *n_buffer_end = data + payload;
 				zval *z_obj = NULL;
-				pb_scheme_container *c_container = NULL;
+				php_protocolbuffers_scheme_container *c_container = NULL;
 				char *name = {0};
 				int name_length = 0;
 				ulong name_hash = 0;
@@ -424,7 +424,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 				object_init_ex(z_obj, s->ce);
 				php_protocolbuffers_properties_init(z_obj, s->ce TSRMLS_CC);
 
-				pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
+				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
 
 				if (c_container->use_wakeup_and_sleep > 0) {
 					php_protocolbuffers_execute_wakeup(z_obj, c_container TSRMLS_CC);
@@ -649,7 +649,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 					}
 
 					if (last_data_offset == data) {
-						php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_decode_message: detect infinite loop when processing repeated packed field.");
+						php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_decode_message: detect infinite loop when processing repeated packed field.");
 						break;
 					}
 					last_data_offset = data;
@@ -660,7 +660,7 @@ const char* pb_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, co
 			data += payload;
 		break;
 		case WIRETYPE_FIXED32: {
-			if (!pb_process_fixed32(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
+			if (!php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
 				return NULL;
 			}
 			data += 4;
@@ -678,7 +678,7 @@ int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 {
 	int err = 0;
 	php_protocolbuffers_serializer *ser = NULL;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	err = php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);
 	if (err) {
@@ -709,7 +709,7 @@ int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, int data_len, const char *klass, int klass_len)
 {
 	zval *obj = NULL;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	const char *data_end, *res;
 	int err = 0;
 	zend_class_entry **ce = NULL;
@@ -772,7 +772,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		efree(unknown_name);
 	}
 
-	res = pb_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
+	res = php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
 	if (res == NULL) {
 		zval_ptr_dtor(&obj);
 		zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
@@ -787,7 +787,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 	return 0;
 }
 
-void php_protocolbuffers_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void php_protocolbuffers_execute_wakeup(zval *obj, php_protocolbuffers_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
@@ -805,7 +805,7 @@ void php_protocolbuffers_execute_wakeup(zval *obj, pb_scheme_container *containe
 	}
 }
 
-void php_protocolbuffers_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC)
+void php_protocolbuffers_execute_sleep(zval *obj, php_protocolbuffers_scheme_container *container TSRMLS_DC)
 {
 	zval fname, *retval_ptr = NULL;
 
@@ -819,19 +819,19 @@ void php_protocolbuffers_execute_sleep(zval *obj, pb_scheme_container *container
 
 		if (retval_ptr) {
 			if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_execute_sleep failed. __sleep method have to return an array");
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_execute_sleep failed. __sleep method have to return an array");
 				zval_ptr_dtor(&retval_ptr);
 				retval_ptr = NULL;
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_execute_sleep failed. __sleep method have to return an array");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_execute_sleep failed. __sleep method have to return an array");
 		}
 	}
 
 	if (retval_ptr) {
 		zval **entry = NULL;
 		HashPosition pos;
-		pb_scheme *scheme;
+		php_protocolbuffers_scheme *scheme;
 		int i;
 
 		for (i = 0; i < container->size; i++) {
@@ -863,8 +863,8 @@ int php_protocolbuffers_properties_init(zval *object, zend_class_entry *ce TSRML
 {
 	zval *pp = NULL;
 	int j = 0;
-	pb_scheme_container *container = NULL;
-	pb_scheme *scheme = NULL;
+	php_protocolbuffers_scheme_container *container = NULL;
+	php_protocolbuffers_scheme *scheme = NULL;
 	HashTable *properties = NULL;
 
 	php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);

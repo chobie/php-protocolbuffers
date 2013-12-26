@@ -47,16 +47,16 @@ int php_protocolbuffers_read_protected_property(zval *instance, char *name, size
 
 int php_protocolbuffers_set_protected_property(zval *instance, char *name, size_t name_len, zval *value TSRMLS_DC);
 
-#define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, pb_scheme *scheme, php_protocolbuffers_serializer *ser, int is_packed
-typedef void (*pb_encode_callback)(PB_ENCODE_CALLBACK_PARAMETERS);
+#define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, int is_packed
+typedef void (*php_protocolbuffers_encode_callback)(PB_ENCODE_CALLBACK_PARAMETERS);
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass);
 
 int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, int data_len, const char *klass, int klass_len);
 
-void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value);
+void php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hresult, zval *dz, int tag, int wiretype, int64_t value);
 
-void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length);
+void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hresult, int tag, int wiretype, uint8_t *bytes, int length);
 
 int php_protocolbuffers_properties_init(zval *object, zend_class_entry *ce TSRMLS_DC);
 
@@ -68,15 +68,15 @@ char *php_protocolbuffers_get_default_unknown_property_name();
 
 int php_protocolbuffers_get_default_unknown_property_name_len();
 
-void php_protocolbuffers_scheme_container_init(pb_scheme_container *container);
+void php_protocolbuffers_scheme_container_init(php_protocolbuffers_scheme_container *container);
 
-int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, pb_scheme_container **result TSRMLS_DC);
+int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, php_protocolbuffers_scheme_container **result TSRMLS_DC);
 
 void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC);
 
-void php_protocolbuffers_execute_wakeup(zval *obj, pb_scheme_container *container TSRMLS_DC);
+void php_protocolbuffers_execute_wakeup(zval *obj, php_protocolbuffers_scheme_container *container TSRMLS_DC);
 
-void php_protocolbuffers_execute_sleep(zval *obj, pb_scheme_container *container TSRMLS_DC);
+void php_protocolbuffers_execute_sleep(zval *obj, php_protocolbuffers_scheme_container *container TSRMLS_DC);
 
 #include "core_inl.h"
 

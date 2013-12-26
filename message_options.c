@@ -48,7 +48,7 @@ int php_protocolbuffers_message_options_init_properties(zval *object TSRMLS_DC)
 	return 0;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_options_get_options, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_options_get_options, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
@@ -87,7 +87,7 @@ PHP_METHOD(protocolbuffers_message_options, getExtension)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_message_options_methods[] = {
-	PHP_ME(protocolbuffers_message_options, getExtension, arginfo_pb_message_options_get_options, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message_options, getExtension, arginfo_protocolbuffers_message_options_get_options, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

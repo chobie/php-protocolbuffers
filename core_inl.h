@@ -167,7 +167,7 @@ static inline float decode_float(int32_t value) {
     return u.f;
 }
 
-static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
+static inline int php_protocolbuffers_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len TSRMLS_DC)
 {
     zval **d, **dd;
 
@@ -186,7 +186,7 @@ static inline int pb_get_lval_from_hash_by_tag(HashTable *proto, ulong tag, cons
     return 0;
 }
 
-static inline int pb_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len, zval **result TSRMLS_DC)
+static inline int php_protocolbuffers_get_zval_from_hash_by_tag(HashTable *proto, ulong tag, const char *name, size_t name_len, zval **result TSRMLS_DC)
 {
     zval **d, **dd;
 
@@ -284,7 +284,7 @@ static inline const char* ReadVarint64FromArray(const char* buffer, uint64_t* va
 	return ptr;
 }
 
-static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_size, uint tag)
+static inline php_protocolbuffers_scheme *php_protocolbuffers_search_scheme_by_tag(php_protocolbuffers_scheme* scheme, uint scheme_size, uint tag)
 {
 	int i = 0;
 
@@ -297,7 +297,7 @@ static inline pb_scheme *pb_search_scheme_by_tag(pb_scheme* scheme, uint scheme_
 	return NULL;
 }
 
-static inline void php_protocolbuffers_decode_add_value_and_consider_repeated(pb_scheme_container *container, pb_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
+static inline void php_protocolbuffers_decode_add_value_and_consider_repeated(php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *s, HashTable *hresult, zval *dz TSRMLS_DC)
 {
 	char *name;
 	int name_len;
@@ -344,7 +344,7 @@ static inline void php_protocolbuffers_decode_add_value_and_consider_repeated(pb
 	}
 }
 
-static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, uint64_t value, HashTable *hresult)
+static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, uint64_t value, HashTable *hresult)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;
@@ -395,7 +395,7 @@ static inline int pb_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, 
 	return 1;
 }
 
-static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
+static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;
@@ -450,7 +450,7 @@ static inline int pb_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype,
 	return 1;
 }
 
-static inline int pb_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, pb_scheme_container *container, pb_scheme *scheme, const char *data, HashTable *hresult)
+static inline int php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;

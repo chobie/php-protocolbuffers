@@ -127,26 +127,26 @@ zend_object_value php_protocolbuffers_descriptor_new(zend_class_entry *ce TSRMLS
 	object->name = NULL;
 	object->name_len = 0;
 	object->free_container = 0;
-	object->container = (pb_scheme_container*)emalloc(sizeof(pb_scheme_container));
+	object->container = (php_protocolbuffers_scheme_container*)emalloc(sizeof(php_protocolbuffers_scheme_container));
 	php_protocolbuffers_scheme_container_init(object->container);
 
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_name, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_get_name, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_field, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_get_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, tag)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_get_fields, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_get_fields, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_dump, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_dump, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -213,7 +213,7 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 	zval *instance = getThis();
 	php_protocolbuffers_descriptor *descriptor;
 	int n = 0;
-	pb_scheme *ischeme;
+	php_protocolbuffers_scheme *ischeme;
 
 
 	descriptor = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_descriptor, instance);
@@ -251,7 +251,7 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 
 	php_printf("  \"extension_ranges\": {\n");
 	if (descriptor->container->extension_cnt > 0) {
-		pb_extension_range *range;
+		php_protocolbuffers_extension_range *range;
 		for (n = 0; n < descriptor->container->extension_cnt; n++) {
 			range = &(descriptor->container->extensions[n]);
 
@@ -274,11 +274,11 @@ PHP_METHOD(protocolbuffers_descriptor, dump)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_descriptor_methods[] = {
-	PHP_ME(protocolbuffers_descriptor, __construct, arginfo_pb_descriptor___construct, ZEND_ACC_PRIVATE)
-	PHP_ME(protocolbuffers_descriptor, getName,     arginfo_pb_descriptor_get_name,    ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getField,    arginfo_pb_descriptor_get_field,   ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, getFields,   arginfo_pb_descriptor_get_fields,  ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor, dump,        arginfo_pb_descriptor_dump,        ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, __construct, arginfo_protocolbuffers_descriptor___construct, ZEND_ACC_PRIVATE)
+	PHP_ME(protocolbuffers_descriptor, getName,     arginfo_protocolbuffers_descriptor_get_name,    ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getField,    arginfo_protocolbuffers_descriptor_get_field,   ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, getFields,   arginfo_protocolbuffers_descriptor_get_fields,  ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor, dump,        arginfo_protocolbuffers_descriptor_dump,        ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

@@ -143,7 +143,7 @@ static const int64_t kLongMax = LONG_MAX;
 #endif
 #endif
 
-typedef struct pb_scheme
+typedef struct php_protocolbuffers_scheme
 {
 	int tag;
 	char *name;
@@ -168,12 +168,12 @@ typedef struct pb_scheme
 	char *message;
 	char *enum_msg;
 	zend_class_entry *ce;
-} pb_scheme;
+} php_protocolbuffers_scheme;
 
 typedef struct {
 	int begin;
 	int end;
-} pb_extension_range;
+} php_protocolbuffers_extension_range;
 
 typedef struct {
 	char *name;
@@ -181,7 +181,7 @@ typedef struct {
 	char *filename;
 	int filename_len;
 	int is_extendable;
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	int use_single_property;
 	char *orig_single_property_name;
 	int orig_single_property_name_len;
@@ -192,8 +192,8 @@ typedef struct {
 	int process_unknown_fields;
 	int use_wakeup_and_sleep;
 	int extension_cnt;
-	pb_extension_range *extensions;
-} pb_scheme_container;
+	php_protocolbuffers_extension_range *extensions;
+} php_protocolbuffers_scheme_container;
 
 
 enum WireType {
@@ -241,7 +241,7 @@ typedef struct{
 	char *name;
 	size_t name_len;
 	int free_container;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 } php_protocolbuffers_descriptor;
 
 typedef struct{

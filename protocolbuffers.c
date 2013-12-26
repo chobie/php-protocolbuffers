@@ -73,13 +73,13 @@ static zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D)
 #endif
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_decode, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, bytes)
 	ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_encode, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, descriptor)
 ZEND_END_ARG_INFO()
@@ -117,7 +117,7 @@ PHP_METHOD(protocolbuffers, encode)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_methods[] = {
-	PHP_ME(protocolbuffers, decode, arginfo_pb_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers, decode, arginfo_protocolbuffers_decode, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers, encode, NULL, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -294,7 +294,7 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 			zend_try {
 			int i = 0;
 			HashPosition pos;
-			pb_scheme_container **element;
+			php_protocolbuffers_scheme_container **element;
 
 			for(zend_hash_internal_pointer_reset_ex(PBG(messages), &pos);
 							zend_hash_get_current_data_ex(PBG(messages), (void **)&element, &pos) == SUCCESS;

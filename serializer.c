@@ -13,43 +13,43 @@ static int php_protocolbuffers_serializer_write_varint32(php_protocolbuffers_ser
 
 static int php_protocolbuffers_serializer_write_varint64(php_protocolbuffers_serializer *serializer, uint64_t value);
 
-static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS);
+static void php_protocolbuffers_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS);
 
-static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, php_protocolbuffers_serializer *ser, pb_encode_callback f, int is_packed);
+static void php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, php_protocolbuffers_encode_callback f, int is_packed);
 
-static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *container, HashTable *hash, php_protocolbuffers_serializer *ser TSRMLS_DC);
+static void php_protocolbuffers_encode_unknown_fields(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_serializer *ser TSRMLS_DC);
 
 static int php_protocolbuffers_serializer_resize(php_protocolbuffers_serializer *serializer, size_t size)
 {
@@ -151,12 +151,6 @@ static int php_protocolbuffers_serializer_write_varint32(php_protocolbuffers_ser
 	uint8_t bytes[kMaxVarint32Bytes];
 	int size = 0, i;
 
-	if (value > kint32max) {
-/* TODO:		fprintf(stderr, "out of bounds. write_varint32 expects %d\n", kint32max);
-		return 0;
-*/
-	}
-
 	if (php_protocolbuffers_serializer_resize(serializer, 4)) {
 		return 1;
 	}
@@ -195,7 +189,7 @@ static int php_protocolbuffers_serializer_write_varint64(php_protocolbuffers_ser
 	return 0;
 }
 
-static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_DOUBLE) {
 		convert_to_double(*element);
@@ -207,7 +201,7 @@ static void pb_encode_element_float(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write32_le(ser, encode_float(Z_DVAL_PP(element)));
 }
 
-static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_DOUBLE) {
 		convert_to_double(*element);
@@ -219,7 +213,7 @@ static void pb_encode_element_double(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write64_le(ser, encode_double(Z_DVAL_PP(element)));
 }
 
-static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint32_t v = 0;
 
@@ -241,7 +235,7 @@ static void pb_encode_element_fixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write32_le(ser, v);
 }
 
-static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint64_t v = 0;
 
@@ -252,7 +246,7 @@ static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 			errno = 0;
 			v = strtoull(Z_STRVAL_PP(element), &endptr, 0);
 			if  (errno == ERANGE) {
-				zend_error(E_WARNING, "pb_encode_element_fixed64: strtoull failed to decode string");
+				zend_error(E_WARNING, "php_protocolbuffers_encode_element_fixed64: strtoull failed to decode string");
 				return;
 			}
 		} else if (Z_TYPE_PP(element) == IS_DOUBLE) {
@@ -272,7 +266,7 @@ static void pb_encode_element_fixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write64_le(ser, (uint64_t)v);
 }
 
-static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -284,7 +278,7 @@ static void pb_encode_element_bool(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
-static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -305,7 +299,7 @@ static void pb_encode_element_int64(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint64(ser, v);
 }
 
-static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint64_t v = 0;
 
@@ -327,7 +321,7 @@ static void pb_encode_element_uint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint64(ser, v);
 }
 
-static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int32_t v = 0;
 
@@ -349,7 +343,7 @@ static void pb_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint32(ser,(uint32_t)v);
 }
 
-static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_NULL) {
 
@@ -365,10 +359,10 @@ static void pb_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 }
 
-static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	zend_class_entry *ce = NULL;
-	pb_scheme_container *n_container = NULL;
+	php_protocolbuffers_scheme_container *n_container = NULL;
 	php_protocolbuffers_serializer *n_ser = NULL;
 	int err = 0;
 
@@ -393,7 +387,7 @@ static void pb_encode_element_msg(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_destroy(n_ser);
 }
 
-static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_STRLEN_PP(element) > 0) {
 		php_protocolbuffers_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
@@ -402,7 +396,7 @@ static void pb_encode_element_bytes(PB_ENCODE_CALLBACK_PARAMETERS)
 	}
 }
 
-static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	uint32_t v = 0;
 
@@ -424,7 +418,7 @@ static void pb_encode_element_uint32(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint32(ser, v);
 }
 
-static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -436,7 +430,7 @@ static void pb_encode_element_enum(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint32(ser, Z_LVAL_PP(element));
 }
 
-static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -448,7 +442,7 @@ static void pb_encode_element_sfixed32(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write32_le(ser, Z_LVAL_PP(element));
 }
 
-static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -463,7 +457,7 @@ static void pb_encode_element_sfixed64(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write64_le(ser, (int64_t)v);
 }
 
-static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	if (Z_TYPE_PP(element) != IS_LONG) {
 		convert_to_long(*element);
@@ -475,7 +469,7 @@ static void pb_encode_element_sint32(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint32(ser, zigzag_encode32(Z_LVAL_PP(element)));
 }
 
-static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
+static void php_protocolbuffers_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 {
 	int64_t v = 0;
 
@@ -497,7 +491,7 @@ static void pb_encode_element_sint64(PB_ENCODE_CALLBACK_PARAMETERS)
 	php_protocolbuffers_serializer_write_varint64(ser, zigzag_encode64(v));
 }
 
-static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container *container, HashTable *hash, pb_scheme *scheme, php_protocolbuffers_serializer *ser, pb_encode_callback f, int is_packed)
+static void php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, php_protocolbuffers_encode_callback f, int is_packed)
 {
 	zval **tmp = NULL;
 	char *name = {0};
@@ -549,7 +543,7 @@ static void pb_encode_element(INTERNAL_FUNCTION_PARAMETERS, pb_scheme_container 
 
 		} else {
 			if (is_packed == 1) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "pb_encode_element_packed called non repeated scheme. this is bug");
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_encode_element_packed called non repeated scheme. this is bug");
 			} else {
 				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
@@ -603,7 +597,7 @@ void php_protocolbuffers_serializer_init(php_protocolbuffers_serializer **serial
 	*serializer = ser;
 }
 
-static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *container, HashTable *hash, php_protocolbuffers_serializer *ser TSRMLS_DC)
+static void php_protocolbuffers_encode_unknown_fields(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_serializer *ser TSRMLS_DC)
 {
 	char *uname = {0};
 	int uname_len = 0;
@@ -697,13 +691,13 @@ static void php_protocolbuffers_encode_unknown_fields(pb_scheme_container *conta
 	}
 }
 
-int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, pb_scheme_container *container, php_protocolbuffers_serializer **serializer)
+int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer)
 {
 	int i = 0;
 	php_protocolbuffers_serializer *ser;
 	zval **c = NULL;
 	HashTable *hash = NULL;
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 
 	php_protocolbuffers_serializer_init(&ser);
 
@@ -739,57 +733,57 @@ int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass
 
 		switch (scheme->type) {
 			case TYPE_DOUBLE:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_double, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_double, scheme->packed);
 			break;
 			case TYPE_FLOAT:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_float, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_float, scheme->packed);
 			break;
 			case TYPE_INT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int64, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_int64, scheme->packed);
 			break;
 			case TYPE_UINT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint64, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_uint64, scheme->packed);
 			break;
 			case TYPE_INT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_int32, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_int32, scheme->packed);
 			break;
 			case TYPE_FIXED64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed64, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_fixed64, scheme->packed);
 			break;
 			case TYPE_FIXED32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_fixed32, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_fixed32, scheme->packed);
 			break;
 			case TYPE_BOOL:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bool, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_bool, scheme->packed);
 			break;
 			case TYPE_STRING:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_string, 0);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_string, 0);
 			break;
 			case TYPE_GROUP:
 			break;
 			case TYPE_MESSAGE:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_msg, 0);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_msg, 0);
 			break;
 			case TYPE_BYTES:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_bytes, 0);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_bytes, 0);
 			break;
 			case TYPE_UINT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_uint32, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_uint32, scheme->packed);
 			break;
 			case TYPE_ENUM:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_enum, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_enum, scheme->packed);
 			break;
 			case TYPE_SFIXED32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed32, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_sfixed32, scheme->packed);
 			break;
 			case TYPE_SFIXED64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sfixed64, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_sfixed64, scheme->packed);
 			break;
 			case TYPE_SINT32:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint32, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_sint32, scheme->packed);
 			break;
 			case TYPE_SINT64:
-				pb_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &pb_encode_element_sint64, scheme->packed);
+				php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, ser, &php_protocolbuffers_encode_element_sint64, scheme->packed);
 			break;
 			default:
 			break;

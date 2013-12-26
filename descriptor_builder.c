@@ -83,39 +83,39 @@ zend_object_value php_protocolbuffers_descriptor_builder_new(zend_class_entry *c
 }
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_add_field, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_add_field, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, field)
 	ZEND_ARG_INFO(0, force_add)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_get_name, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_get_name, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_name, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_set_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_build, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_build, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_set_extension, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_set_extension, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_add_extension_range, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_add_extension_range, 0, 0, 2)
 	ZEND_ARG_INFO(0, begin)
 	ZEND_ARG_INFO(0, end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_descriptor_builder_get_options, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_descriptor_builder_get_options, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 static void php_protocolbuffers_build_extension_ranges(zval *instance, php_protocolbuffers_descriptor *descriptor TSRMLS_DC)
 {
 	zval **entry = NULL, **tmp = NULL;
-	pb_extension_range *ranges;
+	php_protocolbuffers_extension_range *ranges;
 	HashPosition pos;
 	int i = 0;
 
@@ -124,8 +124,8 @@ static void php_protocolbuffers_build_extension_ranges(zval *instance, php_proto
 	}
 
 	descriptor->container->extension_cnt = zend_hash_num_elements(Z_ARRVAL_PP(tmp));
-	ranges = (pb_extension_range*)emalloc(sizeof(pb_extension_range) * descriptor->container->extension_cnt);
-	memset(ranges, '\0', sizeof(pb_extension_range) * descriptor->container->extension_cnt);
+	ranges = (php_protocolbuffers_extension_range*)emalloc(sizeof(php_protocolbuffers_extension_range) * descriptor->container->extension_cnt);
+	memset(ranges, '\0', sizeof(php_protocolbuffers_extension_range) * descriptor->container->extension_cnt);
 
 	descriptor->container->extensions = ranges;
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
@@ -206,7 +206,7 @@ static void php_protocolbuffers_build_options(zval *instance, php_protocolbuffer
 	}
 }
 
-int php_protocolbuffers_init_scheme_with_zval(pb_scheme *scheme, int tag, zval *element TSRMLS_DC)
+int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme, int tag, zval *element TSRMLS_DC)
 {
 	zval *tmp = NULL;
 	int tsize = 0;
@@ -304,7 +304,7 @@ static int php_protocolbuffers_build_fields(zval *fields, php_protocolbuffers_de
 	zval **element;
 	int n;
 	size_t sz;
-	pb_scheme *ischeme;
+	php_protocolbuffers_scheme *ischeme;
 
 	if (fields == NULL || Z_TYPE_P(fields) != IS_ARRAY) {
 		return 0;
@@ -313,8 +313,8 @@ static int php_protocolbuffers_build_fields(zval *fields, php_protocolbuffers_de
 	proto = Z_ARRVAL_P(fields);
 	sz = zend_hash_num_elements(proto);
 
-	ischeme = (pb_scheme*)emalloc(sizeof(pb_scheme) * sz);
-	memset(ischeme, '\0', sizeof(pb_scheme) * sz);
+	ischeme = (php_protocolbuffers_scheme*)emalloc(sizeof(php_protocolbuffers_scheme) * sz);
+	memset(ischeme, '\0', sizeof(php_protocolbuffers_scheme) * sz);
 	descriptor->container->size = sz;
 	descriptor->container->scheme = ischeme;
 
@@ -333,7 +333,7 @@ static int php_protocolbuffers_build_fields(zval *fields, php_protocolbuffers_de
 static void php_protocolbuffers_build_field_descriptor(php_protocolbuffers_descriptor *descriptor, zval *result  TSRMLS_DC)
 {
 	int n = 0;
-	pb_scheme *ischeme;
+	php_protocolbuffers_scheme *ischeme;
 	zval *arrval = NULL;
 	zval *tmp = NULL, *value = NULL;
 
@@ -549,6 +549,8 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addExtensionRange)
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(fields), (void **)&entry, &pos) == SUCCESS) {
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(fields), &string_key, &string_key_len, &num_key, 1, &pos)) {
 				case HASH_KEY_IS_STRING:
+					zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "extension range expects long key.");
+					return;
 				break;
 				case HASH_KEY_IS_LONG:
 					if (begin <= num_key && num_key <= end) {
@@ -582,12 +584,12 @@ PHP_METHOD(protocolbuffers_descriptor_builder, addExtensionRange)
 
 static zend_function_entry php_protocolbuffers_descriptor_builder_methods[] = {
 	PHP_ME(protocolbuffers_descriptor_builder, __construct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-	PHP_ME(protocolbuffers_descriptor_builder, addField,  arginfo_pb_descriptor_builder_add_field, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, getName,   arginfo_pb_descriptor_builder_get_name, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_pb_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_pb_descriptor_builder_build, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, addExtensionRange, arginfo_pb_descriptor_builder_add_extension_range, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_pb_descriptor_builder_get_options, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, addField,  arginfo_protocolbuffers_descriptor_builder_add_field, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, getName,   arginfo_protocolbuffers_descriptor_builder_get_name, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, setName,   arginfo_protocolbuffers_descriptor_builder_set_name, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, build,     arginfo_protocolbuffers_descriptor_builder_build, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, addExtensionRange, arginfo_protocolbuffers_descriptor_builder_add_extension_range, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_descriptor_builder, getOptions, arginfo_protocolbuffers_descriptor_builder_get_options, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

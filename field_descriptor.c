@@ -164,22 +164,22 @@ static void php_protocolbuffers_field_descriptor_get_property(INTERNAL_FUNCTION_
 	}
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor___construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_field_descriptor___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_type, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_field_descriptor_get_type, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_type, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_field_descriptor_set_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, wiretype)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_get_default, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_field_descriptor_get_default, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_field_descriptor_set_default, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_field_descriptor_set_default, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
@@ -240,10 +240,10 @@ PHP_METHOD(protocolbuffers_field_descriptor, isExtension)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_field_descriptor_methods[] = {
-	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_pb_field_descriptor___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(protocolbuffers_field_descriptor, __construct,  arginfo_protocolbuffers_field_descriptor___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_field_descriptor, getName, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_pb_field_descriptor_get_type, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_pb_field_descriptor_get_default, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_field_descriptor, getType,  arginfo_protocolbuffers_field_descriptor_get_type, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_field_descriptor, getDefault, arginfo_protocolbuffers_field_descriptor_get_default, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_field_descriptor, isExtension, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };

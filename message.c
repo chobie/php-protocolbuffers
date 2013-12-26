@@ -85,77 +85,77 @@ zend_object_value php_protocolbuffers_message_new(zend_class_entry *ce TSRMLS_DC
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set_from, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_set_from, 0, 0, 1)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_serialize_to_string, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_serialize_to_string, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_parse_from_string, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_parse_from_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message___call, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message___call, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_merge_from, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_merge_from, 0, 0, 1)
 	ZEND_ARG_INFO(0, message)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_discard_unknown_fields, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_discard_unknown_fields, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_clear, 0, 0, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear_alls, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_clear_alls, 0, 0, 0)
 	ZEND_ARG_INFO(0, clear_unknown_fields)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_has, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_has, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set, 0, 0, 2)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_append, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_get_extension, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_has_extension, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_set_extension, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_append, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_message_clear_extension, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_get_extension, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_scheme *scheme, zval *object, char **name, int *name_len, HashTable **ht TSRMLS_DC)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_has_extension, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_set_extension, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_clear_extension, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static void php_protocolbuffers_get_hash(php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, zval *object, char **name, int *name_len, HashTable **ht TSRMLS_DC)
 {
 	char *n = {0};
 	int n_len = 0;
@@ -184,9 +184,9 @@ static void php_protocolbuffers_get_hash(pb_scheme_container *container, pb_sche
 
 }
 
-static void php_protocolbuffers_message_merge_from(pb_scheme_container *container, HashTable *htt, HashTable *hts TSRMLS_DC)
+static void php_protocolbuffers_message_merge_from(php_protocolbuffers_scheme_container *container, HashTable *htt, HashTable *hts TSRMLS_DC)
 {
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 
 	int i = 0;
 	for (i = 0; i < container->size; i++) {
@@ -242,7 +242,7 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 					if (Z_TYPE_PP(tmp2) == IS_OBJECT) {
 						char *n;
 						int n_len;
-						pb_scheme_container *c;
+						php_protocolbuffers_scheme_container *c;
 						HashTable *_htt = NULL, *_hts = NULL;
 
 						PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME2(*tmp, &c, p)
@@ -300,7 +300,7 @@ static void php_protocolbuffers_message_merge_from(pb_scheme_container *containe
 	}
 }
 
-static inline void php_protocolbuffers_typeconvert(pb_scheme *scheme, zval *vl TSRMLS_DC)
+static inline void php_protocolbuffers_typeconvert(php_protocolbuffers_scheme *scheme, zval *vl TSRMLS_DC)
 {
 	// TODO: check message
 #define TYPE_CONVERT(vl) \
@@ -364,10 +364,10 @@ static inline void php_protocolbuffers_typeconvert(pb_scheme *scheme, zval *vl T
 }
 
 
-static pb_scheme *php_protocolbuffers_message_get_scheme_by_name(pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+static php_protocolbuffers_scheme *php_protocolbuffers_message_get_scheme_by_name(php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	int i = 0;
-	pb_scheme *scheme = NULL;
+	php_protocolbuffers_scheme *scheme = NULL;
 
 	for (i = 0; i < container->size; i++) {
 		scheme = &container->scheme[i];
@@ -386,7 +386,7 @@ static pb_scheme *php_protocolbuffers_message_get_scheme_by_name(pb_scheme_conta
 	return scheme;
 }
 
-static void php_protocolbuffers_message_get_hash_table_by_container(pb_scheme_container *container, pb_scheme *scheme, zval *instance, HashTable **hash, char **name, int *name_len TSRMLS_DC)
+static void php_protocolbuffers_message_get_hash_table_by_container(php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, zval *instance, HashTable **hash, char **name, int *name_len TSRMLS_DC)
 {
 	char *n = NULL;
 	int n_len = 0;
@@ -411,12 +411,12 @@ static void php_protocolbuffers_message_get_hash_table_by_container(pb_scheme_co
 	*name_len = n_len;
 }
 
-static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n = {0};
 	int n_len = 0;
 	HashTable *htt = NULL;
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	zval **e = NULL;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
@@ -437,9 +437,9 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
+static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	zval *tmp;
 	zval **e = NULL;
 	HashTable *htt;
@@ -513,9 +513,9 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	zval **e = NULL;
 	HashTable *htt;
 	char *n = {0};
@@ -562,9 +562,9 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 	}
 }
 
-static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
+static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	zval **e = NULL;
 	HashTable *htt;
 	char *n = {0};
@@ -636,12 +636,12 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 	}
 }
 
-static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, pb_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
 {
 	char *n = {0};
 	int n_len = 0;
 	HashTable *htt = NULL;
-	pb_scheme *scheme;
+	php_protocolbuffers_scheme *scheme;
 	zval **e = NULL;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
@@ -671,7 +671,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static int php_protocolbuffers_get_unknown_zval(zval **retval, pb_scheme_container *container, zval *instance TSRMLS_DC)
+static int php_protocolbuffers_get_unknown_zval(zval **retval, php_protocolbuffers_scheme_container *container, zval *instance TSRMLS_DC)
 {
 	zval **unknown_fieldset = NULL;
 	HashTable *target = NULL;
@@ -779,7 +779,7 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 {
 	HashPosition pos;
 	zval **param;
-	pb_scheme_container *container = NULL;
+	php_protocolbuffers_scheme_container *container = NULL;
 	char *key;
 	uint key_len;
 	unsigned long index= 0;
@@ -872,7 +872,7 @@ PHP_METHOD(protocolbuffers_message, parseFromString)
 PHP_METHOD(protocolbuffers_message, mergeFrom)
 {
 	zval *object = NULL, *instance = getThis();
-	pb_scheme_container *container = NULL;
+	php_protocolbuffers_scheme_container *container = NULL;
 	char *n = {0};
 	int n_len = 0;
 	HashTable *htt = NULL, *hts = NULL;
@@ -906,7 +906,7 @@ PHP_METHOD(protocolbuffers_message, mergeFrom)
 PHP_METHOD(protocolbuffers_message, current)
 {
 	zval **tmp = NULL, *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	php_protocolbuffers_message *message;
 	const char *name;
 	int name_len = 0;
@@ -944,7 +944,7 @@ PHP_METHOD(protocolbuffers_message, current)
 PHP_METHOD(protocolbuffers_message, key)
 {
 	zval *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	php_protocolbuffers_message *message;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
@@ -959,7 +959,7 @@ PHP_METHOD(protocolbuffers_message, key)
 PHP_METHOD(protocolbuffers_message, next)
 {
 	zval *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	php_protocolbuffers_message *message;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
@@ -973,7 +973,7 @@ PHP_METHOD(protocolbuffers_message, next)
 PHP_METHOD(protocolbuffers_message, rewind)
 {
 	zval *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	php_protocolbuffers_message *message;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
@@ -991,7 +991,7 @@ PHP_METHOD(protocolbuffers_message, rewind)
 PHP_METHOD(protocolbuffers_message, valid)
 {
 	zval *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	php_protocolbuffers_message *message;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
@@ -1012,7 +1012,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 	zval *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {
@@ -1029,7 +1029,7 @@ PHP_METHOD(protocolbuffers_message, clear)
 PHP_METHOD(protocolbuffers_message, clearAll)
 {
 	zval *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	zend_bool clear_unknown_fields = 1;
 	int i = 0;
 
@@ -1059,7 +1059,7 @@ PHP_METHOD(protocolbuffers_message, clearAll)
 PHP_METHOD(protocolbuffers_message, __call)
 {
 	zval *params = NULL, *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	char *name = {0};
 	int flag = 0, name_len = 0;
 	smart_str buf = {0};
@@ -1119,7 +1119,7 @@ PHP_METHOD(protocolbuffers_message, has)
 	zval *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {
@@ -1138,7 +1138,7 @@ PHP_METHOD(protocolbuffers_message, get)
 	zval *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {
@@ -1157,7 +1157,7 @@ PHP_METHOD(protocolbuffers_message, set)
 	zval *value = NULL, *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &value) == FAILURE) {
@@ -1176,7 +1176,7 @@ PHP_METHOD(protocolbuffers_message, append)
 	zval *value = NULL, *instance = getThis();
 	char *name = {0};
 	int name_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &name, &name_len, &value) == FAILURE) {
@@ -1200,7 +1200,7 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 	HashTable *htt = NULL;
 	char *name = {0}, *n = {0};
 	int name_len = 0, n_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1258,7 +1258,7 @@ PHP_METHOD(protocolbuffers_message, hasExtension)
 	HashTable *htt = NULL;
 	char *name = {0}, *n = {0};
 	int name_len = 0, n_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1319,7 +1319,7 @@ PHP_METHOD(protocolbuffers_message, setExtension)
 	HashTable *htt = NULL;
 	char *name = {0}, *n = {0};
 	int name_len = 0, n_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1375,7 +1375,7 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 	HashTable *htt = NULL;
 	char *name = {0}, *n = {0};
 	int name_len = 0, n_len = 0;
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 	int is_mangled = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1432,7 +1432,7 @@ err:
 PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 {
 	zval *unknown_fieldset, *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
 	if (container->process_unknown_fields > 0) {
@@ -1448,7 +1448,7 @@ PHP_METHOD(protocolbuffers_message, discardUnknownFields)
 PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 {
 	zval *unknown_fieldset = NULL, *instance = getThis();
-	pb_scheme_container *container;
+	php_protocolbuffers_scheme_container *container;
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
 
@@ -1467,22 +1467,22 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 
 
 static zend_function_entry php_protocolbuffers_message_methods[] = {
-	PHP_ME(protocolbuffers_message, __construct,          arginfo_pb_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_pb_message_serialize_to_string, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, parseFromString,      arginfo_pb_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_message, mergeFrom,            arginfo_pb_message_merge_from, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, clear,                arginfo_pb_message_clear, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, __construct,          arginfo_protocolbuffers_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_protocolbuffers_message_serialize_to_string, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, parseFromString,      arginfo_protocolbuffers_message_parse_from_string, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(protocolbuffers_message, mergeFrom,            arginfo_protocolbuffers_message_merge_from, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, clear,                arginfo_protocolbuffers_message_clear, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, clearAll,             NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, has,                  arginfo_pb_message_has, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, get,                  arginfo_pb_message_get, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, set,                  arginfo_pb_message_set, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, setFrom,              arginfo_pb_message_set_from, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, append,               arginfo_pb_message_append, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, hasExtension,         arginfo_pb_message_has_extension, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, getExtension,         arginfo_pb_message_get_extension, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, setExtension,         arginfo_pb_message_set_extension, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_pb_message_clear_extension, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_pb_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, has,                  arginfo_protocolbuffers_message_has, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, get,                  arginfo_protocolbuffers_message_get, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, set,                  arginfo_protocolbuffers_message_set, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, setFrom,              arginfo_protocolbuffers_message_set_from, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, append,               arginfo_protocolbuffers_message_append, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, hasExtension,         arginfo_protocolbuffers_message_has_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, getExtension,         arginfo_protocolbuffers_message_get_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, setExtension,         arginfo_protocolbuffers_message_set_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_protocolbuffers_message_clear_extension, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_protocolbuffers_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
@@ -1491,7 +1491,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, rewind,    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, valid,     NULL, ZEND_ACC_PUBLIC)
 	/* magic method */
-	PHP_ME(protocolbuffers_message, __call,   arginfo_pb_message___call, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, __call,   arginfo_protocolbuffers_message___call, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

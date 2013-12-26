@@ -124,17 +124,17 @@ void php_protocolbuffers_unknown_field_set_add_field(INTERNAL_FUNCTION_PARAMETER
 }
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_set___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_set___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_set_count, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_set_count, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_field, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_add_field, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_add_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, unknown_field)
 ZEND_END_ARG_INFO()
 
@@ -286,9 +286,9 @@ PHP_METHOD(protocolbuffers_unknown_field_set, valid)
 /* }}} */
 
 static zend_function_entry php_protocolbuffers_unknown_field_set_methods[] = {
-	PHP_ME(protocolbuffers_unknown_field_set, count, arginfo_pb_unknown_field_set_count, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field_set, getField, arginfo_pb_unknown_field_get_field, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field_set, addField, arginfo_pb_unknown_field_add_field, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, count, arginfo_protocolbuffers_unknown_field_set_count, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, getField, arginfo_protocolbuffers_unknown_field_get_field, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field_set, addField, arginfo_protocolbuffers_unknown_field_add_field, ZEND_ACC_PUBLIC)
 	/* iterator */
 	PHP_ME(protocolbuffers_unknown_field_set, current, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field_set, key,     NULL, ZEND_ACC_PUBLIC)

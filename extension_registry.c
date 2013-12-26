@@ -99,7 +99,7 @@ static void php_protocolbuffers_extension_registry_free_storage(php_protocolbuff
 
 static int sort_cb(const void *a, const void *b)
 {
-    return ((pb_scheme*)a)->tag - ((pb_scheme*)b)->tag;
+    return ((php_protocolbuffers_scheme*)a)->tag - ((php_protocolbuffers_scheme*)b)->tag;
 }
 
 
@@ -114,7 +114,7 @@ zend_object_value php_protocolbuffers_extension_registry_new(zend_class_entry *c
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_extension_registry_add, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_extension_registry_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, message_class_name)
 	ZEND_ARG_INFO(0, extension)
 	ZEND_ARG_INFO(0, descriptor)
@@ -149,7 +149,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	long message_class_name_len = 0;
 	zval *descriptor, **bucket;
 	zend_class_entry **ce;
-	pb_scheme_container *container = NULL;
+	php_protocolbuffers_scheme_container *container = NULL;
 	long extension = 0;
 	php_protocolbuffers_extension_registry *registry;
 
@@ -159,7 +159,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 	}
 
 	if (zend_lookup_class((char*)message_class_name, message_class_name_len, &ce TSRMLS_CC) == FAILURE) {
-		// TODO(chobie): check the class has getDescriptor method.
+		// TODO(chobie): check the class which has getDescriptor method.
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "%s class does not find", message_class_name);
 		return;
 	}
@@ -229,11 +229,11 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 
 		zend_declare_property_null(*ce, name, len-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 		php_protocolbuffers_get_scheme_container((*ce)->name, (*ce)->name_length, &container TSRMLS_CC);
-		container->scheme = (pb_scheme*)erealloc(container->scheme, sizeof(pb_scheme) * (container->size + 1));
+		container->scheme = (php_protocolbuffers_scheme*)erealloc(container->scheme, sizeof(php_protocolbuffers_scheme) * (container->size + 1));
 		if (php_protocolbuffers_init_scheme_with_zval(&container->scheme[container->size], extension, descriptor TSRMLS_CC)) {
 			container->scheme[container->size].is_extension = 1;
 			container->size++;
-			qsort(container->scheme, container->size, sizeof(pb_scheme), sort_cb);
+			qsort(container->scheme, container->size, sizeof(php_protocolbuffers_scheme), sort_cb);
 		}
 	}
 }
@@ -242,7 +242,7 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 static zend_function_entry php_protocolbuffers_extension_registry_methods[] = {
 	PHP_ME(protocolbuffers_extension_registry, __construct,  NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_extension_registry, getInstance,  NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME(protocolbuffers_extension_registry, add,  arginfo_pb_extension_registry_add, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_extension_registry, add,  arginfo_protocolbuffers_extension_registry_add, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

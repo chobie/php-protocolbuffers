@@ -274,31 +274,31 @@ zend_object_value php_protocolbuffers_unknown_field_new(zend_class_entry *ce TSR
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_number, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_number, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_type, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_type, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_varint, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_varint, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_length_delimited, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_length_delimited, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_length_delimited_size, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_length_delimited_size, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_fixed32, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_fixed32, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_fixed64, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_fixed64, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_float_list, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_float_list, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pb_unknown_field_get_as_double_list, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_unknown_field_get_as_double_list, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -408,18 +408,18 @@ PHP_METHOD(protocolbuffers_unknown_field, isFixed32)
 
 
 static zend_function_entry php_protocolbuffers_unknown_field_methods[] = {
-	PHP_ME(protocolbuffers_unknown_field, getNumber, arginfo_pb_unknown_field_get_number, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getType, arginfo_pb_unknown_field_get_type, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getNumber, arginfo_protocolbuffers_unknown_field_get_number, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getType, arginfo_protocolbuffers_unknown_field_get_type, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, isVarint, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, isFixed64, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, isLengthDelimited, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_unknown_field, isFixed32, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsVarintList, arginfo_pb_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimitedList, arginfo_pb_unknown_field_get_as_length_delimited, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsFloatList, arginfo_pb_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsDoubleList, arginfo_pb_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsFixed32List, arginfo_pb_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
-	PHP_ME(protocolbuffers_unknown_field, getAsFixed64List, arginfo_pb_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsVarintList, arginfo_protocolbuffers_unknown_field_get_as_varint, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsLengthDelimitedList, arginfo_protocolbuffers_unknown_field_get_as_length_delimited, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsFloatList, arginfo_protocolbuffers_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsDoubleList, arginfo_protocolbuffers_unknown_field_get_as_float_list, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsFixed32List, arginfo_protocolbuffers_unknown_field_get_as_fixed32, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_unknown_field, getAsFixed64List, arginfo_protocolbuffers_unknown_field_get_as_fixed64, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
