@@ -1230,7 +1230,6 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 	}
 
 	ce = Z_OBJCE_P(instance);
-
 	if (!php_protocolbuffers_extension_registry_get_registry(registry, ce->name, ce->name_length, &extension_registry TSRMLS_CC)) {
 		goto err;
 	}

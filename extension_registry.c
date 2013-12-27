@@ -35,9 +35,9 @@
 
 zval *php_protocolbuffers_extension_registry_get_instance(TSRMLS_D)
 {
-	zval *extension_registry = NULL;
-
 	if (PBG(extension_registry) == NULL) {
+		zval *extension_registry = NULL;
+
 		MAKE_STD_ZVAL(extension_registry);
 		object_init_ex(extension_registry, php_protocol_buffers_extension_registry_class_entry);
 		PBG(extension_registry) = extension_registry;
