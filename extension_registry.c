@@ -158,6 +158,16 @@ PHP_METHOD(protocolbuffers_extension_registry, add)
 		return;
 	}
 
+	if (message_class_name[0] == '\\') {
+		int x;
+		for (x = 0; x < message_class_name_len-1; x++) {
+			message_class_name[x] = message_class_name[x+1];
+		}
+		message_class_name[message_class_name_len-1] = '\0';
+		message_class_name_len--;
+	}
+
+
 	if (zend_lookup_class((char*)message_class_name, message_class_name_len, &ce TSRMLS_CC) == FAILURE) {
 		// TODO(chobie): check the class which has getDescriptor method.
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "%s class does not find", message_class_name);
