@@ -80,6 +80,14 @@ extern zend_class_entry *php_protocol_buffers_invalid_byte_sequence_class_entry;
 extern zend_class_entry *php_protocol_buffers_invalid_protocolbuffers_exception_class_entry;
 extern zend_class_entry *php_protocol_buffers_uninitialized_message_exception_class_entry;
 
+ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
+	HashTable *messages;
+	HashTable *classes;
+	zval *extension_registry;
+	long strict_mode;
+	int validate_string;
+ZEND_END_MODULE_GLOBALS(protocolbuffers)
+
 ZEND_EXTERN_MODULE_GLOBALS(protocolbuffers)
 
 #ifdef ZTS

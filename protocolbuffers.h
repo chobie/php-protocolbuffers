@@ -326,14 +326,6 @@ typedef struct{
 # endif
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
-	HashTable *messages;
-	HashTable *classes;
-	zval *extension_registry;
-	long strict_mode;
-	int validate_string;
-ZEND_END_MODULE_GLOBALS(protocolbuffers)
-
 #include "core.h"
 
 #endif
