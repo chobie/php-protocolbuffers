@@ -74,12 +74,7 @@ void php_protocolbuffers_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval 
 	array_init(fields);
 
 	zend_mangle_property_name(&name, &name_len, (char*)"*", 1, (char*)ZEND_STRS("fields"), 0);
-	if (zend_hash_find(Z_OBJPROP_P(instance), name, name_len, (void **)&prior_fields) == SUCCESS) {
-		zval_ptr_dtor(prior_fields);
-		prior_fields = NULL;
-	}
-
-	zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&fields, sizeof(zval *), NULL);
+	zend_hash_update(Z_OBJPROP_P(instance), name, name_len, (void **)&fields, sizeof(zval), NULL);
 	efree(name);
 }
 
