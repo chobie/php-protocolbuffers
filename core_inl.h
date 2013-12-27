@@ -354,7 +354,7 @@ static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETER
 			MAKE_STD_ZVAL(dz);
 			php_protocolbuffers_process_unknown_field(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hresult, dz, tag, wiretype, value);
 		} else {
-			/* skip unknown field */
+			/* NOTE: skip unknown field. nothing to do. */
 		}
 	} else {
 		MAKE_STD_ZVAL(dz);
