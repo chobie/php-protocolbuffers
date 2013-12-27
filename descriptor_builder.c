@@ -253,6 +253,31 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 	scheme->mangled_name_h   = zend_inline_hash_func(mangle, mangle_len);
 	scheme->skip = 0;
 
+	if (scheme->type == TYPE_MESSAGE) {
+		zend_class_entry **c;
+
+		php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("message"), &tmp TSRMLS_CC);
+
+		if (Z_TYPE_P(tmp) == IS_STRING) {
+			if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
+				efree(scheme->original_name);
+				efree(scheme->name);
+				efree(scheme->mangled_name);
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
+				return 0;
+			}
+
+			scheme->ce = *c;
+		} else {
+			efree(scheme->original_name);
+			efree(scheme->name);
+			efree(scheme->mangled_name);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "message wiretype set. we need message parameter for referencing class entry.");
+			return 0;
+		}
+	}
+
+
 	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("default"), &tmp TSRMLS_CC);
 	/* TODO(chobie): check types */
 
@@ -284,26 +309,6 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 	}
 	scheme->packed = Z_LVAL_P(tmp);
 
-	if (scheme->type == TYPE_MESSAGE) {
-		zend_class_entry **c;
-
-		php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("message"), &tmp TSRMLS_CC);
-
-		if (Z_TYPE_P(tmp) == IS_STRING) {
-			if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
-				zval_ptr_dtor(&def);
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
-				return 0;
-			}
-
-			scheme->ce = *c;
-		} else {
-			zval_ptr_dtor(&def);
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "message wiretype set. we need message parameter for referencing class entry.");
-			return 0;
-		}
-	}
-
 	return 1;
 }
 
@@ -333,6 +338,10 @@ static int php_protocolbuffers_build_fields(zval *fields, php_protocolbuffers_de
 					zend_hash_move_forward_ex(proto, &pos), n++
 	) {
 		if (!php_protocolbuffers_init_scheme_with_zval(&ischeme[n], (int)pos->h, *element TSRMLS_CC)) {
+			efree(ischeme);
+
+			descriptor->container->size = 0;
+			descriptor->container->scheme = NULL;
 			return 0;
 		}
 	}
@@ -499,7 +508,7 @@ PHP_METHOD(protocolbuffers_descriptor_builder, build)
 
 	fields = zend_read_property(php_protocol_buffers_descriptor_builder_class_entry, getThis(), ZEND_STRS("fields")-1, 0 TSRMLS_CC);
 	if (!php_protocolbuffers_build_fields(fields, descriptor, result TSRMLS_CC)) {
-		efree(result);
+		zval_ptr_dtor(&result);
 		RETURN_NULL();
 	}
 	php_protocolbuffers_build_options(getThis(), descriptor TSRMLS_CC);
