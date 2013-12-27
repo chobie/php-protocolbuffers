@@ -411,7 +411,7 @@ static void php_protocolbuffers_message_get_hash_table_by_container(php_protocol
 	*name_len = n_len;
 }
 
-static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len)
+static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *params)
 {
 	char *n = {0};
 	int n_len = 0;
@@ -433,7 +433,19 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
-		RETURN_ZVAL(*e, 1, 0);
+		if (scheme->repeated && params != NULL && Z_TYPE_P(params) != IS_NULL) {
+			zval **value;
+
+			if (Z_TYPE_P(params) != IS_LONG) {
+				convert_to_long(params);
+			}
+
+			if (zend_hash_index_find(Z_ARRVAL_PP(e), Z_LVAL_P(params), (void **)&value) == SUCCESS) {
+				RETURN_ZVAL(*value, 1, 0);
+			}
+		} else {
+			RETURN_ZVAL(*e, 1, 0);
+		}
 	}
 }
 
@@ -1080,7 +1092,15 @@ PHP_METHOD(protocolbuffers_message, __call)
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
 	switch (flag) {
 		case MAGICMETHOD_GET:
-			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len);
+		{
+			zval **tmp = NULL;
+			if (params != NULL && Z_TYPE_P(params) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(params)) > 0) {
+				zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
+				php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
+			} else {
+				php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, NULL);
+			}
+		}
 		break;
 		case MAGICMETHOD_SET:
 		{
@@ -1139,14 +1159,15 @@ PHP_METHOD(protocolbuffers_message, get)
 	char *name = {0};
 	int name_len = 0;
 	php_protocolbuffers_scheme_container *container;
+	zval *params = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s", &name, &name_len) == FAILURE) {
+		"s|z", &name, &name_len, &params) == FAILURE) {
 		return;
 	}
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len);
+	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, params);
 }
 /* }}} */
 
