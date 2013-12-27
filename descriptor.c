@@ -98,6 +98,9 @@ static void php_protocolbuffers_descriptor_free_storage(php_protocolbuffers_desc
 			if ((object->container)->scheme[i].mangled_name != NULL) {
 				efree((object->container)->scheme[i].mangled_name);
 			}
+			if ((object->container)->scheme[i].default_value != NULL) {
+				zval_ptr_dtor(&(object->container)->scheme[i].default_value);
+			}
 		}
 
 		if (object->container->single_property_name != NULL) {

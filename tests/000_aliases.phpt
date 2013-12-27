@@ -19,15 +19,6 @@ if ($target instanceof ProtocolBuffersDescriptorBuilder) {
 	echo get_class($target) . PHP_EOL;
 }
 
-class A extends ProtocolBuffers\Message{public static function getDescriptor(){}}
-
-$target = new A();
-if ($target instanceof ProtocolBuffersMessage) {
-	echo "OK" . PHP_EOL;
-} else {
-	echo get_class($target) . PHP_EOL;
-}
-
 $target = new ProtocolBuffers\UnknownField();
 if ($target instanceof ProtocolBuffersUnknownField) {
 	echo "OK" . PHP_EOL;
@@ -87,7 +78,6 @@ if ($target instanceof ProtocolBuffersUninitializedMessageException) {
 
 
 --EXPECT--
-OK
 OK
 OK
 OK

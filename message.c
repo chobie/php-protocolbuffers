@@ -821,6 +821,10 @@ PHP_METHOD(protocolbuffers_message, __construct)
 		return;
 	}
 
+	if (php_protocolbuffers_properties_init(instance, Z_OBJCE_P(instance) TSRMLS_CC)) {
+		return;
+	}
+
 	if (params != NULL) {
 		php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, params);
 	}

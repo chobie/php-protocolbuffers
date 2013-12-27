@@ -310,6 +310,9 @@ PHP_RSHUTDOWN_FUNCTION(protocolbuffers)
 					if ((*element)->scheme[i].mangled_name != NULL) {
 						efree((*element)->scheme[i].mangled_name);
 					}
+					if ((*element)->scheme[i].default_value != NULL) {
+						zval_ptr_dtor(&((*element)->scheme[i].default_value));
+					}
 				}
 
 				if ((*element)->single_property_name != NULL) {

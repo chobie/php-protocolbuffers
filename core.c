@@ -134,7 +134,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 				if (ret != NULL) {
 					zval_ptr_dtor(&ret);
 				}
-				zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+				zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "getDescriptor returns unexpected class");
 				return 1;
 			}
 		} else {
@@ -867,7 +867,10 @@ int php_protocolbuffers_properties_init(zval *object, zend_class_entry *ce TSRML
 	php_protocolbuffers_scheme *scheme = NULL;
 	HashTable *properties = NULL;
 
-	php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);
+	if (php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC)) {
+		return 1;
+	}
+
 	ALLOC_HASHTABLE(properties);
 	zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
@@ -883,7 +886,11 @@ int php_protocolbuffers_properties_init(zval *object, zend_class_entry *ce TSRML
 			if (scheme->repeated > 0) {
 				array_init(pp);
 			} else {
-				ZVAL_NULL(pp);
+				if (Z_TYPE_P(scheme->default_value) != IS_NULL) {
+					ZVAL_ZVAL(pp, scheme->default_value, 1, 0);
+				} else {
+					ZVAL_NULL(pp);
+				}
 			}
 
 			zend_hash_update(properties, scheme->name, scheme->name_len, (void **)&pp, sizeof(zval), NULL);

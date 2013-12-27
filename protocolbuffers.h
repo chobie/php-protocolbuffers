@@ -167,6 +167,7 @@ typedef struct php_protocolbuffers_scheme
 	int is_extension;
 	char *message;
 	char *enum_msg;
+	zval *default_value;
 	zend_class_entry *ce;
 } php_protocolbuffers_scheme;
 

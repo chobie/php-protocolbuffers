@@ -212,6 +212,7 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 	int tsize = 0;
 	char *mangle;
 	int mangle_len;
+	zval *def;
 
 	scheme->is_extension = 0;
 	scheme->tag = tag;
@@ -252,6 +253,13 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 	scheme->mangled_name_h   = zend_inline_hash_func(mangle, mangle_len);
 	scheme->skip = 0;
 
+	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("default"), &tmp TSRMLS_CC);
+	/* TODO(chobie): check types */
+
+	MAKE_STD_ZVAL(def);
+	ZVAL_ZVAL(def, tmp, 1, 0);
+	scheme->default_value = def;
+
 	php_protocolbuffers_field_descriptor_get_property(Z_OBJPROP_P(element), ZEND_STRS("required"), &tmp TSRMLS_CC);
 	if (Z_TYPE_P(tmp) != IS_LONG) {
 		convert_to_long(tmp);
@@ -283,12 +291,14 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			if (zend_lookup_class(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &c TSRMLS_CC) == FAILURE) {
+				zval_ptr_dtor(&def);
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "the class %s does not find.", Z_STRVAL_P(tmp));
 				return 0;
 			}
 
 			scheme->ce = *c;
 		} else {
+			zval_ptr_dtor(&def);
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "message wiretype set. we need message parameter for referencing class entry.");
 			return 0;
 		}
