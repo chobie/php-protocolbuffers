@@ -328,6 +328,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 	zval *dz = NULL;
 	HashTable *hresult;
 	pbf __payload = {0};
+	php_protocolbuffers_scheme *prior_scheme = NULL;
 
 	if (container->use_single_property > 0) {
 		zval **tmp = NULL;
@@ -420,16 +421,6 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 				php_protocolbuffers_get_scheme_container(s->ce->name, s->ce->name_length, &c_container TSRMLS_CC);
 
-				MAKE_STD_ZVAL(z_obj);
-				object_init_ex(z_obj, s->ce);
-				php_protocolbuffers_properties_init(z_obj, s->ce TSRMLS_CC);
-
-				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
-
-				if (c_container->use_wakeup_and_sleep > 0) {
-					php_protocolbuffers_execute_wakeup(z_obj, c_container TSRMLS_CC);
-				}
-
 				if (container->use_single_property < 1) {
 					name        = s->mangled_name;
 					name_length = s->mangled_name_len;
@@ -438,6 +429,30 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 					name        = s->name;
 					name_length = s->name_len;
 					name_hash   = s->name_h;
+				}
+
+				if (prior_scheme != NULL && prior_scheme == s && !s->repeated) {
+					/* NOTE: some protobuf implementation will split child message into each filed. */
+					zval **tt;
+
+					if (zend_hash_quick_find(hresult, name, name_length, name_hash, (void **)&tt) == SUCCESS) {
+						z_obj = *tt;
+						Z_ADDREF_P(z_obj);
+					} else {
+						MAKE_STD_ZVAL(z_obj);
+						object_init_ex(z_obj, s->ce);
+						php_protocolbuffers_properties_init(z_obj, s->ce TSRMLS_CC);
+					}
+				} else {
+					MAKE_STD_ZVAL(z_obj);
+					object_init_ex(z_obj, s->ce);
+					php_protocolbuffers_properties_init(z_obj, s->ce TSRMLS_CC);
+				}
+
+				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);
+
+				if (c_container->use_wakeup_and_sleep > 0) {
+					php_protocolbuffers_execute_wakeup(z_obj, c_container TSRMLS_CC);
 				}
 
 				if (s->repeated) {
@@ -667,6 +682,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 		}
 		break;
 		}
+		prior_scheme = s;
 	}
 
 	return data;
