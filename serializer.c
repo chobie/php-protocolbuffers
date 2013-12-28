@@ -345,17 +345,29 @@ static void php_protocolbuffers_encode_element_int32(PB_ENCODE_CALLBACK_PARAMETE
 
 static void php_protocolbuffers_encode_element_string(PB_ENCODE_CALLBACK_PARAMETERS)
 {
-	if (Z_TYPE_PP(element) != IS_NULL) {
+	zval *tmp = *element;
+	int free = 0;
+	zval *t;
 
-		if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
+	if (Z_TYPE_P(tmp) != IS_NULL) {
+		if (Z_TYPE_P(tmp) == IS_OBJECT) {
+			zend_call_method_with_0_params(element, Z_OBJCE_PP(element), NULL, "__tostring", &t);
+			tmp = t;
+			free = 1;
+		}
+
+		if (PBG(validate_string) && is_utf8(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp)) < 1) {
 			zend_throw_exception_ex(php_protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
 			return;
 		}
 
 		php_protocolbuffers_serializer_write_varint32(ser, (scheme->tag << 3) | WIRETYPE_LENGTH_DELIMITED);
-		php_protocolbuffers_serializer_write_varint32(ser, Z_STRLEN_PP(element));
+		php_protocolbuffers_serializer_write_varint32(ser, Z_STRLEN_P(tmp));
 
-		php_protocolbuffers_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_PP(element), Z_STRLEN_PP(element));
+		php_protocolbuffers_serializer_write_chararray(ser, (unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+		if (free) {
+			zval_ptr_dtor(&t);
+		}
 	}
 }
 

@@ -307,7 +307,10 @@ static inline void php_protocolbuffers_typeconvert(php_protocolbuffers_scheme *s
 		switch (scheme->type) {\
 			case TYPE_STRING:\
 				if (Z_TYPE_P(vl) != IS_STRING) {\
-					convert_to_string(vl);\
+					if (Z_TYPE_P(vl) == IS_OBJECT && zend_hash_exists(&(Z_OBJCE_P(vl)->function_table), ZEND_STRS("__tostring"))) {\
+					} else {\
+						convert_to_string(vl);\
+					}\
 				}\
 			break;\
 			case TYPE_SINT32:\
