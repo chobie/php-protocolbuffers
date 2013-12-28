@@ -552,7 +552,7 @@ static void php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAMETERS, php
 				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					return;
 				}
-				if (Z_TYPE_PP(tmp) != IS_OBJECT) {
+				if (scheme->ce != NULL && Z_TYPE_PP(tmp) != IS_OBJECT) {
 					return;
 				}
 				if (Z_TYPE_PP(tmp) == IS_ARRAY) {
