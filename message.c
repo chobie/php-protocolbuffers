@@ -447,7 +447,16 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 				RETURN_ZVAL(*value, 1, 0);
 			}
 		} else {
-			RETURN_ZVAL(*e, 1, 0);
+			if (scheme->ce != NULL && Z_TYPE_PP(e) == IS_NULL) {
+				zval *tmp;
+				MAKE_STD_ZVAL(tmp);
+				object_init_ex(tmp, scheme->ce);
+				php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
+
+				RETURN_ZVAL(tmp, 0, 1);
+			} else {
+				RETURN_ZVAL(*e, 1, 0);
+			}
 		}
 	}
 }
@@ -1263,6 +1272,24 @@ PHP_METHOD(protocolbuffers_message, getExtension)
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 		if (is_mangled) {
 			efree(n);
+		}
+
+		if (Z_TYPE_PP(e) == IS_NULL) {
+			int x = 0;
+			for (x = 0; x < container->size; x++) {
+				php_protocolbuffers_scheme *scheme;
+
+				scheme = &container->scheme[x];
+				if (scheme->ce != NULL && strcmp(scheme->name, name) == 0) {
+					zval *tmp;
+					MAKE_STD_ZVAL(tmp);
+					object_init_ex(tmp, scheme->ce);
+					php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
+
+					RETURN_ZVAL(tmp, 0, 1);
+					break;
+				}
+			}
 		}
 
 		RETURN_ZVAL(*e, 1, 0);
