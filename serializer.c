@@ -552,6 +552,9 @@ static void php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAMETERS, php
 				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 					return;
 				}
+				if (Z_TYPE_PP(tmp) != IS_OBJECT) {
+					return;
+				}
 				if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 					//php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not repeated field but array given", scheme->name);
 					return;
