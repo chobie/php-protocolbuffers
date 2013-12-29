@@ -447,6 +447,13 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 					MAKE_STD_ZVAL(z_obj);
 					object_init_ex(z_obj, s->ce);
 					php_protocolbuffers_properties_init(z_obj, s->ce TSRMLS_CC);
+
+					if (instanceof_function_ex(s->ce, php_protocol_buffers_message_class_entry, 0 TSRMLS_CC)) {
+						php_protocolbuffers_message *m;
+						m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, z_obj);
+
+						ZVAL_ZVAL(m->container, *result, 1, 0);
+					}
 				}
 
 				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, &z_obj);

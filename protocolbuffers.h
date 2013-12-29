@@ -247,6 +247,7 @@ typedef struct{
 
 typedef struct{
 	zend_object zo;
+	zval *container;
 	int max;
 	int offset;
 } php_protocolbuffers_message;

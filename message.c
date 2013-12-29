@@ -67,6 +67,9 @@ static zend_object_handlers php_protocolbuffers_message_object_handlers;
 
 static void php_protocolbuffers_message_free_storage(php_protocolbuffers_message *object TSRMLS_DC)
 {
+	if (object->container != NULL) {
+		zval_ptr_dtor(&object->container);
+	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);
 }
@@ -79,6 +82,8 @@ zend_object_value php_protocolbuffers_message_new(zend_class_entry *ce TSRMLS_DC
 
 	object->max    = 0;
 	object->offset = 0;
+	MAKE_STD_ZVAL(object->container);
+	ZVAL_NULL(object->container);
 
 	retval.handlers = &php_protocolbuffers_message_object_handlers;
 
@@ -464,6 +469,7 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	php_protocolbuffers_scheme *scheme;
+	php_protocolbuffers_message *m;
 	zval *tmp;
 	zval **e = NULL;
 	HashTable *htt;
@@ -511,6 +517,10 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
 			return;
 		}
+
+		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
+		ZVAL_ZVAL(m->container, instance, 1, 0);
+
 	}
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
@@ -589,6 +599,7 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
 {
 	php_protocolbuffers_scheme *scheme;
+	php_protocolbuffers_message *m;
 	zval **e = NULL;
 	HashTable *htt;
 	char *n = {0};
@@ -625,6 +636,8 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
 			return;
 		}
+		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
+		ZVAL_ZVAL(m->container, instance, 1, 0);
 	}
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
@@ -1520,6 +1533,22 @@ PHP_METHOD(protocolbuffers_message, getUnknownFieldSet)
 /* }}} */
 
 
+/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::containerOf()
+*/
+PHP_METHOD(protocolbuffers_message, containerOf)
+{
+	zval *instance = getThis();
+	php_protocolbuffers_message *m;
+
+	m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, instance);
+
+	if (m->container != NULL) {
+		RETURN_ZVAL(m->container, 1, 0);
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_protocolbuffers_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_protocolbuffers_message_serialize_to_string, ZEND_ACC_PUBLIC)
@@ -1538,7 +1567,8 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, clearExtension,       arginfo_protocolbuffers_message_clear_extension, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_protocolbuffers_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
-	/* iterator */
+	PHP_ME(protocolbuffers_message, containerOf,          NULL, ZEND_ACC_PUBLIC)
+		/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, next,      NULL, ZEND_ACC_PUBLIC)
