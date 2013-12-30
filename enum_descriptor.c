@@ -1,7 +1,37 @@
 #include "protocolbuffers.h"
 #include "enum_descriptor.h"
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_enum_descriptor_is_valid, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+
+/* {{{ proto void ProtocolBuffersEnumDescriptor::__construct()
+*/
+PHP_METHOD(protocolbuffers_enum_descriptor, __construct)
+{
+}
+/* }}} */
+
+/* {{{ proto bool ProtocolBuffersEnumDescriptor::isValid(long $value)
+*/
+PHP_METHOD(protocolbuffers_enum_descriptor, isValid)
+{
+	long value = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &value) == FAILURE) {
+		return;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 static zend_function_entry protocolbuffers_enum_descriptor_methods[] = {
+	PHP_ME(protocolbuffers_enum_descriptor, __construct, NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
+	PHP_ME(protocolbuffers_enum_descriptor, isValid, arginfo_protocolbuffers_enum_descriptor_is_valid, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
