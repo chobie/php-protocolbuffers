@@ -52,6 +52,7 @@ zend_class_entry *php_protocol_buffers_descriptor_class_entry;
 zend_class_entry *php_protocol_buffers_field_descriptor_class_entry;
 
 zend_class_entry *php_protocol_buffers_serializable_class_entry;
+zend_class_entry *php_protocol_buffers_enum_describable_class_entry;
 
 zend_class_entry *php_protocol_buffers_message_class_entry;
 zend_class_entry *php_protocol_buffers_message_options_class_entry;
@@ -185,6 +186,21 @@ static void php_protocol_buffers_serializable(TSRMLS_D)
 	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "Describable", php_protocol_buffers_serializable_class_entry);
 }
 
+static zend_function_entry php_protocolbuffers_enum_describable_methods[] = {
+	ZEND_FENTRY(getEnumDescriptor, NULL, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT)
+	PHP_FE_END
+};
+
+static void php_protocol_buffers_enum_describable(TSRMLS_D)
+{
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "ProtocolBuffersEnumDescribable", php_protocolbuffers_enum_describable_methods);
+	php_protocol_buffers_enum_describable_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
+
+	PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(PHP_PROTOCOLBUFFERS_NAMESPACE, "EnumDescribable", php_protocol_buffers_serializable_class_entry);
+}
+
 static void php_protocolbuffers_init(TSRMLS_D)
 {
 	zend_class_entry ce;
@@ -199,6 +215,7 @@ static void php_protocolbuffers_init(TSRMLS_D)
 	php_protocolbuffers_descriptor_class(TSRMLS_C);
 	php_protocolbuffers_filed_descriptor_class(TSRMLS_C);
 	php_protocol_buffers_serializable(TSRMLS_C);
+	php_protocol_buffers_enum_describable(TSRMLS_C);
 	php_protocolbuffers_message_class(TSRMLS_C);
 	php_protocolbuffers_message_options_class(TSRMLS_C);
 	php_protocolbuffers_enum_class(TSRMLS_C);
