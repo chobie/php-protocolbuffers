@@ -1,6 +1,6 @@
 ARG_WITH('protocolbuffers', 'protocolbuffers extension', 'no');
 
 if (PHP_PROTOCOLBUFFERS != "no") {
-    EXTENSION("protocolbuffers", "protocolbuffers.c descriptor.c descriptor_builder.c field_descriptor.c message.c message_options.c enum.c php_message_options.c unknown_field.c unknown_field_set.c helper.c extension_registry.c core.c serializer.c");
+    EXTENSION("protocolbuffers", "protocolbuffers.c descriptor.c descriptor_builder.c field_descriptor.c message.c message_options.c enum.c enum_descriptor.c enum_value_descriptor.c php_message_options.c unknown_field.c unknown_field_set.c helper.c extension_registry.c core.c serializer.c");
     ADD_EXTENSION_DEP('protocolbuffers','spl',true);
 }

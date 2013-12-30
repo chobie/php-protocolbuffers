@@ -1,6 +1,5 @@
 #include "protocolbuffers.h"
-#include "unknown_field_set.h"
-#include "unknown_field.h"
+#include "enum.h"
 
 static zend_function_entry protocolbuffers_enum_methods[] = {
 	PHP_FE_END
