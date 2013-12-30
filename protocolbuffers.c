@@ -35,6 +35,7 @@
 #include "field_descriptor.h"
 #include "message.h"
 #include "message_options.h"
+#include "enum.h"
 #include "php_message_options.h"
 #include "descriptor_builder.h"
 #include "unknown_field.h"
@@ -50,6 +51,7 @@ zend_class_entry *php_protocol_buffers_serializable_class_entry;
 
 zend_class_entry *php_protocol_buffers_message_class_entry;
 zend_class_entry *php_protocol_buffers_message_options_class_entry;
+zend_class_entry *php_protocol_buffers_enum_class_entry;
 zend_class_entry *php_protocol_buffers_descriptor_builder_class_entry;
 zend_class_entry *php_protocol_buffers_unknown_field_class_entry;
 zend_class_entry *php_protocol_buffers_unknown_field_set_class_entry;
@@ -192,6 +194,7 @@ static void php_protocolbuffers_init(TSRMLS_D)
 	php_protocol_buffers_serializable(TSRMLS_C);
 	php_protocolbuffers_message_class(TSRMLS_C);
 	php_protocolbuffers_message_options_class(TSRMLS_C);
+	php_protocolbuffers_enum_class(TSRMLS_C);
 	php_protocolbuffers_php_message_options_class(TSRMLS_C);
 	php_protocolbuffers_descriptor_builder_class(TSRMLS_C);
 	php_protocolbuffers_unknown_field_class(TSRMLS_C);

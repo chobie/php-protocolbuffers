@@ -68,6 +68,7 @@ extern zend_class_entry *php_protocol_buffers_serializable_class_entry;
 
 extern zend_class_entry *php_protocol_buffers_message_class_entry;
 extern zend_class_entry *php_protocol_buffers_message_options_class_entry;
+extern zend_class_entry *php_protocol_buffers_enum_class_entry;
 extern zend_class_entry *php_protocol_buffers_descriptor_builder_class_entry;
 extern zend_class_entry *php_protocol_buffers_unknown_field_class_entry;
 extern zend_class_entry *php_protocol_buffers_unknown_field_set_class_entry;
