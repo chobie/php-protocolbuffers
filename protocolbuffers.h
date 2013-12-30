@@ -94,7 +94,7 @@
 #define PHP_PROTOCOLBUFFERS_EXCEPTION_ERROR(exception) zend_exception_error(exception, E_ERROR TSRMLS_CC)
 #endif
 
-#if PHP_VERSION_ID < 50300
+#if PHP_VERSION_ID < 50307
 #define PHP_FE_END            { NULL, NULL, NULL, 0, 0 }
 #endif
 
