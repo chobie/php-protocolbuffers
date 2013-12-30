@@ -35,6 +35,12 @@ PHP_METHOD(protocolbuffers_enum_descriptor_builder, addValue)
 */
 PHP_METHOD(protocolbuffers_enum_descriptor_builder, build)
 {
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	object_init_ex(result, php_protocol_buffers_enum_descriptor_class_entry);
+
+	RETURN_ZVAL(result, 0, 1);
 }
 /* }}} */
 
