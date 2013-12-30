@@ -17,6 +17,10 @@ PHP_METHOD(protocolbuffers_enum, __construct)
 */
 PHP_METHOD(protocolbuffers_enum, isValid)
 {
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersEnum::isValid can't work under PHP 5.3. please consider upgrading your PHP");
+	return;
+#else
 	zval *value;
 	zval *result, *result2;
 
@@ -36,6 +40,7 @@ PHP_METHOD(protocolbuffers_enum, isValid)
 		}
 		zval_ptr_dtor(&result);
 	}
+#endif
 }
 /* }}} */
 
