@@ -17,14 +17,25 @@ PHP_METHOD(protocolbuffers_enum, __construct)
 */
 PHP_METHOD(protocolbuffers_enum, isValid)
 {
-	long value = 0;
+	zval *value;
+	zval *result, *result2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"l", &value) == FAILURE) {
+		"z", &value) == FAILURE) {
 		return;
 	}
 
-	RETURN_TRUE;
+	if (zend_call_method_with_0_params(NULL, EG(called_scope), NULL, "getenumdescriptor", &result)) {
+		if (zend_call_method_with_1_params(&result, Z_OBJCE_P(result), NULL, "isvalid", &result2, value)) {
+			if (Z_BVAL_P(result2)) {
+				RETVAL_TRUE;
+			} else {
+				RETVAL_FALSE;
+			}
+			zval_ptr_dtor(&result2);
+		}
+		zval_ptr_dtor(&result);
+	}
 }
 /* }}} */
 
