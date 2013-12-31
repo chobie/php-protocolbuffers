@@ -25,17 +25,6 @@
  <notes>Initial Release</notes>
  <contents>
   <dir name="/">
-   <dir name="contrib">
-    <file role="src" name="main.cc"/>
-    <file role="src" name="protoc-gen-php.cc"/>
-    <file role="src" name="protoc-gen-php.h"/>
-    <file role="src" name="strutil.cc"/>
-    <file role="src" name="strutil.h"/>
-   </dir>
-   <dir name="examples">
-    <file role="doc" name="address.php"/>
-    <file role="doc" name="address2.php"/>
-   </dir>
    <dir name="tests">
     <dir name="fixtures">
      <file role="test" name="001_big_tag.bin"/>
@@ -235,8 +224,6 @@
     <file role="test" name="005_decode_sfixed64_packed.phpt"/>
     <file role="test" name="005_decode_sint32_packed.phpt"/>
     <file role="test" name="005_decode_sint64_packed.phpt"/>
-    <file role="test" name="800_field_descriptor.phpt"/>
-    <file role="test" name="801_descirptor_builder.phpt"/>
     <file role="test" name="999_dummy_string.phpt"/>
     <file role="test" name="999_empty_string.phpt"/>
     <file role="test" name="999_illegal_bytes.phpt"/>
@@ -247,33 +234,42 @@
    </dir>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
-   <file role="src" name="core.h"/>
-   <file role="src" name="core.c"/>
-   <file role="src" name="core_inl.h"/>
-   <file role="src" name="descriptor.c"/>
-   <file role="src" name="descriptor.h"/>
-   <file role="src" name="descriptor_builder.c"/>
-   <file role="src" name="descriptor_builder.h"/>
-   <file role="src" name="field_descriptor.c"/>
-   <file role="src" name="field_descriptor.h"/>
-   <file role="src" name="field_options.c"/>
-   <file role="src" name="field_options.h"/>
-   <file role="src" name="helper.h"/>
-   <file role="src" name="message.c"/>
-   <file role="src" name="message.h"/>
-   <file role="src" name="message_options.c"/>
-   <file role="src" name="message_options.h"/>
-   <file role="src" name="php_message_options.c"/>
-   <file role="src" name="php_message_options.h"/>
-   <file role="src" name="php_protocolbuffers.h"/>
-   <file role="src" name="protocol_buffers.c"/>
-   <file role="src" name="protocol_buffers.h"/>
-   <file role="src" name="serializer.c"/>
-   <file role="src" name="serializer.h"/>
-   <file role="src" name="unknown_field.c"/>
-   <file role="src" name="unknown_field.h"/>
-   <file role="src" name="unknown_field_set.c"/>
-   <file role="src" name="unknown_field_set.h"/>
+   <file role="src" name="core.c" />
+   <file role="src" name="core.h" />
+   <file role="src" name="core_inl.h" />
+   <file role="src" name="descriptor.c" />
+   <file role="src" name="descriptor.h" />
+   <file role="src" name="descriptor_builder.c" />
+   <file role="src" name="descriptor_builder.h" />
+   <file role="src" name="enum.c" />
+   <file role="src" name="enum.h" />
+   <file role="src" name="enum_descriptor.c" />
+   <file role="src" name="enum_descriptor.h" />
+   <file role="src" name="enum_descriptor_builder.c" />
+   <file role="src" name="enum_descriptor_builder.h" />
+   <file role="src" name="enum_value_descriptor.c" />
+   <file role="src" name="enum_value_descriptor.h" />
+   <file role="src" name="extension_registry.c" />
+   <file role="src" name="extension_registry.h" />
+   <file role="src" name="field_descriptor.c" />
+   <file role="src" name="field_descriptor.h" />
+   <file role="src" name="helper.c" />
+   <file role="src" name="helper.h" />
+   <file role="src" name="message.c" />
+   <file role="src" name="message.h" />
+   <file role="src" name="message_options.c" />
+   <file role="src" name="message_options.h" />
+   <file role="src" name="php_message_options.c" />
+   <file role="src" name="php_message_options.h" />
+   <file role="src" name="php_protocolbuffers.h" />
+   <file role="src" name="protocolbuffers.c" />
+   <file role="src" name="protocolbuffers.h" />
+   <file role="src" name="serializer.c" />
+   <file role="src" name="serializer.h" />
+   <file role="src" name="unknown_field.c" />
+   <file role="src" name="unknown_field.h" />
+   <file role="src" name="unknown_field_set.c" />
+   <file role="src" name="unknown_field_set.h" />
    <file role="doc" name="LICENSE"/>
   </dir>
  </contents>
