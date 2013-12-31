@@ -21,24 +21,30 @@ PHP_METHOD(protocolbuffers_enum, isValid)
 	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersEnum::isValid can't work under PHP 5.3. please consider upgrading your PHP");
 	return;
 #else
-	zval *value;
+	long value;
 	zval *result, *result2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"z", &value) == FAILURE) {
+		"l", &value) == FAILURE) {
 		return;
 	}
 
 	if (zend_call_method_with_0_params(NULL, EG(called_scope), NULL, "getenumdescriptor", &result)) {
-		if (zend_call_method_with_1_params(&result, Z_OBJCE_P(result), NULL, "isvalid", &result2, value)) {
-			if (Z_BVAL_P(result2)) {
+		zval *values, **entry;
+		HashPosition pos;
+
+		php_protocolbuffers_read_protected_property(result, ZEND_STRS("values"), &values TSRMLS_CC);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&entry, &pos) == SUCCESS) {
+			if (Z_LVAL_PP(entry) == value) {
 				RETVAL_TRUE;
-			} else {
-				RETVAL_FALSE;
+				break;
 			}
-			zval_ptr_dtor(&result2);
+			zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos);
 		}
 		zval_ptr_dtor(&result);
+
+		RETVAL_FALSE;
 	}
 #endif
 }
