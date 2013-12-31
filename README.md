@@ -18,14 +18,14 @@ PHP5.2 is limited support (can't use `ProtocolBuffers\Message::parseFromString()
 ## Install
 
 ````
-    git clone https://github.com/chobie/php-protocolbuffers.git
-    cd php-protocolbuffers
-    phpize
-    ./configure
-    make
-    make install
-    # please add following line to your php.ini
-    # extension=protocolbuffers.so
+git clone https://github.com/chobie/php-protocolbuffers.git
+cd php-protocolbuffers
+phpize
+./configure
+make
+make install
+# please add following line to your php.ini
+# extension=protocolbuffers.so
 ````
 
 ### More information
