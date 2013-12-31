@@ -33,6 +33,12 @@ PHP_METHOD(protocolbuffers_enum, isValid)
 		zval *values, **entry;
 		HashPosition pos;
 
+		if (!instanceof_function_ex(Z_OBJCE_P(result), php_protocol_buffers_enum_descriptor_class_entry, 0 TSRMLS_CC)) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "ProtocolBuffersEnum::getEnumDescriptor returns unexpected value.");
+			zval_ptr_dtor(&result);
+			return;
+		}
+
 		php_protocolbuffers_read_protected_property(result, ZEND_STRS("values"), &values TSRMLS_CC);
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&entry, &pos) == SUCCESS) {
@@ -43,8 +49,10 @@ PHP_METHOD(protocolbuffers_enum, isValid)
 			zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos);
 		}
 		zval_ptr_dtor(&result);
-
 		RETVAL_FALSE;
+	} else {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "cannot call ProtocolBuffersEnum::getEnumDescriptor.");
+			return;
 	}
 #endif
 }
