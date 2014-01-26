@@ -6,3 +6,6 @@ php:
   - 5.5
 
 script: rake compile test
+
+notifications:
+  irc: "chat.freenode.net#php-protocolbuffers"
