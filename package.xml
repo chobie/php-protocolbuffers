@@ -11,11 +11,11 @@
   <email>chobieeeee@php.net</email>
   <active>yes</active>
  </lead>
- <date>2013-06-11</date>
- <time>02:31:48</time>
+ <date>2014-01-26</date>
+ <time>01:30:48</time>
  <version>
-  <release>0.1.0a</release>
-  <api>0.1.0</api>
+  <release>0.2.0</release>
+  <api>0.2.0</api>
  </version>
  <stability>
   <release>alpha</release>
