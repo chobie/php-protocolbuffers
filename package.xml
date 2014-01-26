@@ -4,7 +4,7 @@
  <channel>pecl.php.net</channel>
  <summary>Protocol Buffers are a way of encoding structured data in an efficient yet extensible format. Google uses Protocol Buffers for almost all of its internal RPC protocols and file formats.
 </summary>
- <description>Protocol buffers are a flexible, efficient, automated mechanism for serializing structured data – think XML, but smaller, faster, and simpler. You define how you want your data to be structured once, then you can use special generated source code to easily write and read your structured data to and from a variety of data streams and using a variety of languages. You can even update your data structure without breaking deployed programs that are compiled against the "old" format.</description>
+ <description>Protocol buffers are a flexible, efficient, automated mechanism for serializing structured data think XML, but smaller, faster, and simpler. You define how you want your data to be structured once, then you can use special generated source code to easily write and read your structured data to and from a variety of data streams and using a variety of languages. You can even update your data structure without breaking deployed programs that are compiled against the "old" format.</description>
  <lead>
   <name>Shuhei Tanuma</name>
   <user>chobieeee</user>
@@ -14,7 +14,7 @@
  <date>2014-01-26</date>
  <time>01:30:48</time>
  <version>
-  <release>0.2.0</release>
+  <release>0.2.1</release>
   <api>0.2.0</api>
  </version>
  <stability>
@@ -22,7 +22,7 @@
   <api>alpha</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
- <notes>Initial Release</notes>
+ <notes>This is package.xml maintenance release only.</notes>
  <contents>
  <dir name="/">
      <file role="src" name="config.m4"/>
@@ -59,7 +59,7 @@
      <file role="src" name="php_message_options.c"/>
      <file role="src" name="php_message_options.h"/>
      <file role="src" name="php_protocolbuffers.h"/>
-     <file role="doc" name="phpunit.xml.dist"/>
+     <file role="src" name="phpunit.xml.dist"/>
      <file role="src" name="protocolbuffers.c"/>
      <file role="src" name="protocolbuffers.h"/>
      <file role="doc" name="README.md"/>
@@ -260,74 +260,74 @@
              <file role="test" name="003_sint64_packed.bin"/>
              <file role="test" name="003_uint32_packed.bin"/>
              <file role="test" name="999_conformance_quick.bin"/>
-             <file role="doc" name="android_logo.gif"/>
+             <file role="test" name="android_logo.gif"/>
              <file role="test" name="fixture001.bin"/>
          </dir>
          <dir name="messages">
-             <file role="doc" name="003_has_message.proto.php"/>
-             <file role="doc" name="addressbook.proto.php"/>
-             <file role="doc" name="big_tag.proto.php"/>
-             <file role="doc" name="field.proto.php"/>
-             <file role="doc" name="field_bool.proto.php"/>
-             <file role="doc" name="field_bool_packed.proto.php"/>
-             <file role="doc" name="field_bytes.proto.php"/>
-             <file role="doc" name="field_double.proto.php"/>
-             <file role="doc" name="field_double_packed.proto.php"/>
-             <file role="doc" name="field_fixed32.proto.php"/>
-             <file role="doc" name="field_fixed32_packed.proto.php"/>
-             <file role="doc" name="field_fixed64.proto.php"/>
-             <file role="doc" name="field_fixed64_packed.proto.php"/>
-             <file role="doc" name="field_float.proto.php"/>
-             <file role="doc" name="field_float_packed.proto.php"/>
-             <file role="doc" name="field_int32.proto.php"/>
-             <file role="doc" name="field_int32_packed.proto.php"/>
-             <file role="doc" name="field_int64.proto.php"/>
-             <file role="doc" name="field_int64_packed.proto.php"/>
-             <file role="doc" name="field_sfixed32.proto.php"/>
-             <file role="doc" name="field_sfixed32_packed.proto.php"/>
-             <file role="doc" name="field_sfixed64.proto.php"/>
-             <file role="doc" name="field_sfixed64_packed.proto.php"/>
-             <file role="doc" name="field_sint32.proto.php"/>
-             <file role="doc" name="field_sint32_packed.proto.php"/>
-             <file role="doc" name="field_sint64.proto.php"/>
-             <file role="doc" name="field_sint64_packed.proto.php"/>
-             <file role="doc" name="field_string.proto.php"/>
-             <file role="doc" name="field_uint32_packed.proto.php"/>
-             <file role="doc" name="field_uint64.proto.php"/>
-             <file role="doc" name="repeated_int32.proto.php"/>
-             <file role="doc" name="repeated_string.proto.php"/>
+             <file role="test" name="003_has_message.proto.php"/>
+             <file role="test" name="addressbook.proto.php"/>
+             <file role="test" name="big_tag.proto.php"/>
+             <file role="test" name="field.proto.php"/>
+             <file role="test" name="field_bool.proto.php"/>
+             <file role="test" name="field_bool_packed.proto.php"/>
+             <file role="test" name="field_bytes.proto.php"/>
+             <file role="test" name="field_double.proto.php"/>
+             <file role="test" name="field_double_packed.proto.php"/>
+             <file role="test" name="field_fixed32.proto.php"/>
+             <file role="test" name="field_fixed32_packed.proto.php"/>
+             <file role="test" name="field_fixed64.proto.php"/>
+             <file role="test" name="field_fixed64_packed.proto.php"/>
+             <file role="test" name="field_float.proto.php"/>
+             <file role="test" name="field_float_packed.proto.php"/>
+             <file role="test" name="field_int32.proto.php"/>
+             <file role="test" name="field_int32_packed.proto.php"/>
+             <file role="test" name="field_int64.proto.php"/>
+             <file role="test" name="field_int64_packed.proto.php"/>
+             <file role="test" name="field_sfixed32.proto.php"/>
+             <file role="test" name="field_sfixed32_packed.proto.php"/>
+             <file role="test" name="field_sfixed64.proto.php"/>
+             <file role="test" name="field_sfixed64_packed.proto.php"/>
+             <file role="test" name="field_sint32.proto.php"/>
+             <file role="test" name="field_sint32_packed.proto.php"/>
+             <file role="test" name="field_sint64.proto.php"/>
+             <file role="test" name="field_sint64_packed.proto.php"/>
+             <file role="test" name="field_string.proto.php"/>
+             <file role="test" name="field_uint32_packed.proto.php"/>
+             <file role="test" name="field_uint64.proto.php"/>
+             <file role="test" name="repeated_int32.proto.php"/>
+             <file role="test" name="repeated_string.proto.php"/>
          </dir>
          <dir name="proto">
-             <file role="doc" name="addressbook.proto"/>
-             <file role="doc" name="big_tag.proto"/>
-             <file role="doc" name="field_bool.proto"/>
-             <file role="doc" name="field_bool_packed.proto"/>
-             <file role="doc" name="field_bytes.proto"/>
-             <file role="doc" name="field_double.proto"/>
-             <file role="doc" name="field_double_packed.proto"/>
-             <file role="doc" name="field_fixed32.proto"/>
-             <file role="doc" name="field_fixed32_packed.proto"/>
-             <file role="doc" name="field_fixed64.proto"/>
-             <file role="doc" name="field_fixed64_packed.proto"/>
-             <file role="doc" name="field_float.proto"/>
-             <file role="doc" name="field_float_packed.proto"/>
-             <file role="doc" name="field_int32.proto"/>
-             <file role="doc" name="field_int32_packed.proto"/>
-             <file role="doc" name="field_int64.proto"/>
-             <file role="doc" name="field_int64_packed.proto"/>
-             <file role="doc" name="field_sfixed32.proto"/>
-             <file role="doc" name="field_sfixed32_packed.proto"/>
-             <file role="doc" name="field_sfixed64.proto"/>
-             <file role="doc" name="field_sfixed64_packed.proto"/>
-             <file role="doc" name="field_sint32.proto"/>
-             <file role="doc" name="field_sint32_packed.proto"/>
-             <file role="doc" name="field_sint64.proto"/>
-             <file role="doc" name="field_sint64_packed.proto"/>
-             <file role="doc" name="field_string.proto"/>
-             <file role="doc" name="field_uint32_packed.proto"/>
-             <file role="doc" name="has_message.proto"/>
-             <file role="doc" name="repeated_int32.proto"/>
-             <file role="doc" name="repeated_string.proto"/>
+             <file role="test" name="addressbook.proto"/>
+             <file role="test" name="big_tag.proto"/>
+             <file role="test" name="field_bool.proto"/>
+             <file role="test" name="field_bool_packed.proto"/>
+             <file role="test" name="field_bytes.proto"/>
+             <file role="test" name="field_double.proto"/>
+             <file role="test" name="field_double_packed.proto"/>
+             <file role="test" name="field_fixed32.proto"/>
+             <file role="test" name="field_fixed32_packed.proto"/>
+             <file role="test" name="field_fixed64.proto"/>
+             <file role="test" name="field_fixed64_packed.proto"/>
+             <file role="test" name="field_float.proto"/>
+             <file role="test" name="field_float_packed.proto"/>
+             <file role="test" name="field_int32.proto"/>
+             <file role="test" name="field_int32_packed.proto"/>
+             <file role="test" name="field_int64.proto"/>
+             <file role="test" name="field_int64_packed.proto"/>
+             <file role="test" name="field_sfixed32.proto"/>
+             <file role="test" name="field_sfixed32_packed.proto"/>
+             <file role="test" name="field_sfixed64.proto"/>
+             <file role="test" name="field_sfixed64_packed.proto"/>
+             <file role="test" name="field_sint32.proto"/>
+             <file role="test" name="field_sint32_packed.proto"/>
+             <file role="test" name="field_sint64.proto"/>
+             <file role="test" name="field_sint64_packed.proto"/>
+             <file role="test" name="field_string.proto"/>
+             <file role="test" name="field_uint32_packed.proto"/>
+             <file role="test" name="has_message.proto"/>
+             <file role="test" name="repeated_int32.proto"/>
+             <file role="test" name="repeated_string.proto"/>
          </dir>
      </dir>
  </dir>
