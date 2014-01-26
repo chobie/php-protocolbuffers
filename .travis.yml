@@ -9,3 +9,4 @@ script: rake compile test
 
 notifications:
   irc: "chat.freenode.net#php-protocolbuffers"
+  use_notice: true
