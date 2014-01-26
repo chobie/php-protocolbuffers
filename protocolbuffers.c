@@ -274,7 +274,7 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Protocol Buffers Support", "enabled");
-	php_info_print_table_row(2, "Version", PHP_PROTOCOLBUFFERS_EXTVER);
+	php_info_print_table_row(2, "Version", PHP_PROTOCOLBUFFERS_VERSION);
 	php_info_print_table_end();
 }
 
@@ -411,7 +411,7 @@ zend_module_entry protocolbuffers_module_entry = {
 	PHP_RSHUTDOWN(protocolbuffers),		/* RSHUTDOWN */
 	PHP_MINFO(protocolbuffers),	/* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
-	PHP_PROTOCOLBUFFERS_EXTVER,
+	PHP_PROTOCOLBUFFERS_VERSION,
 #endif
 	PHP_MODULE_GLOBALS(protocolbuffers),
 	PHP_GINIT(protocolbuffers),
