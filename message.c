@@ -40,6 +40,7 @@ enum ProtocolBuffers_MagicMethod {
 	MAGICMETHOD_APPEND = 3,
 	MAGICMETHOD_CLEAR  = 4,
 	MAGICMETHOD_HAS    = 5,
+	MAGICMETHOD_MUTABLE= 6,
 };
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
@@ -130,6 +131,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_has, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_mutable, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
@@ -758,6 +763,17 @@ static enum ProtocolBuffers_MagicMethod php_protocolbuffers_parse_magic_method(c
 				i += 2;
 				flag = MAGICMETHOD_SET;
 				continue;
+			} else if (i+7 < name_len &&
+				name[i] == 'm' &&
+				name[i+1] == 'u' &&
+				name[i+2] == 't' &&
+				name[i+3] == 'a' &&
+				name[i+4] == 'b' &&
+				name[i+5] == 'l' &&
+				name[i+6] == 'e'
+			){
+				i += 7;
+				flag = MAGICMETHOD_MUTABLE;
 			} else if (i+6 < name_len &&
 				name[i] == 'a' &&
 				name[i+1] == 'p' &&
@@ -1131,6 +1147,13 @@ PHP_METHOD(protocolbuffers_message, __call)
 			}
 		}
 		break;
+		case MAGICMETHOD_MUTABLE:
+		{
+			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, NULL);
+			Z_ADDREF_P(return_value);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, return_value);
+		}
+		break;
 		case MAGICMETHOD_SET:
 		{
 			zval **tmp = NULL;
@@ -1197,6 +1220,27 @@ PHP_METHOD(protocolbuffers_message, get)
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, params);
+}
+/* }}} */
+
+/* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::mutable($key)
+*/
+PHP_METHOD(protocolbuffers_message, mutable)
+{
+	zval *instance = getThis();
+	char *name = {0};
+	int name_len = 0;
+	php_protocolbuffers_scheme_container *container;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
+	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, NULL);
+	Z_ADDREF_P(return_value);
+	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, return_value);
 }
 /* }}} */
 
@@ -1558,6 +1602,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, clearAll,             NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, has,                  arginfo_protocolbuffers_message_has, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, get,                  arginfo_protocolbuffers_message_get, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, mutable,              arginfo_protocolbuffers_message_mutable, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, set,                  arginfo_protocolbuffers_message_set, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, setFrom,              arginfo_protocolbuffers_message_set_from, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, append,               arginfo_protocolbuffers_message_append, ZEND_ACC_PUBLIC)
