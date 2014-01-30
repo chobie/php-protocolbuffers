@@ -4,6 +4,10 @@
 
 php-protocolbuffers provides full protocol buffers features into PHP.
 
+## Status
+
+Alpha (considering phpish API design)
+
 ## Requirements
 
 * PHP5.3 higher
@@ -27,6 +31,9 @@ make install
 # please add following line to your php.ini
 # extension=protocolbuffers.so
 ````
+
+`protoc-gen-php` is related project (https://github.com/chobie/protoc-gen-php).
+you need this when you generate message from .proto file.
 
 ### More information
 
