@@ -199,6 +199,7 @@ namespace {
 
     class ProtocolBuffersEnum
     {
+        public function getName($value){}
         public function isValid($value){}
     }
 
