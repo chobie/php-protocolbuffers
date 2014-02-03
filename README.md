@@ -69,7 +69,3 @@ see wiki https://github.com/chobie/php-protocolbuffers/wiki
 
 New BSD License
 
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/chobie/php-protocolbuffers/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
