@@ -1,5 +1,6 @@
 <?php
 namespace {
+
     class ProtocolBuffers
     {
         const WIRETYPE_VARINT = 0;
@@ -69,6 +70,7 @@ namespace {
          * serialize this message into string
          *
          * @return string
+         * @api
          */
         public function serializeToString(){}
 
@@ -76,6 +78,7 @@ namespace {
          * parse bytes and returns new instance.
          *
          * @return self
+         * @api
          */
         public static function parseFromString($bytes){}
 
@@ -90,11 +93,13 @@ namespace {
          * clear specified field
          *
          * @param string $field_name
+         * @api
          */
         public function clear($field_name){}
 
         /**
          * clear all fields
+         * @api
          */
         public function clearAll(){}
 
@@ -103,6 +108,7 @@ namespace {
          *
          * @param string $field_name
          * @return bool
+         * @api
          */
         public function has($field_name){}
 
@@ -115,6 +121,7 @@ namespace {
          *
          * @param string $field_name
          * @return mixed
+         * @api
          */
         public function get($field_name){}
 
@@ -129,6 +136,7 @@ namespace {
         /**
          * @param $field_name
          * @param $value
+         * @api
          */
         public function set($field_name, $value){}
 
@@ -194,7 +202,7 @@ namespace {
         /**
          * @return ProtocolBuffersDescriptor
          */
-        public function getDescriptor(){}
+        public static function getDescriptor(){}
     }
 
     class ProtocolBuffersEnum
@@ -276,6 +284,22 @@ namespace {
     class ProtocolBuffersInvalidByteSequenceException extends Exception{}
     class ProtocolBuffersInvalidProtocolBufferException extends Exception{}
     class ProtocolBuffersUninitializedMessageException extends Exception{}
+
+    class ProtocolBuffersDescriptor{
+    }
+
+    class ProtocolBuffersFieldDescriptor{
+    }
+
+    class ProtocolBuffersDescriptorBuilder{
+
+        public function addField($tag, ProtocolBuffersFieldDescriptor $field_descriptor){}
+
+        /**
+         * @return ProtocolBuffersDescriptor
+         */
+        public function build(){}
+    }
 }
 
 
@@ -288,4 +312,7 @@ namespace ProtocolBuffers
     class InvalidByteSequenceException extends \ProtocolBuffersInvalidByteSequenceException{}
     class InvalidProtocolBufferException extends \ProtocolBuffersInvalidProtocolBufferException{}
     class UninitializedMessageException extends \ProtocolBuffersUninitializedMessageException{}
+    class Descriptor extends \ProtocolBuffersDescriptor{}
+    class FieldDescriptor extends \ProtocolBuffersFieldDescriptor{}
+    class DescriptorBuilder extends \ProtocolBuffersDescriptorBuilder{}
 }
