@@ -205,10 +205,15 @@ namespace {
         public static function getDescriptor(){}
     }
 
-    class ProtocolBuffersEnum
+    abstract class ProtocolBuffersEnum implements ProtocolBuffersEnumDescribable
     {
         public function getName($value){}
         public function isValid($value){}
+
+        /**
+         * @return ProtocolBuffersEnumDescriptor
+         */
+        abstract static function getEnumDescriptor();
     }
 
     class ProtocolBuffersUnknownFieldSet
@@ -300,6 +305,26 @@ namespace {
          */
         public function build(){}
     }
+
+    class ProtocolBuffersEnumDescriptor {
+    }
+    
+    class ProtocolBuffersEnumDescriptorBuilder{
+        
+        public function addValue(ProtocolBuffersEnumValueDescriptor $value, $force_add = false) {}
+
+        /**
+         * @return ProtocolBuffersEnumDescriptor
+         */
+        public function build() {}
+    }
+
+    class ProtocolBuffersEnumValueDescriptor{
+    }
+
+    interface ProtocolBuffersEnumDescribable{
+        public static function getEnumDescriptor();
+    }
 }
 
 
@@ -315,4 +340,8 @@ namespace ProtocolBuffers
     class Descriptor extends \ProtocolBuffersDescriptor{}
     class FieldDescriptor extends \ProtocolBuffersFieldDescriptor{}
     class DescriptorBuilder extends \ProtocolBuffersDescriptorBuilder{}
+    class EnumDescriptor extends \ProtocolBuffersEnumDescriptor{}
+    class EnumDescriptorBuilder extends \ProtocolBuffersEnumDescriptorBuilder{}
+    class EnumValueDescriptor extends \ProtocolBuffersEnumValueDescriptor{}
+    abstract class Enum extends \ProtocolBuffersEnum{}
 }
