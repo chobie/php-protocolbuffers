@@ -69,7 +69,9 @@ static zend_object_handlers php_protocolbuffers_message_object_handlers;
 static void php_protocolbuffers_message_free_storage(php_protocolbuffers_message *object TSRMLS_DC)
 {
 	if (object->container != NULL) {
+		ZVAL_NULL(object->container);
 		zval_ptr_dtor(&object->container);
+		object->container = NULL;
 	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
 	efree(object);
@@ -524,7 +526,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 		}
 
 		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
-		ZVAL_ZVAL(m->container, instance, 1, 0);
+		ZVAL_ZVAL(m->container, instance, 0, 0);
 
 	}
 
@@ -642,7 +644,7 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 			return;
 		}
 		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
-		ZVAL_ZVAL(m->container, instance, 1, 0);
+		ZVAL_ZVAL(m->container, instance, 0, 0);
 	}
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);

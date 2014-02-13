@@ -452,7 +452,8 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 						php_protocolbuffers_message *m;
 						m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, z_obj);
 
-						ZVAL_ZVAL(m->container, *result, 1, 0);
+						// point to parent.
+						ZVAL_ZVAL(m->container, *result, 0, 0);
 					}
 				}
 
