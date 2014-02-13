@@ -916,7 +916,7 @@ int php_protocolbuffers_properties_init(zval *object, zend_class_entry *ce TSRML
 				}
 			}
 
-			zend_hash_update(properties, scheme->name, scheme->name_len, (void **)&pp, sizeof(zval), NULL);
+			zend_hash_update(properties, scheme->original_name, scheme->original_name_len, (void **)&pp, sizeof(zval), NULL);
 		}
 	}
 
