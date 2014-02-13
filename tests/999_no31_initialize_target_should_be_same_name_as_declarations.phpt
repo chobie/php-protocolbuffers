@@ -72,5 +72,5 @@ $container->appendConfigVersions($content);
 $buffer = $container->serializeToString();
 
 // Don't SEGV
-$c = Container::parseFromString($buffer);
+$c = ProtocolBuffers::decode("Container", $buffer);
 --EXPECT--
