@@ -11,10 +11,10 @@
   <email>chobieeeee@php.net</email>
   <active>yes</active>
  </lead>
- <date>2014-01-26</date>
- <time>01:30:48</time>
+ <date>2014-02-14</date>
+ <time>04:50:48</time>
  <version>
-  <release>0.2.1</release>
+  <release>0.2.2</release>
   <api>0.2.0</api>
  </version>
  <stability>
@@ -22,7 +22,16 @@
   <api>alpha</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
- <notes>This is package.xml maintenance release only.</notes>
+ <notes>Bumped up to 0.2.2
+
+[added]
+* added IDE friendly stub file.
+* added ProtocolBuffersEnum::getName($value) method.
+
+[bug fixes]
+* #31 fixes potential for segmentation fault when using camel case field name.
+* #32 don't waste memory when retain parent message.
+ </notes>
  <contents>
  <dir name="/">
      <file role="src" name="config.m4"/>
@@ -69,6 +78,9 @@
      <file role="src" name="unknown_field.h"/>
      <file role="src" name="unknown_field_set.c"/>
      <file role="src" name="unknown_field_set.h"/>
+     <dir name="stubs">
+         <file role="doc" name="protocolbuffers.stub.php"/>
+     </dir>
      <dir name="tests">
          <file role="test" name="000_aliases.phpt"/>
          <file role="test" name="001_big_tag.phpt"/>
@@ -208,6 +220,7 @@
          <file role="test" name="999_regression_multiple_repeated_fields.phpt"/>
          <file role="test" name="999_remove_first_ns.phpt"/>
          <file role="test" name="999_required_property.phpt"/>
+         <file role="test" name="999_no31_initialize_target_should_be_same_name_as_declarations.phpt" />
          <dir name="fixtures">
              <file role="test" name="001_big_tag.bin"/>
              <file role="test" name="001_bool.bin"/>
