@@ -798,7 +798,9 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 
 	res = php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, &obj);
 	if (res == NULL) {
-		zval_ptr_dtor(&obj);
+		if (obj != NULL) {
+			zval_ptr_dtor(&obj);
+		}
 		zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "passed variable contains malformed byte sequence. or it contains unsupported tag");
 		return 0;
 	}
