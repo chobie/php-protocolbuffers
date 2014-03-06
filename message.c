@@ -527,7 +527,6 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
 		ZVAL_ZVAL(m->container, instance, 0, 0);
-
 	}
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
@@ -846,9 +845,10 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(params), (void **)&param, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(params), &pos)) {
 
-		zend_hash_get_current_key_ex(Z_ARRVAL_P(params), &key, &key_len, &index, 0, &pos);
-		Z_ADDREF_PP(param);
-		php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, key, key_len, key, key_len, *param);
+		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(params), &key, &key_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+			Z_ADDREF_PP(param);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, key, key_len, key, key_len, *param);
+		}
 	}
 
 }
@@ -1280,6 +1280,7 @@ PHP_METHOD(protocolbuffers_message, append)
 	}
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
+	Z_ADDREF_P(value);
 	php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value);
 }
 
