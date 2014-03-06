@@ -503,30 +503,34 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 
 	if (scheme->ce != NULL) {
-		if (Z_TYPE_P(value) == IS_ARRAY) {
-			zval *param;
+		if (scheme->repeated) {
+			// TODO: check variables.
+		} else {
+			if (Z_TYPE_P(value) == IS_ARRAY) {
+				zval *param;
 
-			MAKE_STD_ZVAL(tmp);
-			MAKE_STD_ZVAL(param);
+				MAKE_STD_ZVAL(tmp);
+				MAKE_STD_ZVAL(param);
 
-			ZVAL_ZVAL(param, value, 1, 1);
+				ZVAL_ZVAL(param, value, 1, 1);
 
-			object_init_ex(tmp, scheme->ce);
-			php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
-			zend_call_method_with_1_params(&tmp, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
-			zval_ptr_dtor(&param);
+				object_init_ex(tmp, scheme->ce);
+				php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
+				zend_call_method_with_1_params(&tmp, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
+				zval_ptr_dtor(&param);
 
-			value = tmp;
+				value = tmp;
+			}
+
+			if (scheme->ce != Z_OBJCE_P(value)) {
+				zval_ptr_dtor(&value);
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
+				return;
+			}
+
+			m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
+			ZVAL_ZVAL(m->container, instance, 0, 0);
 		}
-
-		if (scheme->ce != Z_OBJCE_P(value)) {
-			zval_ptr_dtor(&value);
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
-			return;
-		}
-
-		m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, value);
-		ZVAL_ZVAL(m->container, instance, 0, 0);
 	}
 
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
