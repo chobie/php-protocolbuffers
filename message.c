@@ -34,6 +34,10 @@
 #include "unknown_field_set.h"
 #include "extension_registry.h"
 
+#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+#include "ext/json/php_json.h"
+#endif
+
 enum ProtocolBuffers_MagicMethod {
 	MAGICMETHOD_GET    = 1,
 	MAGICMETHOD_SET    = 2,
@@ -1600,6 +1604,23 @@ PHP_METHOD(protocolbuffers_message, containerOf)
 /* }}} */
 
 
+/* {{{ proto array ProtocolBuffersMessage::jsonSerialize()
+*/
+PHP_METHOD(protocolbuffers_message, jsonSerialize)
+{
+#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+	zval *instance = getThis(), *result = NULL;
+
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance, &result) == 0) {
+		RETURN_ZVAL(result, 0, 1);
+	}
+#else
+  return;
+#endif
+}
+/* }}} */
+
+
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_protocolbuffers_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(protocolbuffers_message, serializeToString,    arginfo_protocolbuffers_message_serialize_to_string, ZEND_ACC_PUBLIC)
@@ -1620,6 +1641,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_protocolbuffers_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, containerOf,          NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, jsonSerialize,        NULL, ZEND_ACC_PUBLIC)
 		/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
@@ -1639,6 +1661,10 @@ void php_protocolbuffers_message_class(TSRMLS_D)
 	php_protocol_buffers_message_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, zend_ce_iterator);
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_protocol_buffers_serializable_class_entry);
+
+#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_json_serializable_ce);
+#endif
 
 	php_protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 	php_protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;

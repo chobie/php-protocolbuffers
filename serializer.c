@@ -706,6 +706,147 @@ static void php_protocolbuffers_encode_unknown_fields(php_protocolbuffers_scheme
 	}
 }
 
+
+static void php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, php_protocolbuffers_encode_callback f, int is_packed, zval **output)
+{
+	zval **tmp = NULL;
+	char *name = {0};
+	int name_len = 0;
+
+	if (container->use_single_property < 1) {
+		name = scheme->mangled_name;
+		name_len = scheme->mangled_name_len;
+	} else {
+		name = scheme->name;
+		name_len = scheme->name_len;
+	}
+
+	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
+//		if (scheme->repeated) {
+//			HashPosition pos;
+//			zval **element;
+//
+//			if (Z_TYPE_PP(tmp) != IS_ARRAY) {
+//				array_init(*tmp);
+//			}
+//
+//			for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
+//							zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
+//							zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
+//			) {
+//				if (Z_TYPE_PP(element) == IS_NULL) {
+//					continue;
+//				}
+//
+//				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, n_ser, is_packed);
+//			}
+//		} else {
+//			if (is_packed == 1) {
+//				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_encode_element_packed called non repeated scheme. this is bug");
+//			} else {
+//				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
+//					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+//					return;
+//				}
+//				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
+//					return;
+//				}
+//				if (scheme->ce != NULL && Z_TYPE_PP(tmp) != IS_OBJECT) {
+//					return;
+//				}
+//				if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+//					//php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not repeated field but array given", scheme->name);
+//					return;
+//				}
+//
+//				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
+//			}
+//		}
+	} else {
+		if (scheme->required > 0) {
+			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			return;
+		}
+	}
+}
+
+int php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, zval **result)
+{
+	int i = 0;
+	php_protocolbuffers_scheme *scheme;
+	HashTable *hash = NULL;
+	zval **c = NULL;
+	zval *target = *result;
+
+	if (container->use_single_property < 1) {
+		hash = Z_OBJPROP_P(klass);
+	} else {
+		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
+			hash = Z_ARRVAL_PP(c);
+		} else {
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
+			return -1;
+		}
+	}
+
+	for (i = 0; i < container->size; i++) {
+		scheme = &(container->scheme[i]);
+
+		switch (scheme->type) {
+			case TYPE_DOUBLE:
+				add_assoc_double(target, scheme->name, 0);
+			break;
+			case TYPE_FLOAT:
+			break;
+			case TYPE_INT64:
+			break;
+			case TYPE_UINT64:
+			break;
+			case TYPE_INT32:
+			break;
+			case TYPE_FIXED64:
+			break;
+			case TYPE_FIXED32:
+			break;
+			case TYPE_BOOL:
+			break;
+			case TYPE_STRING:
+				add_assoc_string(target, scheme->name, "HOGE", 1);
+			break;
+			case TYPE_GROUP:
+			break;
+			case TYPE_MESSAGE:
+			break;
+			case TYPE_BYTES:
+				add_assoc_string(target, scheme->name, "HOGE", 1);
+			break;
+			case TYPE_UINT32:
+			break;
+			case TYPE_ENUM:
+			break;
+			case TYPE_SFIXED32:
+			break;
+			case TYPE_SFIXED64:
+			break;
+			case TYPE_SINT32:
+			break;
+			case TYPE_SINT64:
+			break;
+			default:
+			break;
+		}
+
+		if (EG(exception)) {
+			return 1;
+		}
+	}
+
+	if (container->process_unknown_fields > 0) {
+		//php_protocolbuffers_encode_unknown_fields(container, hash, ser TSRMLS_CC);
+	}
+	return 0;
+}
+
 int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer)
 {
 	int i = 0;

@@ -37,4 +37,6 @@ void php_protocolbuffers_serializer_init(php_protocolbuffers_serializer **serial
 
 int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer);
 
+int php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, zval **result);
+
 #endif

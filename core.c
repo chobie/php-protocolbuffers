@@ -697,6 +697,34 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 }
 
 
+int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass, zval **result)
+{
+	int err = 0;
+	zval *tmp = NULL;
+	php_protocolbuffers_scheme_container *container;
+
+	err = php_protocolbuffers_get_scheme_container(ce->name, ce->name_length, &container TSRMLS_CC);
+	if (err) {
+		if (EG(exception)) {
+			return err;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
+			return err;
+		}
+	}
+
+	MAKE_STD_ZVAL(tmp);
+	array_init(tmp);
+
+//TODO
+	if (php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &tmp) != 0) {
+		zval_ptr_dtor(&tmp);
+		return 1;
+	}
+
+	*result = tmp;
+	return err;
+}
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
 {
