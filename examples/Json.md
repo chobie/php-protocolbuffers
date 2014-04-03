@@ -3,7 +3,7 @@
 ## Ini
 
 | key                                           | TYPE | Default | Description                                            |
-+-----------------------------------------------+------+---------+--------------------------------------------------------+
+|-----------------------------------------------|------|---------|--------------------------------------------------------|
 | protocolbuffers.json_serializer.respect_name? | BOOL | TRUE    | use field name as object key. otherwise use tag number |
 
 ## Types
@@ -11,7 +11,7 @@
 Basically, json serialize implementation respects protocol buffers serialization rule.
 
 | PB Type     | Json Type |
-+-------------+-----------+
+|-------------|-----------|
 |TYPE_DOUBLE  | STRING    |
 |TYPE_FLOAT   | STRING    |
 |TYPE_INT64   | STRING    |
@@ -30,7 +30,7 @@ Basically, json serialize implementation respects protocol buffers serialization
 |TYPE_SINT64  | STRING    |
 |TYPE_MESSAGE | OBJECT    |
 
-* client have to parse integer value by theirselves.
+* client have to parse numerical value by theirselves.
 
 ### Error Handling
 
