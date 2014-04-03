@@ -778,13 +778,14 @@ int php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zval 
 			case TYPE_SINT32:
 			case TYPE_SINT64:
 				if (Z_TYPE_P(tmp) != IS_NULL) {
-
 					if (Z_TYPE_P(tmp) == IS_STRING) {
 						if (Z_STRLEN_P(tmp) == 0 || (Z_STRLEN_P(tmp) == 1 && Z_STRVAL_P(tmp)[0] == '0')) {
 						} else {
+								Z_ADDREF_P(tmp);
 								add_assoc_zval(target, scheme->name, tmp);
 						}
 					} else {
+						Z_ADDREF_P(tmp);
 						add_assoc_zval(target, scheme->name, tmp);
 					}
 				}
