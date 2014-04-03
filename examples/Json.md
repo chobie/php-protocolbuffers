@@ -19,7 +19,7 @@ Basically, json serialize implementation respects protocol buffers serialization
 |TYPE_INT32   | STRING    |
 |TYPE_FIXED64 | STRING    |
 |TYPE_FIXED32 | STRING    |
-|TYPE_BOOL    | STRING    |
+|TYPE_BOOL    | BOOLEAN   |
 |TYPE_STRING  | STRING    |
 |TYPE_BYTES   | STRING    |
 |TYPE_UINT32  | STRING    |
