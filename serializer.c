@@ -707,7 +707,7 @@ static void php_protocolbuffers_encode_unknown_fields(php_protocolbuffers_scheme
 }
 
 
-static void php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, php_protocolbuffers_encode_callback f, int is_packed, zval **output)
+static int php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval **output)
 {
 	zval **tmp = NULL;
 	char *name = {0};
@@ -722,50 +722,12 @@ static void php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_
 	}
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
-//		if (scheme->repeated) {
-//			HashPosition pos;
-//			zval **element;
-//
-//			if (Z_TYPE_PP(tmp) != IS_ARRAY) {
-//				array_init(*tmp);
-//			}
-//
-//			for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
-//							zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
-//							zend_hash_move_forward_ex(Z_ARRVAL_PP(tmp), &pos)
-//			) {
-//				if (Z_TYPE_PP(element) == IS_NULL) {
-//					continue;
-//				}
-//
-//				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, element, scheme, n_ser, is_packed);
-//			}
-//		} else {
-//			if (is_packed == 1) {
-//				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_encode_element_packed called non repeated scheme. this is bug");
-//			} else {
-//				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-//					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
-//					return;
-//				}
-//				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-//					return;
-//				}
-//				if (scheme->ce != NULL && Z_TYPE_PP(tmp) != IS_OBJECT) {
-//					return;
-//				}
-//				if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-//					//php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not repeated field but array given", scheme->name);
-//					return;
-//				}
-//
-//				f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
-//			}
-//		}
+		*output = *tmp;
+		return 0;
 	} else {
 		if (scheme->required > 0) {
 			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
-			return;
+			return 1;
 		}
 	}
 }
@@ -790,48 +752,76 @@ int php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zval 
 	}
 
 	for (i = 0; i < container->size; i++) {
+		zval *tmp;
 		scheme = &(container->scheme[i]);
+
+		if (php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, container, hash, scheme, &tmp)) {
+			return -1;
+		}
 
 		switch (scheme->type) {
 			case TYPE_DOUBLE:
-				add_assoc_double(target, scheme->name, 0);
-			break;
 			case TYPE_FLOAT:
-			break;
 			case TYPE_INT64:
-			break;
 			case TYPE_UINT64:
-			break;
 			case TYPE_INT32:
-			break;
 			case TYPE_FIXED64:
-			break;
 			case TYPE_FIXED32:
-			break;
 			case TYPE_BOOL:
-			break;
 			case TYPE_STRING:
-				add_assoc_string(target, scheme->name, "HOGE", 1);
-			break;
 			case TYPE_GROUP:
-			break;
-			case TYPE_MESSAGE:
-			break;
 			case TYPE_BYTES:
-				add_assoc_string(target, scheme->name, "HOGE", 1);
-			break;
 			case TYPE_UINT32:
-			break;
 			case TYPE_ENUM:
-			break;
 			case TYPE_SFIXED32:
-			break;
 			case TYPE_SFIXED64:
-			break;
 			case TYPE_SINT32:
-			break;
 			case TYPE_SINT64:
+				if (Z_TYPE_P(tmp) != IS_NULL) {
+
+					if (Z_TYPE_P(tmp) == IS_STRING) {
+						if (Z_STRLEN_P(tmp) == 0 || (Z_STRLEN_P(tmp) == 1 && Z_STRVAL_P(tmp)[0] == '0')) {
+						} else {
+								add_assoc_zval(target, scheme->name, tmp);
+						}
+					} else {
+						add_assoc_zval(target, scheme->name, tmp);
+					}
+				}
+
 			break;
+			case TYPE_MESSAGE: {
+				zval *out;
+				php_protocolbuffers_scheme_container *c2;
+				php_protocolbuffers_get_scheme_container(scheme->ce->name, scheme->ce->name_length, &c2 TSRMLS_CC);
+
+				if (scheme->repeated) {
+					HashPosition pos;
+					zval **entry, *tt;
+					zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(tmp), &pos);
+
+					MAKE_STD_ZVAL(tt);
+					array_init(tt);
+
+					while (zend_hash_get_current_data_ex(Z_ARRVAL_P(tmp), (void **)&entry, &pos) == SUCCESS) {
+						MAKE_STD_ZVAL(out);
+						array_init(out);
+
+						php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, *entry, c2, &out);
+
+						add_next_index_zval(tt, out);
+						zend_hash_move_forward_ex(Z_ARRVAL_P(tmp), &pos);
+					}
+					add_assoc_zval(target, scheme->name, tt);
+				} else {
+						MAKE_STD_ZVAL(out);
+						array_init(out);
+						php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, c2, &out);
+						add_assoc_zval(target, scheme->name, out);
+				}
+
+				break;
+			}
 			default:
 			break;
 		}
@@ -842,8 +832,9 @@ int php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zval 
 	}
 
 	if (container->process_unknown_fields > 0) {
-		//php_protocolbuffers_encode_unknown_fields(container, hash, ser TSRMLS_CC);
+		// TODO
 	}
+
 	return 0;
 }
 
