@@ -57,7 +57,7 @@ namespace {
         public static function encode($message, $descriptor = NULL){}
     }
 
-    class ProtocolBuffersMessage implements Iterator
+    class ProtocolBuffersMessage implements Iterator, \JsonSerializable
     {
         /**
          * create new message
@@ -203,6 +203,11 @@ namespace {
          * @return ProtocolBuffersDescriptor
          */
         public static function getDescriptor(){}
+
+        /**
+        * @return array
+        */
+        public function jsonSerialize(){}
     }
 
     abstract class ProtocolBuffersEnum implements ProtocolBuffersEnumDescribable
