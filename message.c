@@ -34,9 +34,9 @@
 #include "unknown_field_set.h"
 #include "extension_registry.h"
 
-#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
-#include "ext/json/php_json.h"
-#endif
+//#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+//#include "ext/json/php_json.h"
+//#endif
 
 enum ProtocolBuffers_MagicMethod {
 	MAGICMETHOD_GET    = 1,
@@ -1662,9 +1662,10 @@ void php_protocolbuffers_message_class(TSRMLS_D)
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, zend_ce_iterator);
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_protocol_buffers_serializable_class_entry);
 
-#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
-	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_json_serializable_ce);
-#endif
+// Note(chobie): Don't implement JsonSerializable here as some environment uses json shared module.
+//#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+//	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_json_serializable_ce);
+//#endif
 
 	php_protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 	php_protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;
