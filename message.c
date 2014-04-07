@@ -1603,18 +1603,32 @@ PHP_METHOD(protocolbuffers_message, containerOf)
 }
 /* }}} */
 
+static int json_serializable_checked = 0;
 
 /* {{{ proto array ProtocolBuffersMessage::jsonSerialize()
 */
 PHP_METHOD(protocolbuffers_message, jsonSerialize)
 {
-#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "JsonSerializable does not support on this version");
+#else
 	zval *instance = getThis(), *result = NULL;
+	zend_class_entry **json;
+
+
+	if (json_serializable_checked == 0) {
+		if (zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
+			if (!instanceof_function(php_protocol_buffers_message_class_entry, *json TSRMLS_CC)) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "JsonSerializable does not support on this version (probably json module doesn't load)");
+				return;
+			}
+		}
+		json_serializable_checked = 1;
+	}
 
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
-#else
   return;
 #endif
 }
