@@ -48,6 +48,7 @@ enum ProtocolBuffers_MagicMethod {
 };
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
+static int json_serializable_checked = 0;
 
 #define PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
 	{\
@@ -1607,8 +1608,6 @@ PHP_METHOD(protocolbuffers_message, containerOf)
 }
 /* }}} */
 
-static int json_serializable_checked = 0;
-
 /* {{{ proto array ProtocolBuffersMessage::jsonSerialize()
 */
 PHP_METHOD(protocolbuffers_message, jsonSerialize)
@@ -1619,8 +1618,8 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 	zval *instance = getThis(), *result = NULL;
 	zend_class_entry **json;
 
-
 	if (json_serializable_checked == 0) {
+		/* checks JsonSerializable class (for json dynamic module)*/
 		if (zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
 			if (!instanceof_function(php_protocol_buffers_message_class_entry, *json TSRMLS_CC)) {
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "JsonSerializable does not support on this version (probably json module doesn't load)");

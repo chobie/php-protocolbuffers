@@ -2,9 +2,9 @@
 
 #include "core.h"
 #include "serializer.h"
+#include "json_serializer.h"
 #include "unknown_field.h"
 #include "unknown_field_set.h"
-
 
 static char *single_property_name_default = "_properties";
 static int single_property_name_default_len = sizeof("_properties");
@@ -716,7 +716,6 @@ int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zend_class_e
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 
-//TODO
 	if (php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &tmp) != 0) {
 		zval_ptr_dtor(&tmp);
 		return 1;
