@@ -1138,7 +1138,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 	}
 
 	flag = php_protocolbuffers_parse_magic_method(name, name_len, &buf, &buf2);
-
 	if (flag == 0) {
 		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;

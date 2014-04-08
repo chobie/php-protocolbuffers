@@ -38,7 +38,7 @@ Basically, json serialize implementation respects protocol buffers serialization
 
 ## Unknown Field
 
-* (considering) respects descriptor builder setting. or don't support unknown field.
+* does not support.
 
 ## Overriding
 
