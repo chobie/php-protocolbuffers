@@ -5,7 +5,10 @@ php:
   - 5.4
   - 5.5
 
-script: rake compile test
+script:
+  - uname -a
+  - cat /etc/issue
+  - rake compile test
 
 notifications:
   irc: "chat.freenode.net#php-protocolbuffers"
