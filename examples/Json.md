@@ -1,11 +1,5 @@
 # JsonSerialize specification
 
-## Ini
-
-| key                                           | TYPE | Default | Description                                            |
-|-----------------------------------------------|------|---------|--------------------------------------------------------|
-| protocolbuffers.json_serializer.respect_name? | BOOL | TRUE    | use field name as object key. otherwise use tag number |
-
 ## Types
 
 Basically, json serialize implementation respects protocol buffers serialization rule.
@@ -31,6 +25,8 @@ Basically, json serialize implementation respects protocol buffers serialization
 |TYPE_MESSAGE | OBJECT    |
 
 * client have to parse numerical value by theirselves.
+* JsonSerialize does not serialize NULL value.
+* JsonSerialize uses field name as property key.
 
 ### Error Handling
 
@@ -39,6 +35,10 @@ Basically, json serialize implementation respects protocol buffers serialization
 ## Unknown Field
 
 * does not support.
+
+## Extensions
+
+* (considering) does not support.
 
 ## Overriding
 
@@ -56,7 +56,6 @@ public function jsonSerialize()
 ## Others
 
 * `__sleep` and `__wakeup` method doesn't invoke when serializing json.
-
 
 * should support custom serializer class? (ProtocolBuffers\Serializer\JsonSerializer)
   * easy to custom. it should have `protocolbuffers.json_serializer.class` ini value or some setter method.
