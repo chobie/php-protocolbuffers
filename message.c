@@ -517,7 +517,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 				MAKE_STD_ZVAL(tmp);
 				MAKE_STD_ZVAL(param);
 
-				ZVAL_ZVAL(param, value, 1, 1);
+				ZVAL_ZVAL(param, value, 1, 0);
 
 				object_init_ex(tmp, scheme->ce);
 				php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
