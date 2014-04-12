@@ -378,6 +378,136 @@ static const char* php_protocolbuffers_get_property_name(php_protocolbuffers_sch
 	return name;
 }
 
+static int php_protocolbuffers_json_encode_value(zval **value, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer2 *ser, void *opaque TSRMLS_DC)
+{
+	zval value_copy;
+	zval *result = (zval*)opaque;
+
+	switch (scheme->type) {
+		case TYPE_STRING:
+			if (Z_STRLEN_PP(value) == 0 || (Z_STRLEN_PP(value) == 1 && Z_STRVAL_PP(value)[0] == '0')) {
+				return -1;
+			}
+
+			ser->serialize_string(Z_STRVAL_PP(value), Z_STRLEN_PP(value), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_INT32:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_int32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_ENUM:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_enum((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_UINT64:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_uint64((uint64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_DOUBLE:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_double(&value_copy);
+
+			ser->serialize_double((double)Z_DVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_FLOAT:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_double(&value_copy);
+
+			ser->serialize_float((float)Z_DVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_INT64:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_int64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_FIXED64:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_fixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_FIXED32:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_fixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_BOOL:
+			ser->serialize_bool(Z_BVAL_PP(value), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_GROUP:
+			break;
+		case TYPE_BYTES:
+			if (Z_STRLEN_PP(value) == 0 || (Z_STRLEN_PP(value) == 1 && Z_STRVAL_PP(value)[0] == '0')) {
+				return -1;
+			}
+
+			ser->serialize_bytes(Z_STRVAL_PP(value), Z_STRLEN_PP(value), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_UINT32:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_uint32((uint32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_SFIXED32:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_sfixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_SFIXED64:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_sfixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_SINT32:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_sint32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		case TYPE_SINT64:
+			value_copy = **value;
+			zval_copy_ctor(&value_copy);
+			convert_to_long(&value_copy);
+
+			ser->serialize_sint64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
+			break;
+		break;
+		case TYPE_MESSAGE: {
+			php_protocolbuffers_scheme_container *child_container;
+
+			php_protocolbuffers_get_scheme_container(scheme->ce->name, scheme->ce->name_length, &child_container TSRMLS_CC);
+			ser->serialize_message(value, scheme, child_container, container, result TSRMLS_CC);
+			break;
+		}
+		default:
+		break;
+	}
+	return 0;
+}
+
 static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval *result TSRMLS_DC)
 {
 	zval **tmp = NULL, value_copy;
@@ -406,11 +536,11 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 
 					switch (scheme->type) {
 						case TYPE_STRING:
-							if (Z_STRLEN_PP(tmp) == 0 || (Z_STRLEN_PP(tmp) == 1 && Z_STRVAL_PP(tmp)[0] == '0')) {
+							if (Z_STRLEN_PP(element) == 0 || (Z_STRLEN_PP(element) == 1 && Z_STRVAL_PP(element)[0] == '0')) {
 								return;
 							}
 
-							ser->serialize_string(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), scheme, container, outer TSRMLS_CC);
+							ser->serialize_string(Z_STRVAL_PP(element), Z_STRLEN_PP(element), scheme, container, outer TSRMLS_CC);
 							break;
 						case TYPE_INT32:
 							value_copy = **element;
@@ -478,11 +608,11 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 						case TYPE_GROUP:
 							break;
 						case TYPE_BYTES:
-							if (Z_STRLEN_PP(tmp) == 0 || (Z_STRLEN_PP(tmp) == 1 && Z_STRVAL_PP(tmp)[0] == '0')) {
+							if (Z_STRLEN_PP(element) == 0 || (Z_STRLEN_PP(element) == 1 && Z_STRVAL_PP(element)[0] == '0')) {
 								return;
 							}
 
-							ser->serialize_bytes(Z_STRVAL_PP(element), Z_STRLEN_PP(tmp), scheme, container, outer TSRMLS_CC);
+							ser->serialize_bytes(Z_STRVAL_PP(element), Z_STRLEN_PP(element), scheme, container, outer TSRMLS_CC);
 						break;
 						case TYPE_UINT32:
 							value_copy = **element;
@@ -551,129 +681,7 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 				return;
 			}
 
-			switch (scheme->type) {
-				case TYPE_STRING:
-					if (Z_STRLEN_PP(tmp) == 0 || (Z_STRLEN_PP(tmp) == 1 && Z_STRVAL_PP(tmp)[0] == '0')) {
-						return;
-					}
-
-					ser->serialize_string(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_INT32:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_int32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_ENUM:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_enum((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_UINT64:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_uint64((uint64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_DOUBLE:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_double(&value_copy);
-
-					ser->serialize_double((double)Z_DVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_FLOAT:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_double(&value_copy);
-
-					ser->serialize_float((float)Z_DVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_INT64:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_int64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_FIXED64:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_fixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_FIXED32:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_fixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_BOOL:
-					ser->serialize_bool(Z_BVAL_PP(tmp), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_GROUP:
-					break;
-				case TYPE_BYTES:
-					if (Z_STRLEN_PP(tmp) == 0 || (Z_STRLEN_PP(tmp) == 1 && Z_STRVAL_PP(tmp)[0] == '0')) {
-						return;
-					}
-
-					ser->serialize_bytes(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_UINT32:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_uint32((uint32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_SFIXED32:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_sfixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_SFIXED64:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_sfixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_SINT32:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_sint32((int32_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				case TYPE_SINT64:
-					value_copy = **tmp;
-					zval_copy_ctor(&value_copy);
-					convert_to_long(&value_copy);
-
-					ser->serialize_sint64((int64_t)Z_LVAL_P(&value_copy), scheme, container, result TSRMLS_CC);
-					break;
-				break;
-				case TYPE_MESSAGE: {
-					php_protocolbuffers_scheme_container *child_container;
-
-					php_protocolbuffers_get_scheme_container(scheme->ce->name, scheme->ce->name_length, &child_container TSRMLS_CC);
-					ser->serialize_message(tmp, scheme, child_container, container, result TSRMLS_CC);
-					break;
-				}
-				default:
-				break;
-			}
-			//f(INTERNAL_FUNCTION_PARAM_PASSTHRU, tmp, scheme, ser, is_packed);
+			php_protocolbuffers_json_encode_value(tmp, container, scheme, ser, (void*)result TSRMLS_CC);
 		}
 	} else {
 		if (scheme->required > 0) {
