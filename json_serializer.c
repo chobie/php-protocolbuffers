@@ -39,7 +39,7 @@ static int _json_serializer_float(
 	if (scheme->repeated) {
 		add_next_index_double(result, value);
 	} else {
-		add_assoc_double_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_double_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -57,7 +57,7 @@ static int _json_serializer_double(
 	if (scheme->repeated) {
 		add_next_index_double(result, value);
 	} else {
-		add_assoc_double_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_double_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -76,7 +76,7 @@ static int _json_serializer_enum(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -94,7 +94,7 @@ static int _json_serializer_sint32(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -112,7 +112,7 @@ static int _json_serializer_sint64(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -130,7 +130,7 @@ static int _json_serializer_fixed64(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -148,7 +148,7 @@ static int _json_serializer_sfixed32(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -166,7 +166,7 @@ static int _json_serializer_sfixed64(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -184,7 +184,7 @@ static int _json_serializer_fixed32(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -202,7 +202,7 @@ static int _json_serializer_uint32(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -220,7 +220,7 @@ static int _json_serializer_bool(
 	if (scheme->repeated) {
 		add_next_index_bool(result, value);
 	} else {
-		add_assoc_bool_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_bool_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -239,7 +239,7 @@ static int _json_serializer_int64(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -257,7 +257,7 @@ static int _json_serializer_uint64(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -276,7 +276,7 @@ static int _json_serializer_int32(
 	if (scheme->repeated) {
 		add_next_index_long(result, value);
 	} else {
-		add_assoc_long_ex(result, scheme->name, scheme->name_len, value);
+		add_assoc_long_ex(result, scheme->original_name, scheme->original_name_len, value);
 	}
 
 	return 0;
@@ -294,7 +294,7 @@ static int _json_serializer_bytes(
 	if (scheme->repeated) {
 		add_next_index_stringl(result, value, value_len, 1);
 	} else {
-		add_assoc_stringl_ex(result, scheme->name, scheme->name_len, value, value_len, 1);
+		add_assoc_stringl_ex(result, scheme->original_name, scheme->original_name_len, value, value_len, 1);
 	}
 
 	return 0;
@@ -313,7 +313,7 @@ static int _json_serializer_string(
 	if (scheme->repeated) {
 		add_next_index_stringl(result, value, value_len, 1);
 	} else {
-		add_assoc_stringl_ex(result, scheme->name, scheme->name_len, value, value_len, 1);
+		add_assoc_stringl_ex(result, scheme->original_name, scheme->original_name_len, value, value_len, 1);
 	}
 
 	return 0;
@@ -336,7 +336,7 @@ static int _json_serializer_message(
 	if (scheme->repeated) {
 		add_next_index_zval(result, tmp);
 	} else {
-		add_assoc_zval_ex(result, scheme->name, scheme->name_len, tmp);
+		add_assoc_zval_ex(result, scheme->original_name, scheme->original_name_len, tmp);
 	}
 
 	return 0;
@@ -531,7 +531,8 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 						break;
 					}
 				}
-				add_assoc_zval_ex(result, scheme->name, scheme->name_len, outer);
+
+				add_assoc_zval_ex(result, scheme->original_name, scheme->original_name_len, outer);
 			}
 
 		} else {
