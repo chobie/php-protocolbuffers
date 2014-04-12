@@ -23,7 +23,15 @@ typedef struct {
 	int (*serialize_message)(zval *value,
 		php_protocolbuffers_scheme *scheme,
 		php_protocolbuffers_scheme_container *child_container,
-		php_protocolbuffers_scheme_container *containe,
+		php_protocolbuffers_scheme_container *container,
+		void *opaque TSRMLS_DC);
+	int (*serialize_repeated_begin)(
+		php_protocolbuffers_scheme *scheme,
+		php_protocolbuffers_scheme_container *container,
+		void *opaque TSRMLS_DC);
+	int (*serialize_repeated_end)(zval *value,
+		php_protocolbuffers_scheme *scheme,
+		php_protocolbuffers_scheme_container *container,
 		void *opaque TSRMLS_DC);
 } php_protocolbuffers_serializer2;
 
@@ -63,6 +71,35 @@ static int _json_serializer_double(
 	return 0;
 }
 
+static int _json_serializer_repeated_begin(
+	php_protocolbuffers_scheme *scheme,
+	php_protocolbuffers_scheme_container *container,
+	void *opaque TSRMLS_DC
+)
+{
+	zval **result = (zval**)opaque;
+	zval *outer = NULL;
+
+	MAKE_STD_ZVAL(outer);
+	array_init(outer);
+
+	*result = outer;
+	return 0;
+}
+
+static int _json_serializer_repeated_end(
+	zval *value,
+	php_protocolbuffers_scheme *scheme,
+	php_protocolbuffers_scheme_container *container,
+	void *opaque TSRMLS_DC
+)
+{
+	zval *outer = (zval*)opaque;
+
+	add_assoc_zval_ex(value, scheme->original_name, scheme->original_name_len, outer);
+
+	return 0;
+}
 
 static int _json_serializer_enum(
 	int32_t value,
@@ -361,6 +398,8 @@ static php_protocolbuffers_serializer2 json_serializer = {
 	_json_serializer_sint32,//sint32
 	_json_serializer_sint64,//sint64
 	_json_serializer_message,//message
+	_json_serializer_repeated_begin, //repeated_begin
+	_json_serializer_repeated_end, //repeated_end
 };
 
 
@@ -504,7 +543,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 
 static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval *result TSRMLS_DC)
 {
-	zval **tmp = NULL, value_copy;
+	zval **tmp = NULL;
 	char *name = {0};
 	int name_len = 0;
 	php_protocolbuffers_serializer2 *ser = &json_serializer;
@@ -512,13 +551,14 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 	name = php_protocolbuffers_get_property_name(container, scheme, &name_len);
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
+		HashPosition pos;
+		zval **element;
+
 		if (scheme->repeated) {
-			HashPosition pos;
-			zval **element, *outer;
+			zval *outer; // TODO(chobie): abstraction
 
 			if (Z_TYPE_PP(tmp) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_PP(tmp)) > 0) {
-				MAKE_STD_ZVAL(outer);
-				array_init(outer);
+				ser->serialize_repeated_begin(scheme, container, (void*)&outer TSRMLS_CC);
 
 				for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmp), &pos);
 								zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmp), (void **)&element, &pos) == SUCCESS;
@@ -531,9 +571,8 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 					php_protocolbuffers_json_encode_value(element, container, scheme, ser, (void*)outer TSRMLS_CC);
 				}
 
-				add_assoc_zval_ex(result, scheme->original_name, scheme->original_name_len, outer);
+				ser->serialize_repeated_end(result, scheme, container, outer TSRMLS_CC);
 			}
-
 		} else {
 			if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
 				zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);

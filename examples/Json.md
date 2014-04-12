@@ -26,6 +26,7 @@ Basically, json serialize implementation respects protocol buffers serialization
 
 * JsonSerialize does not serialize NULL value.
 * JsonSerialize uses field name as property key.
+* JsonSerialize might loose precision when using big number. this is PHP limitation.
 
 ### Error Handling
 
