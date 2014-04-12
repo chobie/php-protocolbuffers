@@ -478,6 +478,11 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 				return -1;
 			}
 
+			if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
+				zend_throw_exception_ex(php_protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+				return -1;
+			}
+
 			ser->serialize_string(Z_STRVAL_PP(element), Z_STRLEN_PP(element), scheme, container, outer TSRMLS_CC);
 			break;
 		case TYPE_GROUP:
