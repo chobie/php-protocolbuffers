@@ -469,7 +469,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			break;
 		case TYPE_BOOL:
 			zval_copy_ctor(&value_copy);
-			convert_to_bool(&value_copy);
+			convert_to_boolean(&value_copy);
 
 			ser->serialize_bool(Z_BVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
 			break;
