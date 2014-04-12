@@ -716,7 +716,7 @@ int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zend_class_e
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 
-	if (php_protocolbuffers_encode_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, klass, container, &tmp) != 0) {
+	if (php_protocolbuffers_encode_jsonserialize(klass, container, &tmp TSRMLS_CC) != 0) {
 		zval_ptr_dtor(&tmp);
 		return 1;
 	}
