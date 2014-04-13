@@ -510,7 +510,41 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 	if (scheme->ce != NULL) {
 		if (scheme->repeated) {
-			// TODO: check variables.
+			HashPosition pos;
+			zval **element, *outer;
+
+			if (zend_hash_num_elements(Z_ARRVAL_P(value)) > 0) {
+				MAKE_STD_ZVAL(outer);
+				array_init(outer);
+
+				for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(value), &pos);
+								zend_hash_get_current_data_ex(Z_ARRVAL_P(value), (void **)&element, &pos) == SUCCESS;
+								zend_hash_move_forward_ex(Z_ARRVAL_P(value), &pos)
+				) {
+					zval *child, *param;
+
+					if (Z_TYPE_PP(element) == IS_NULL) {
+						continue;
+					}
+
+					MAKE_STD_ZVAL(child);
+					MAKE_STD_ZVAL(param);
+					ZVAL_ZVAL(param, *element, 1, 0);
+
+					object_init_ex(child, scheme->ce);
+					php_protocolbuffers_properties_init(child, scheme->ce TSRMLS_CC);
+
+					zend_call_method_with_1_params(&child, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
+					zval_ptr_dtor(&param);
+
+					m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, child);
+					ZVAL_ZVAL(m->container, instance, 0, 0);
+					add_next_index_zval(outer, child);
+				}
+				value = outer;
+				should_free = 1;
+			}
+
 		} else {
 			if (Z_TYPE_P(value) == IS_ARRAY) {
 				zval *param;
