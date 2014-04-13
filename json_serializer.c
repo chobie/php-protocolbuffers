@@ -432,6 +432,7 @@ static int convert_to_int64(zval *value, int64_t *result)
 	} else {
 		v = (int64_t)Z_LVAL_P(value);
 	}
+	*result = v;
 
 	return 0;
 }
@@ -478,6 +479,7 @@ static int convert_to_uint32(zval *value, uint32_t *result)
 	} else {
 		v = (uint32_t)Z_LVAL_P(value);
 	}
+	*result = v;
 
 	return 0;
 }
