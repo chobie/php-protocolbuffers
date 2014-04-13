@@ -8,7 +8,7 @@ typedef struct {
 	int (*serialize_int64)(int64_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_uint64)(uint64_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_int32)(int32_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
-	int (*serialize_fixed64)(int64_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
+	int (*serialize_fixed64)(uint64_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_fixed32)(int32_t value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_bool)(zend_bool value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_string)(const char *value, size_t value_len, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
@@ -418,6 +418,89 @@ static const char* php_protocolbuffers_get_property_name(php_protocolbuffers_sch
 }
 
 
+static int convert_to_int64(zval *value, int64_t *result)
+{
+	int64_t v = 0;
+
+	if (Z_TYPE_P(value) != IS_LONG) {
+		if (Z_TYPE_P(value) == IS_STRING) {
+			v = (int64_t)atoll(Z_STRVAL_P(value));
+		} else {
+			convert_to_long(value);
+			v = (int64_t)Z_LVAL_P(value);
+		}
+	} else {
+		v = (int64_t)Z_LVAL_P(value);
+	}
+
+	return 0;
+}
+
+static int convert_to_uint64(zval *value, uint64_t *result)
+{
+	uint64_t v = 0;
+
+	if (Z_TYPE_P(value) != IS_LONG) {
+		if (Z_TYPE_P(value) == IS_STRING) {
+			char *endptr = NULL;
+			errno = 0;
+			v = strtoull(Z_STRVAL_P(value), &endptr, 0);
+
+			if  (errno == ERANGE) {
+				zend_error(E_WARNING, "php_protocolbuffers_encode_value_fixed64: strtoull failed to decode string");
+				return -1;
+			}
+		} else if (Z_TYPE_P(value) == IS_DOUBLE) {
+			v = (uint64_t)Z_DVAL_P(value);
+		} else {
+			convert_to_long(value);
+			v = Z_LVAL_P(value);
+		}
+	} else {
+		v = Z_LVAL_P(value);
+	}
+	*result = v;
+
+	return 0;
+}
+
+static int convert_to_uint32(zval *value, uint32_t *result)
+{
+	uint32_t v = 0;
+
+	if (Z_TYPE_P(value) != IS_LONG) {
+		if (Z_TYPE_P(value) == IS_STRING) {
+			v = (uint32_t)atol(Z_STRVAL_P(value));
+		} else {
+			convert_to_long(value);
+			v = (uint32_t)Z_LVAL_P(value);
+		}
+	} else {
+		v = (uint32_t)Z_LVAL_P(value);
+	}
+
+	return 0;
+}
+
+static int convert_to_int32(zval *value, int32_t *result)
+{
+	int32_t v = 0;
+
+	if (Z_TYPE_P(value) != IS_LONG) {
+		if (Z_TYPE_P(value) == IS_STRING) {
+			v = (int32_t)atol(Z_STRVAL_P(value));
+		} else {
+			convert_to_long(value);
+			v = (int32_t)Z_LVAL_P(value);
+		}
+	} else {
+		v = (int32_t)Z_LVAL_P(value);
+	}
+
+	*result = v;
+	return 0;
+}
+
 static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer2 *ser, void *opaque TSRMLS_DC)
 {
 	zval value_copy;
@@ -430,48 +513,74 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			convert_to_double(&value_copy);
 
 			ser->serialize_double((double)Z_DVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
 		case TYPE_FLOAT:
 			zval_copy_ctor(&value_copy);
 			convert_to_double(&value_copy);
 
 			ser->serialize_float((float)Z_DVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
 		case TYPE_INT64:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int64_t v;
 
-			ser->serialize_int64((int64_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int64(&value_copy, &v);
+
+			ser->serialize_int64(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_UINT64:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			uint64_t v;
 
-			ser->serialize_uint64((uint64_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_uint64(&value_copy, &v);
+
+			ser->serialize_uint64(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_INT32:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int32_t v;
 
-			ser->serialize_int32((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int32(&value_copy, &v);
+			ser->serialize_int32(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_FIXED64:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			uint64_t v;
 
-			ser->serialize_fixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_uint64(&value_copy, &v);
+			ser->serialize_fixed64(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_FIXED32:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			uint32_t v;
 
-			ser->serialize_fixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_uint32(&value_copy, &v);
+			ser->serialize_fixed32(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+
+		}
 		case TYPE_BOOL:
 			zval_copy_ctor(&value_copy);
 			convert_to_boolean(&value_copy);
 
 			ser->serialize_bool(Z_BVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
 		case TYPE_STRING:
 			if (Z_STRLEN_PP(element) == 0 || (Z_STRLEN_PP(element) == 1 && Z_STRVAL_PP(element)[0] == '0')) {
@@ -501,42 +610,63 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 
 			ser->serialize_bytes(Z_STRVAL_PP(element), Z_STRLEN_PP(element), scheme, container, outer TSRMLS_CC);
 		case TYPE_UINT32:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			uint32_t v;
 
-			ser->serialize_uint32((uint32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_uint32(&value_copy, &v);
+			ser->serialize_uint32(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_ENUM:
 			zval_copy_ctor(&value_copy);
 			convert_to_long(&value_copy);
 
 			ser->serialize_enum((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
 		break;
 		case TYPE_SFIXED32:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int32_t v;
 
-			ser->serialize_sfixed32((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int64(&value_copy, &v);
+			ser->serialize_sfixed32(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_SFIXED64:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int64_t v;
 
-			ser->serialize_sfixed64((int64_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int64(&value_copy, &v);
+			ser->serialize_sfixed64(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_SINT32:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int32_t v;
 
-			ser->serialize_sint32((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int32(&value_copy, &v);
+			ser->serialize_sint32(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		case TYPE_SINT64:
-			zval_copy_ctor(&value_copy);
-			convert_to_long(&value_copy);
+		{
+			int64_t v;
 
-			ser->serialize_sint64((int64_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
+			zval_copy_ctor(&value_copy);
+			convert_to_int64(&value_copy, &v);
+			ser->serialize_sint64(v, scheme, container, outer TSRMLS_CC);
+			zval_dtor(&value_copy);
 			break;
+		}
 		break;
 		default:
 		break;
@@ -544,7 +674,6 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 
 	return 0;
 }
-
 
 static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval *result TSRMLS_DC)
 {
