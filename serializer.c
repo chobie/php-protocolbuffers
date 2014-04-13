@@ -706,6 +706,32 @@ static void php_protocolbuffers_encode_unknown_fields(php_protocolbuffers_scheme
 	}
 }
 
+
+int php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval **output)
+{
+	zval **tmp = NULL;
+	char *name = {0};
+	int name_len = 0;
+
+	if (container->use_single_property < 1) {
+		name = scheme->mangled_name;
+		name_len = scheme->mangled_name_len;
+	} else {
+		name = scheme->name;
+		name_len = scheme->name_len;
+	}
+
+	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
+		*output = *tmp;
+		return 0;
+	} else {
+		if (scheme->required > 0) {
+			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			return 1;
+		}
+	}
+}
+
 int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer)
 {
 	int i = 0;

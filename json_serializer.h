@@ -28,15 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PHP_PROTOCOLBUFFERS_SERIALIZER_H
-#define PHP_PROTOCOLBUFFERS_SERIALIZER_H
+#ifndef PHP_PROTOCOLBUFFERS_JSON_SERIALIZER_H
+#define PHP_PROTOCOLBUFFERS_JSON_SERIALIZER_H
 
-void php_protocolbuffers_serializer_destroy(php_protocolbuffers_serializer *serializer);
-
-void php_protocolbuffers_serializer_init(php_protocolbuffers_serializer **serializer);
-
-int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer);
-
-int php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval **output);
-
+int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_scheme_container *container, int throws_exception, zval **result TSRMLS_DC);
 #endif

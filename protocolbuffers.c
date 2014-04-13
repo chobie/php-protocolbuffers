@@ -208,7 +208,6 @@ static void php_protocolbuffers_init(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "ProtocolBuffers", php_protocolbuffers_methods);
 	protocol_buffers_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-
 	php_protocol_buffers_invalid_byte_sequence_exception(TSRMLS_C);
 	php_protocol_buffers_invalid_exception(TSRMLS_C);
 	php_protocolbuffers_uninitialized_message_exception(TSRMLS_C);
@@ -301,10 +300,16 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
+	zend_class_entry **json;
 	PBG(messages) = NULL;
 	PBG(classes) = NULL;
 	PBG(extension_registry) = NULL;
 	PBG(strict_mode) = 1;
+
+	// NOTE(chobie): prevent segmentaiton fault on CentOS box (CentOS uses json shared modules.)
+	if (zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
+		zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, *json);
+	}
 
 	if (!PBG(messages)) {
 		ALLOC_HASHTABLE(PBG(messages));

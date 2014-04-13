@@ -34,6 +34,10 @@
 #include "unknown_field_set.h"
 #include "extension_registry.h"
 
+//#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+//#include "ext/json/php_json.h"
+//#endif
+
 enum ProtocolBuffers_MagicMethod {
 	MAGICMETHOD_GET    = 1,
 	MAGICMETHOD_SET    = 2,
@@ -44,6 +48,7 @@ enum ProtocolBuffers_MagicMethod {
 };
 
 static zend_object_handlers php_protocolbuffers_message_object_handlers;
+static int json_serializable_checked = 0;
 
 #define PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME2(instance, container, proto) \
 	{\
@@ -482,6 +487,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 	HashTable *htt;
 	char *n = {0};
 	int n_len = 0;
+	int should_free = 0;
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
@@ -512,7 +518,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 				MAKE_STD_ZVAL(tmp);
 				MAKE_STD_ZVAL(param);
 
-				ZVAL_ZVAL(param, value, 1, 1);
+				ZVAL_ZVAL(param, value, 1, 0);
 
 				object_init_ex(tmp, scheme->ce);
 				php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
@@ -520,6 +526,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 				zval_ptr_dtor(&param);
 
 				value = tmp;
+				should_free = 1;
 			}
 
 			if (scheme->ce != Z_OBJCE_P(value)) {
@@ -540,19 +547,26 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 		if (container->use_single_property > 0) {
 			MAKE_STD_ZVAL(vl);
-			ZVAL_ZVAL(vl, *e, 1, 1);
+			ZVAL_ZVAL(vl, *e, 1, 0);
 			php_protocolbuffers_typeconvert(scheme, vl TSRMLS_CC);
 
+			Z_ADDREF_P(vl);
 			zend_hash_update(htt, scheme->name, scheme->name_len, (void **)&vl, sizeof(zval *), NULL);
+			zval_ptr_dtor(&vl);
 		} else {
 			zval *garvage = *e;
 
 			MAKE_STD_ZVAL(vl);
-			ZVAL_ZVAL(vl, value, 1, 1);
+			ZVAL_ZVAL(vl, value, 1, 0);
 
+			Z_ADDREF_P(vl);
 			php_protocolbuffers_typeconvert(scheme, vl TSRMLS_CC);
 			*e = vl;
 			zval_ptr_dtor(&garvage);
+			zval_ptr_dtor(&vl);
+		}
+		if (should_free) {
+			zval_ptr_dtor(&value);
 		}
 	}
 }
@@ -671,11 +685,13 @@ static void php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAMETERS, zva
 		}
 
 		MAKE_STD_ZVAL(val);
-		ZVAL_ZVAL(val, value, 1, 1);
+		ZVAL_ZVAL(val, value, 1, 0);
 
 		Z_ADDREF_P(nval);
+		Z_ADDREF_P(val);
 		zend_hash_next_index_insert(Z_ARRVAL_P(nval), &val, sizeof(zval *), NULL);
 		zend_hash_update(htt, n, n_len, (void **)&nval, sizeof(zval *), NULL);
+		zval_ptr_dtor(&val);
 
 		if (flag == 1) {
 			zval_ptr_dtor(&nval);
@@ -850,11 +866,9 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 		zend_hash_move_forward_ex(Z_ARRVAL_P(params), &pos)) {
 
 		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(params), &key, &key_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
-			Z_ADDREF_PP(param);
 			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, key, key_len, key, key_len, *param);
 		}
 	}
-
 }
 
 /* {{{ proto ProtocolBuffersMessage ProtocolBuffersMessage::__construct([array $params])
@@ -1134,7 +1148,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 	}
 
 	flag = php_protocolbuffers_parse_magic_method(name, name_len, &buf, &buf2);
-
 	if (flag == 0) {
 		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(instance)->name, name);
 		return;
@@ -1156,7 +1169,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 		case MAGICMETHOD_MUTABLE:
 		{
 			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, NULL);
-			Z_ADDREF_P(return_value);
 			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, return_value);
 		}
 		break;
@@ -1165,7 +1177,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 			zval **tmp = NULL;
 
 			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-			Z_ADDREF_PP(tmp);
 			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
 		}
 		break;
@@ -1174,7 +1185,6 @@ PHP_METHOD(protocolbuffers_message, __call)
 			zval **tmp = NULL;
 
 			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-			Z_ADDREF_PP(tmp);
 			php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
 		}
 		break;
@@ -1284,7 +1294,6 @@ PHP_METHOD(protocolbuffers_message, append)
 	}
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
-	Z_ADDREF_P(value);
 	php_protocolbuffers_message_append(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value);
 }
 
@@ -1599,6 +1608,48 @@ PHP_METHOD(protocolbuffers_message, containerOf)
 }
 /* }}} */
 
+/* {{{ proto array ProtocolBuffersMessage::jsonSerialize()
+*/
+PHP_METHOD(protocolbuffers_message, jsonSerialize)
+{
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "JsonSerializable does not support on this version");
+#else
+	zval *instance = getThis(), *result = NULL;
+	zend_class_entry **json;
+
+	if (json_serializable_checked == 0) {
+		/* checks JsonSerializable class (for json dynamic module)*/
+		if (zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
+			if (!instanceof_function(php_protocol_buffers_message_class_entry, *json TSRMLS_CC)) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "JsonSerializable does not support on this version (probably json module doesn't load)");
+				return;
+			}
+		}
+		json_serializable_checked = 1;
+	}
+
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, Z_OBJCE_P(instance), instance, &result) == 0) {
+		RETURN_ZVAL(result, 0, 1);
+	}
+  return;
+#endif
+}
+/* }}} */
+
+/* {{{ proto array ProtocolBuffersMessage::toArray()
+*/
+PHP_METHOD(protocolbuffers_message, toArray)
+{
+	zval *instance = getThis(), *result = NULL;
+	zend_class_entry **json;
+
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, Z_OBJCE_P(instance), instance, &result) == 0) {
+		RETURN_ZVAL(result, 0, 1);
+	}
+  return;
+}
+/* }}} */
 
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_protocolbuffers_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
@@ -1620,6 +1671,8 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, discardUnknownFields, arginfo_protocolbuffers_message_discard_unknown_fields, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, containerOf,          NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, jsonSerialize,        NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, toArray,        NULL, ZEND_ACC_PUBLIC)
 		/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
@@ -1639,6 +1692,11 @@ void php_protocolbuffers_message_class(TSRMLS_D)
 	php_protocol_buffers_message_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, zend_ce_iterator);
 	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_protocol_buffers_serializable_class_entry);
+
+// Note(chobie): Don't implement JsonSerializable here as some environment uses json shared module.
+//#if ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 4) && (PHP_RELEASE_VERSION >= 26)) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION == 5) && (PHP_RELEASE_VERSION >= 10))
+//	zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, php_json_serializable_ce);
+//#endif
 
 	php_protocol_buffers_message_class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 	php_protocol_buffers_message_class_entry->create_object = php_protocolbuffers_message_new;

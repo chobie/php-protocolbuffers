@@ -57,7 +57,7 @@ namespace {
         public static function encode($message, $descriptor = NULL){}
     }
 
-    class ProtocolBuffersMessage implements Iterator
+    abstract class ProtocolBuffersMessage implements Iterator, Traversable, ProtocolBuffersDescribable, \JsonSerializable
     {
         /**
          * create new message
@@ -76,6 +76,8 @@ namespace {
 
         /**
          * parse bytes and returns new instance.
+         *
+         * @param $bytes
          *
          * @return self
          * @api
@@ -203,6 +205,16 @@ namespace {
          * @return ProtocolBuffersDescriptor
          */
         public static function getDescriptor(){}
+
+        /**
+         * @return array
+         */
+        public function jsonSerialize(){}
+
+        /**
+         * @return array
+         */
+        public function toArray(){}
     }
 
     abstract class ProtocolBuffersEnum implements ProtocolBuffersEnumDescribable
@@ -308,9 +320,9 @@ namespace {
 
     class ProtocolBuffersEnumDescriptor {
     }
-    
+
     class ProtocolBuffersEnumDescriptorBuilder{
-        
+
         public function addValue(ProtocolBuffersEnumValueDescriptor $value, $force_add = false) {}
 
         /**
@@ -324,6 +336,10 @@ namespace {
 
     interface ProtocolBuffersEnumDescribable{
         public static function getEnumDescriptor();
+    }
+
+    interface ProtocolBuffersDescribable{
+        public static function getDescriptor();
     }
 }
 

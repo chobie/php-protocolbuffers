@@ -2,9 +2,9 @@
 
 #include "core.h"
 #include "serializer.h"
+#include "json_serializer.h"
 #include "unknown_field.h"
 #include "unknown_field_set.h"
-
 
 static char *single_property_name_default = "_properties";
 static int single_property_name_default_len = sizeof("_properties");
@@ -90,8 +90,12 @@ void php_protocolbuffers_scheme_container_init(php_protocolbuffers_scheme_contai
 	container->single_property_h = zend_inline_hash_func(container->single_property_name, container->single_property_name_len);
 }
 
-
 int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, php_protocolbuffers_scheme_container **result TSRMLS_DC)
+{
+	return php_protocolbuffers_get_scheme_container_ex(klass, klass_len, 1, result TSRMLS_CC);
+}
+
+int php_protocolbuffers_get_scheme_container_ex(const char *klass, size_t klass_len, int throws_exception, php_protocolbuffers_scheme_container **result TSRMLS_DC)
 {
 	php_protocolbuffers_scheme_container *container, **cn;
 
@@ -108,7 +112,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 			if (Z_TYPE_P(ret) == IS_ARRAY) {
 				/* TODO(chobie): move this block after release. */
 				zval_ptr_dtor(&ret);
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_get_scheme_container no longger support array based descriptor");
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_get_scheme_container no longer support array based descriptor");
 				return 1;
 			} else if (Z_TYPE_P(ret) == IS_OBJECT) {
 				zend_class_entry *entry;
@@ -697,6 +701,33 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 }
 
 
+int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, int throws_exception, zend_class_entry *ce, zval *klass, zval **result)
+{
+	int err = 0;
+	zval *tmp = NULL;
+	php_protocolbuffers_scheme_container *container;
+
+	err = php_protocolbuffers_get_scheme_container_ex(ce->name, ce->name_length, throws_exception, &container TSRMLS_CC);
+	if (err) {
+		if (EG(exception)) {
+			return err;
+		} else {
+			php_protocolbuffers_raise_error_or_exception(php_protocolbuffers_get_exception_base(TSRMLS_C), E_ERROR, throws_exception, "php_protocolbuffers_get_scheme_container failed. %s does not have getDescriptor method", ce->name);
+			return err;
+		}
+	}
+
+	MAKE_STD_ZVAL(tmp);
+	array_init(tmp);
+
+	if (php_protocolbuffers_encode_jsonserialize(klass, container, throws_exception, &tmp TSRMLS_CC) != 0) {
+		zval_ptr_dtor(&tmp);
+		return 1;
+	}
+
+	*result = tmp;
+	return err;
+}
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass)
 {

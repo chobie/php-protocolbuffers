@@ -143,6 +143,15 @@ static const int64_t kLongMax = LONG_MAX;
 #endif
 #endif
 
+#define php_protocolbuffers_raise_error_or_exception(ce, warning_level, use_exception, ...) \
+	do {\
+		if (use_exception) { \
+			zend_throw_exception_ex(ce, 0 TSRMLS_CC, __VA_ARGS__); \
+		} else { \
+			php_error_docref(NULL TSRMLS_CC, warning_level, __VA_ARGS__); \
+		} \
+	} while(0);
+
 typedef struct php_protocolbuffers_scheme
 {
 	int tag;
