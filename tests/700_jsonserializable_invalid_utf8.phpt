@@ -2,6 +2,7 @@
 Check for JsonSerializable implementations
 --SKIPIF--
 <?php if (version_compare(PHP_VERSION, "5.4.0") < 0) { die('skip for under 5.4'); } ?>
+<?php if (!extension_loaded("json")) { die('skip for json not installed'); } ?>
 --FILE--
 <?php
 require "messages" . DIRECTORY_SEPARATOR . "AllTypes.proto.php";
