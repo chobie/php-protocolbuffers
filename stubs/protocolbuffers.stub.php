@@ -210,6 +210,11 @@ namespace {
          * @return array
          */
         public function jsonSerialize(){}
+
+        /**
+         * @return array
+         */
+        public function toArray(){}
     }
 
     abstract class ProtocolBuffersEnum implements ProtocolBuffersEnumDescribable

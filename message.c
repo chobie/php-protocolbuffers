@@ -1637,6 +1637,19 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 }
 /* }}} */
 
+/* {{{ proto array ProtocolBuffersMessage::toArray()
+*/
+PHP_METHOD(protocolbuffers_message, toArray)
+{
+	zval *instance = getThis(), *result = NULL;
+	zend_class_entry **json;
+
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance, &result) == 0) {
+		RETURN_ZVAL(result, 0, 1);
+	}
+  return;
+}
+/* }}} */
 
 static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, __construct,          arginfo_protocolbuffers_message___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
@@ -1659,6 +1672,7 @@ static zend_function_entry php_protocolbuffers_message_methods[] = {
 	PHP_ME(protocolbuffers_message, getUnknownFieldSet,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, containerOf,          NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, jsonSerialize,        NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(protocolbuffers_message, toArray,        NULL, ZEND_ACC_PUBLIC)
 		/* iterator */
 	PHP_ME(protocolbuffers_message, current,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(protocolbuffers_message, key,       NULL, ZEND_ACC_PUBLIC)
