@@ -37,8 +37,8 @@
  * @method void setStringValue(string $value)
  * @method string getBytesValue()
  * @method void setBytesValue(string $value)
- * @method \AllTypes getMessageValue()
- * @method void setMessageValue(\AllTypes $value)
+ * @method AllTypes getMessageValue()
+ * @method void setMessageValue(AllTypes $value)
  * @method array getRDoubleValue()
  * @method void appendRDoubleValue(string $value)
  * @method array getRFloatValue()
@@ -70,9 +70,9 @@
  * @method array getRBytesValue()
  * @method void appendRBytesValue(string $value)
  * @method array getRMessageValue()
- * @method void appendRMessageValue(\AllTypes $value)
+ * @method void appendRMessageValue(AllTypes $value)
  */
-class AllTypes extends \ProtocolBuffers\Message
+class AllTypes extends ProtocolBuffersMessage
 {
     // @@protoc_insertion_point(traits:.AllTypes)
 
@@ -80,7 +80,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $double_value
      * @tag 1
      * @label optional
-     * @type \ProtocolBuffers::TYPE_DOUBLE
+     * @type ProtocolBuffers::TYPE_DOUBLE
      **/
     protected $double_value;
 
@@ -88,7 +88,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $float_value
      * @tag 2
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FLOAT
+     * @type ProtocolBuffers::TYPE_FLOAT
      **/
     protected $float_value;
 
@@ -96,7 +96,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $int32_value
      * @tag 3
      * @label optional
-     * @type \ProtocolBuffers::TYPE_INT32
+     * @type ProtocolBuffers::TYPE_INT32
      **/
     protected $int32_value;
 
@@ -104,7 +104,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $int64_value
      * @tag 4
      * @label optional
-     * @type \ProtocolBuffers::TYPE_INT64
+     * @type ProtocolBuffers::TYPE_INT64
      **/
     protected $int64_value;
 
@@ -112,7 +112,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $uint32_value
      * @tag 5
      * @label optional
-     * @type \ProtocolBuffers::TYPE_UINT32
+     * @type ProtocolBuffers::TYPE_UINT32
      **/
     protected $uint32_value;
 
@@ -120,7 +120,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $uint64_value
      * @tag 6
      * @label optional
-     * @type \ProtocolBuffers::TYPE_UINT64
+     * @type ProtocolBuffers::TYPE_UINT64
      **/
     protected $uint64_value;
 
@@ -128,7 +128,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $sint32_value
      * @tag 7
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SINT32
+     * @type ProtocolBuffers::TYPE_SINT32
      **/
     protected $sint32_value;
 
@@ -136,7 +136,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $sint64_value
      * @tag 8
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SINT64
+     * @type ProtocolBuffers::TYPE_SINT64
      **/
     protected $sint64_value;
 
@@ -144,7 +144,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $fixed32_value
      * @tag 9
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FIXED32
+     * @type ProtocolBuffers::TYPE_FIXED32
      **/
     protected $fixed32_value;
 
@@ -152,7 +152,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $fixed64_value
      * @tag 10
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FIXED64
+     * @type ProtocolBuffers::TYPE_FIXED64
      **/
     protected $fixed64_value;
 
@@ -160,7 +160,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $sfixed32_value
      * @tag 11
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SFIXED32
+     * @type ProtocolBuffers::TYPE_SFIXED32
      **/
     protected $sfixed32_value;
 
@@ -168,7 +168,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $sfixed64_value
      * @tag 12
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SFIXED64
+     * @type ProtocolBuffers::TYPE_SFIXED64
      **/
     protected $sfixed64_value;
 
@@ -176,7 +176,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var bool $bool_value
      * @tag 13
      * @label optional
-     * @type \ProtocolBuffers::TYPE_BOOL
+     * @type ProtocolBuffers::TYPE_BOOL
      **/
     protected $bool_value;
 
@@ -184,7 +184,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $string_value
      * @tag 14
      * @label optional
-     * @type \ProtocolBuffers::TYPE_STRING
+     * @type ProtocolBuffers::TYPE_STRING
      **/
     protected $string_value;
 
@@ -192,15 +192,15 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var string $bytes_value
      * @tag 15
      * @label optional
-     * @type \ProtocolBuffers::TYPE_BYTES
+     * @type ProtocolBuffers::TYPE_BYTES
      **/
     protected $bytes_value;
 
     /**
-     * @var \AllTypes $message_value
+     * @var AllTypes $message_value
      * @tag 16
      * @label optional
-     * @type \ProtocolBuffers::TYPE_MESSAGE
+     * @type ProtocolBuffers::TYPE_MESSAGE
      **/
     protected $message_value;
 
@@ -208,7 +208,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_double_value
      * @tag 21
      * @label optional
-     * @type \ProtocolBuffers::TYPE_DOUBLE
+     * @type ProtocolBuffers::TYPE_DOUBLE
      **/
     protected $r_double_value;
 
@@ -216,7 +216,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_float_value
      * @tag 22
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FLOAT
+     * @type ProtocolBuffers::TYPE_FLOAT
      **/
     protected $r_float_value;
 
@@ -224,7 +224,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_int32_value
      * @tag 23
      * @label optional
-     * @type \ProtocolBuffers::TYPE_INT32
+     * @type ProtocolBuffers::TYPE_INT32
      **/
     protected $r_int32_value;
 
@@ -232,7 +232,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_int64_value
      * @tag 24
      * @label optional
-     * @type \ProtocolBuffers::TYPE_INT64
+     * @type ProtocolBuffers::TYPE_INT64
      **/
     protected $r_int64_value;
 
@@ -240,7 +240,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_uint32_value
      * @tag 25
      * @label optional
-     * @type \ProtocolBuffers::TYPE_UINT32
+     * @type ProtocolBuffers::TYPE_UINT32
      **/
     protected $r_uint32_value;
 
@@ -248,7 +248,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_uint64_value
      * @tag 26
      * @label optional
-     * @type \ProtocolBuffers::TYPE_UINT64
+     * @type ProtocolBuffers::TYPE_UINT64
      **/
     protected $r_uint64_value;
 
@@ -256,7 +256,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_sint32_value
      * @tag 27
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SINT32
+     * @type ProtocolBuffers::TYPE_SINT32
      **/
     protected $r_sint32_value;
 
@@ -264,7 +264,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_sint64_value
      * @tag 28
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SINT64
+     * @type ProtocolBuffers::TYPE_SINT64
      **/
     protected $r_sint64_value;
 
@@ -272,7 +272,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_fixed32_value
      * @tag 29
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FIXED32
+     * @type ProtocolBuffers::TYPE_FIXED32
      **/
     protected $r_fixed32_value;
 
@@ -280,7 +280,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_fixed64_value
      * @tag 30
      * @label optional
-     * @type \ProtocolBuffers::TYPE_FIXED64
+     * @type ProtocolBuffers::TYPE_FIXED64
      **/
     protected $r_fixed64_value;
 
@@ -288,7 +288,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_sfixed32_value
      * @tag 31
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SFIXED32
+     * @type ProtocolBuffers::TYPE_SFIXED32
      **/
     protected $r_sfixed32_value;
 
@@ -296,7 +296,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_sfixed64_value
      * @tag 32
      * @label optional
-     * @type \ProtocolBuffers::TYPE_SFIXED64
+     * @type ProtocolBuffers::TYPE_SFIXED64
      **/
     protected $r_sfixed64_value;
 
@@ -304,7 +304,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_bool_value
      * @tag 33
      * @label optional
-     * @type \ProtocolBuffers::TYPE_BOOL
+     * @type ProtocolBuffers::TYPE_BOOL
      **/
     protected $r_bool_value;
 
@@ -312,7 +312,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_string_value
      * @tag 34
      * @label optional
-     * @type \ProtocolBuffers::TYPE_STRING
+     * @type ProtocolBuffers::TYPE_STRING
      **/
     protected $r_string_value;
 
@@ -320,7 +320,7 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_bytes_value
      * @tag 35
      * @label optional
-     * @type \ProtocolBuffers::TYPE_BYTES
+     * @type ProtocolBuffers::TYPE_BYTES
      **/
     protected $r_bytes_value;
 
@@ -328,8 +328,8 @@ class AllTypes extends \ProtocolBuffers\Message
      * @var array $r_message_value
      * @tag 36
      * @label optional
-     * @type \ProtocolBuffers::TYPE_MESSAGE
-     * @see \AllTypes
+     * @type ProtocolBuffers::TYPE_MESSAGE
+     * @see AllTypes
      **/
     protected $r_message_value;
 
@@ -341,16 +341,16 @@ class AllTypes extends \ProtocolBuffers\Message
     /**
      * get descriptor for protocol buffers
      *
-     * @return \ProtocolBuffersDescriptor
+     * @return ProtocolBuffersDescriptor
      */
     public static function getDescriptor()
     {
         static $descriptor;
 
         if (!isset($descriptor)) {
-            $desc = new \ProtocolBuffers\DescriptorBuilder();
-            $desc->addField(1, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_DOUBLE,
+            $desc = new ProtocolBuffersDescriptorBuilder();
+            $desc->addField(1, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_DOUBLE,
                 "name"     => "double_value",
                 "required" => false,
                 "optional" => true,
@@ -358,8 +358,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(2, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FLOAT,
+            $desc->addField(2, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FLOAT,
                 "name"     => "float_value",
                 "required" => false,
                 "optional" => true,
@@ -367,8 +367,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(3, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_INT32,
+            $desc->addField(3, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_INT32,
                 "name"     => "int32_value",
                 "required" => false,
                 "optional" => true,
@@ -376,8 +376,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(4, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_INT64,
+            $desc->addField(4, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_INT64,
                 "name"     => "int64_value",
                 "required" => false,
                 "optional" => true,
@@ -385,8 +385,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(5, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_UINT32,
+            $desc->addField(5, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_UINT32,
                 "name"     => "uint32_value",
                 "required" => false,
                 "optional" => true,
@@ -394,8 +394,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(6, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_UINT64,
+            $desc->addField(6, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_UINT64,
                 "name"     => "uint64_value",
                 "required" => false,
                 "optional" => true,
@@ -403,8 +403,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(7, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SINT32,
+            $desc->addField(7, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SINT32,
                 "name"     => "sint32_value",
                 "required" => false,
                 "optional" => true,
@@ -412,8 +412,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(8, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SINT64,
+            $desc->addField(8, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SINT64,
                 "name"     => "sint64_value",
                 "required" => false,
                 "optional" => true,
@@ -421,8 +421,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(9, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FIXED32,
+            $desc->addField(9, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FIXED32,
                 "name"     => "fixed32_value",
                 "required" => false,
                 "optional" => true,
@@ -430,8 +430,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(10, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FIXED64,
+            $desc->addField(10, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FIXED64,
                 "name"     => "fixed64_value",
                 "required" => false,
                 "optional" => true,
@@ -439,8 +439,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(11, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SFIXED32,
+            $desc->addField(11, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SFIXED32,
                 "name"     => "sfixed32_value",
                 "required" => false,
                 "optional" => true,
@@ -448,8 +448,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(12, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SFIXED64,
+            $desc->addField(12, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SFIXED64,
                 "name"     => "sfixed64_value",
                 "required" => false,
                 "optional" => true,
@@ -457,8 +457,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(13, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_BOOL,
+            $desc->addField(13, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_BOOL,
                 "name"     => "bool_value",
                 "required" => false,
                 "optional" => true,
@@ -466,8 +466,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(14, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_STRING,
+            $desc->addField(14, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_STRING,
                 "name"     => "string_value",
                 "required" => false,
                 "optional" => true,
@@ -475,8 +475,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => "",
             )));
-            $desc->addField(15, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_BYTES,
+            $desc->addField(15, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_BYTES,
                 "name"     => "bytes_value",
                 "required" => false,
                 "optional" => true,
@@ -484,18 +484,18 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(16, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_MESSAGE,
+            $desc->addField(16, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_MESSAGE,
                 "name"     => "message_value",
                 "required" => false,
                 "optional" => true,
                 "repeated" => false,
                 "packable" => false,
                 "default"  => null,
-                "message" => '\AllTypes',
+                "message" => 'AllTypes',
             )));
-            $desc->addField(21, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_DOUBLE,
+            $desc->addField(21, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_DOUBLE,
                 "name"     => "r_double_value",
                 "required" => false,
                 "optional" => false,
@@ -503,8 +503,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(22, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FLOAT,
+            $desc->addField(22, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FLOAT,
                 "name"     => "r_float_value",
                 "required" => false,
                 "optional" => false,
@@ -512,8 +512,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(23, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_INT32,
+            $desc->addField(23, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_INT32,
                 "name"     => "r_int32_value",
                 "required" => false,
                 "optional" => false,
@@ -521,8 +521,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(24, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_INT64,
+            $desc->addField(24, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_INT64,
                 "name"     => "r_int64_value",
                 "required" => false,
                 "optional" => false,
@@ -530,8 +530,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(25, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_UINT32,
+            $desc->addField(25, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_UINT32,
                 "name"     => "r_uint32_value",
                 "required" => false,
                 "optional" => false,
@@ -539,8 +539,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(26, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_UINT64,
+            $desc->addField(26, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_UINT64,
                 "name"     => "r_uint64_value",
                 "required" => false,
                 "optional" => false,
@@ -548,8 +548,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(27, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SINT32,
+            $desc->addField(27, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SINT32,
                 "name"     => "r_sint32_value",
                 "required" => false,
                 "optional" => false,
@@ -557,8 +557,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(28, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SINT64,
+            $desc->addField(28, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SINT64,
                 "name"     => "r_sint64_value",
                 "required" => false,
                 "optional" => false,
@@ -566,8 +566,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(29, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FIXED32,
+            $desc->addField(29, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FIXED32,
                 "name"     => "r_fixed32_value",
                 "required" => false,
                 "optional" => false,
@@ -575,8 +575,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(30, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_FIXED64,
+            $desc->addField(30, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_FIXED64,
                 "name"     => "r_fixed64_value",
                 "required" => false,
                 "optional" => false,
@@ -584,8 +584,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(31, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SFIXED32,
+            $desc->addField(31, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SFIXED32,
                 "name"     => "r_sfixed32_value",
                 "required" => false,
                 "optional" => false,
@@ -593,8 +593,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(32, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_SFIXED64,
+            $desc->addField(32, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_SFIXED64,
                 "name"     => "r_sfixed64_value",
                 "required" => false,
                 "optional" => false,
@@ -602,8 +602,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(33, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_BOOL,
+            $desc->addField(33, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_BOOL,
                 "name"     => "r_bool_value",
                 "required" => false,
                 "optional" => false,
@@ -611,8 +611,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => false,
             )));
-            $desc->addField(34, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_STRING,
+            $desc->addField(34, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_STRING,
                 "name"     => "r_string_value",
                 "required" => false,
                 "optional" => false,
@@ -620,8 +620,8 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => "",
             )));
-            $desc->addField(35, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_BYTES,
+            $desc->addField(35, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_BYTES,
                 "name"     => "r_bytes_value",
                 "required" => false,
                 "optional" => false,
@@ -629,15 +629,15 @@ class AllTypes extends \ProtocolBuffers\Message
                 "packable" => false,
                 "default"  => null,
             )));
-            $desc->addField(36, new \ProtocolBuffers\FieldDescriptor(array(
-                "type"     => \ProtocolBuffers::TYPE_MESSAGE,
+            $desc->addField(36, new ProtocolBuffersFieldDescriptor(array(
+                "type"     => ProtocolBuffers::TYPE_MESSAGE,
                 "name"     => "r_message_value",
                 "required" => false,
                 "optional" => false,
                 "repeated" => true,
                 "packable" => false,
                 "default"  => null,
-                "message" => '\AllTypes',
+                "message" => 'AllTypes',
             )));
             // @@protoc_insertion_point(builder_scope:.AllTypes)
 
