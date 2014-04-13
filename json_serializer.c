@@ -2,6 +2,15 @@
 #include "serializer.h"
 #include "json_serializer.h"
 
+#define php_protocolbuffers_raise_error_or_exception(ce, warning_level, use_exception, ...) \
+	do {\
+		if (use_exception) { \
+			zend_throw_exception_ex(ce, 0 TSRMLS_CC, __VA_ARGS__); \
+		} else { \
+			php_error_docref(NULL TSRMLS_CC, warning_level, __VA_ARGS__); \
+		} \
+	} while(0);
+
 typedef struct {
 	int (*serialize_double)(double value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_float)(float value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
@@ -590,7 +599,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			}
 
 			if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
-				zend_throw_exception_ex(php_protocol_buffers_invalid_byte_sequence_class_entry, 0 TSRMLS_CC, "passed string is not valid utf8 string");
+				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_byte_sequence_class_entry, E_WARNING, 0, "passed string is not valid utf8 string");
 				return -1;
 			}
 
@@ -711,7 +720,7 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 			}
 		} else {
 			if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-				zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_uninitialized_message_exception_class_entry, E_WARNING, 0, "the class does not have required property `%s`.", scheme->name);
 				return;
 			}
 			if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
@@ -729,7 +738,7 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 		}
 	} else {
 		if (scheme->required > 0) {
-			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, E_WARNING, 0, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
 			return;
 		}
 	}
@@ -754,7 +763,7 @@ int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *con
 		return 0;
 	} else {
 		if (scheme->required > 0) {
-			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, E_WARNING, 0, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
 			return 1;
 		}
 	}
@@ -776,7 +785,7 @@ int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_sc
 		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
 			hash = Z_ARRVAL_PP(c);
 		} else {
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "the class does not have `_properties` protected property.");
+			php_protocolbuffers_raise_error_or_exception(spl_ce_InvalidArgumentException, E_WARNING, 0, "the class does not have `_properties` protected property.");
 			return -1;
 		}
 	}
