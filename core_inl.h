@@ -344,7 +344,7 @@ static inline void php_protocolbuffers_decode_add_value_and_consider_repeated(ph
 	}
 }
 
-static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, uint64_t value, HashTable *hresult)
+static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, uint64_t value, HashTable *hresult, int use_string)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;
@@ -386,7 +386,7 @@ static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETER
 				return 0;
 		}
 		if (scheme->type != TYPE_BOOL) {
-			php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
+			php_protocolbuffers_format_string(dz, &__payload, use_string TSRMLS_CC);
 		}
 
 		php_protocolbuffers_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
@@ -395,7 +395,7 @@ static inline int php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAMETER
 	return 1;
 }
 
-static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult)
+static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult, int use_string)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;
@@ -419,7 +419,7 @@ static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETE
 				d = decode_double(v);
 
 				__payload.type = TYPE_DOUBLE;__payload.value.d = d;
-				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload, use_string TSRMLS_CC);
 			}
 			break;
 			case TYPE_FIXED64:
@@ -428,7 +428,7 @@ static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETE
 
 				memcpy(&v, data, 8);
 				__payload.type = TYPE_UINT64;__payload.value.uint64 = v;
-				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload, use_string TSRMLS_CC);
 			}
 			break;
 			case TYPE_SFIXED64:
@@ -437,7 +437,7 @@ static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETE
 				memcpy(&l, data, 8);
 
 				__payload.type = TYPE_INT64;__payload.value.int64 = l;
-				php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
+				php_protocolbuffers_format_string(dz, &__payload, use_string TSRMLS_CC);
 			}
 			break;
 			default:
@@ -450,7 +450,7 @@ static inline int php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAMETE
 	return 1;
 }
 
-static inline int php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult)
+static inline int php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAMETERS, int wiretype, int tag, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, const char *data, HashTable *hresult, int use_string)
 {
 	pbf __payload = {0};
 	zval *dz = NULL;
@@ -493,7 +493,7 @@ static inline int php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAMETE
 				zval_ptr_dtor(&dz);
 				return 0;
 		}
-		php_protocolbuffers_format_string(dz, &__payload TSRMLS_CC);
+		php_protocolbuffers_format_string(dz, &__payload, use_string TSRMLS_CC);
 		php_protocolbuffers_decode_add_value_and_consider_repeated(container, scheme, hresult, dz TSRMLS_CC);
 	}
 
