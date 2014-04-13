@@ -31,5 +31,5 @@
 #ifndef PHP_PROTOCOLBUFFERS_JSON_SERIALIZER_H
 #define PHP_PROTOCOLBUFFERS_JSON_SERIALIZER_H
 
-int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_scheme_container *container, zval **result TSRMLS_DC);
+int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_scheme_container *container, int throws_exception, zval **result TSRMLS_DC);
 #endif

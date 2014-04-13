@@ -1629,7 +1629,7 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 		json_serializable_checked = 1;
 	}
 
-	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance, &result) == 0) {
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
   return;
@@ -1644,7 +1644,7 @@ PHP_METHOD(protocolbuffers_message, toArray)
 	zval *instance = getThis(), *result = NULL;
 	zend_class_entry **json;
 
-	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJCE_P(instance), instance, &result) == 0) {
+	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
   return;

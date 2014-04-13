@@ -50,7 +50,7 @@ int php_protocolbuffers_set_protected_property(zval *instance, char *name, size_
 #define PB_ENCODE_CALLBACK_PARAMETERS INTERNAL_FUNCTION_PARAMETERS, zval **element, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer *ser, int is_packed
 typedef void (*php_protocolbuffers_encode_callback)(PB_ENCODE_CALLBACK_PARAMETERS);
 
-int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass, zval **result);
+int php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAMETERS, int throws_exception, zend_class_entry *ce, zval *klass, zval **result);
 
 int php_protocolbuffers_encode(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce, zval *klass);
 
@@ -73,6 +73,8 @@ int php_protocolbuffers_get_default_unknown_property_name_len();
 void php_protocolbuffers_scheme_container_init(php_protocolbuffers_scheme_container *container);
 
 int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len, php_protocolbuffers_scheme_container **result TSRMLS_DC);
+
+int php_protocolbuffers_get_scheme_container_ex(const char *klass, size_t klass_len, int throws_exception, php_protocolbuffers_scheme_container **result TSRMLS_DC);
 
 void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC);
 

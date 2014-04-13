@@ -2,15 +2,6 @@
 #include "serializer.h"
 #include "json_serializer.h"
 
-#define php_protocolbuffers_raise_error_or_exception(ce, warning_level, use_exception, ...) \
-	do {\
-		if (use_exception) { \
-			zend_throw_exception_ex(ce, 0 TSRMLS_CC, __VA_ARGS__); \
-		} else { \
-			php_error_docref(NULL TSRMLS_CC, warning_level, __VA_ARGS__); \
-		} \
-	} while(0);
-
 typedef struct {
 	int (*serialize_double)(double value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
 	int (*serialize_float)(float value, php_protocolbuffers_scheme *scheme, php_protocolbuffers_scheme_container *container, void *opaque TSRMLS_DC);
@@ -378,7 +369,7 @@ static int _json_serializer_message(
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 
-	php_protocolbuffers_encode_jsonserialize(value, child_container, &tmp TSRMLS_CC);
+	php_protocolbuffers_encode_jsonserialize(value, child_container, 0,  &tmp TSRMLS_CC);
 	if (scheme->repeated) {
 		add_next_index_zval(result, tmp);
 	} else {
@@ -512,7 +503,7 @@ static int convert_to_int32(zval *value, int32_t *result)
 	return 0;
 }
 
-static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer2 *ser, void *opaque TSRMLS_DC)
+static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, php_protocolbuffers_serializer2 *ser, int throws_exception, void *opaque TSRMLS_DC)
 {
 	zval value_copy;
 	zval *outer = (zval*)opaque;
@@ -599,7 +590,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			}
 
 			if (PBG(validate_string) && is_utf8(Z_STRVAL_PP(element), Z_STRLEN_PP(element)) < 1) {
-				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_byte_sequence_class_entry, E_WARNING, 0, "passed string is not valid utf8 string");
+				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_byte_sequence_class_entry, E_WARNING, throws_exception, "passed string is not valid utf8 string");
 				return -1;
 			}
 
@@ -686,7 +677,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 	return 0;
 }
 
-static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval *result TSRMLS_DC)
+static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, int throws_exception, zval *result TSRMLS_DC)
 {
 	zval **tmp = NULL;
 	char *name = {0};
@@ -713,14 +704,14 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 						continue;
 					}
 
-					php_protocolbuffers_json_encode_value(element, container, scheme, ser, (void*)outer TSRMLS_CC);
+					php_protocolbuffers_json_encode_value(element, container, scheme, ser, throws_exception, (void*)outer TSRMLS_CC);
 				}
 
 				ser->serialize_repeated_end(result, scheme, container, outer TSRMLS_CC);
 			}
 		} else {
 			if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_uninitialized_message_exception_class_entry, E_WARNING, 0, "the class does not have required property `%s`.", scheme->name);
+				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_uninitialized_message_exception_class_entry, E_WARNING, throws_exception, "the class does not have required property `%s`.", scheme->name);
 				return;
 			}
 			if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
@@ -734,17 +725,17 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 				return;
 			}
 
-			php_protocolbuffers_json_encode_value(tmp, container, scheme, ser, (void*)result TSRMLS_CC);
+			php_protocolbuffers_json_encode_value(tmp, container, scheme, ser, throws_exception, (void*)result TSRMLS_CC);
 		}
 	} else {
 		if (scheme->required > 0) {
-			php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, E_WARNING, 0, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
+			php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, E_WARNING, throws_exception, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
 			return;
 		}
 	}
 }
 
-int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, zval **output TSRMLS_DC)
+int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, int throws_exception, zval **output TSRMLS_DC)
 {
 	zval **tmp = NULL;
 	char *name = {0};
@@ -770,7 +761,7 @@ int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *con
 }
 
 
-int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_scheme_container *container, zval **result TSRMLS_DC)
+int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_scheme_container *container, int throws_exception, zval **result TSRMLS_DC)
 {
 	int i = 0;
 	php_protocolbuffers_scheme *scheme;
@@ -785,7 +776,7 @@ int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_sc
 		if (zend_hash_find(Z_OBJPROP_P(klass), container->single_property_name, container->single_property_name_len+1, (void**)&c) == SUCCESS) {
 			hash = Z_ARRVAL_PP(c);
 		} else {
-			php_protocolbuffers_raise_error_or_exception(spl_ce_InvalidArgumentException, E_WARNING, 0, "the class does not have `_properties` protected property.");
+			php_protocolbuffers_raise_error_or_exception(spl_ce_InvalidArgumentException, E_WARNING, throws_exception, "the class does not have `_properties` protected property.");
 			return -1;
 		}
 	}
@@ -794,10 +785,10 @@ int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_sc
 		zval *tmp;
 		scheme = &(container->scheme[i]);
 
-		if (php_protocolbuffers_fetch_element2(container, hash, scheme, &tmp TSRMLS_CC)) {
+		if (php_protocolbuffers_fetch_element2(container, hash, scheme, throws_exception, &tmp TSRMLS_CC)) {
 			return -1;
 		}
-		php_protocolbuffers_json_encode_element(container, hash, scheme, target TSRMLS_CC);
+		php_protocolbuffers_json_encode_element(container, hash, scheme, throws_exception, target TSRMLS_CC);
 
 		if (EG(exception)) {
 			return 1;
