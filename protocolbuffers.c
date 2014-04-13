@@ -74,7 +74,7 @@ zend_class_entry *php_protocol_buffers_uninitialized_message_exception_class_ent
 
 ZEND_DECLARE_MODULE_GLOBALS(protocolbuffers);
 
-static zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D)
+zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D)
 {
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 2)
 	return zend_exception_get_default();

@@ -152,6 +152,8 @@ static const int64_t kLongMax = LONG_MAX;
 		} \
 	} while(0);
 
+zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D);
+
 typedef struct php_protocolbuffers_scheme
 {
 	int tag;
