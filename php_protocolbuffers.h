@@ -32,7 +32,7 @@
 #define PHP_PROTOCOLBUFFERS_H
 
 #define PHP_PROTOCOLBUFFERS_EXTNAME "protocolbuffers"
-#define PHP_PROTOCOLBUFFERS_VERSION "0.2.2"
+#define PHP_PROTOCOLBUFFERS_VERSION "0.2.3"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
