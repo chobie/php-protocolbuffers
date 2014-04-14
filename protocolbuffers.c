@@ -298,6 +298,7 @@ PHP_MINIT_FUNCTION(protocolbuffers)
 	return SUCCESS;
 }
 
+static int implemented = 0;
 PHP_RINIT_FUNCTION(protocolbuffers)
 {
 	zend_class_entry **json;
@@ -307,8 +308,9 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 	PBG(strict_mode) = 1;
 
 	// NOTE(chobie): prevent segmentaiton fault on CentOS box (CentOS uses json shared modules.)
-	if (zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
+	if (implemented == 0 && zend_lookup_class("JsonSerializable", sizeof("JsonSerializable")-1, &json TSRMLS_CC) != FAILURE) {
 		zend_class_implements(php_protocol_buffers_message_class_entry TSRMLS_CC, 1, *json);
+		implemented = 1;
 	}
 
 	if (!PBG(messages)) {
