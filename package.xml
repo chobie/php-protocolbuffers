@@ -12,9 +12,9 @@
   <active>yes</active>
  </lead>
  <date>2014-04-14</date>
- <time>17:20:48</time>
+ <time>18:04:30</time>
  <version>
-  <release>0.2.4</release>
+  <release>0.2.5</release>
   <api>0.2.3</api>
  </version>
  <stability>
@@ -22,10 +22,11 @@
   <api>alpha</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
- <notes>Bumped up to 0.2.4
+ <notes>Bumped up to 0.2.5.
 
 [bug fix]
-* don't implement jsonSerialize twice.
+* (jsonSerialize) fix memory size problem on CentOS 64bit box.
+
  </notes>
  <contents>
  <dir name="/">
