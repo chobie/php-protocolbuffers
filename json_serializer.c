@@ -156,7 +156,7 @@ static int _json_serializer_sint64(
 }
 
 static int _json_serializer_fixed64(
-	int64_t value,
+	uint64_t value,
 	php_protocolbuffers_scheme *scheme,
 	php_protocolbuffers_scheme_container *container,
 	void *opaque TSRMLS_DC
@@ -350,7 +350,7 @@ static int _json_serializer_string(
 	if (scheme->repeated) {
 		add_next_index_stringl(result, value, value_len, 1);
 	} else {
-		add_assoc_stringl_ex(result, scheme->original_name, scheme->original_name_len, value, value_len, 1);
+		add_assoc_stringl_ex(result, scheme->original_name, scheme->original_name_len, (char*)value, value_len, 1);
 	}
 
 	return 0;
@@ -634,7 +634,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			int32_t v;
 
 			zval_copy_ctor(&value_copy);
-			convert_to_int64(&value_copy, &v);
+			convert_to_int32(&value_copy, &v);
 			ser->serialize_sfixed32(v, scheme, container, outer TSRMLS_CC);
 			zval_dtor(&value_copy);
 			break;
@@ -680,8 +680,8 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_container *container, HashTable *hash, php_protocolbuffers_scheme *scheme, int throws_exception, zval *result TSRMLS_DC)
 {
 	zval **tmp = NULL;
-	char *name = {0};
-	int name_len = 0;
+	const char *name = {0};
+	size_t name_len = 0;
 	php_protocolbuffers_serializer2 *ser = &json_serializer;
 
 	name = php_protocolbuffers_get_property_name(container, scheme, &name_len);
@@ -758,6 +758,8 @@ int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *con
 			return 1;
 		}
 	}
+
+	return 0;
 }
 
 
