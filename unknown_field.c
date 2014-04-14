@@ -330,7 +330,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getType)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT, -1, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_VARINT, -1, PBG(native_scalars));
 }
 /* }}} */
 
@@ -338,7 +338,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsVarintList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED, -1, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_LENGTH_DELIMITED, -1, PBG(native_scalars));
 }
 /* }}} */
 
@@ -346,7 +346,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsLengthDelimitedList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, -1, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, -1, PBG(native_scalars));
 }
 /* }}} */
 
@@ -354,7 +354,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed32List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, -1, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, -1, PBG(native_scalars));
 }
 /* }}} */
 
@@ -362,7 +362,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFixed64List)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, TYPE_FLOAT, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED32, TYPE_FLOAT, PBG(native_scalars));
 }
 /* }}} */
 
@@ -370,7 +370,7 @@ PHP_METHOD(protocolbuffers_unknown_field, getAsFloatList)
 */
 PHP_METHOD(protocolbuffers_unknown_field, getAsDoubleList)
 {
-	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, TYPE_DOUBLE, PBG(native_scalar));
+	php_protocolbuffers_unknown_field_get_as(INTERNAL_FUNCTION_PARAM_PASSTHRU, WIRETYPE_FIXED64, TYPE_DOUBLE, PBG(native_scalars));
 }
 /* }}} */
 

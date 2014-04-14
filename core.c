@@ -11,7 +11,7 @@ static int single_property_name_default_len = sizeof("_properties");
 static char *unknown_property_name_default = "_unknown";
 static int unknown_property_name_default_len = sizeof("_unknown");
 
-const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, int native_scalar, zval **result);
+const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, int native_scalars, zval **result);
 
 int php_protocolbuffers_read_protected_property(zval *instance, char *name, size_t name_len, zval **result TSRMLS_DC)
 {
@@ -255,14 +255,14 @@ void php_protocolbuffers_process_unknown_field_bytes(INTERNAL_FUNCTION_PARAMETER
 	}
 }
 
-void php_protocolbuffers_format_string(zval *result, pbf *payload, int native_scalar TSRMLS_DC)
+void php_protocolbuffers_format_string(zval *result, pbf *payload, int native_scalars TSRMLS_DC)
 {
 	char __buffer[64] = {0};
 	char *buffer = __buffer;
 	int free = 0;
 	size_t size = 0;
 
-	if (native_scalar == 1) {
+	if (native_scalars == 1) {
 		switch (payload->type) {
 			case TYPE_SINT32:
 			case TYPE_INT32:
@@ -355,7 +355,7 @@ void php_protocolbuffers_format_string(zval *result, pbf *payload, int native_sc
 	}
 }
 
-const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, int native_scalar, zval **result)
+const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, const char *data, const char *data_end, php_protocolbuffers_scheme_container *container, int native_scalars, zval **result)
 {
 	uint32_t payload = 0, tag = 0, wiretype = 0;
 	uint64_t value = 0;
@@ -410,13 +410,13 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 		case WIRETYPE_VARINT:
 		{
 			data = ReadVarint64FromArray(data, &value, data_end);
-			if (!php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, value, hresult, native_scalar)) {
+			if (!php_protocolbuffers_process_varint(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, value, hresult, native_scalars)) {
 				return NULL;
 			}
 		}
 		break;
 		case WIRETYPE_FIXED64:
-			if (!php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult, native_scalar)) {
+			if (!php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult, native_scalars)) {
 				return NULL;
 			}
 			data += 8;
@@ -491,7 +491,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 					}
 				}
 
-				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, PBG(native_scalar), &z_obj);
+				php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, n_buffer_end, c_container, PBG(native_scalars), &z_obj);
 
 				if (c_container->use_wakeup_and_sleep > 0) {
 					php_protocolbuffers_execute_wakeup(z_obj, c_container TSRMLS_CC);
@@ -540,7 +540,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_DOUBLE;__payload.value.d = d;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
 							data += 8;
@@ -557,7 +557,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_DOUBLE;__payload.value.d = a;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
@@ -572,7 +572,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_INT64;__payload.value.int64 = v2;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -585,7 +585,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_UINT64;__payload.value.uint64 = v2;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -597,7 +597,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)payload;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -608,7 +608,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 							MAKE_STD_ZVAL(dz);
 							__payload.type = TYPE_UINT64;__payload.value.uint64 = l;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 8;
@@ -621,7 +621,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 							MAKE_STD_ZVAL(dz);
 							__payload.type = TYPE_UINT32;__payload.value.uint32 = l;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
@@ -641,7 +641,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 							MAKE_STD_ZVAL(dz);
 							__payload.type = TYPE_UINT32;__payload.value.uint32 = (uint32_t)payload;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -661,7 +661,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_INT32;__payload.value.int32 = l;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 							data += 4;
@@ -674,7 +674,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 							MAKE_STD_ZVAL(dz);
 							__payload.type = TYPE_INT64;__payload.value.int64 = l;
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 
@@ -686,7 +686,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 
 							MAKE_STD_ZVAL(dz);
 							__payload.type = TYPE_INT32;__payload.value.int32 = (int32_t)zigzag_decode32(payload);
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						break;
@@ -698,7 +698,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 							MAKE_STD_ZVAL(dz);
 
 							__payload.type = TYPE_SINT64;__payload.value.int64 = (int64_t)zigzag_decode64(v2);
-							php_protocolbuffers_format_string(dz, &__payload, native_scalar TSRMLS_CC);
+							php_protocolbuffers_format_string(dz, &__payload, native_scalars TSRMLS_CC);
 
 							php_protocolbuffers_decode_add_value_and_consider_repeated(container, s, hresult, dz TSRMLS_CC);
 						}
@@ -717,7 +717,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 			data += payload;
 		break;
 		case WIRETYPE_FIXED32: {
-			if (!php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult, native_scalar)) {
+			if (!php_protocolbuffers_process_fixed32(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult, native_scalars)) {
 				return NULL;
 			}
 			data += 4;
@@ -857,7 +857,7 @@ int php_protocolbuffers_decode(INTERNAL_FUNCTION_PARAMETERS, const char *data, i
 		efree(unknown_name);
 	}
 
-	res = php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, PBG(native_scalar), &obj);
+	res = php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAM_PASSTHRU, data, data_end, container, PBG(native_scalars), &obj);
 	if (res == NULL) {
 		if (obj != NULL) {
 			zval_ptr_dtor(&obj);
