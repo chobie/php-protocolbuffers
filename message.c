@@ -1571,7 +1571,6 @@ PHP_METHOD(protocolbuffers_message, clearExtension)
 
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 		zval *tmp;
-		ulong hval;
 		if (is_mangled) {
 			efree(n);
 		}
@@ -1676,7 +1675,6 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 PHP_METHOD(protocolbuffers_message, toArray)
 {
 	zval *instance = getThis(), *result = NULL;
-	zend_class_entry **json;
 
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
