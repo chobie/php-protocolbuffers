@@ -11,10 +11,10 @@
   <email>chobieeeee@php.net</email>
   <active>yes</active>
  </lead>
- <date>2014-04-13</date>
- <time>22:00:48</time>
+ <date>2014-04-14</date>
+ <time>17:20:48</time>
  <version>
-  <release>0.2.3</release>
+  <release>0.2.4</release>
   <api>0.2.3</api>
  </version>
  <stability>
@@ -22,16 +22,10 @@
   <api>alpha</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
- <notes>Bumped up to 0.2.3
+ <notes>Bumped up to 0.2.4
 
-[added]
-* supported jsonSerializable interface
-* added ProtocolBuffersEnum::toArray() method
-
-[bug fixes]
-* #33 Message::append on a repeated field causes segfault, batch assigning it throws exception
-* fixed refcounting problem
-
+[bug fix]
+* don't implement jsonSerialize twice.
  </notes>
  <contents>
  <dir name="/">
@@ -65,7 +59,6 @@
      <file role="src" name="message.h"/>
      <file role="src" name="message_options.c"/>
      <file role="src" name="message_options.h"/>
-     <file role="doc" name="person.proto"/>
      <file role="src" name="php_message_options.c"/>
      <file role="src" name="php_message_options.h"/>
      <file role="src" name="php_protocolbuffers.h"/>
