@@ -11,10 +11,10 @@
   <email>chobieeeee@php.net</email>
   <active>yes</active>
  </lead>
- <date>2014-04-14</date>
- <time>18:04:30</time>
+ <date>2014-04-15</date>
+ <time>12:55:30</time>
  <version>
-  <release>0.2.5</release>
+  <release>0.2.6</release>
   <api>0.2.3</api>
  </version>
  <stability>
@@ -22,10 +22,11 @@
   <api>alpha</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
- <notes>Bumped up to 0.2.5.
+ <notes>Bumped up to 0.2.6
+* fixed several compile warnings (thanks remi)
 
-[bug fix]
-* (jsonSerialize) fix memory size problem on CentOS 64bit box.
+[fixes]
+* (ExtensionRegistry) initialize class entry member when reallocating scheme.
 
  </notes>
  <contents>
