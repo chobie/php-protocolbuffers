@@ -527,19 +527,33 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 						continue;
 					}
 
-					MAKE_STD_ZVAL(child);
-					MAKE_STD_ZVAL(param);
-					ZVAL_ZVAL(param, *element, 1, 0);
+					if (Z_TYPE_PP(element) == IS_OBJECT) {
+						if (scheme->ce != Z_OBJCE_PP(element)) {
+							zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_P(value)->name);
+							return;
+						} else {
+							m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, *element);
+							ZVAL_ZVAL(m->container, instance, 0, 0);
 
-					object_init_ex(child, scheme->ce);
-					php_protocolbuffers_properties_init(child, scheme->ce TSRMLS_CC);
+							Z_ADDREF_PP(element);
+							add_next_index_zval(outer, *element);
+						}
+					} else {
+						MAKE_STD_ZVAL(child);
+						MAKE_STD_ZVAL(param);
+						ZVAL_ZVAL(param, *element, 1, 0);
 
-					zend_call_method_with_1_params(&child, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
-					zval_ptr_dtor(&param);
+						object_init_ex(child, scheme->ce);
+						php_protocolbuffers_properties_init(child, scheme->ce TSRMLS_CC);
 
-					m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, child);
-					ZVAL_ZVAL(m->container, instance, 0, 0);
-					add_next_index_zval(outer, child);
+						zend_call_method_with_1_params(&child, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
+						zval_ptr_dtor(&param);
+
+						m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, child);
+						ZVAL_ZVAL(m->container, instance, 0, 0);
+						add_next_index_zval(outer, child);
+					}
+
 				}
 				value = outer;
 				should_free = 1;
