@@ -27,7 +27,7 @@ PHP_METHOD(protocolbuffers_enum_descriptor_builder, __construct)
 PHP_METHOD(protocolbuffers_enum_descriptor_builder, addValue)
 {
 	zval *instance = getThis();
-	zval *value, **fields, *name, *value2;
+	zval *value, **fields, *name;
 	zend_bool force = 0;
 	char *property;
 	int property_len;

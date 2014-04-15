@@ -66,7 +66,7 @@ void php_protocolbuffers_unknown_field_set_properties_init(zval *object TSRMLS_D
 
 void php_protocolbuffers_unknown_field_clear(INTERNAL_FUNCTION_PARAMETERS, zval *instance)
 {
-	zval *fields = NULL, **prior_fields = NULL;
+	zval *fields = NULL;
 	char *name = {0};
 	int name_len = 0;
 

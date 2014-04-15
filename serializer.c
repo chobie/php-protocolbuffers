@@ -723,13 +723,13 @@ int php_protocolbuffers_fetch_element(INTERNAL_FUNCTION_PARAMETERS, php_protocol
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
 		*output = *tmp;
-		return 0;
 	} else {
 		if (scheme->required > 0) {
 			zend_throw_exception_ex(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, 0 TSRMLS_CC, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
 			return 1;
 		}
 	}
+	return 0;
 }
 
 int php_protocolbuffers_encode_message(INTERNAL_FUNCTION_PARAMETERS, zval *klass, php_protocolbuffers_scheme_container *container, php_protocolbuffers_serializer **serializer)

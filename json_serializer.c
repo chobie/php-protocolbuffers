@@ -403,7 +403,7 @@ static php_protocolbuffers_serializer2 json_serializer = {
 };
 
 
-static const char* php_protocolbuffers_get_property_name(php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, size_t *name_len)
+static const char* php_protocolbuffers_get_property_name(php_protocolbuffers_scheme_container *container, php_protocolbuffers_scheme *scheme, int *name_len)
 {
 	const char *name;
 	if (container->use_single_property < 1) {
@@ -681,7 +681,7 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 {
 	zval **tmp = NULL;
 	const char *name = {0};
-	size_t name_len = 0;
+	int name_len = 0;
 	php_protocolbuffers_serializer2 *ser = &json_serializer;
 
 	name = php_protocolbuffers_get_property_name(container, scheme, &name_len);
@@ -751,7 +751,6 @@ int php_protocolbuffers_fetch_element2(php_protocolbuffers_scheme_container *con
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
 		*output = *tmp;
-		return 0;
 	} else {
 		if (scheme->required > 0) {
 			php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_invalid_protocolbuffers_exception_class_entry, E_WARNING, 0, "the class does not declared required property `%s`. probably you missed declaration", scheme->name);
@@ -770,7 +769,6 @@ int php_protocolbuffers_encode_jsonserialize(zval *klass, php_protocolbuffers_sc
 	HashTable *hash = NULL;
 	zval **c = NULL;
 	zval *target = *result;
-	php_protocolbuffers_serializer2 *ser = &json_serializer;
 
 	if (container->use_single_property < 1) {
 		hash = Z_OBJPROP_P(klass);

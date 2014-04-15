@@ -35,7 +35,7 @@ static void php_protocolbuffers_helper_debug_zval(zval **value TSRMLS_DC)
 	zval *val = *value;
 
 	php_printf("{\n");
-	php_printf("  address: 0x%x,\n", (unsigned int)val);
+	php_printf("  address: 0x%lx,\n", (unsigned long)val);
 	php_printf("  type: %d,\n", val->type);
 	php_printf("  is_ref: %d,\n", PZVAL_IS_REF(val));
 	php_printf("  refcount: %d,\n", Z_REFCOUNT_PP(value));
@@ -44,14 +44,14 @@ static void php_protocolbuffers_helper_debug_zval(zval **value TSRMLS_DC)
 	php_printf("    double: %f,\n", val->value.dval);
 	if (val->type == 4) {
 		php_printf("    ht: {\n");
-		php_printf("      address: 0x%x,\n", (unsigned int)val->value.ht);
+		php_printf("      address: 0x%lx,\n", (unsigned long)val->value.ht);
 		php_printf("      num_of_elements: %d,\n", (unsigned int)val->value.ht->nNumOfElements);
 		php_printf("      next_free_elements: %d,\n", (unsigned int)val->value.ht->nNextFreeElement);
 		php_printf("    },\n");
 	}
 	php_printf("    object: {\n");
 	php_printf("      handle: 0x%x,\n", val->value.obj.handle);
-	php_printf("      handlers: 0x%x,\n", (unsigned int)val->value.obj.handlers);
+	php_printf("      handlers: 0x%lx,\n", (unsigned long)val->value.obj.handlers);
 	php_printf("    },\n");
 	php_printf("  }\n");
 	php_printf("}\n");

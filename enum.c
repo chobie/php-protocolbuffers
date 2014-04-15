@@ -26,7 +26,7 @@ PHP_METHOD(protocolbuffers_enum, isValid)
 	return;
 #else
 	long value;
-	zval *result, *result2;
+	zval *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &value) == FAILURE) {
@@ -71,7 +71,7 @@ PHP_METHOD(protocolbuffers_enum, getName)
 	return;
 #else
 	long value;
-	zval *result, *result2;
+	zval *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &value) == FAILURE) {
@@ -79,7 +79,7 @@ PHP_METHOD(protocolbuffers_enum, getName)
 	}
 
 	if (zend_call_method_with_0_params(NULL, EG(called_scope), NULL, "getenumdescriptor", &result)) {
-		zval *values, **entry, **key;
+		zval *values, **entry;
 		HashPosition pos;
 
 		if (!instanceof_function_ex(Z_OBJCE_P(result), php_protocol_buffers_enum_descriptor_class_entry, 0 TSRMLS_CC)) {
