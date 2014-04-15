@@ -214,6 +214,7 @@ int php_protocolbuffers_init_scheme_with_zval(php_protocolbuffers_scheme *scheme
 	int mangle_len;
 	zval *def;
 
+	scheme->ce = NULL;
 	scheme->is_extension = 0;
 	scheme->tag = tag;
 
