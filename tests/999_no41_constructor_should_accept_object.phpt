@@ -148,6 +148,15 @@ foreach ($bar->getUsers() as $user) {
 	echo $user->getId() . PHP_EOL;
 }
 
+try {
+$var = new TestMessage(array('users' => array(
+		array('id' => 1),
+    new StdClass(),
+)));
+	echo "FAULT" . PHP_EOL;
+} catch (InvalidArgumentException $e) {
+	echo "OK" . PHP_EOL;
+}
 --EXPECT--
 1
 2
@@ -158,3 +167,4 @@ foreach ($bar->getUsers() as $user) {
 1
 2
 3
+OK
