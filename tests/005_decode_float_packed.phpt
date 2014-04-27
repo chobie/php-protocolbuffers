@@ -29,7 +29,25 @@ if ($obj instanceof Tutorial_Float) {
 }
 
 
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Float", $bytes);
+if ($obj instanceof Tutorial_Float) {
+    if (count($obj->getValue()) != 3) {
+        var_dump($obj);
+        exit;
+    }
+
+    $values = $obj->getValue();
+    if ($values[0] === 0.0) {
+			echo "OK" . PHP_EOL;
+    }
+} else {
+    var_dump($obj);
+}
+
+
 --EXPECT--
 0
 1.0499999523163
 3.1417999267578
+OK

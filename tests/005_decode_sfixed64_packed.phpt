@@ -23,7 +23,7 @@ if ($obj instanceof Tutorial_SFixed64) {
     $values = $obj->getValue();
 
     if ($values[0] == -1024 && $values[1] == 0 && $values[2] == 1024) {
-        echo "OK";
+        echo "OK" . PHP_EOL;
     } else {
         var_dump($obj);
     }
@@ -31,6 +31,24 @@ if ($obj instanceof Tutorial_SFixed64) {
     var_dump($obj);
 }
 
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_SFixed64", $bytes);
+if ($obj instanceof Tutorial_SFixed64) {
+    if (count($obj->getValue()) != 3) {
+        var_dump($obj);
+        exit;
+    }
+    $values = $obj->getValue();
+
+    if ($values[0] === -1024 && $values[1] === 0 && $values[2] === 1024) {
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
 
 --EXPECT--
+OK
 OK

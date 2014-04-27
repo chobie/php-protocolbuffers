@@ -18,5 +18,20 @@ if ($obj instanceof Tutorial_Bytes) {
 } else {
     var_dump($obj);
 }
+
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Bytes", $bytes);
+
+if ($obj instanceof Tutorial_Bytes) {
+    if ($obj->getValue() === $droid) {
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
+
 --EXPECT--
+OK
 OK

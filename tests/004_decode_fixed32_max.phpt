@@ -13,12 +13,26 @@ $obj = ProtocolBuffers::decode("Tutorial_Fixed32", $bytes);
 
 if ($obj instanceof Tutorial_Fixed32) {
     if ($obj->getValue() == 4294967295) {
-        echo "OK";
+        echo "OK" . PHP_EOL;
     } else {
         var_dump($obj);
     }
 } else {
     var_dump($obj);
 }
+
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Fixed32", $bytes);
+if ($obj instanceof Tutorial_Fixed32) {
+    if ($obj->getValue() === 4294967295) {
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
+
 --EXPECT--
+OK
 OK

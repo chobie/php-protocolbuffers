@@ -10,15 +10,28 @@ $u = new Tutorial_SInt32();
 $u->setValue(-2147483648);
 
 $obj = ProtocolBuffers::decode("Tutorial_SInt32", $bytes);
-
 if ($obj instanceof Tutorial_SInt32) {
     if ($obj->getValue() == -2147483648) {
-        echo "OK";
+        echo "OK" . PHP_EOL;
     } else {
         var_dump($obj);
     }
 } else {
     var_dump($obj);
 }
+
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_SInt32", $bytes);
+if ($obj instanceof Tutorial_SInt32) {
+    if ($obj->getValue() === -2147483648) {
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
+
 --EXPECT--
+OK
 OK

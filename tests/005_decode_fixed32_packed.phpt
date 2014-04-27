@@ -22,7 +22,24 @@ if ($obj instanceof Tutorial_Fixed32) {
     }
     $values = $obj->getValue();
     if ($values[0] == 0 && $values[1] == 128 && $values[2] == 256 && $values[3] == 512 && $values[4] == 1024) {
-        echo "OK";
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
+
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Fixed32", $bytes);
+if ($obj instanceof Tutorial_Fixed32) {
+    if (count($obj->getValue()) != 5) {
+        var_dump($obj);
+        exit;
+    }
+    $values = $obj->getValue();
+    if ($values[0] === 0 && $values[1] === 128 && $values[2] === 256 && $values[3] === 512 && $values[4] === 1024) {
+        echo "OK" . PHP_EOL;
     } else {
         var_dump($obj);
     }
@@ -31,4 +48,5 @@ if ($obj instanceof Tutorial_Fixed32) {
 }
 
 --EXPECT--
+OK
 OK

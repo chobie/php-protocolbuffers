@@ -23,7 +23,33 @@ if ($obj instanceof Tutorial_Integer32) {
     var_dump($obj);
 }
 
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Integer32", $bytes);
+if ($obj instanceof Tutorial_Integer32) {
+    if (count($obj->getValue()) != 3) {
+        var_dump($obj);
+        exit;
+    }
+
+    $values = $obj->getValue();
+
+    if ($values[0] === 1) {
+			echo "OK" . PHP_EOL;
+    }
+    if ($values[1] === 2) {
+			echo "OK" . PHP_EOL;
+    }
+    if ($values[2] === 1024) {
+			echo "OK" . PHP_EOL;
+    }
+} else {
+    var_dump($obj);
+}
+
 --EXPECT--
 1
 2
 1024
+OK
+OK
+OK

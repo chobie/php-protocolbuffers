@@ -20,5 +20,20 @@ if ($obj instanceof Tutorial_Boolean) {
 } else {
     var_dump($obj);
 }
+
+ini_set("protocolbuffers.native_scalars", 1);
+$obj = ProtocolBuffers::decode("Tutorial_Boolean", $data);
+
+if ($obj instanceof Tutorial_Boolean) {
+    if ($obj->getValue() === true) {
+        echo "OK" . PHP_EOL;
+    } else {
+        var_dump($obj);
+    }
+} else {
+    var_dump($obj);
+}
+
 --EXPECT--
+OK
 OK
