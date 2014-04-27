@@ -285,14 +285,25 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(protocolbuffers)
 {
+	memset(protocolbuffers_globals, 0, sizeof(zend_protocolbuffers_globals));
+}
+
+static void php_protocolbuffers_cleanup_global_handles(TSRMLS_D)
+{
 }
 
 static PHP_GSHUTDOWN_FUNCTION(protocolbuffers)
 {
+	php_protocolbuffers_cleanup_global_handles(TSRMLS_C);
+}
+
+static void php_protocolbuffers_init_globals() {
+
 }
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
+	ZEND_INIT_MODULE_GLOBALS(protocolbuffers, php_protocolbuffers_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	php_protocolbuffers_init(TSRMLS_C);
