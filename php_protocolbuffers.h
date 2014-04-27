@@ -90,8 +90,8 @@ ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
 	HashTable *classes;
 	zval *extension_registry;
 	long strict_mode;
-	int validate_string;
-	int native_scalars;
+	long validate_string;
+	long native_scalars;
 ZEND_END_MODULE_GLOBALS(protocolbuffers)
 
 ZEND_EXTERN_MODULE_GLOBALS(protocolbuffers)
