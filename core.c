@@ -282,7 +282,7 @@ void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC)
 			char *p = 0;
 			free = 1;
 
- 			/* Note: this is safe */
+			/* Note: this is safe */
 			buffer = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			size = zend_sprintf(buffer, "%f", payload->value.f);
 
@@ -302,11 +302,11 @@ void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC)
 				}
 				break;
 			}
-  		}
+		}
 		break;
 		case TYPE_DOUBLE:{
 			free = 1;
- 			/* Note: this is safe */
+			/* Note: this is safe */
 			buffer = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			size = zend_sprintf(buffer, "%.*G", (int)EG(precision), payload->value.d);
 		}
@@ -387,7 +387,7 @@ const char* php_protocolbuffers_decode_message(INTERNAL_FUNCTION_PARAMETERS, con
 		break;
 		case WIRETYPE_FIXED64:
 			if (!php_protocolbuffers_process_fixed64(INTERNAL_FUNCTION_PARAM_PASSTHRU, wiretype, tag, container, s, data, hresult)) {
-            	return NULL;
+					return NULL;
 			}
 			data += 8;
 		break;

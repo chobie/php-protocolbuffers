@@ -1060,7 +1060,7 @@ PHP_METHOD(protocolbuffers_message, current)
 	}
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
-    	RETVAL_ZVAL(*tmp, 1, 0);
+		RETVAL_ZVAL(*tmp, 1, 0);
 	}
 }
 /* }}} */
@@ -1680,7 +1680,7 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
-  return;
+	return;
 #endif
 }
 /* }}} */
@@ -1694,7 +1694,7 @@ PHP_METHOD(protocolbuffers_message, toArray)
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
-  return;
+	return;
 }
 /* }}} */
 
