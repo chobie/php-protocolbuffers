@@ -28,7 +28,7 @@ end
 desc "run php test cases"
 task :test do
   ENV["TESTS"] = "--show-diff -q"
-  sh "make test"
+  cmd_run("make test")
   sh "cat tests/*.diff; if [ $? -eq 0 ];then exit 1; fi"
 end
 
