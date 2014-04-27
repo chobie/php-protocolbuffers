@@ -32,3 +32,13 @@ task :test do
   sh "cat tests/*.diff; if [ $? -eq 0 ];then exit 1; fi"
 end
 
+task :integration do
+  if ENV["TRAVIS_PHP_VERSION"] > 5.3 then
+    sh "phpenv config-add tests/integration/protocolbuffers.ini"
+    sh "sudo make install"
+    sh "sudo cp tests/integration/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf"
+    sh "~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
+    sleep 1
+    sh "tests/integration/fcgiget.php localhost:9000/home/vagrant/php-protocolbuffers/tests/integration/test.php"
+  end
+end

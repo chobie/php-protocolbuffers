@@ -9,6 +9,7 @@ script:
   - uname -a
   - cat /etc/issue
   - rake compile test
+  - rake integration
 
 notifications:
   irc: "chat.freenode.net#php-protocolbuffers"
