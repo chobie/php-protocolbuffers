@@ -33,7 +33,7 @@ task :test do
 end
 
 task :integration do
-  if ENV["TRAVIS_PHP_VERSION"] > 5.3 then
+  if ENV["TRAVIS_PHP_VERSION"].to_f > 5.3 then
     sh "phpenv config-add tests/integration/protocolbuffers.ini"
     sh "sudo make install"
     sh "sudo cp tests/integration/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf"

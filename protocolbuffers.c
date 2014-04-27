@@ -294,7 +294,11 @@ static void php_protocolbuffers_cleanup_global_handles(TSRMLS_D)
 
 static PHP_GSHUTDOWN_FUNCTION(protocolbuffers)
 {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 2) || (PHP_MAJOR_VERSION < 5)
+#ifndef ZTS
 	php_protocolbuffers_cleanup_global_handles(TSRMLS_C);
+#endif
+#endif
 }
 
 static void php_protocolbuffers_init_globals() {
