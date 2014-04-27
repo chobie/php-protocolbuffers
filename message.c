@@ -562,6 +562,7 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 		} else {
 			if (Z_TYPE_P(value) == IS_ARRAY) {
+				/* NOTE(chobie): Array to Object conversion */
 				zval *param;
 
 				MAKE_STD_ZVAL(tmp);
@@ -638,8 +639,8 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "clear method can't use for extension value", name);
 		return;
 	}
-	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 
+	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 		zval *vl = NULL;
 
@@ -763,7 +764,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 
 	if (scheme->is_extension) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "get method can't use for extension value", name);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "has method can't use for extension value", name);
 		return;
 	}
 
