@@ -39,6 +39,6 @@ task :integration do
     sh "sudo cp tests/integration/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf"
     sh "sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
     sleep 1
-    cmd_run("php tests/integration/fcgiget.php localhost:9000/home/vagrant/php-protocolbuffers/tests/integration/test.php")
+    cmd_run("$(phpenv which php) tests/integration/fcgiget.php localhost:9000/home/vagrant/php-protocolbuffers/tests/integration/test.php")
   end
 end
