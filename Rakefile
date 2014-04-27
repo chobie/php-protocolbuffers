@@ -40,7 +40,7 @@ task :integration do
     sh "sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
     sleep 1
 
-    cmd_run("$(phpenv which php) tests/integration/fcgiget.php localhost:9000/home/travis/chobie/php-protocolbuffers/tests/integration/test.php")
-    cmd_run("$(phpenv which php) tests/integration/fcgiget.php localhost:9000/home/travis/chobie/php-protocolbuffers/tests/integration/test.php")
+    cmd_run("$(phpenv which php) tests/integration/fcgiget.php localhost:9000/home/travis/build/chobie/php-protocolbuffers/tests/integration/test.php")
+    cmd_run("$(phpenv which php) tests/integration/fcgiget.php localhost:9000/home/travis/build/chobie/php-protocolbuffers/tests/integration/test.php")
   end
 end
