@@ -37,8 +37,8 @@ task :integration do
     sh "phpenv config-add tests/integration/protocolbuffers.ini"
     sh "sudo make install"
     sh "sudo cp tests/integration/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf"
-    sh "~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
+    sh "sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
     sleep 1
-    sh "tests/integration/fcgiget.php localhost:9000/home/vagrant/php-protocolbuffers/tests/integration/test.php"
+    cmd_run("tests/integration/fcgiget.php localhost:9000/home/vagrant/php-protocolbuffers/tests/integration/test.php")
   end
 end

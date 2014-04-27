@@ -307,7 +307,7 @@ static void php_protocolbuffers_init_globals() {
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
-	ZEND_INIT_MODULE_GLOBALS(protocolbuffers, php_protocolbuffers_init_globals, NULL);
+	//ZEND_INIT_MODULE_GLOBALS(protocolbuffers, php_protocolbuffers_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	php_protocolbuffers_init(TSRMLS_C);
