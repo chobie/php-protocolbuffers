@@ -280,6 +280,7 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, zend_protocolbuffers_globals, protocolbuffers_globals)
 	STD_PHP_INI_BOOLEAN("protocolbuffers.validate_string", "1", PHP_INI_ALL, OnUpdateLong, validate_string, zend_protocolbuffers_globals, protocolbuffers_globals)
+	STD_PHP_INI_BOOLEAN("protocolbuffers.native_scalars", "0", PHP_INI_ALL, OnUpdateLong, native_scalars, zend_protocolbuffers_globals, protocolbuffers_globals)
 PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(protocolbuffers)
@@ -323,6 +324,7 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 		zend_hash_init(PBG(classes), 0, NULL, NULL, 0);
 	}
 	PBG(validate_string) = 1;
+	PBG(native_scalars) = 0;
 
 	return SUCCESS;
 }

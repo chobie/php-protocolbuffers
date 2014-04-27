@@ -91,6 +91,7 @@ ZEND_BEGIN_MODULE_GLOBALS(protocolbuffers)
 	zval *extension_registry;
 	long strict_mode;
 	int validate_string;
+	int native_scalars;
 ZEND_END_MODULE_GLOBALS(protocolbuffers)
 
 ZEND_EXTERN_MODULE_GLOBALS(protocolbuffers)
