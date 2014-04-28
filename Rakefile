@@ -8,6 +8,7 @@ def cmd_run(command)
     pipe.each { |line|
       print "+ " + line
     }
+    $?.to_i
   }
 end
 
