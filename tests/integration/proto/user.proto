@@ -1,0 +1,7 @@
+package pecl.protocolbuffers;
+
+message User
+{
+	optional int64 user_id = 1;
+	optional bytes name = 2;
+}
