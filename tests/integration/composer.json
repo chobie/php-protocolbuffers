@@ -1,0 +1,6 @@
+{
+    "require": {
+        "adoy/fastcgi-client": "dev-master",
+        "phpunit/phpunit": "3.7.*"
+    }
+}
