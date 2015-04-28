@@ -280,34 +280,18 @@ PHP_MINFO_FUNCTION(protocolbuffers)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("protocolbuffers.strict_mode", "1", PHP_INI_ALL, OnUpdateLong, strict_mode, zend_protocolbuffers_globals, protocolbuffers_globals)
 	STD_PHP_INI_BOOLEAN("protocolbuffers.validate_string", "1", PHP_INI_ALL, OnUpdateLong, validate_string, zend_protocolbuffers_globals, protocolbuffers_globals)
-	STD_PHP_INI_BOOLEAN("protocolbuffers.native_scalars", "0", PHP_INI_ALL, OnUpdateLong, native_scalars, zend_protocolbuffers_globals, protocolbuffers_globals)
 PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(protocolbuffers)
-{
-	memset(protocolbuffers_globals, 0, sizeof(zend_protocolbuffers_globals));
-}
-
-static void php_protocolbuffers_cleanup_global_handles(TSRMLS_D)
 {
 }
 
 static PHP_GSHUTDOWN_FUNCTION(protocolbuffers)
 {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 2) || (PHP_MAJOR_VERSION < 5)
-#ifndef ZTS
-	php_protocolbuffers_cleanup_global_handles(TSRMLS_C);
-#endif
-#endif
-}
-
-static void php_protocolbuffers_init_globals() {
-
 }
 
 PHP_MINIT_FUNCTION(protocolbuffers)
 {
-	//ZEND_INIT_MODULE_GLOBALS(protocolbuffers, php_protocolbuffers_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	php_protocolbuffers_init(TSRMLS_C);
@@ -339,7 +323,6 @@ PHP_RINIT_FUNCTION(protocolbuffers)
 		zend_hash_init(PBG(classes), 0, NULL, NULL, 0);
 	}
 	PBG(validate_string) = 1;
-	PBG(native_scalars) = 0;
 
 	return SUCCESS;
 }

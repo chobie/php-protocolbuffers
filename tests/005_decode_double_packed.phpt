@@ -20,24 +20,7 @@ if ($obj instanceof Tutorial_Double) {
     }
     $values = $obj->getValue();
     if ($values[0] == 0 && $values[1] == 1.05 && $values[2] == 3.1418) {
-        echo "OK" . PHP_EOL;
-    } else {
-        var_dump($obj);
-    }
-} else {
-    var_dump($obj);
-}
-
-ini_set("protocolbuffers.native_scalars", 1);
-$obj = ProtocolBuffers::decode("Tutorial_Double", $bytes);
-if ($obj instanceof Tutorial_Double) {
-    if (count($obj->getValue()) != 3) {
-        var_dump($obj);
-        exit;
-    }
-    $values = $obj->getValue();
-    if ($values[0] === 0.0 && $values[1] === 1.05 && $values[2] === 3.1418) {
-        echo "OK" . PHP_EOL;
+        echo "OK";
     } else {
         var_dump($obj);
     }
@@ -46,5 +29,4 @@ if ($obj instanceof Tutorial_Double) {
 }
 
 --EXPECT--
-OK
 OK

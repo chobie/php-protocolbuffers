@@ -13,26 +13,12 @@ $obj = ProtocolBuffers::decode("Tutorial_SFixed32", $bytes);
 
 if ($obj instanceof Tutorial_SFixed32) {
     if ($obj->getValue() == 256) {
-        echo "OK" . PHP_EOL;
+        echo "OK";
     } else {
         var_dump($obj);
     }
 } else {
     var_dump($obj);
 }
-
-ini_set("protocolbuffers.native_scalars", 1);
-$obj = ProtocolBuffers::decode("Tutorial_SFixed32", $bytes);
-if ($obj instanceof Tutorial_SFixed32) {
-    if ($obj->getValue() === 256) {
-        echo "OK" . PHP_EOL;
-    } else {
-        var_dump($obj);
-    }
-} else {
-    var_dump($obj);
-}
-
 --EXPECT--
-OK
 OK

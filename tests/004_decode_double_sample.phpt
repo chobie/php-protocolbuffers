@@ -10,18 +10,7 @@ $obj = ProtocolBuffers::decode("Tutorial_Double", $bytes);
 
 if ($obj instanceof Tutorial_Double) {
     if (round($obj->getValue(), 2) == 1.05) {
-        echo "OK" . PHP_EOL;
-    } else {
-        var_dump($obj);
-    }
-} else {
-    var_dump($obj);
-}
-
-ini_set("protocolbuffers.native_scalars", 1);
-if ($obj instanceof Tutorial_Double) {
-    if (round($obj->getValue(), 2) === 1.05) {
-        echo "OK" . PHP_EOL;
+        echo "OK";
     } else {
         var_dump($obj);
     }
@@ -29,5 +18,4 @@ if ($obj instanceof Tutorial_Double) {
     var_dump($obj);
 }
 --EXPECT--
-OK
 OK
