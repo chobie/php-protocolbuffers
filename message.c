@@ -100,10 +100,12 @@ zend_object_value php_protocolbuffers_message_new(zend_class_entry *ce TSRMLS_DC
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, params)
+	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_set_from, 0, 0, 1)
 	ZEND_ARG_INFO(0, params)
+	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_protocolbuffers_message_serialize_to_string, 0, 0, 0)
@@ -478,7 +480,7 @@ static void php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 }
 
-static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value)
+static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *instance, php_protocolbuffers_scheme_container *container, char *name, int name_len, char *name2, int name2_len, zval *value, zend_bool strict)
 {
 	php_protocolbuffers_scheme *scheme;
 	php_protocolbuffers_message *m;
@@ -491,8 +493,10 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 	scheme = php_protocolbuffers_message_get_scheme_by_name(container, name, name_len, name2, name2_len);
 	if (scheme == NULL) {
-		zval_ptr_dtor(&value);
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+        if (strict) {
+		    zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "%s does not find", name);
+		    zval_ptr_dtor(&value);
+        }
 		return;
 	}
 
@@ -517,6 +521,10 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 				MAKE_STD_ZVAL(outer);
 				array_init(outer);
 
+                zval *zval_strict;
+                MAKE_STD_ZVAL(zval_strict);
+                ZVAL_BOOL(zval_strict, strict);
+
 				for(zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(value), &pos);
 								zend_hash_get_current_data_ex(Z_ARRVAL_P(value), (void **)&element, &pos) == SUCCESS;
 								zend_hash_move_forward_ex(Z_ARRVAL_P(value), &pos)
@@ -527,42 +535,29 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 						continue;
 					}
 
-					if (Z_TYPE_PP(element) == IS_OBJECT) {
-						if (scheme->ce != Z_OBJCE_PP(element)) {
-							zval_ptr_dtor(&outer);
-							zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "expected %s class. given %s class", scheme->ce->name, Z_OBJCE_PP(element)->name);
-							return;
-						} else {
-							m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, *element);
-							ZVAL_ZVAL(m->container, instance, 0, 0);
+					MAKE_STD_ZVAL(child);
+					MAKE_STD_ZVAL(param);
+					ZVAL_ZVAL(param, *element, 1, 0);
 
-							Z_ADDREF_PP(element);
-							add_next_index_zval(outer, *element);
-						}
-					} else {
-						MAKE_STD_ZVAL(child);
-						MAKE_STD_ZVAL(param);
-						ZVAL_ZVAL(param, *element, 1, 0);
+					object_init_ex(child, scheme->ce);
+					php_protocolbuffers_properties_init(child, scheme->ce TSRMLS_CC);
 
-						object_init_ex(child, scheme->ce);
-						php_protocolbuffers_properties_init(child, scheme->ce TSRMLS_CC);
+					zend_call_method_with_2_params(&child, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param, zval_strict);
+					zval_ptr_dtor(&param);
 
-						zend_call_method_with_1_params(&child, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
-						zval_ptr_dtor(&param);
-
-						m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, child);
-						ZVAL_ZVAL(m->container, instance, 0, 0);
-						add_next_index_zval(outer, child);
-					}
-
+					m = PHP_PROTOCOLBUFFERS_GET_OBJECT(php_protocolbuffers_message, child);
+					ZVAL_ZVAL(m->container, instance, 0, 0);
+					add_next_index_zval(outer, child);
 				}
+
+                zval_ptr_dtor(&zval_strict);
+
 				value = outer;
 				should_free = 1;
 			}
 
 		} else {
 			if (Z_TYPE_P(value) == IS_ARRAY) {
-				/* NOTE(chobie): Array to Object conversion */
 				zval *param;
 
 				MAKE_STD_ZVAL(tmp);
@@ -572,7 +567,15 @@ static void php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAMETERS, zval *
 
 				object_init_ex(tmp, scheme->ce);
 				php_protocolbuffers_properties_init(tmp, scheme->ce TSRMLS_CC);
-				zend_call_method_with_1_params(&tmp, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param);
+
+                zval *zval_strict;
+                MAKE_STD_ZVAL(zval_strict);
+                ZVAL_BOOL(zval_strict, strict);
+
+				zend_call_method_with_2_params(&tmp, scheme->ce, NULL, ZEND_CONSTRUCTOR_FUNC_NAME, NULL, param, zval_strict);
+
+                zval_ptr_dtor(&zval_strict);
+
 				zval_ptr_dtor(&param);
 
 				value = tmp;
@@ -639,8 +642,8 @@ static void php_protocolbuffers_message_clear(INTERNAL_FUNCTION_PARAMETERS, zval
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "clear method can't use for extension value", name);
 		return;
 	}
-
 	php_protocolbuffers_message_get_hash_table_by_container(container, scheme, instance, &htt, &n, &n_len TSRMLS_CC);
+
 	if (zend_hash_find(htt, n, n_len, (void **)&e) == SUCCESS) {
 		zval *vl = NULL;
 
@@ -764,7 +767,7 @@ static void php_protocolbuffers_message_has(INTERNAL_FUNCTION_PARAMETERS, zval *
 	}
 
 	if (scheme->is_extension) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "has method can't use for extension value", name);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "get method can't use for extension value", name);
 		return;
 	}
 
@@ -899,7 +902,7 @@ static enum ProtocolBuffers_MagicMethod php_protocolbuffers_parse_magic_method(c
 	return flag;
 }
 
-static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *instance, zval *params)
+static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *instance, zval *params, zend_bool strict)
 {
 	HashPosition pos;
 	zval **param;
@@ -916,7 +919,7 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 		zend_hash_move_forward_ex(Z_ARRVAL_P(params), &pos)) {
 
 		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(params), &key, &key_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
-			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, key, key_len, key, key_len, *param);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, key, key_len, key, key_len, *param, strict);
 		}
 	}
 }
@@ -926,9 +929,10 @@ static void php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAMETERS, zval *ins
 PHP_METHOD(protocolbuffers_message, __construct)
 {
 	zval *params = NULL, *instance = getThis();
+    zend_bool strict = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"|a", &params) == FAILURE) {
+		"|ab", &params, &strict) == FAILURE) {
 		return;
 	}
 
@@ -937,7 +941,7 @@ PHP_METHOD(protocolbuffers_message, __construct)
 	}
 
 	if (params != NULL) {
-		php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, params);
+		php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, params, strict);
 	}
 }
 /* }}} */
@@ -947,13 +951,14 @@ PHP_METHOD(protocolbuffers_message, __construct)
 PHP_METHOD(protocolbuffers_message, setFrom)
 {
 	zval *params = NULL, *instance = getThis();
+    zend_bool strict = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"a", &params) == FAILURE) {
+		"a|b", &params, &strict) == FAILURE) {
 		return;
 	}
 
-	php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, params);
+	php_protocolbuffers_set_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, params, strict);
 }
 /* }}} */
 
@@ -1061,7 +1066,7 @@ PHP_METHOD(protocolbuffers_message, current)
 	}
 
 	if (zend_hash_find(hash, name, name_len, (void **)&tmp) == SUCCESS) {
-		RETVAL_ZVAL(*tmp, 1, 0);
+    	RETVAL_ZVAL(*tmp, 1, 0);
 	}
 }
 /* }}} */
@@ -1219,7 +1224,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 		case MAGICMETHOD_MUTABLE:
 		{
 			php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, NULL);
-			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, return_value);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, return_value, 1);
 		}
 		break;
 		case MAGICMETHOD_SET:
@@ -1227,7 +1232,7 @@ PHP_METHOD(protocolbuffers_message, __call)
 			zval **tmp = NULL;
 
 			zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&tmp);
-			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp);
+			php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, buf.c, buf.len, buf2.c, buf2.len, *tmp, 1);
 		}
 		break;
 		case MAGICMETHOD_APPEND:
@@ -1306,7 +1311,7 @@ PHP_METHOD(protocolbuffers_message, mutable)
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
 	php_protocolbuffers_message_get(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, NULL);
 	Z_ADDREF_P(return_value);
-	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, return_value);
+	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, return_value, 1);
 }
 /* }}} */
 
@@ -1325,7 +1330,7 @@ PHP_METHOD(protocolbuffers_message, set)
 	}
 
 	PHP_PROTOCOLBUFFERS_MESSAGE_CHECK_SCHEME
-	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value);
+	php_protocolbuffers_message_set(INTERNAL_FUNCTION_PARAM_PASSTHRU, instance, container, name, name_len, name, name_len, value, 1);
 }
 
 
@@ -1681,7 +1686,7 @@ PHP_METHOD(protocolbuffers_message, jsonSerialize)
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
-	return;
+  return;
 #endif
 }
 /* }}} */
@@ -1695,7 +1700,7 @@ PHP_METHOD(protocolbuffers_message, toArray)
 	if (php_protocolbuffers_jsonserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, Z_OBJCE_P(instance), instance, &result) == 0) {
 		RETURN_ZVAL(result, 0, 1);
 	}
-	return;
+  return;
 }
 /* }}} */
 

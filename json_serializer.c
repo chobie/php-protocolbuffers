@@ -611,6 +611,7 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			}
 
 			ser->serialize_bytes(Z_STRVAL_PP(element), Z_STRLEN_PP(element), scheme, container, outer TSRMLS_CC);
+            break;
 		case TYPE_UINT32:
 		{
 			uint32_t v;
@@ -628,7 +629,6 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			ser->serialize_enum((int32_t)Z_LVAL_P(&value_copy), scheme, container, outer TSRMLS_CC);
 			zval_dtor(&value_copy);
 			break;
-		break;
 		case TYPE_SFIXED32:
 		{
 			int32_t v;
@@ -669,9 +669,8 @@ static int php_protocolbuffers_json_encode_value(zval **element, php_protocolbuf
 			zval_dtor(&value_copy);
 			break;
 		}
-		break;
 		default:
-		break;
+		    break;
 	}
 
 	return 0;

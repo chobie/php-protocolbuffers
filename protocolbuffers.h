@@ -85,7 +85,7 @@
 #else
 /* NOTE: zend_register_ns_class_alias had TSRMLS bug under 5.4. we have to define it for compatibility */
 #define PHP_PROTOCOLBUFFERS_REGISTER_NS_CLASS_ALIAS(ns, name, ce) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_CC)
+    zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_CC)
 #endif
 
 #if PHP_VERSION_ID < 50300
@@ -144,179 +144,179 @@ static const int64_t kLongMax = LONG_MAX;
 #endif
 
 #define php_protocolbuffers_raise_error_or_exception(ce, warning_level, use_exception, ...) \
-	do {\
-		if (use_exception) { \
-			zend_throw_exception_ex(ce, 0 TSRMLS_CC, __VA_ARGS__); \
-		} else { \
-			php_error_docref(NULL TSRMLS_CC, warning_level, __VA_ARGS__); \
-		} \
-	} while(0);
+    do {\
+        if (use_exception) { \
+            zend_throw_exception_ex(ce, 0 TSRMLS_CC, __VA_ARGS__); \
+        } else { \
+            php_error_docref(NULL TSRMLS_CC, warning_level, __VA_ARGS__); \
+        } \
+    } while(0);
 
 zend_class_entry *php_protocolbuffers_get_exception_base(TSRMLS_D);
 
 typedef struct php_protocolbuffers_scheme
 {
-	int tag;
-	char *name;
-	int name_len;
-	ulong name_h;
-	char *original_name;
-	int original_name_len;
-	char *mangled_name;
-	int mangled_name_len;
-	ulong mangled_name_h;
-	int magic_type;
-	/* TODO: use flags */
-	int type;
-	int flags;
-	int required;
-	int optional;
-	int scheme_type;
-	int repeated;
-	int packed;
-	int skip;
-	int is_extension;
-	char *message;
-	char *enum_msg;
-	zval *default_value;
-	zend_class_entry *ce;
+    int tag;
+    char *name;
+    int name_len;
+    ulong name_h;
+    char *original_name;
+    int original_name_len;
+    char *mangled_name;
+    int mangled_name_len;
+    ulong mangled_name_h;
+    int magic_type;
+    /* TODO: use flags */
+    int type;
+    int flags;
+    int required;
+    int optional;
+    int scheme_type;
+    int repeated;
+    int packed;
+    int skip;
+    int is_extension;
+    char *message;
+    char *enum_msg;
+    zval *default_value;
+    zend_class_entry *ce;
 } php_protocolbuffers_scheme;
 
 typedef struct {
-	int begin;
-	int end;
+    int begin;
+    int end;
 } php_protocolbuffers_extension_range;
 
 typedef struct {
-	char *name;
-	int name_len;
-	char *filename;
-	int filename_len;
-	int is_extendable;
-	php_protocolbuffers_scheme *scheme;
-	int use_single_property;
-	char *orig_single_property_name;
-	int orig_single_property_name_len;
-	char *single_property_name;
-	int single_property_name_len;
-	ulong single_property_h;
-	int size;
-	int process_unknown_fields;
-	int use_wakeup_and_sleep;
-	int extension_cnt;
-	php_protocolbuffers_extension_range *extensions;
+    char *name;
+    int name_len;
+    char *filename;
+    int filename_len;
+    int is_extendable;
+    php_protocolbuffers_scheme *scheme;
+    int use_single_property;
+    char *orig_single_property_name;
+    int orig_single_property_name_len;
+    char *single_property_name;
+    int single_property_name_len;
+    ulong single_property_h;
+    int size;
+    int process_unknown_fields;
+    int use_wakeup_and_sleep;
+    int extension_cnt;
+    php_protocolbuffers_extension_range *extensions;
 } php_protocolbuffers_scheme_container;
 
 
 enum WireType {
-	WIRETYPE_VARINT           = 0,
-	WIRETYPE_FIXED64          = 1,
-	WIRETYPE_LENGTH_DELIMITED = 2,
-	WIRETYPE_START_GROUP      = 3,
-	WIRETYPE_END_GROUP        = 4,
-	WIRETYPE_FIXED32          = 5,
+    WIRETYPE_VARINT           = 0,
+    WIRETYPE_FIXED64          = 1,
+    WIRETYPE_LENGTH_DELIMITED = 2,
+    WIRETYPE_START_GROUP      = 3,
+    WIRETYPE_END_GROUP        = 4,
+    WIRETYPE_FIXED32          = 5,
 };
 
 // Lite alternative to FieldDescriptor::Type.  Must be kept in sync.
 enum FieldType {
-	TYPE_DOUBLE         = 1,
-	TYPE_FLOAT          = 2,
-	TYPE_INT64          = 3,
-	TYPE_UINT64         = 4,
-	TYPE_INT32          = 5,
-	TYPE_FIXED64        = 6,
-	TYPE_FIXED32        = 7,
-	TYPE_BOOL           = 8,
-	TYPE_STRING         = 9,
-	TYPE_GROUP          = 10,
-	TYPE_MESSAGE        = 11,
-	TYPE_BYTES          = 12,
-	TYPE_UINT32         = 13,
-	TYPE_ENUM           = 14,
-	TYPE_SFIXED32       = 15,
-	TYPE_SFIXED64       = 16,
-	TYPE_SINT32         = 17,
-	TYPE_SINT64         = 18,
-	MAX_FIELD_TYPE      = 18,
+    TYPE_DOUBLE         = 1,
+    TYPE_FLOAT          = 2,
+    TYPE_INT64          = 3,
+    TYPE_UINT64         = 4,
+    TYPE_INT32          = 5,
+    TYPE_FIXED64        = 6,
+    TYPE_FIXED32        = 7,
+    TYPE_BOOL           = 8,
+    TYPE_STRING         = 9,
+    TYPE_GROUP          = 10,
+    TYPE_MESSAGE        = 11,
+    TYPE_BYTES          = 12,
+    TYPE_UINT32         = 13,
+    TYPE_ENUM           = 14,
+    TYPE_SFIXED32       = 15,
+    TYPE_SFIXED64       = 16,
+    TYPE_SINT32         = 17,
+    TYPE_SINT64         = 18,
+    MAX_FIELD_TYPE      = 18,
 };
 
 typedef struct php_protocolbuffers_serializer
 {
-	uint8_t *buffer;
-	size_t buffer_size;
-	size_t buffer_capacity;
-	size_t buffer_offset;
+    uint8_t *buffer;
+    size_t buffer_size;
+    size_t buffer_capacity;
+    size_t buffer_offset;
 } php_protocolbuffers_serializer;
 
 typedef struct{
-	zend_object zo;
-	char *name;
-	size_t name_len;
-	int free_container;
-	php_protocolbuffers_scheme_container *container;
+    zend_object zo;
+    char *name;
+    size_t name_len;
+    int free_container;
+    php_protocolbuffers_scheme_container *container;
 } php_protocolbuffers_descriptor;
 
 typedef struct{
-	zend_object zo;
-	zval *container;
-	int max;
-	int offset;
+    zend_object zo;
+    zval *container;
+    int max;
+    int offset;
 } php_protocolbuffers_message;
 
 typedef struct{
-	zend_object zo;
-	int max;
-	int offset;
+    zend_object zo;
+    int max;
+    int offset;
 } php_protocolbuffers_unknown_field_set;
 
 typedef struct{
-	zend_object zo;
-	HashTable *registry;
+    zend_object zo;
+    HashTable *registry;
 } php_protocolbuffers_extension_registry;
 
 typedef union {
-	uint64_t varint;
-	struct {
-		uint8_t *val;
-		size_t len;
-	} buffer;
+    uint64_t varint;
+    struct {
+        uint8_t *val;
+        size_t len;
+    } buffer;
 } unknown_value;
 
 typedef struct{
-	zend_object zo;
-	int number;
-	int type;
-	HashTable *ht;
+    zend_object zo;
+    int number;
+    int type;
+    HashTable *ht;
 } php_protocolbuffers_unknown_field;
 
 
 #  if ZEND_MODULE_API_NO >= 20100525
 #  define PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(STRUCT_NAME) \
-	STRUCT_NAME *object;\
-	\
-	object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
-	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-	object_properties_init(&object->zo, ce);\
-	\
-	retval.handle = zend_objects_store_put(object,\
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
-		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
-	NULL TSRMLS_CC);\
-	retval.handlers = zend_get_std_object_handlers();
+    STRUCT_NAME *object;\
+    \
+    object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
+    zend_object_std_init(&object->zo, ce TSRMLS_CC);\
+    object_properties_init(&object->zo, ce);\
+    \
+    retval.handle = zend_objects_store_put(object,\
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,\
+        (zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
+    NULL TSRMLS_CC);\
+    retval.handlers = zend_get_std_object_handlers();
 #  else
 #  define PHP_PROTOCOLBUFFERS_STD_CREATE_OBJECT(STRUCT_NAME) \
-	STRUCT_NAME *object;\
-	zval *tmp = NULL;\
-	\
-	object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
-	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-	zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
-	\
-	retval.handle = zend_objects_store_put(object,\
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
-		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
-	NULL TSRMLS_CC);\
-	retval.handlers = zend_get_std_object_handlers();
+    STRUCT_NAME *object;\
+    zval *tmp = NULL;\
+    \
+    object = (STRUCT_NAME*)ecalloc(1, sizeof(*object));\
+    zend_object_std_init(&object->zo, ce TSRMLS_CC);\
+    zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+    \
+    retval.handle = zend_objects_store_put(object,\
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,\
+        (zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
+    NULL TSRMLS_CC);\
+    retval.handlers = zend_get_std_object_handlers();
 #  endif
 
 #define PHP_PROTOCOLBUFFERS_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *)zend_object_store_get_object(OBJECT TSRMLS_CC);

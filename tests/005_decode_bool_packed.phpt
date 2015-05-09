@@ -19,7 +19,7 @@ if ($obj instanceof Tutorial_Boolean) {
     }
     $values = $obj->getValue();
     if ($values[0] === true && $values[1] === false) {
-        echo "OK" . PHP_EOL;
+        echo "OK";
     } else {
         var_dump($obj);
     }
@@ -27,23 +27,6 @@ if ($obj instanceof Tutorial_Boolean) {
     var_dump($obj);
 }
 
-ini_set("protocolbuffers.native_scalars", 1);
-$obj = ProtocolBuffers::decode("Tutorial_Boolean", $bytes);
-if ($obj instanceof Tutorial_Boolean) {
-    if (count($obj->getValue()) != 2) {
-        var_dump($obj);
-        exit;
-    }
-    $values = $obj->getValue();
-    if ($values[0] === true && $values[1] === false) {
-        echo "OK" . PHP_EOL;
-    } else {
-        var_dump($obj);
-    }
-} else {
-    var_dump($obj);
-}
 
 --EXPECT--
-OK
 OK

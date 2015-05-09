@@ -1,9 +1,0 @@
-{
-    "require": {
-        "adoy/fastcgi-client": "dev-master",
-        "phpunit/phpunit": "3.7.*"
-    },
-    "autoload": {
-        "psr-4": {"pecl\\": "messages/pecl"}
-    }
-}

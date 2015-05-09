@@ -76,7 +76,7 @@ int php_protocolbuffers_get_scheme_container(const char *klass, size_t klass_len
 
 int php_protocolbuffers_get_scheme_container_ex(const char *klass, size_t klass_len, int throws_exception, php_protocolbuffers_scheme_container **result TSRMLS_DC);
 
-void php_protocolbuffers_format_string(zval *result, pbf *payload, int use_string TSRMLS_DC);
+void php_protocolbuffers_format_string(zval *result, pbf *payload TSRMLS_DC);
 
 void php_protocolbuffers_execute_wakeup(zval *obj, php_protocolbuffers_scheme_container *container TSRMLS_DC);
 
