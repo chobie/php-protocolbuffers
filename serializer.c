@@ -558,7 +558,7 @@ static void php_protocolbuffers_encode_element(INTERNAL_FUNCTION_PARAMETERS, php
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "php_protocolbuffers_encode_element_packed called non repeated scheme. this is bug");
 			} else {
 				if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does not have required property `%s`.", scheme->name);
+					zend_throw_exception_ex(php_protocol_buffers_uninitialized_message_exception_class_entry, 0 TSRMLS_CC, "the class does have required property `%s`.", scheme->name);
 					return;
 				}
 				if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {

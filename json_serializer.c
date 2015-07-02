@@ -711,7 +711,7 @@ static void php_protocolbuffers_json_encode_element(php_protocolbuffers_scheme_c
 			}
 		} else {
 			if (scheme->required > 0 && Z_TYPE_PP(tmp) == IS_NULL) {
-				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_uninitialized_message_exception_class_entry, E_WARNING, throws_exception, "the class does not have required property `%s`.", scheme->name);
+				php_protocolbuffers_raise_error_or_exception(php_protocol_buffers_uninitialized_message_exception_class_entry, E_WARNING, throws_exception, "the class does have required property `%s`.", scheme->name);
 				return;
 			}
 			if (scheme->required == 0 && Z_TYPE_PP(tmp) == IS_NULL) {
