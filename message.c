@@ -877,11 +877,12 @@ static enum ProtocolBuffers_MagicMethod php_protocolbuffers_parse_magic_method(c
 
 		if (name[i] >= 'A' && name[i] <= 'Z') {
 			if (buf->len > 0) {
-				if ((last_is_capital == 0
-					&& i+1 >= name_len)
-					|| (i+1 < name_len && name[i+1] >= 'a' && name[i+1] <= 'z')) {
-					smart_str_appendc(buf, '_');
-				}
+//				if ((last_is_capital == 0
+//					&& i+1 >= name_len)
+//					|| (i+1 < name_len && name[i+1] >= 'a' && name[i+1] <= 'z')) {
+//					smart_str_appendc(buf, '_');
+//				}
+                smart_str_appendc(buf, '_');
 			}
 			smart_str_appendc(buf, name[i] + ('a' - 'A'));
 			smart_str_appendc(buf2, name[i]);
