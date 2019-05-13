@@ -882,7 +882,7 @@ static enum ProtocolBuffers_MagicMethod php_protocolbuffers_parse_magic_method(c
 //					|| (i+1 < name_len && name[i+1] >= 'a' && name[i+1] <= 'z')) {
 //					smart_str_appendc(buf, '_');
 //				}
-                smart_str_appendc(buf, '_');
+				smart_str_appendc(buf, '_');
 			}
 			smart_str_appendc(buf, name[i] + ('a' - 'A'));
 			smart_str_appendc(buf2, name[i]);
